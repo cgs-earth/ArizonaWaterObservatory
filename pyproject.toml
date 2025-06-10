@@ -4,7 +4,7 @@
 [project]
 name = "arizonawaterobservatory"
 version = "0.1.0"
-description = "Add your description here"
+description = "A datahub for water data in Arizona"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
