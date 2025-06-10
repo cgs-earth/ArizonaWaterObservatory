@@ -3,7 +3,7 @@
 
 
 def main():
-    print("Hello from arizonawaterobservatory!")
+    print("Hello from server!")
 
 
 if __name__ == "__main__":
