@@ -350,6 +350,7 @@ version = "0.1.0"
 source = { editable = "packages/crawler" }
 dependencies = [
     { name = "dagster" },
+    { name = "pydantic" },
 ]
 
 [package.dev-dependencies]
@@ -359,7 +360,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "dagster", specifier = "==1.10.19" }]
+requires-dist = [
+    { name = "dagster", specifier = "==1.10.19" },
+    { name = "pydantic", specifier = ">=2.11.5" },
+]
 
 [package.metadata.requires-dev]
 dev = [
