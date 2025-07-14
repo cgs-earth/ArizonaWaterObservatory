@@ -8,6 +8,7 @@ import { fireEvent } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import Accordion from '@/components/Accordion';
 import { Item } from '@/components/Accordion/Accordion.types';
+import { Variant } from '@/components/types';
 
 const items: Item[] = [
   { id: 'item-1', title: 'Item 1', content: 'Content 1' },
@@ -22,7 +23,7 @@ describe('Accordion', () => {
   });
 
   it('applies the correct variant class', () => {
-    const { container } = render(<Accordion items={items} variant="secondary" />);
+    const { container } = render(<Accordion items={items} variant={Variant.Secondary} />);
     const item = container.querySelector('.mantine-Accordion-item');
     expect(item?.className).toMatch(/secondary/);
   });

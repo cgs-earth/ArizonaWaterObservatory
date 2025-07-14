@@ -65,7 +65,7 @@ describe('RadarChart', () => {
 
   it('renders the radar chart container', () => {
     const { container } = render(
-      <RadarChart<TestProps> series={mockSeries} properties={['a', 'b']} title="Test Radar" />
+      <RadarChart series={mockSeries} properties={['a', 'b']} title="Test Radar" />
     );
 
     const chart = container.querySelector('.echarts-for-react');

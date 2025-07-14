@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Checkbox, Group, Stack, Text, Title } from '@mantine/core';
+import { Box, Group, Stack, Text, Title } from '@mantine/core';
+import Plus from '@/assets/Plus';
+import Checkbox from '@/components//Checkbox';
 import Accordion from '@/components/Accordion';
 import { Item } from '@/components/Accordion/Accordion.types';
+import { Variant } from '@/components/types';
+import IconButton from '../IconButton';
 
 export default {
   title: 'Accordion',
@@ -27,7 +31,7 @@ const items: Item[] = [
     title: (
       <Box>
         <Group>
-          <Checkbox radius="xs" variant="outline" />
+          <Checkbox />
           <Stack justify="center" gap={1}>
             <Title order={3}>SensorThings 1</Title>
             <Text fw={700} size="sm">
@@ -35,6 +39,9 @@ const items: Item[] = [
             </Text>
             <Text size="xs">02/03/2020 - 02/03/2021</Text>
           </Stack>
+          <IconButton ml="auto" mr="md">
+            <Plus />
+          </IconButton>
         </Group>
       </Box>
     ),
@@ -47,13 +54,13 @@ const items: Item[] = [
             content: 'sub item 1 - content',
           },
         ]}
-        variant="secondary"
+        variant={Variant.Secondary}
       />
     ),
   },
 ];
 
 export const Usage = () => <Accordion items={items} />;
-export const Primary = () => <Accordion items={items} variant="primary" />;
-export const Secondary = () => <Accordion items={items} variant="secondary" />;
-export const Tertiary = () => <Accordion items={items} variant="tertiary" />;
+export const Primary = () => <Accordion items={items} variant={Variant.Primary} />;
+export const Secondary = () => <Accordion items={items} variant={Variant.Secondary} />;
+export const Tertiary = () => <Accordion items={items} variant={Variant.Tertiary} />;

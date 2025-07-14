@@ -12,21 +12,22 @@ import {
 } from '@mantine/core';
 import styles from '@/components/Accordion/Accordion.module.css';
 import { Item } from '@/components/Accordion/Accordion.types';
+import { Variant } from '../types';
 
 type Props = AccordionProps & {
   items: Item[];
-  variant?: 'primary' | 'secondary' | 'tertiary';
+  variant?: Variant;
 };
 
 const CustomAccordion: React.FC<Props> = (props) => {
-  const { items, variant = 'primary', ...accordionProps } = props;
+  const { items, variant = Variant.Primary, ...accordionProps } = props;
 
-  const getVariantClass = (variant: 'primary' | 'secondary' | 'tertiary'): string => {
-    if (variant === 'secondary') {
+  const getVariantClass = (variant: Variant): string => {
+    if (variant === Variant.Secondary) {
       return styles.secondary;
     }
 
-    if (variant === 'tertiary') {
+    if (variant === Variant.Tertiary) {
       return styles.tertiary;
     }
 
