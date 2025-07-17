@@ -8,7 +8,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import Checkbox from '@/components/Checkbox';
 
-describe('CustomCheckbox', () => {
+describe('Checkbox', () => {
   it('renders with default props', () => {
     render(<Checkbox label="Test Checkbox" />);
 

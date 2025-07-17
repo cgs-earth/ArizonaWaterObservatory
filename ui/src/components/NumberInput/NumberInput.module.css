@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export enum ExtendedVariant {
-  Unstyled = 'unstyled',
+.input {
+  border-color: var(--input-border);
+}
+
+.input:focus {
+  border-color: var(--input-border);
 }

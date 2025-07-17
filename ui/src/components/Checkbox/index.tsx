@@ -4,11 +4,16 @@
  */
 
 import { MouseEvent } from 'react';
-import { Checkbox, CheckboxProps, useMantineColorScheme, useMantineTheme } from '@mantine/core';
+import {
+  Checkbox as _Checkbox,
+  CheckboxProps,
+  useMantineColorScheme,
+  useMantineTheme,
+} from '@mantine/core';
 import styles from '@/components/Checkbox/Checkbox.module.css';
 
-const CustomCheckbox: React.FC<CheckboxProps> = (props) => {
-  const { onClick = () => null, ...checkboxProps } = props;
+const Checkbox: React.FC<CheckboxProps> = (props) => {
+  const { onClick, ...checkboxProps } = props;
 
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
@@ -17,14 +22,16 @@ const CustomCheckbox: React.FC<CheckboxProps> = (props) => {
 
   const handleClick = (event: MouseEvent<HTMLInputElement>) => {
     event.stopPropagation();
-    onClick(event);
+    if (onClick) {
+      onClick(event);
+    }
   };
 
   return (
-    <Checkbox
+    <_Checkbox
       classNames={{
         input: styles.input,
-        icon: colorScheme === 'dark' ? styles.iconDark : styles.iconLight,
+        icon: styles.icon,
       }}
       color={color}
       radius="xs"
@@ -36,4 +43,4 @@ const CustomCheckbox: React.FC<CheckboxProps> = (props) => {
   );
 };
 
-export default CustomCheckbox;
+export default Checkbox;

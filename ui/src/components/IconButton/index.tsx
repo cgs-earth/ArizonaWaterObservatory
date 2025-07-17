@@ -3,22 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MouseEvent } from 'react';
+import { MouseEvent, MouseEventHandler } from 'react';
 import { ActionIcon, ActionIconProps } from '@mantine/core';
 import styles from '@/components/IconButton/IconButton.module.css';
+import { ExtendedVariant } from '@/components/IconButton/IconButton.types';
 import { Variant } from '@/components/types';
 
 type Props = ActionIconProps & {
-  variant?: Variant;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  variant?: Variant | ExtendedVariant;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 };
 
 const IconButton: React.FC<Props> = (props) => {
-  const { onClick = () => null, variant = Variant.Primary, ...actionIconProps } = props;
+  const { onClick, variant = Variant.Primary, ...actionIconProps } = props;
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    onClick(event);
+    if (onClick) {
+      onClick(event);
+    }
   };
 
   const variantClass = styles[variant];

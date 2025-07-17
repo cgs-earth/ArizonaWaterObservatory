@@ -4,7 +4,7 @@
  */
 
 import {
-  Accordion,
+  Accordion as _Accordion,
   AccordionControl,
   AccordionItem,
   AccordionPanel,
@@ -19,25 +19,13 @@ type Props = AccordionProps & {
   variant?: Variant;
 };
 
-const CustomAccordion: React.FC<Props> = (props) => {
+const Accordion: React.FC<Props> = (props) => {
   const { items, variant = Variant.Primary, ...accordionProps } = props;
 
-  const getVariantClass = (variant: Variant): string => {
-    if (variant === Variant.Secondary) {
-      return styles.secondary;
-    }
-
-    if (variant === Variant.Tertiary) {
-      return styles.tertiary;
-    }
-
-    return styles.primary;
-  };
-
-  const variantClass = getVariantClass(variant);
+  const variantClass = styles[variant];
 
   return (
-    <Accordion
+    <_Accordion
       {...accordionProps}
       classNames={{
         item: `${styles.item} ${variantClass}`,
@@ -53,8 +41,8 @@ const CustomAccordion: React.FC<Props> = (props) => {
           <AccordionPanel>{item.content}</AccordionPanel>
         </AccordionItem>
       ))}
-    </Accordion>
+    </_Accordion>
   );
 };
 
-export default CustomAccordion;
+export default Accordion;

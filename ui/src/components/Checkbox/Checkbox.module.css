@@ -8,10 +8,10 @@
   border-width: 2px;
 }
 
-.iconLight {
-  color: var(--mantine-color-black);
+:where([data-mantine-color-scheme='dark']) .icon {
+  color: var(--mantine-color-dark-0);
 }
 
-.iconDark {
-  color: var(--mantine-color-dark-0);
+:where([data-mantine-color-scheme='light']) .icon {
+  color: var(--mantine-color-black);
 }

@@ -5,6 +5,7 @@
 
 import Plus from '@/assets/Plus';
 import IconButton from '@/components/IconButton';
+import { ExtendedVariant } from '@/components/IconButton/IconButton.types';
 import { Variant } from '@/components/types';
 
 export default {
@@ -28,6 +29,11 @@ export const Secondary = () => (
 );
 export const Tertiary = () => (
   <IconButton variant={Variant.Tertiary}>
+    <Plus />
+  </IconButton>
+);
+export const Unstyled = () => (
+  <IconButton variant={ExtendedVariant.Unstyled}>
     <Plus />
   </IconButton>
 );

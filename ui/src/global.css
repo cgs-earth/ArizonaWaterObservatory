@@ -27,4 +27,14 @@
   --asu-color-primary: var(--asu-gold);
   --asu-color-secondary: var(--asu-maroon);
   --asu-color-tertiary: var(--asu-gray-5);
+
+  --default-margin: 8px;
+}
+
+:where([data-mantine-color-scheme='dark']) {
+  --input-border: var(--asu-gray-5);
+}
+
+:where([data-mantine-color-scheme='light']) {
+  --input-border: var(--asu-gray-3);
 }
