@@ -3,25 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, CopyButton, Group, Text, Tooltip, UnstyledButton } from '@mantine/core';
+import { Box, CopyButton, Group, Tooltip, UnstyledButton } from '@mantine/core';
 import Check from '@/assets/Check';
-import CopyCode from '@/assets/CopyLink';
-import styles from '@/components/CopyInput/CopyInput.module.css';
+import CopyCode from '@/assets/CopyCode';
+import styles from '@/components/Code/Code.module.css';
 
 type Props = {
-  url: string;
+  code: string;
 };
 
 const CopyInput: React.FC<Props> = (props) => {
-  const { url } = props;
+  const { code } = props;
   return (
     <Box component="div" className={styles.input}>
       <Group justify="center" align="center" p={0} h="100%">
-        <Text className={styles.text} title={url}>
-          {url}
-        </Text>
+        <Box component="pre" className={styles.code} data-testid="code-block">
+          {code}
+        </Box>
         <Box component="div" className={styles.buttonWrapper}>
-          <CopyButton value={url}>
+          <CopyButton value={code}>
             {({ copied, copy }) => (
               <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
                 <UnstyledButton onClick={copy} className={styles.button}>

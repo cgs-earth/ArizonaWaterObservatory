@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const Copy: React.FC = () => {
+const CopyCode: React.FC = () => {
   return (
     <svg
       data-identifier="link-copy-svg"
@@ -31,4 +31,4 @@ const Copy: React.FC = () => {
   );
 };
 
-export default Copy;
+export default CopyCode;

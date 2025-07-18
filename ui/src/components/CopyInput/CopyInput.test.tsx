@@ -25,7 +25,7 @@ describe('CopyInput', () => {
     expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
-  it('copies the URL and shows "Copied" tooltip', async () => {
+  it('copies the URL and shows check icon', async () => {
     render(<CopyInput url={testUrl} />);
 
     const button = screen.getByRole('button');
