@@ -6,9 +6,9 @@
 import { PropsWithChildren } from 'react';
 import { Box, ModalContent, ModalOverlay, ModalRoot } from '@mantine/core';
 import X from '@/assets/X';
+import IconButton from '@/components/IconButton';
+import { ExtendedVariant } from '@/components/IconButton/IconButton.types';
 import styles from '@/components/Modal/Modal.module.css';
-import IconButton from '../IconButton';
-import { ExtendedVariant } from '../IconButton/IconButton.types';
 
 type Props = {
   opened: boolean;

@@ -8,8 +8,8 @@ import Plus from '@/assets/Plus';
 import Checkbox from '@/components//Checkbox';
 import Accordion from '@/components/Accordion';
 import { Item } from '@/components/Accordion/Accordion.types';
+import IconButton from '@/components/IconButton';
 import { Variant } from '@/components/types';
-import IconButton from '../IconButton';
 
 export default {
   title: 'Accordion',

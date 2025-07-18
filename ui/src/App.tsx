@@ -4,17 +4,16 @@
  */
 
 import '@mantine/core/styles.css';
-
-import { MantineProvider } from '@mantine/core';
-import { Router } from './Router';
-import { theme } from './theme';
-
+import '@mantine/dates/styles.css';
 import './global.css';
+
+import { Providers } from '@/providers';
+import { Router } from '@/Router';
 
 export default function App() {
   return (
-    <MantineProvider theme={theme}>
+    <Providers>
       <Router />
-    </MantineProvider>
+    </Providers>
   );
 }

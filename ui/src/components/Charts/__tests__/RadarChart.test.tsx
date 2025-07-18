@@ -6,8 +6,8 @@
 import { render } from '@test-utils';
 import { GeoJsonProperties } from 'geojson';
 import { describe, expect, it } from 'vitest';
+import RadarChart from '@/components/Charts/RadarChart';
 import { Series } from '@/components/Charts/types';
-import RadarChart from '../RadarChart';
 
 type TestProps = GeoJsonProperties & {
   name: string;

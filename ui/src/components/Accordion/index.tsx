@@ -12,7 +12,7 @@ import {
 } from '@mantine/core';
 import styles from '@/components/Accordion/Accordion.module.css';
 import { Item } from '@/components/Accordion/Accordion.types';
-import { Variant } from '../types';
+import { Variant } from '@/components/types';
 
 type Props = AccordionProps & {
   items: Item[];
