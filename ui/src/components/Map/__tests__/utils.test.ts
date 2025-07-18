@@ -6,8 +6,13 @@
 import FeatureService, { FeatureServiceOptions } from '@hansdo/mapbox-gl-arcgis-featureserver';
 import mapboxglMock, { Map, Popup, SourceSpecification } from 'mapbox-gl';
 import { vi } from 'vitest';
-import { MainLayerDefinition, SourceConfig, Sources } from '../types';
-import { addClickFunctions, addHoverFunctions, addLayers, addSources } from '../utils';
+import { MainLayerDefinition, SourceConfig, Sources } from '@/components/Map/types';
+import {
+  addClickFunctions,
+  addHoverFunctions,
+  addLayers,
+  addSources,
+} from '@/components/Map/utils';
 
 vi.mock('mapbox-gl');
 vi.mock('@hansdo/mapbox-gl-arcgis-featureserver');
