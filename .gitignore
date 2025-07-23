@@ -3,4 +3,4 @@ node_modules/
 __pycache__/
 *.pyc
 
-pygeoapi-deployment/local.openapi.yml
+*.openapi.yml
