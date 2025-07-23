@@ -14,13 +14,13 @@ dependencies = [
     "covjson-pydantic>=0.7.0",
     "geojson-pydantic>=2.0.0",
     "redis>=6.2.0",
-    "iodh-integrations",
     "usace",
     "com",
     "rise",
     "snotel",
     "awdb_com",
     "awdb_forecasts",
+    "noaa_rfc"
 ]
 
 [dependency-groups]
@@ -36,13 +36,13 @@ dev = [
 members = ["packages/*"]
 
 [tool.uv.sources]
-iodh-integrations = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", branch = "includeStaticJson" }
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", rev = "includeStaticJson" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", rev = "includeStaticJson" }
 rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise", rev = "includeStaticJson" }
 snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/snotel", rev = "includeStaticJson" }
 awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com", rev = "includeStaticJson" }
 awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", rev = "includeStaticJson" }
+noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc", rev = "includeStaticJson" }
 
 [tool.coverage.run]
 # don't include tests 

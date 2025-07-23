@@ -2,7 +2,7 @@ precommit:
 	pre-commit install
 	pre-commit run 
 
-server:
+dev:
 	uv run pygeoapi openapi generate pygeoapi-deployment/pygeoapi.config.yml --output-file pygeoapi-deployment/local.openapi.yml
 	PYGEOAPI_CONFIG=pygeoapi-deployment/pygeoapi.config.yml PYGEOAPI_OPENAPI=pygeoapi-deployment/local.openapi.yml uv run pygeoapi serve --starlette
 

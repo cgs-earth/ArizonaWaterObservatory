@@ -1003,6 +1003,1822 @@ paths:
       summary: Get Air and Water Database Forecasts schema
       tags:
       - awdb-forecasts-edr
+  /collections/noaa-rfc:
+    get:
+      description: NOAA River Forecast Center Forecasts
+      operationId: describeNoaa-rfcCollection
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Collection
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Forecast Center Seasonal Forecasts metadata
+      tags:
+      - noaa-rfc
+  /collections/noaa-rfc/items:
+    get:
+      description: NOAA River Forecast Center Forecasts
+      operationId: getNoaa-rfcFeatures
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      - $ref: '#/components/parameters/bbox'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/bbox-crs'
+      - &id004
+        description: The properties that should be included for each feature. The
+          parameter value is a comma-separated list of property names.
+        explode: false
+        in: query
+        name: properties
+        required: false
+        schema:
+          items:
+            enum:
+            - espid
+            - espfdate
+            - espai
+            - espmi
+            - esppcti
+            - espavg30
+            - esppavg
+            - esppmed
+            - esppctile
+            - espplace
+            - espnyears
+            - espname
+            - esplatdd
+            - esplngdd
+            - espfgroupid
+            - espbasin
+            - espsubbasin
+            - espbper
+            - espeper
+            - espp_500
+            - espobpavg
+            - espiobpavg
+            - espobpmed
+            - espiobpmed
+            - espobpntd
+            - espiobpntd
+            - espobpesp
+            - espiobpesp
+            - espqpfdays
+            - dataset_link
+            - image_plot_link
+            type: string
+          type: array
+        style: form
+      - $ref: '#/components/parameters/vendorSpecificParameters'
+      - $ref: '#/components/parameters/skipGeometry'
+      - $ref: https://raw.githubusercontent.com/opengeospatial/ogcapi-records/master/core/openapi/parameters/sortby.yaml
+      - $ref: '#/components/parameters/offset'
+      - explode: false
+        in: query
+        name: espid
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: false
+        in: query
+        name: espfdate
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: false
+        in: query
+        name: espai
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espmi
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: esppcti
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espavg30
+        required: false
+        schema:
+          type: number
+        style: form
+      - explode: false
+        in: query
+        name: esppavg
+        required: false
+        schema:
+          type: number
+        style: form
+      - explode: false
+        in: query
+        name: esppmed
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: esppctile
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espplace
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espnyears
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espname
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: false
+        in: query
+        name: esplatdd
+        required: false
+        schema:
+          type: number
+        style: form
+      - explode: false
+        in: query
+        name: esplngdd
+        required: false
+        schema:
+          type: number
+        style: form
+      - explode: false
+        in: query
+        name: espfgroupid
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: false
+        in: query
+        name: espbasin
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: false
+        in: query
+        name: espsubbasin
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: false
+        in: query
+        name: espbper
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espeper
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espp_500
+        required: false
+        schema:
+          type: number
+        style: form
+      - explode: false
+        in: query
+        name: espobpavg
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espiobpavg
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espobpmed
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espiobpmed
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espobpntd
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espiobpntd
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espobpesp
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espiobpesp
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: espqpfdays
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: query
+        name: dataset_link
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: false
+        in: query
+        name: image_plot_link
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Features
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Forecast Center Seasonal Forecasts items
+      tags:
+      - noaa-rfc
+    options:
+      description: NOAA River Forecast Center Forecasts
+      operationId: optionsNoaa-rfcFeatures
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Forecast Center Seasonal Forecasts items
+      tags:
+      - noaa-rfc
+  /collections/noaa-rfc/items/{featureId}:
+    get:
+      description: NOAA River Forecast Center Forecasts
+      operationId: getNoaa-rfcFeature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Feature
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Forecast Center Seasonal Forecasts item by id
+      tags:
+      - noaa-rfc
+    options:
+      description: NOAA River Forecast Center Forecasts
+      operationId: optionsNoaa-rfcFeature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Forecast Center Seasonal Forecasts item by id
+      tags:
+      - noaa-rfc
+  /collections/noaa-rfc/queryables:
+    get:
+      description: NOAA River Forecast Center Forecasts
+      operationId: getNoaa-rfcQueryables
+      parameters:
+      - *id004
+      - $ref: '#/components/parameters/f'
+      - *id003
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Forecast Center Seasonal Forecasts queryables
+      tags:
+      - noaa-rfc
+  /collections/noaa-rfc/schema:
+    get:
+      description: NOAA River Forecast Center Forecasts
+      operationId: getNoaa-rfcSchema
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Forecast Center Seasonal Forecasts schema
+      tags:
+      - noaa-rfc
+  /collections/noaa-river-stage-forecast-day-1:
+    get:
+      description: NOAA River Stage Forecast 24 Hours / 1 day from now
+      operationId: describeNoaa-river-stage-forecast-day-1Collection
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Collection
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 1 metadata
+      tags:
+      - noaa-river-stage-forecast-day-1
+  /collections/noaa-river-stage-forecast-day-1/items:
+    get:
+      description: NOAA River Stage Forecast 24 Hours / 1 day from now
+      operationId: getNoaa-river-stage-forecast-day-1Features
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      - $ref: '#/components/parameters/bbox'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/bbox-crs'
+      - &id005
+        description: The properties that should be included for each feature. The
+          parameter value is a comma-separated list of property names.
+        explode: false
+        in: query
+        name: properties
+        required: false
+        schema:
+          items:
+            enum:
+            - objectid
+            - gaugelid
+            - status
+            - location
+            - waterbody
+            - state
+            - fcsttime
+            - fcstissunc
+            - wfo
+            - url
+            - action
+            - forecast
+            - units
+            - lowthresh
+            - lowthreshu
+            - secvalue
+            - secunit
+            - flood
+            - moderate
+            - major
+            - latitude
+            - longitude
+            - hdatum
+            - pedts
+            - idp_filedate
+            - idp_ingestdate
+            - shape
+            type: string
+          type: array
+        style: form
+      - $ref: '#/components/parameters/vendorSpecificParameters'
+      - $ref: '#/components/parameters/skipGeometry'
+      - $ref: https://raw.githubusercontent.com/opengeospatial/ogcapi-records/master/core/openapi/parameters/sortby.yaml
+      - $ref: '#/components/parameters/offset'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - explode: false
+        in: query
+        name: objectid
+        required: false
+        schema:
+          type: esriFieldTypeOID
+        style: form
+      - explode: false
+        in: query
+        name: gaugelid
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: status
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: location
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: waterbody
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: state
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: fcsttime
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: fcstissunc
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: wfo
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: url
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: action
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: forecast
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: units
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: lowthresh
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: lowthreshu
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: secvalue
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: secunit
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: flood
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: moderate
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: major
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: latitude
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: longitude
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: hdatum
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: pedts
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: idp_filedate
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: idp_ingestdate
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: shape
+        required: false
+        schema:
+          type: esriFieldTypeGeometry
+        style: form
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Features
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 1 items
+      tags:
+      - noaa-river-stage-forecast-day-1
+    options:
+      description: NOAA River Stage Forecast 24 Hours / 1 day from now
+      operationId: optionsNoaa-river-stage-forecast-day-1Features
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Stage Forecast Day 1 items
+      tags:
+      - noaa-river-stage-forecast-day-1
+  /collections/noaa-river-stage-forecast-day-1/items/{featureId}:
+    get:
+      description: NOAA River Stage Forecast 24 Hours / 1 day from now
+      operationId: getNoaa-river-stage-forecast-day-1Feature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Feature
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 1 item by id
+      tags:
+      - noaa-river-stage-forecast-day-1
+    options:
+      description: NOAA River Stage Forecast 24 Hours / 1 day from now
+      operationId: optionsNoaa-river-stage-forecast-day-1Feature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Stage Forecast Day 1 item by id
+      tags:
+      - noaa-river-stage-forecast-day-1
+  /collections/noaa-river-stage-forecast-day-1/queryables:
+    get:
+      description: NOAA River Stage Forecast 24 Hours / 1 day from now
+      operationId: getNoaa-river-stage-forecast-day-1Queryables
+      parameters:
+      - *id005
+      - $ref: '#/components/parameters/f'
+      - *id003
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 1 queryables
+      tags:
+      - noaa-river-stage-forecast-day-1
+  /collections/noaa-river-stage-forecast-day-1/schema:
+    get:
+      description: NOAA River Stage Forecast 24 Hours / 1 day from now
+      operationId: getNoaa-river-stage-forecast-day-1Schema
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 1 schema
+      tags:
+      - noaa-river-stage-forecast-day-1
+  /collections/noaa-river-stage-forecast-day-10:
+    get:
+      description: NOAA River Stage Forecast 240 hours / 10 days from now
+      operationId: describeNoaa-river-stage-forecast-day-10Collection
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Collection
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 10 metadata
+      tags:
+      - noaa-river-stage-forecast-day-10
+  /collections/noaa-river-stage-forecast-day-10/items:
+    get:
+      description: NOAA River Stage Forecast 240 hours / 10 days from now
+      operationId: getNoaa-river-stage-forecast-day-10Features
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      - $ref: '#/components/parameters/bbox'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/bbox-crs'
+      - &id006
+        description: The properties that should be included for each feature. The
+          parameter value is a comma-separated list of property names.
+        explode: false
+        in: query
+        name: properties
+        required: false
+        schema:
+          items:
+            enum:
+            - objectid
+            - gaugelid
+            - status
+            - location
+            - waterbody
+            - state
+            - fcsttime
+            - fcstissunc
+            - lowthreshu
+            - wfo
+            - url
+            - action
+            - forecast
+            - units
+            - lowthresh
+            - secvalue
+            - secunit
+            - flood
+            - moderate
+            - major
+            - latitude
+            - longitude
+            - hdatum
+            - pedts
+            - idp_filedate
+            - idp_ingestdate
+            - shape
+            type: string
+          type: array
+        style: form
+      - $ref: '#/components/parameters/vendorSpecificParameters'
+      - $ref: '#/components/parameters/skipGeometry'
+      - $ref: https://raw.githubusercontent.com/opengeospatial/ogcapi-records/master/core/openapi/parameters/sortby.yaml
+      - $ref: '#/components/parameters/offset'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - explode: false
+        in: query
+        name: objectid
+        required: false
+        schema:
+          type: esriFieldTypeOID
+        style: form
+      - explode: false
+        in: query
+        name: gaugelid
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: status
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: location
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: waterbody
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: state
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: fcsttime
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: fcstissunc
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: lowthreshu
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: wfo
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: url
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: action
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: forecast
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: units
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: lowthresh
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: secvalue
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: secunit
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: flood
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: moderate
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: major
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: latitude
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: longitude
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: hdatum
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: pedts
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: idp_filedate
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: idp_ingestdate
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: shape
+        required: false
+        schema:
+          type: esriFieldTypeGeometry
+        style: form
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Features
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 10 items
+      tags:
+      - noaa-river-stage-forecast-day-10
+    options:
+      description: NOAA River Stage Forecast 240 hours / 10 days from now
+      operationId: optionsNoaa-river-stage-forecast-day-10Features
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Stage Forecast Day 10 items
+      tags:
+      - noaa-river-stage-forecast-day-10
+  /collections/noaa-river-stage-forecast-day-10/items/{featureId}:
+    get:
+      description: NOAA River Stage Forecast 240 hours / 10 days from now
+      operationId: getNoaa-river-stage-forecast-day-10Feature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Feature
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 10 item by id
+      tags:
+      - noaa-river-stage-forecast-day-10
+    options:
+      description: NOAA River Stage Forecast 240 hours / 10 days from now
+      operationId: optionsNoaa-river-stage-forecast-day-10Feature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Stage Forecast Day 10 item by id
+      tags:
+      - noaa-river-stage-forecast-day-10
+  /collections/noaa-river-stage-forecast-day-10/queryables:
+    get:
+      description: NOAA River Stage Forecast 240 hours / 10 days from now
+      operationId: getNoaa-river-stage-forecast-day-10Queryables
+      parameters:
+      - *id006
+      - $ref: '#/components/parameters/f'
+      - *id003
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 10 queryables
+      tags:
+      - noaa-river-stage-forecast-day-10
+  /collections/noaa-river-stage-forecast-day-10/schema:
+    get:
+      description: NOAA River Stage Forecast 240 hours / 10 days from now
+      operationId: getNoaa-river-stage-forecast-day-10Schema
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 10 schema
+      tags:
+      - noaa-river-stage-forecast-day-10
+  /collections/noaa-river-stage-forecast-day-2:
+    get:
+      description: NOAA River Stage Forecast 48 hours / 2 days from now
+      operationId: describeNoaa-river-stage-forecast-day-2Collection
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Collection
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 2 metadata
+      tags:
+      - noaa-river-stage-forecast-day-2
+  /collections/noaa-river-stage-forecast-day-2/items:
+    get:
+      description: NOAA River Stage Forecast 48 hours / 2 days from now
+      operationId: getNoaa-river-stage-forecast-day-2Features
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      - $ref: '#/components/parameters/bbox'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/bbox-crs'
+      - &id007
+        description: The properties that should be included for each feature. The
+          parameter value is a comma-separated list of property names.
+        explode: false
+        in: query
+        name: properties
+        required: false
+        schema:
+          items:
+            enum:
+            - objectid
+            - gaugelid
+            - status
+            - location
+            - waterbody
+            - state
+            - fcsttime
+            - fcstissunc
+            - wfo
+            - url
+            - action
+            - forecast
+            - units
+            - lowthresh
+            - lowthreshu
+            - secvalue
+            - secunit
+            - flood
+            - moderate
+            - major
+            - latitude
+            - longitude
+            - hdatum
+            - pedts
+            - idp_filedate
+            - idp_ingestdate
+            - shape
+            type: string
+          type: array
+        style: form
+      - $ref: '#/components/parameters/vendorSpecificParameters'
+      - $ref: '#/components/parameters/skipGeometry'
+      - $ref: https://raw.githubusercontent.com/opengeospatial/ogcapi-records/master/core/openapi/parameters/sortby.yaml
+      - $ref: '#/components/parameters/offset'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - explode: false
+        in: query
+        name: objectid
+        required: false
+        schema:
+          type: esriFieldTypeOID
+        style: form
+      - explode: false
+        in: query
+        name: gaugelid
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: status
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: location
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: waterbody
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: state
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: fcsttime
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: fcstissunc
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: wfo
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: url
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: action
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: forecast
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: units
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: lowthresh
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: lowthreshu
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: secvalue
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: secunit
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: flood
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: moderate
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: major
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: latitude
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: longitude
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: hdatum
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: pedts
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: idp_filedate
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: idp_ingestdate
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: shape
+        required: false
+        schema:
+          type: esriFieldTypeGeometry
+        style: form
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Features
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 2 items
+      tags:
+      - noaa-river-stage-forecast-day-2
+    options:
+      description: NOAA River Stage Forecast 48 hours / 2 days from now
+      operationId: optionsNoaa-river-stage-forecast-day-2Features
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Stage Forecast Day 2 items
+      tags:
+      - noaa-river-stage-forecast-day-2
+  /collections/noaa-river-stage-forecast-day-2/items/{featureId}:
+    get:
+      description: NOAA River Stage Forecast 48 hours / 2 days from now
+      operationId: getNoaa-river-stage-forecast-day-2Feature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Feature
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 2 item by id
+      tags:
+      - noaa-river-stage-forecast-day-2
+    options:
+      description: NOAA River Stage Forecast 48 hours / 2 days from now
+      operationId: optionsNoaa-river-stage-forecast-day-2Feature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Stage Forecast Day 2 item by id
+      tags:
+      - noaa-river-stage-forecast-day-2
+  /collections/noaa-river-stage-forecast-day-2/queryables:
+    get:
+      description: NOAA River Stage Forecast 48 hours / 2 days from now
+      operationId: getNoaa-river-stage-forecast-day-2Queryables
+      parameters:
+      - *id007
+      - $ref: '#/components/parameters/f'
+      - *id003
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 2 queryables
+      tags:
+      - noaa-river-stage-forecast-day-2
+  /collections/noaa-river-stage-forecast-day-2/schema:
+    get:
+      description: NOAA River Stage Forecast 48 hours / 2 days from now
+      operationId: getNoaa-river-stage-forecast-day-2Schema
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 2 schema
+      tags:
+      - noaa-river-stage-forecast-day-2
+  /collections/noaa-river-stage-forecast-day-3:
+    get:
+      description: NOAA River Stage Forecast 72 hours / 3 days from now
+      operationId: describeNoaa-river-stage-forecast-day-3Collection
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Collection
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 3 metadata
+      tags:
+      - noaa-river-stage-forecast-day-3
+  /collections/noaa-river-stage-forecast-day-3/items:
+    get:
+      description: NOAA River Stage Forecast 72 hours / 3 days from now
+      operationId: getNoaa-river-stage-forecast-day-3Features
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      - $ref: '#/components/parameters/bbox'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/bbox-crs'
+      - &id008
+        description: The properties that should be included for each feature. The
+          parameter value is a comma-separated list of property names.
+        explode: false
+        in: query
+        name: properties
+        required: false
+        schema:
+          items:
+            enum:
+            - objectid
+            - gaugelid
+            - status
+            - location
+            - waterbody
+            - state
+            - fcsttime
+            - fcstissunc
+            - wfo
+            - url
+            - action
+            - forecast
+            - units
+            - lowthresh
+            - lowthreshu
+            - secvalue
+            - secunit
+            - flood
+            - moderate
+            - major
+            - latitude
+            - longitude
+            - hdatum
+            - pedts
+            - idp_filedate
+            - idp_ingestdate
+            - shape
+            type: string
+          type: array
+        style: form
+      - $ref: '#/components/parameters/vendorSpecificParameters'
+      - $ref: '#/components/parameters/skipGeometry'
+      - $ref: https://raw.githubusercontent.com/opengeospatial/ogcapi-records/master/core/openapi/parameters/sortby.yaml
+      - $ref: '#/components/parameters/offset'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - explode: false
+        in: query
+        name: objectid
+        required: false
+        schema:
+          type: esriFieldTypeOID
+        style: form
+      - explode: false
+        in: query
+        name: gaugelid
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: status
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: location
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: waterbody
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: state
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: fcsttime
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: fcstissunc
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: wfo
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: url
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: action
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: forecast
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: units
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: lowthresh
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: lowthreshu
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: secvalue
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: secunit
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: flood
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: moderate
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: major
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: latitude
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: longitude
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: hdatum
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: pedts
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: idp_filedate
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: idp_ingestdate
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: shape
+        required: false
+        schema:
+          type: esriFieldTypeGeometry
+        style: form
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Features
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 3 items
+      tags:
+      - noaa-river-stage-forecast-day-3
+    options:
+      description: NOAA River Stage Forecast 72 hours / 3 days from now
+      operationId: optionsNoaa-river-stage-forecast-day-3Features
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Stage Forecast Day 3 items
+      tags:
+      - noaa-river-stage-forecast-day-3
+  /collections/noaa-river-stage-forecast-day-3/items/{featureId}:
+    get:
+      description: NOAA River Stage Forecast 72 hours / 3 days from now
+      operationId: getNoaa-river-stage-forecast-day-3Feature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Feature
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 3 item by id
+      tags:
+      - noaa-river-stage-forecast-day-3
+    options:
+      description: NOAA River Stage Forecast 72 hours / 3 days from now
+      operationId: optionsNoaa-river-stage-forecast-day-3Feature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      responses:
+        '200':
+          description: options response
+      summary: Options for River Stage Forecast Day 3 item by id
+      tags:
+      - noaa-river-stage-forecast-day-3
+  /collections/noaa-river-stage-forecast-day-3/queryables:
+    get:
+      description: NOAA River Stage Forecast 72 hours / 3 days from now
+      operationId: getNoaa-river-stage-forecast-day-3Queryables
+      parameters:
+      - *id008
+      - $ref: '#/components/parameters/f'
+      - *id003
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 3 queryables
+      tags:
+      - noaa-river-stage-forecast-day-3
+  /collections/noaa-river-stage-forecast-day-3/schema:
+    get:
+      description: NOAA River Stage Forecast 72 hours / 3 days from now
+      operationId: getNoaa-river-stage-forecast-day-3Schema
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get River Stage Forecast Day 3 schema
+      tags:
+      - noaa-river-stage-forecast-day-3
   /collections/snotel-edr:
     get:
       description: USDA Snow Telemetry Network (SNOTEL) EDR
@@ -1033,7 +2849,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id004
+      - &id009
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -1244,7 +3060,7 @@ paths:
       description: USDA Snow Telemetry Network (SNOTEL) EDR
       operationId: getSnotel-edrQueryables
       parameters:
-      - *id004
+      - *id009
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -1309,7 +3125,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id005
+      - &id010
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -1488,7 +3304,7 @@ paths:
       description: USACE Access2Water API
       operationId: getUsace-edrQueryables
       parameters:
-      - *id005
+      - *id010
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -1523,6 +3339,163 @@ paths:
       summary: Get US Army Corps of Engineers schema
       tags:
       - usace-edr
+  /collections/usgs-prism:
+    get:
+      description: PRISM Monthly Climate Data for the Continental United States
+      operationId: describeUsgs-prismCollection
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Collection
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get Parameter-elevation Regressions on Independent Slopes Model (PRISM)
+        metadata
+      tags:
+      - usgs-prism
+  /collections/usgs-prism/area:
+    get:
+      description: PRISM Monthly Climate Data for the Continental United States
+      operationId: queryAreaUsgs-prism
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/areaCoords.yaml
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/parameter-name.yaml
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/z.yaml
+      - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          content:
+            application/prs.coverage+json:
+              schema:
+                $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/schemas/coverageJSON.yaml
+          description: Response
+      summary: query PRISM Monthly Climate Data for the Continental United States
+        by area
+      tags:
+      - usgs-prism
+  /collections/usgs-prism/cube:
+    get:
+      description: PRISM Monthly Climate Data for the Continental United States
+      operationId: queryCubeUsgs-prism
+      parameters:
+      - description: Only features that have a geometry that intersects the bounding
+          box are selected.The bounding box is provided as four or six numbers, depending
+          on whether the coordinate reference system includes a vertical axis (height
+          or depth).
+        explode: false
+        in: query
+        name: bbox
+        required: true
+        schema:
+          items:
+            type: number
+          maxItems: 6
+          minItems: 4
+          type: array
+        style: form
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/parameter-name.yaml
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/z.yaml
+      - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          content:
+            application/prs.coverage+json:
+              schema:
+                $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/schemas/coverageJSON.yaml
+          description: Response
+      summary: query PRISM Monthly Climate Data for the Continental United States
+        by cube
+      tags:
+      - usgs-prism
+  /collections/usgs-prism/items:
+    get:
+      description: PRISM Monthly Climate Data for the Continental United States
+      operationId: queryItemsUsgs-prism
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/itemsCoords.yaml
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/parameter-name.yaml
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/z.yaml
+      - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          content:
+            application/prs.coverage+json:
+              schema:
+                $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/schemas/coverageJSON.yaml
+          description: Response
+      summary: query PRISM Monthly Climate Data for the Continental United States
+        by items
+      tags:
+      - usgs-prism
+  /collections/usgs-prism/locations:
+    get:
+      description: PRISM Monthly Climate Data for the Continental United States
+      operationId: getLocationsUsgs-prism
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/bbox.yaml
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Features
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get pre-defined locations of PRISM Monthly Climate Data for the Continental
+        United States
+      tags:
+      - usgs-prism
+  /collections/usgs-prism/locations/{locId}:
+    get:
+      description: PRISM Monthly Climate Data for the Continental United States
+      operationId: getLocationUsgs-prism
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/locationId.yaml
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/parameter-name.yaml
+      - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          content:
+            application/prs.coverage+json:
+              schema:
+                $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/schemas/coverageJSON.yaml
+          description: Response
+      summary: query PRISM Monthly Climate Data for the Continental United States
+        by location
+      tags:
+      - usgs-prism
+  /collections/usgs-prism/position:
+    get:
+      description: PRISM Monthly Climate Data for the Continental United States
+      operationId: queryPositionUsgs-prism
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/positionCoords.yaml
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/parameter-name.yaml
+      - $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/parameters/z.yaml
+      - $ref: '#/components/parameters/f'
+      responses:
+        '200':
+          content:
+            application/prs.coverage+json:
+              schema:
+                $ref: https://schemas.opengis.net/ogcapi/edr/1.0/openapi/schemas/coverageJSON.yaml
+          description: Response
+      summary: query PRISM Monthly Climate Data for the Continental United States
+        by position
+      tags:
+      - usgs-prism
   /collections/usgs-sta:
     get:
       description: USGS Streamgages SensorThings API EDR
@@ -1607,7 +3580,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id006
+      - &id011
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -1791,7 +3764,7 @@ paths:
       description: USGS Streamgages SensorThings API EDR
       operationId: getUsgs-staQueryables
       parameters:
-      - *id006
+      - *id011
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -1862,7 +3835,7 @@ paths:
       description: Cancel / delete job
       operationId: deleteJob
       parameters:
-      - &id007
+      - &id012
         description: job identifier
         in: path
         name: jobId
@@ -1883,7 +3856,7 @@ paths:
       description: Retrieve job details
       operationId: getJob
       parameters:
-      - *id007
+      - *id012
       - $ref: '#/components/parameters/f'
       responses:
         '200':
@@ -1900,7 +3873,7 @@ paths:
       description: Retrieve job results
       operationId: getJobResults
       parameters:
-      - *id007
+      - *id012
       - $ref: '#/components/parameters/f'
       responses:
         '200':
@@ -1963,6 +3936,18 @@ tags:
   name: usgs-sta
 - description: USDA Air and Water Database Forecasts (AWDB) EDR
   name: awdb-forecasts-edr
+- description: NOAA River Forecast Center Forecasts
+  name: noaa-rfc
+- description: PRISM Monthly Climate Data for the Continental United States
+  name: usgs-prism
+- description: NOAA River Stage Forecast 24 Hours / 1 day from now
+  name: noaa-river-stage-forecast-day-1
+- description: NOAA River Stage Forecast 48 hours / 2 days from now
+  name: noaa-river-stage-forecast-day-2
+- description: NOAA River Stage Forecast 72 hours / 3 days from now
+  name: noaa-river-stage-forecast-day-3
+- description: NOAA River Stage Forecast 240 hours / 10 days from now
+  name: noaa-river-stage-forecast-day-10
 - name: coverages
 - name: edr
 - name: records

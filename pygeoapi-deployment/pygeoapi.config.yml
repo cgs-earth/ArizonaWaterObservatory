@@ -164,3 +164,87 @@ resources:
         name: awdb_forecasts.awdb_forecasts.AwdbForecastsProvider
         data: https://wcc.sc.egov.usda.gov/awdbRestApi/v3/api-docs
         title_field: name
+
+
+  noaa-rfc:
+    type: collection
+    title: River Forecast Center Seasonal Forecasts
+    description: NOAA River Forecast Center Forecasts
+    keywords: [NOAA]
+    links:
+      - <<: *default-link
+        href: https://www.cbrfc.noaa.gov/wsup/graph/west/map/esp_map.html
+    extents: *default-extent
+    providers:
+      - type: feature
+        name: noaa_rfc.noaa_rfc.NOAARFCProvider
+        data: https://www.cbrfc.noaa.gov/wsup/graph/west/map/esp_map.html
+        title_field: espnam
+
+  usgs-prism:
+    type: collection
+    title: Parameter-elevation Regressions on Independent Slopes Model (PRISM)
+    description: PRISM Monthly Climate Data for the Continental United States
+    keywords:
+      - temperature
+      - precipitation
+    extents: *default-extent
+    links:
+      - <<: *default-link
+        title: information
+        href: https://cida.usgs.gov/thredds/catalog.html?dataset=cida.usgs.gov/prism_v2
+    providers:
+      - type: edr
+        name: xarray-edr
+        data: s3://mdmf/gdp/PRISM_v2.zarr
+        format:
+          name: zarr
+          mimetype: application/zip
+        options:
+          s3:
+            anon: true
+            requester_pays: false
+            client_kwargs:
+              endpoint_url: https://usgs.osn.mghpcc.org
+
+
+  noaa-river-stage-forecast-day-1: &default-river-stage
+    type: collection
+    title: River Stage Forecast Day 1
+    description: NOAA River Stage Forecast 24 Hours / 1 day from now
+    keywords: [NOAA, riv_gauges]
+    links:
+      - <<: *default-link
+        href: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer
+    extents: *default-extent
+    providers:
+      - &default-feature-river-stage
+        type: feature
+        name: ESRI
+        data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/1
+        id_field: objectid
+        time_field: fcsttime
+
+  noaa-river-stage-forecast-day-2:
+    <<: *default-river-stage
+    title: River Stage Forecast Day 2
+    description: NOAA River Stage Forecast 48 hours / 2 days from now
+    providers:
+      - <<: *default-feature-river-stage
+        data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/2
+
+  noaa-river-stage-forecast-day-3:
+    <<: *default-river-stage
+    title: River Stage Forecast Day 3
+    description: NOAA River Stage Forecast 72 hours / 3 days from now
+    providers:
+      - <<: *default-feature-river-stage
+        data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/3
+
+  noaa-river-stage-forecast-day-10:
+    <<: *default-river-stage
+    title: River Stage Forecast Day 10
+    description: NOAA River Stage Forecast 240 hours / 10 days from now
+    providers:
+      - <<: *default-feature-river-stage
+        data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/10
