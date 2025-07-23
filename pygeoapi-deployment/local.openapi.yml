@@ -635,6 +635,635 @@ paths:
         schema
       tags:
       - ADWR_GWSI_Sites
+  /collections/arizona-well-registry:
+    get:
+      description: The Wells 55 Registry database contains different well types -
+        Notices of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic
+        NOI (eNOI) (55-900000 series), registrations of existing wells (55-600000
+        and 55-800000 series), discovered unregistered wells (55-700000 series),and
+        existing wells that are registered to be abandoned (55-400000 series). In
+        other words, the database contains NOIs to drill, replace, modify, abandon,
+        or deepen, registrations, driller reports, completion reports, change of well
+        information, change of ownership, notice of well capping, and abandonment
+        completion reports. This layer is displayed in the Well Registry application.
+      operationId: describeArizona-well-registryCollection
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Collection
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get Arizona Well Registry metadata
+      tags:
+      - arizona-well-registry
+  /collections/arizona-well-registry/items:
+    get:
+      description: The Wells 55 Registry database contains different well types -
+        Notices of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic
+        NOI (eNOI) (55-900000 series), registrations of existing wells (55-600000
+        and 55-800000 series), discovered unregistered wells (55-700000 series),and
+        existing wells that are registered to be abandoned (55-400000 series). In
+        other words, the database contains NOIs to drill, replace, modify, abandon,
+        or deepen, registrations, driller reports, completion reports, change of well
+        information, change of ownership, notice of well capping, and abandonment
+        completion reports. This layer is displayed in the Well Registry application.
+      operationId: getArizona-well-registryFeatures
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      - $ref: '#/components/parameters/bbox'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/bbox-crs'
+      - &id002
+        description: The properties that should be included for each feature. The
+          parameter value is a comma-separated list of property names.
+        explode: false
+        in: query
+        name: properties
+        required: false
+        schema:
+          items:
+            enum:
+            - OBJECTID
+            - PROGRAM
+            - REGISTRY_ID
+            - OWNER_NAME
+            - RGR_PUMP_DATA
+            - WELLTYPE
+            - WELL_TYPE_GROUP
+            - DLIC_NUM
+            - APPROVED
+            - INSTALLED
+            - WELL_DEPTH
+            - WATER_LEVEL
+            - CASING_DEPTH
+            - CASING_DIAMETER
+            - CASING_TYPE
+            - PUMP_TYPE
+            - PUMP_POWER
+            - PUMPRATE
+            - TESTEDRATE
+            - DRAW_DOWN
+            - COMPLETION_REPORT_STATUS
+            - DRILL_LOG
+            - WELL_CANCELLED
+            - CADASTRAL
+            - COUNTY
+            - WATERSHED
+            - BASIN_NAME
+            - SUBBASIN_NAME
+            - AMA
+            - QUAD_CODE
+            - WHOLE_TOWNSHIP
+            - HALF_TOWNSHIP
+            - NORTHSOUTH
+            - WHOLE_RANGE
+            - HALF_RANGE
+            - EASTWEST
+            - SECTION
+            - QUARTER_160_ACRE
+            - QACRE160DIR
+            - QUARTER_40_ACRE
+            - QACRE40DIR
+            - QUARTER_10_ACRE
+            - QACRE10DIR
+            - UTM_X_METERS
+            - UTM_Y_METERS
+            - APPLICATION_DATE
+            - ADDRESS1
+            - ADDRESS2
+            - CITY
+            - STATE
+            - ZIP
+            - ZIP4
+            - WATER_USE
+            - SITE_USE
+            type: string
+          type: array
+        style: form
+      - $ref: '#/components/parameters/vendorSpecificParameters'
+      - $ref: '#/components/parameters/skipGeometry'
+      - $ref: https://raw.githubusercontent.com/opengeospatial/ogcapi-records/master/core/openapi/parameters/sortby.yaml
+      - $ref: '#/components/parameters/offset'
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/datetime
+      - explode: false
+        in: query
+        name: OBJECTID
+        required: false
+        schema:
+          type: esriFieldTypeOID
+        style: form
+      - explode: false
+        in: query
+        name: PROGRAM
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: REGISTRY_ID
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: OWNER_NAME
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: RGR_PUMP_DATA
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: WELLTYPE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: WELL_TYPE_GROUP
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: DLIC_NUM
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: APPROVED
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: INSTALLED
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: WELL_DEPTH
+        required: false
+        schema:
+          type: esriFieldTypeInteger
+        style: form
+      - explode: false
+        in: query
+        name: WATER_LEVEL
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: CASING_DEPTH
+        required: false
+        schema:
+          type: esriFieldTypeInteger
+        style: form
+      - explode: false
+        in: query
+        name: CASING_DIAMETER
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: CASING_TYPE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: PUMP_TYPE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: PUMP_POWER
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: PUMPRATE
+        required: false
+        schema:
+          type: esriFieldTypeInteger
+        style: form
+      - explode: false
+        in: query
+        name: TESTEDRATE
+        required: false
+        schema:
+          type: esriFieldTypeInteger
+        style: form
+      - explode: false
+        in: query
+        name: DRAW_DOWN
+        required: false
+        schema:
+          type: esriFieldTypeInteger
+        style: form
+      - explode: false
+        in: query
+        name: COMPLETION_REPORT_STATUS
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: DRILL_LOG
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: WELL_CANCELLED
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: CADASTRAL
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: COUNTY
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: WATERSHED
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: BASIN_NAME
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: SUBBASIN_NAME
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: AMA
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: QUAD_CODE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: WHOLE_TOWNSHIP
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: HALF_TOWNSHIP
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: NORTHSOUTH
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: WHOLE_RANGE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: HALF_RANGE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: EASTWEST
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: SECTION
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: QUARTER_160_ACRE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: QACRE160DIR
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: QUARTER_40_ACRE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: QACRE40DIR
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: QUARTER_10_ACRE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: QACRE10DIR
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: UTM_X_METERS
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: UTM_Y_METERS
+        required: false
+        schema:
+          type: esriFieldTypeDouble
+        style: form
+      - explode: false
+        in: query
+        name: APPLICATION_DATE
+        required: false
+        schema:
+          type: esriFieldTypeDate
+        style: form
+      - explode: false
+        in: query
+        name: ADDRESS1
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: ADDRESS2
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: CITY
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: STATE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: ZIP
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: ZIP4
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: WATER_USE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      - explode: false
+        in: query
+        name: SITE_USE
+        required: false
+        schema:
+          type: esriFieldTypeString
+        style: form
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Features
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get Arizona Well Registry items
+      tags:
+      - arizona-well-registry
+    options:
+      description: The Wells 55 Registry database contains different well types -
+        Notices of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic
+        NOI (eNOI) (55-900000 series), registrations of existing wells (55-600000
+        and 55-800000 series), discovered unregistered wells (55-700000 series),and
+        existing wells that are registered to be abandoned (55-400000 series). In
+        other words, the database contains NOIs to drill, replace, modify, abandon,
+        or deepen, registrations, driller reports, completion reports, change of well
+        information, change of ownership, notice of well capping, and abandonment
+        completion reports. This layer is displayed in the Well Registry application.
+      operationId: optionsArizona-well-registryFeatures
+      responses:
+        '200':
+          description: options response
+      summary: Options for Arizona Well Registry items
+      tags:
+      - arizona-well-registry
+  /collections/arizona-well-registry/items/{featureId}:
+    get:
+      description: The Wells 55 Registry database contains different well types -
+        Notices of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic
+        NOI (eNOI) (55-900000 series), registrations of existing wells (55-600000
+        and 55-800000 series), discovered unregistered wells (55-700000 series),and
+        existing wells that are registered to be abandoned (55-400000 series). In
+        other words, the database contains NOIs to drill, replace, modify, abandon,
+        or deepen, registrations, driller reports, completion reports, change of well
+        information, change of ownership, notice of well capping, and abandonment
+        completion reports. This layer is displayed in the Well Registry application.
+      operationId: getArizona-well-registryFeature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      - $ref: '#/components/parameters/crs'
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/Feature
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get Arizona Well Registry item by id
+      tags:
+      - arizona-well-registry
+    options:
+      description: The Wells 55 Registry database contains different well types -
+        Notices of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic
+        NOI (eNOI) (55-900000 series), registrations of existing wells (55-600000
+        and 55-800000 series), discovered unregistered wells (55-700000 series),and
+        existing wells that are registered to be abandoned (55-400000 series). In
+        other words, the database contains NOIs to drill, replace, modify, abandon,
+        or deepen, registrations, driller reports, completion reports, change of well
+        information, change of ownership, notice of well capping, and abandonment
+        completion reports. This layer is displayed in the Well Registry application.
+      operationId: optionsArizona-well-registryFeature
+      parameters:
+      - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/featureId
+      responses:
+        '200':
+          description: options response
+      summary: Options for Arizona Well Registry item by id
+      tags:
+      - arizona-well-registry
+  /collections/arizona-well-registry/queryables:
+    get:
+      description: The Wells 55 Registry database contains different well types -
+        Notices of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic
+        NOI (eNOI) (55-900000 series), registrations of existing wells (55-600000
+        and 55-800000 series), discovered unregistered wells (55-700000 series),and
+        existing wells that are registered to be abandoned (55-400000 series). In
+        other words, the database contains NOIs to drill, replace, modify, abandon,
+        or deepen, registrations, driller reports, completion reports, change of well
+        information, change of ownership, notice of well capping, and abandonment
+        completion reports. This layer is displayed in the Well Registry application.
+      operationId: getArizona-well-registryQueryables
+      parameters:
+      - *id002
+      - $ref: '#/components/parameters/f'
+      - *id003
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get Arizona Well Registry queryables
+      tags:
+      - arizona-well-registry
+  /collections/arizona-well-registry/schema:
+    get:
+      description: The Wells 55 Registry database contains different well types -
+        Notices of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic
+        NOI (eNOI) (55-900000 series), registrations of existing wells (55-600000
+        and 55-800000 series), discovered unregistered wells (55-700000 series),and
+        existing wells that are registered to be abandoned (55-400000 series). In
+        other words, the database contains NOIs to drill, replace, modify, abandon,
+        or deepen, registrations, driller reports, completion reports, change of well
+        information, change of ownership, notice of well capping, and abandonment
+        completion reports. This layer is displayed in the Well Registry application.
+      operationId: getArizona-well-registrySchema
+      parameters:
+      - $ref: '#/components/parameters/f'
+      - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          $ref: '#/components/responses/Queryables'
+        '400':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/InvalidParameter
+        '404':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/NotFound
+        '500':
+          $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/responses/ServerError
+      summary: Get Arizona Well Registry schema
+      tags:
+      - arizona-well-registry
   /collections/awdb-forecasts-edr:
     get:
       description: USDA Air and Water Database Forecasts (AWDB) EDR
@@ -719,7 +1348,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id002
+      - &id004
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -968,7 +1597,7 @@ paths:
       description: USDA Air and Water Database Forecasts (AWDB) EDR
       operationId: getAwdb-forecasts-edrQueryables
       parameters:
-      - *id002
+      - *id004
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -1033,7 +1662,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id004
+      - &id005
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -1356,7 +1985,7 @@ paths:
       description: NOAA River Forecast Center Forecasts
       operationId: getNoaa-rfcQueryables
       parameters:
-      - *id004
+      - *id005
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -1421,7 +2050,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id005
+      - &id006
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -1713,7 +2342,7 @@ paths:
       description: NOAA River Stage Forecast 24 Hours / 1 day from now
       operationId: getNoaa-river-stage-forecast-day-1Queryables
       parameters:
-      - *id005
+      - *id006
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -1778,7 +2407,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id006
+      - &id007
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -2070,7 +2699,7 @@ paths:
       description: NOAA River Stage Forecast 240 hours / 10 days from now
       operationId: getNoaa-river-stage-forecast-day-10Queryables
       parameters:
-      - *id006
+      - *id007
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -2135,7 +2764,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id007
+      - &id008
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -2427,7 +3056,7 @@ paths:
       description: NOAA River Stage Forecast 48 hours / 2 days from now
       operationId: getNoaa-river-stage-forecast-day-2Queryables
       parameters:
-      - *id007
+      - *id008
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -2492,7 +3121,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id008
+      - &id009
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -2784,7 +3413,7 @@ paths:
       description: NOAA River Stage Forecast 72 hours / 3 days from now
       operationId: getNoaa-river-stage-forecast-day-3Queryables
       parameters:
-      - *id008
+      - *id009
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -2849,7 +3478,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id009
+      - &id010
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -3060,7 +3689,7 @@ paths:
       description: USDA Snow Telemetry Network (SNOTEL) EDR
       operationId: getSnotel-edrQueryables
       parameters:
-      - *id009
+      - *id010
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -3125,7 +3754,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id010
+      - &id011
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -3304,7 +3933,7 @@ paths:
       description: USACE Access2Water API
       operationId: getUsace-edrQueryables
       parameters:
-      - *id010
+      - *id011
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -3580,7 +4209,7 @@ paths:
       - $ref: https://schemas.opengis.net/ogcapi/features/part1/1.0/openapi/ogcapi-features-1.yaml#/components/parameters/limit
       - $ref: '#/components/parameters/crs'
       - $ref: '#/components/parameters/bbox-crs'
-      - &id011
+      - &id012
         description: The properties that should be included for each feature. The
           parameter value is a comma-separated list of property names.
         explode: false
@@ -3764,7 +4393,7 @@ paths:
       description: USGS Streamgages SensorThings API EDR
       operationId: getUsgs-staQueryables
       parameters:
-      - *id011
+      - *id012
       - $ref: '#/components/parameters/f'
       - *id003
       - $ref: '#/components/parameters/lang'
@@ -3835,7 +4464,7 @@ paths:
       description: Cancel / delete job
       operationId: deleteJob
       parameters:
-      - &id012
+      - &id013
         description: job identifier
         in: path
         name: jobId
@@ -3856,7 +4485,7 @@ paths:
       description: Retrieve job details
       operationId: getJob
       parameters:
-      - *id012
+      - *id013
       - $ref: '#/components/parameters/f'
       responses:
         '200':
@@ -3873,7 +4502,7 @@ paths:
       description: Retrieve job results
       operationId: getJobResults
       parameters:
-      - *id012
+      - *id013
       - $ref: '#/components/parameters/f'
       responses:
         '200':
@@ -3948,6 +4577,16 @@ tags:
   name: noaa-river-stage-forecast-day-3
 - description: NOAA River Stage Forecast 240 hours / 10 days from now
   name: noaa-river-stage-forecast-day-10
+- description: The Wells 55 Registry database contains different well types - Notices
+    of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic NOI (eNOI)
+    (55-900000 series), registrations of existing wells (55-600000 and 55-800000 series),
+    discovered unregistered wells (55-700000 series),and existing wells that are registered
+    to be abandoned (55-400000 series). In other words, the database contains NOIs
+    to drill, replace, modify, abandon, or deepen, registrations, driller reports,
+    completion reports, change of well information, change of ownership, notice of
+    well capping, and abandonment completion reports. This layer is displayed in the
+    Well Registry application.
+  name: arizona-well-registry
 - name: coverages
 - name: edr
 - name: records
