@@ -20,7 +20,8 @@ dependencies = [
     "snotel",
     "awdb_com",
     "awdb_forecasts",
-    "noaa_rfc"
+    "noaa_rfc",
+    "aiohttp>=3.12.12",
 ]
 
 [dependency-groups]

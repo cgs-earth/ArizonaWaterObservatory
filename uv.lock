@@ -148,6 +148,7 @@ name = "arizonawaterobservatory"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "aiohttp" },
     { name = "awdb-com" },
     { name = "awdb-forecasts" },
     { name = "com" },
@@ -173,6 +174,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiohttp", specifier = ">=3.12.12" },
     { name = "awdb-com", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&rev=includeStaticJson" },
     { name = "awdb-forecasts", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&rev=includeStaticJson" },
     { name = "com", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&rev=includeStaticJson" },
