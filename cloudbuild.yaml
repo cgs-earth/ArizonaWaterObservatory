@@ -8,18 +8,20 @@ steps:
       - -c
       - |
         set -e
-        echo "Attempting to pull cache image: $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache"
-        if docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache; then
+        CACHE_IMAGE=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache
+        FINAL_IMAGE=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        echo "Attempting to pull cache image: $CACHE_IMAGE"
+        if docker pull "$CACHE_IMAGE"; then
           echo "Cache image found, building with cache"
           docker build \
-            --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache \
-            --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
+            --cache-from="$CACHE_IMAGE" \
+            --tag="$FINAL_IMAGE" \
             -f pygeoapi-deployment/Dockerfile \
             .
         else
           echo "Cache image not found, building without cache"
           docker build \
-            --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
+            --tag="$FINAL_IMAGE" \
             -f pygeoapi-deployment/Dockerfile \
             .
         fi
