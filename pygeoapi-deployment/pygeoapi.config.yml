@@ -248,3 +248,21 @@ resources:
     providers:
       - <<: *default-feature-river-stage
         data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/10
+
+
+
+  arizona-well-registry:
+    type: collection
+    title: Arizona Well Registry
+    description:  The Wells 55 Registry database contains different well types - Notices of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic NOI (eNOI) (55-900000 series), registrations of existing wells (55-600000 and 55-800000 series), discovered unregistered wells (55-700000 series),and existing wells that are registered to be abandoned (55-400000 series). In other words, the database contains NOIs to drill, replace, modify, abandon, or deepen, registrations, driller reports, completion reports, change of well information, change of ownership, notice of well capping, and abandonment completion reports. This layer is displayed in the Well Registry application.
+    keywords: [Arizona]
+    links:
+      - <<: *default-link
+        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
+    extents: *default-extent
+    providers:
+      - type: feature
+        name: ESRI
+        data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
+        id_field: REGISTRY_ID
+        time_field: installed
