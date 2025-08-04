@@ -3,21 +3,28 @@
 
 steps:
   - name: gcr.io/cloud-builders/docker
-    args:
-      - "-c"
-      # Pull the cache image if available, but don't fail if it doesn't exist
-      # Then build the image with the cache
-      - >
-        docker pull
-        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache
-        || true
-        docker build \
-          --cache-from=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache \
-          --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
-          -f pygeoapi-deployment/Dockerfile \
-          .
-    id: Build
     entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        CACHE_IMAGE=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache
+        echo "Attempting to pull cache image: $CACHE_IMAGE"
+        if docker pull "$CACHE_IMAGE"; then
+          echo "Cache image found, building with cache"
+          docker build \
+            --cache-from="$CACHE_IMAGE" \
+            --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
+            -f pygeoapi-deployment/Dockerfile \
+            .
+        else
+          echo "Cache image not found, building without cache"
+          docker build \
+            --tag=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
+            -f pygeoapi-deployment/Dockerfile \
+            .
+        fi
+    id: Build
   - name: gcr.io/cloud-builders/docker
     args:
       - push
