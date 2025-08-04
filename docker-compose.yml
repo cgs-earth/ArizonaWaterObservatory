@@ -31,8 +31,6 @@ services:
       - .env.example
     ports:
       - 5432:5432
-    volumes:
-      - ./packages/resviz/schema.sql:/docker-entrypoint-initdb.d/schema.sql
 
   redis:
     image: redislabs/redismod
