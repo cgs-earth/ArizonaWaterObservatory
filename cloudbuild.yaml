@@ -8,8 +8,11 @@ steps:
       - -c
       - |
         set -e
-        CACHE_IMAGE=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache
-        FINAL_IMAGE=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+
+        # Define image names as shell-local variables
+        CACHE_IMAGE="$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache"
+        FINAL_IMAGE="$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+
         echo "Attempting to pull cache image: $CACHE_IMAGE"
         if docker pull "$CACHE_IMAGE"; then
           echo "Cache image found, building with cache"
@@ -26,12 +29,14 @@ steps:
             .
         fi
     id: Build
+
   - name: gcr.io/cloud-builders/docker
     args:
       - push
       - >-
         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
+
   - name: gcr.io/cloud-builders/docker
     args:
       - tag
@@ -41,13 +46,16 @@ steps:
       - >-
         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache
     id: Tag Cache
+
   - name: gcr.io/cloud-builders/docker
     args:
       - push
       - >-
         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:cache
     id: Push Cache
+
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: gcloud
     args:
       - run
       - services
@@ -61,13 +69,15 @@ steps:
       - "--region=$_DEPLOY_REGION"
       - "--quiet"
     id: Deploy
-    entrypoint: gcloud
+
 images:
   - >-
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+
 options:
   substitutionOption: MUST_MATCH
   logging: CLOUD_LOGGING_ONLY
+
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
