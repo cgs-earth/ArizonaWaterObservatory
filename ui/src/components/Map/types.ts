@@ -272,3 +272,5 @@ export enum LayerType {
   Fill = 'fill',
   FillExtrusion = 'fill-extrusion',
 }
+
+export type Properties = Record<string, string | number | string[] | number[]>;

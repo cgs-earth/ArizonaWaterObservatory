@@ -10,6 +10,4 @@ export const theme = createTheme({
   headings: {
     fontFamily: 'Arial, Helvetica, sans-serif',
   },
-
-  /** Put your mantine theme override here */
 });
