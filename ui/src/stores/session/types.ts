@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export enum NotifificationType {
+export enum NotificationType {
   Success = 'success',
   Error = 'error',
   Info = 'info',
@@ -12,7 +12,7 @@ export enum NotifificationType {
 export type Notification = {
   id: string;
   message: string;
-  type: NotifificationType;
+  type: NotificationType;
   visible: boolean;
 };
 

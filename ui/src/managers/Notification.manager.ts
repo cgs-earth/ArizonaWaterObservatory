@@ -5,7 +5,7 @@
 
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
-import { Notification, NotifificationType, SessionState } from '@/stores/session/types';
+import { Notification, NotificationType, SessionState } from '@/stores/session/types';
 
 type Timer = {
   timeoutId: ReturnType<typeof setTimeout>;
@@ -47,9 +47,9 @@ class NotificationManager {
 
   show(
     message: string,
-    type: NotifificationType = NotifificationType.Info,
+    type: NotificationType = NotificationType.Info,
     duration: number = 3000
-  ) {
+  ): Notification['id'] {
     const id = this.createUUID();
 
     this.store.getState().addNotification({
@@ -67,10 +67,17 @@ class NotificationManager {
       startTime,
       remaining: duration,
     });
+
+    return id;
   }
 
   pause(id: string) {
     const timer = this.get(id);
+
+    if (!timer) {
+      throw new Error(`Error: no timer instance found for id: ${id}`);
+    }
+
     if (timer) {
       clearTimeout(timer.timeoutId);
       timer.remaining -= Date.now() - timer.startTime;
@@ -92,6 +99,11 @@ class NotificationManager {
 
   hide(id: string) {
     const timer = this.get(id);
+
+    if (!timer) {
+      throw new Error(`Error: no timer instance found for id: ${id}`);
+    }
+
     if (timer) {
       clearTimeout(timer.timeoutId);
       this.remove(id);

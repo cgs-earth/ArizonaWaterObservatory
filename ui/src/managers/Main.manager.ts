@@ -7,7 +7,7 @@ import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
 import { ColorValueHex, Datasource, Layer, MainState } from '@/stores/main/types';
 
-class MainController {
+class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
 
   constructor(store: UseBoundStore<StoreApi<MainState>>) {
@@ -58,4 +58,4 @@ class MainController {
   }
 }
 
-export default MainController;
+export default MainManager;

@@ -18,7 +18,7 @@ class LoadingManager {
     return v6();
   }
 
-  addLoading(message: Loading['message']): Loading['id'] {
+  add(message: Loading['message']): Loading['id'] {
     const loadingInstance: Loading = {
       id: this.createUUID(),
       message,
@@ -29,7 +29,7 @@ class LoadingManager {
     return loadingInstance.id;
   }
 
-  removeLoading(id: Loading['id']) {
+  remove(id: Loading['id']) {
     this.store.getState().removeLoadingInstance(id);
   }
 }
