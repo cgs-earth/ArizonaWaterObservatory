@@ -24,12 +24,10 @@ logging:
 
 metadata:
   identification:
-    title: Western Water Datahub
-    description: The Western Water Datahub is an implementation of OGC API - EDR supported by the United States Bureau of Reclamation.
+    title: Arizona Water Observatory
+    description: The Arizona Water Observatory (AWO) provides water quality and water supply information for Arizona's water resources.
     keywords:
-      - usbr
-      - wwdh
-      - iow
+      - awo
     keywords_type: theme
     terms_of_service: https://opensource.org/license/MIT
     url: https://github.com/internetofwater/WWDH
@@ -38,7 +36,7 @@ metadata:
     url: https://opensource.org/license/MIT
   provider:
     name: Internet of Water
-    url: https://github.com/internetofwater/WWDH
+    url: https://github.com/internetofwater/ArizonaWaterObservatory
   contact:
     address: 113 Brattle St
     city: Cambridge
