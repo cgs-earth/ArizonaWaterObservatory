@@ -17,6 +17,11 @@ steps:
       - '-f'
       - pygeoapi-deployment/Dockerfile
       - .
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - 'gcr.io/$PROJECT_ID/asu-awo-pygeoapi:latest'
+    id: Push
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
     args:
       - run
