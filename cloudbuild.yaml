@@ -17,6 +17,21 @@ steps:
       - '-f'
       - pygeoapi-deployment/Dockerfile
       - .
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - "--platform=managed"
+      - >-
+        --image=gcr.io/$PROJECT_ID/asu-awo-pygeoapi:latest
+      - >-
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+      - "--region=$_DEPLOY_REGION"
+      - "--quiet"
+    id: Deploy
+    entrypoint: gcloud
 images:
   - 'gcr.io/$PROJECT_ID/asu-awo-pygeoapi:latest'
 options:
