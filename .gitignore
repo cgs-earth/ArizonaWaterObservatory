@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 
 *.openapi.yml
+
+.tmp_dagster*
