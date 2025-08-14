@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export function HomePage() {
-  return <>Home Page</>;
+.topBarWrapper {
+  padding: var(--default-spacing);
+  border-bottom: 1px solid var(--border);
 }

@@ -4,13 +4,11 @@
  */
 
 import { useEffect } from 'react';
-import Button from '@/components/Button';
-import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import { DatasourceType } from '@/stores/main/types';
 
 export const MapPage: React.FC = () => {
-  const setDatasources = useMainStore((state) => state.setDatasources);
+  const setDatasources = useMainStore((state) => state.setDatasets);
 
   useEffect(() => {
     setDatasources([
@@ -28,10 +26,5 @@ export const MapPage: React.FC = () => {
     ]);
   }, []);
 
-  return (
-    <>
-      Map Page
-      <Button onClick={() => mainManager.createLayer('test')}>Click</Button>
-    </>
-  );
+  return <div>Map Page</div>;
 };

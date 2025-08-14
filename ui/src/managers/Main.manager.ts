@@ -22,13 +22,13 @@ class MainManager {
     return '#fake';
   }
 
-  private getCurrentDatasourceCount = (datasourceId: Datasource['id']): number => {
+  getDatasourceCount = (datasourceId: Datasource['id']): number => {
     return this.store.getState().layers.filter((layer) => layer.datasourceId === datasourceId)
       .length;
   };
 
-  private getDatasource = (datasourceId: Datasource['id']): Datasource | undefined => {
-    return this.store.getState().datasources.find((datasource) => datasource.id === datasourceId);
+  getDatasource = (datasourceId: Datasource['id']): Datasource | undefined => {
+    return this.store.getState().datasets.find((datasource) => datasource.id === datasourceId);
   };
 
   createLayer(datasourceId: Datasource['id']) {
@@ -38,9 +38,14 @@ class MainManager {
       throw new Error('Error: datasource not found');
     }
 
-    const currentDatasourceCount = this.getCurrentDatasourceCount(datasource.id);
+    const currentDatasourceCount = this.getDatasourceCount(datasource.id);
+    const layers = this.store.getState().layers;
 
-    const name = `${datasource.provider} ${datasource.name} ${currentDatasourceCount + 1}`;
+    let next = 1;
+    let name = `${datasource.provider} ${datasource.name} ${currentDatasourceCount + next++}`;
+    while (layers.some((layer) => layer.name === name)) {
+      name = `${datasource.provider} ${datasource.name} ${currentDatasourceCount + next++}`;
+    }
 
     const layer: Layer = {
       id: this.createUUID(),
@@ -55,6 +60,14 @@ class MainManager {
     };
 
     this.store.getState().addLayer(layer);
+  }
+
+  deleteLayer(layerId: Layer['id']) {
+    const charts = this.store.getState().charts.filter((chart) => chart.layer !== layerId);
+    const layers = this.store.getState().layers.filter((layer) => layer.id !== layerId);
+
+    this.store.getState().setCharts(charts);
+    this.store.getState().setLayers(layers);
   }
 }
 

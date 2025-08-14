@@ -7,8 +7,8 @@ import { create } from 'zustand';
 import { MainState } from '@/stores/main/types';
 
 const useMainStore = create<MainState>()((set) => ({
-  datasources: [],
-  setDatasources: (datasources) => set({ datasources }),
+  datasets: [],
+  setDatasets: (datasets) => set({ datasets }),
   layers: [],
   setLayers: (layers) => set({ layers }),
   addLayer: (layer) =>

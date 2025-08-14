@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import LoadingManager from '@/managers/Loading.manager';
 import useSessionStore from '@/stores/session';
-import LoadingManager from './Loading.manager';
 
 const loadingManager = new LoadingManager(useSessionStore);
 

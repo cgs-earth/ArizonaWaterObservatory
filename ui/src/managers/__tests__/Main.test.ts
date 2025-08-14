@@ -32,7 +32,7 @@ describe('MainController', () => {
     // Reset store state
     store.setState({
       ...store.getState(),
-      datasources: [mockDatasource],
+      datasets: [mockDatasource],
       layers: [],
     });
   });

@@ -52,6 +52,13 @@ export enum DatasourceType {
   Raster = 'raster',
 }
 
+export type Filter = {
+  datasets: Datasource['dataset'][];
+  providers: Datasource['provider'][];
+  categories: Datasource['category'][];
+  dateAvailable: Datasource['dateAvailable'];
+};
+
 export type Datasource = {
   id: string;
   type: DatasourceType;
@@ -90,8 +97,8 @@ export type Chart = {
 };
 
 export interface MainState {
-  datasources: Datasource[];
-  setDatasources: (datasources: MainState['datasources']) => void;
+  datasets: Datasource[];
+  setDatasets: (datasources: MainState['datasets']) => void;
   layers: Layer[];
   setLayers: (layers: MainState['layers']) => void;
   addLayer: (layer: Layer) => void;

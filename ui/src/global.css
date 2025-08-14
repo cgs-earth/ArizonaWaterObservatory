@@ -28,7 +28,7 @@
   --asu-color-secondary: var(--asu-maroon);
   --asu-color-tertiary: var(--asu-gray-5);
 
-  --default-margin: 8px;
+  --default-spacing: 8px;
 }
 
 :where([data-mantine-color-scheme='dark']) {

@@ -9,13 +9,13 @@
   border-radius: 0;
   width: fit-content;
   min-width: 200px;
-  padding: var(--default-margin);
+  padding: var(--default-spacing);
 }
 
 .closeButton {
   display: block;
   margin-left: auto;
-  margin-bottom: var(--default-margin);
+  margin-bottom: var(--default-spacing);
 }
 
 .modalBody {
