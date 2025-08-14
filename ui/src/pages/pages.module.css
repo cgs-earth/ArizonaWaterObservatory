@@ -1,0 +1,14 @@
+/**
+ * Copyright 2025 Lincoln Institute of Land Policy
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.root {
+  max-width: 100vw;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+.right {
+  flex: 1;
+}

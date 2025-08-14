@@ -5,7 +5,7 @@
 
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
-import './global.css';
+import '@/global.css';
 
 import { Providers } from '@/providers';
 import { Router } from '@/Router';
