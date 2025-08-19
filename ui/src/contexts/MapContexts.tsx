@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-'use client';
-
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { Map, Popup } from 'mapbox-gl';
+import { Root } from 'react-dom/client';
 
 /**
  * Defines the structure for a single map context, including the map instance, hover popup, persistent popup, and a function to set the map context.
@@ -24,11 +23,15 @@ interface MapContextType {
   hoverPopup: Popup | null;
   persistentPopup: Popup | null;
   geocoder: MapboxGeocoder | null;
+  root: Root | null;
+  container: HTMLDivElement | null;
   setMap: (
     map: Map,
     hoverPopup: Popup,
     persistentPopup: Popup,
-    geocoder: MapboxGeocoder | null
+    geocoder: MapboxGeocoder | null,
+    root: Root,
+    container: HTMLDivElement
   ) => void;
 }
 
@@ -75,7 +78,9 @@ export const MapProvider: React.FC<{
     map: Map | null,
     hoverPopup: Popup,
     persistentPopup: Popup,
-    geocoder: MapboxGeocoder | null
+    geocoder: MapboxGeocoder | null,
+    root: Root,
+    container: HTMLDivElement
   ) => {
     setMaps((prevMaps) => ({
       ...prevMaps,
@@ -84,7 +89,16 @@ export const MapProvider: React.FC<{
         hoverPopup,
         persistentPopup,
         geocoder,
-        setMap: (m: Map, h: Popup, p: Popup, g: MapboxGeocoder | null) => setMap(id, m, h, p, g),
+        root,
+        container,
+        setMap: (
+          m: Map,
+          h: Popup,
+          p: Popup,
+          g: MapboxGeocoder | null,
+          r: Root,
+          c: HTMLDivElement
+        ) => setMap(id, m, h, p, g, r, c),
       },
     }));
   };
@@ -97,12 +111,16 @@ export const MapProvider: React.FC<{
       hoverPopup: null,
       persistentPopup: null,
       geocoder: null,
+      root: null,
+      container: null,
       setMap: (
         map: Map,
         hoverPopup: Popup,
         persistentPopup: Popup,
-        geocoder: MapboxGeocoder | null
-      ) => setMap(mapId, map, hoverPopup, persistentPopup, geocoder),
+        geocoder: MapboxGeocoder | null,
+        root: Root,
+        container: HTMLDivElement
+      ) => setMap(mapId, map, hoverPopup, persistentPopup, geocoder, root, container),
     };
   });
 

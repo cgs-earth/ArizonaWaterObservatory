@@ -12,6 +12,7 @@ import {
   ScaleControl,
   SourceSpecification,
 } from 'mapbox-gl';
+import { Root } from 'react-dom/client';
 import {
   MainLayerDefinition,
   MapComponentProps,
@@ -87,16 +88,22 @@ export const addHoverFunctions = (
   map: Map,
   layerDefinitions: MainLayerDefinition[],
   hoverPopup: Popup,
-  persistentPopup: Popup
+  persistentPopup: Popup,
+  root: Root,
+  container: HTMLDivElement
 ) => {
   layerDefinitions.forEach((layer) => {
     if (layer.hoverFunction) {
-      map.on('mouseenter', layer.id, layer.hoverFunction(map, hoverPopup, persistentPopup));
+      map.on(
+        'mouseenter',
+        layer.id,
+        layer.hoverFunction(map, hoverPopup, persistentPopup, root, container)
+      );
       if (layer.customHoverExitFunction) {
         map.on(
           'mouseleave',
           layer.id,
-          layer.customHoverExitFunction(map, hoverPopup, persistentPopup)
+          layer.customHoverExitFunction(map, hoverPopup, persistentPopup, root, container)
         );
       } else {
         map.on('mouseleave', layer.id, () => {
@@ -111,13 +118,13 @@ export const addHoverFunctions = (
           map.on(
             'mouseenter',
             subLayer.id,
-            subLayer.hoverFunction(map, hoverPopup, persistentPopup)
+            subLayer.hoverFunction(map, hoverPopup, persistentPopup, root, container)
           );
           if (subLayer.customHoverExitFunction) {
             map.on(
               'mouseleave',
               subLayer.id,
-              subLayer.customHoverExitFunction(map, hoverPopup, persistentPopup)
+              subLayer.customHoverExitFunction(map, hoverPopup, persistentPopup, root, container)
             );
           } else {
             map.on('mouseleave', subLayer.id, () => {
@@ -143,11 +150,17 @@ export const addMouseMoveFunctions = (
   map: Map,
   layerDefinitions: MainLayerDefinition[],
   hoverPopup: Popup,
-  persistentPopup: Popup
+  persistentPopup: Popup,
+  root: Root,
+  container: HTMLDivElement
 ) => {
   layerDefinitions.forEach((layer) => {
     if (layer.mouseMoveFunction) {
-      map.on('mousemove', layer.id, layer.mouseMoveFunction(map, hoverPopup, persistentPopup));
+      map.on(
+        'mousemove',
+        layer.id,
+        layer.mouseMoveFunction(map, hoverPopup, persistentPopup, root, container)
+      );
     }
     if ((layer?.subLayers ?? []).length > 0) {
       layer.subLayers!.forEach((subLayer) => {
@@ -155,7 +168,7 @@ export const addMouseMoveFunctions = (
           map.on(
             'mousemove',
             subLayer.id,
-            subLayer.mouseMoveFunction(map, hoverPopup, persistentPopup)
+            subLayer.mouseMoveFunction(map, hoverPopup, persistentPopup, root, container)
           );
         }
       });
@@ -175,16 +188,26 @@ export const addClickFunctions = (
   map: Map,
   layerDefinitions: MainLayerDefinition[],
   hoverPopup: Popup,
-  persistentPopup: Popup
+  persistentPopup: Popup,
+  root: Root,
+  container: HTMLDivElement
 ) => {
   layerDefinitions.forEach((layer) => {
     if (layer.clickFunction) {
-      map.on('click', layer.id, layer.clickFunction(map, hoverPopup, persistentPopup));
+      map.on(
+        'click',
+        layer.id,
+        layer.clickFunction(map, hoverPopup, persistentPopup, root, container)
+      );
     }
     if ((layer?.subLayers ?? []).length > 0) {
       layer.subLayers!.forEach((subLayer) => {
         if (subLayer.clickFunction) {
-          map.on('click', subLayer.id, subLayer.clickFunction(map, hoverPopup, persistentPopup));
+          map.on(
+            'click',
+            subLayer.id,
+            subLayer.clickFunction(map, hoverPopup, persistentPopup, root, container)
+          );
         }
       });
     }
