@@ -46,7 +46,7 @@ export const Header: React.FC<Props> = (props) => {
           <Text size="sm">{layer.parameters.join(', ')}</Text>
           {(layer.from || layer.to) && (
             <Text size="sm">
-              {layer.from ?? '..'} - {layer.to ?? ''}
+              {layer.from ?? '..'} - {layer.to ?? '..'}
             </Text>
           )}
         </Group>
