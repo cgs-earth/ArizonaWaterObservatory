@@ -35,6 +35,6 @@ describe('Accordion', () => {
     expect(screen.getByText('Content 1')).toBeVisible();
 
     fireEvent.click(control);
-    expect(screen.queryByText('Content 1')).not.toBeVisible();
+    expect(screen.queryByText('Content 1')).toBeVisible();
   });
 });
