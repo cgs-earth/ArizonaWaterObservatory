@@ -10,6 +10,11 @@ import '@/global.css';
 import { Providers } from '@/providers';
 import { Router } from '@/Router';
 
+/**
+ * This component renderes the router and wraps it in the map and mantine providers.
+ *
+ * @component
+ */
 export default function App() {
   return (
     <Providers>
