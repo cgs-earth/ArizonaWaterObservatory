@@ -17,10 +17,23 @@ import {
 vi.mock('mapbox-gl');
 vi.mock('@hansdo/mapbox-gl-arcgis-featureserver');
 
+const renderMock = vi.fn();
+const unmountMock = vi.fn();
+
+const rootMock = {
+  render: renderMock,
+  unmount: unmountMock,
+};
+
+vi.mock('react-dom/client', () => ({
+  createRoot: vi.fn(() => rootMock),
+}));
+
 describe('Map Component: utils', () => {
   let map: Map;
   let hoverPopup: Popup;
   let persistentPopup: Popup;
+  let container: HTMLDivElement;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -33,6 +46,7 @@ describe('Map Component: utils', () => {
     });
     hoverPopup = new mapboxglMock.Popup();
     persistentPopup = new mapboxglMock.Popup();
+    container = document.createElement('div');
   });
 
   test('addSources adds geojson sources to map', () => {
@@ -141,7 +155,7 @@ describe('Map Component: utils', () => {
         hoverFunction: vi.fn(() => vi.fn()),
       },
     ];
-    addHoverFunctions(map, layerDefinitions, hoverPopup, persistentPopup);
+    addHoverFunctions(map, layerDefinitions, hoverPopup, persistentPopup, rootMock, container);
     expect(map.on).toHaveBeenCalledWith('mouseenter', 'layer1', expect.any(Function));
     expect(map.on).toHaveBeenCalledWith('mouseleave', 'layer1', expect.any(Function));
   });
@@ -168,7 +182,7 @@ describe('Map Component: utils', () => {
         ],
       },
     ];
-    addHoverFunctions(map, layerDefinitions, hoverPopup, persistentPopup);
+    addHoverFunctions(map, layerDefinitions, hoverPopup, persistentPopup, rootMock, container);
     expect(map.on).toHaveBeenCalledWith('mouseenter', 'sublayer1', expect.any(Function));
     expect(map.on).toHaveBeenCalledWith('mouseleave', 'sublayer1', expect.any(Function));
   });
@@ -184,7 +198,7 @@ describe('Map Component: utils', () => {
         customHoverExitFunction: vi.fn(() => vi.fn()),
       },
     ];
-    addHoverFunctions(map, layerDefinitions, hoverPopup, persistentPopup);
+    addHoverFunctions(map, layerDefinitions, hoverPopup, persistentPopup, rootMock, container);
     expect(map.on).toHaveBeenCalledWith('mouseenter', 'layer1', expect.any(Function));
     expect(map.on).toHaveBeenCalledWith('mouseleave', 'layer1', expect.any(Function));
   });
@@ -212,7 +226,7 @@ describe('Map Component: utils', () => {
         ],
       },
     ];
-    addHoverFunctions(map, layerDefinitions, hoverPopup, persistentPopup);
+    addHoverFunctions(map, layerDefinitions, hoverPopup, persistentPopup, rootMock, container);
     expect(map.on).toHaveBeenCalledWith('mouseenter', 'sublayer1', expect.any(Function));
     expect(map.on).toHaveBeenCalledWith('mouseleave', 'sublayer1', expect.any(Function));
   });
@@ -227,7 +241,7 @@ describe('Map Component: utils', () => {
         clickFunction: vi.fn(() => vi.fn()),
       },
     ];
-    addClickFunctions(map, layerDefinitions, hoverPopup, persistentPopup);
+    addClickFunctions(map, layerDefinitions, hoverPopup, persistentPopup, rootMock, container);
     expect(map.on).toHaveBeenCalledWith('click', 'layer1', expect.any(Function));
   });
 
@@ -253,7 +267,7 @@ describe('Map Component: utils', () => {
         ],
       },
     ];
-    addClickFunctions(map, layerDefinitions, hoverPopup, persistentPopup);
+    addClickFunctions(map, layerDefinitions, hoverPopup, persistentPopup, rootMock, container);
     expect(map.on).toHaveBeenCalledWith('click', 'sublayer1', expect.any(Function));
   });
 });
