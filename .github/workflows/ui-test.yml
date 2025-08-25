@@ -5,12 +5,7 @@ name: UI Tests
 
 on:
   push:
-    paths:
-      - 'ui/**'
-  pull_request:
-    branches:
-      - main
-      - dev-ui
+  workflow_dispatch: # Allows manual triggering of the workflow
     paths:
       - 'ui/**'
 
