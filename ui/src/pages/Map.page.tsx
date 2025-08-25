@@ -16,7 +16,6 @@ import { DatasourceType } from '@/stores/main/types';
  *
  * @component
  */
-
 export const MapPage: React.FC = () => {
   const setDatasources = useMainStore((state) => state.setDatasets);
 
