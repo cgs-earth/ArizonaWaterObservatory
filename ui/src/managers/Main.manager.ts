@@ -3,15 +3,38 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Map, Popup } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
 import { ColorValueHex, Datasource, Layer, MainState } from '@/stores/main/types';
 
 class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
+  private map: Map | null = null;
+  private hoverPopup: Popup | null = null;
 
   constructor(store: UseBoundStore<StoreApi<MainState>>) {
     this.store = store;
+  }
+
+  /**
+   *
+   * @function
+   */
+  public setMap(map: Map): void {
+    if (!this.map) {
+      this.map = map;
+    }
+  }
+
+  /**
+   *
+   * @function
+   */
+  public setPopup(popup: Popup): void {
+    if (!this.hoverPopup) {
+      this.hoverPopup = popup;
+    }
   }
 
   private createUUID(): string {
@@ -28,7 +51,7 @@ class MainManager {
   };
 
   getDatasource = (datasourceId: Datasource['id']): Datasource | undefined => {
-    return this.store.getState().datasets.find((datasource) => datasource.id === datasourceId);
+    return this.store.getState().collections.find((datasource) => datasource.id === datasourceId);
   };
 
   createLayer(datasourceId: Datasource['id']) {

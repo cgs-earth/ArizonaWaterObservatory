@@ -14,7 +14,7 @@ import { FilterTitle } from '@/features/Panel/Datasets/Filter/Header';
 import useMainStore from '@/stores/main';
 
 const Datasets: React.FC = () => {
-  const datasets = useMainStore((state) => state.datasets);
+  const datasets = useMainStore((state) => state.collections);
 
   const accordions = useMemo(() => {
     const accordions: ReactElement[] = [

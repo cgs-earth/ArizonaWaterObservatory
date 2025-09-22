@@ -17,10 +17,10 @@ import { DatasourceType } from '@/stores/main/types';
  * @component
  */
 export const MapPage: React.FC = () => {
-  const setDatasources = useMainStore((state) => state.setDatasets);
+  const setCollections = useMainStore((state) => state.setCollections);
 
   useEffect(() => {
-    setDatasources([
+    setCollections([
       {
         id: 'test',
         type: DatasourceType.Point,
