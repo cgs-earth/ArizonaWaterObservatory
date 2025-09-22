@@ -13,3 +13,15 @@
   flex: 1;
   height: 100vh;
 }
+
+/* @media screen and (max-width: 899px) {
+  .root {
+    overflow-y: scroll;
+  }
+
+  .right {
+    height: 90%;
+    min-width: 100%;
+    width: 100%;
+  }
+} */

@@ -63,3 +63,11 @@
 .fallbackWrapper {
   padding: calc(var(--default-spacing) * 4);
 }
+
+@media screen and (max-width: 899px) {
+  .panelWrapper {
+    height: unset;
+    max-height: unset;
+    min-width: 100%;
+  }
+}

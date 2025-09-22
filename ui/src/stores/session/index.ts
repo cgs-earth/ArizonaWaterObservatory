@@ -4,29 +4,30 @@
  */
 
 import { create } from 'zustand';
-import { SessionState } from '@/stores/session/types';
+import { immer } from 'zustand/middleware/immer';
+import { createLoadingSlice } from './slices/loading';
+import { createNotificationsSlice } from './slices/notifications';
+import { SessionState, Tools } from './types';
 
-const useSessionStore = create<SessionState>((set) => ({
-  loadingInstances: [],
-  addLoadingInstance: (loadingInstance) =>
-    set((state) => ({
-      loadingInstances: [...state.loadingInstances, loadingInstance],
-    })),
-  removeLoadingInstance: (id) =>
-    set((state) => ({
-      loadingInstances: state.loadingInstances.filter(
-        (loadingInstance) => loadingInstance.id !== id
-      ),
-    })),
-  notifications: [],
-  addNotification: (notification) =>
-    set((state) => ({
-      notifications: [...state.notifications, notification],
-    })),
-  removeNotification: (id) =>
-    set((state) => ({
-      notifications: state.notifications.filter((notification) => notification.id !== id),
-    })),
-}));
+const useSessionStore = create<SessionState>()(
+  immer((set, get, store) => ({
+    legendEntries: [],
+    setLegendEntries: (legendEntries) => set({ legendEntries }),
+    downloadModalOpen: false,
+    setDownloadModalOpen: (downloadModalOpen) => set({ downloadModalOpen }),
+    tools: {
+      [Tools.Legend]: false,
+    },
+    setOpenTools: (tool, open) =>
+      set((state) => ({
+        tools: {
+          ...state.tools,
+          [tool]: open,
+        },
+      })),
+    ...createLoadingSlice(set, get, store),
+    ...createNotificationsSlice(set, get, store),
+  }))
+);
 
 export default useSessionStore;
