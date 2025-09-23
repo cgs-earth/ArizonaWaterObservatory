@@ -22,6 +22,9 @@ dependencies = [
     "awdb_forecasts",
     "noaa_rfc",
     "aiohttp>=3.12.12",
+    "xarray>=2025.4.0",
+    "zarr>=2.18.7",
+    "netcdf4>=1.7.2",
 ]
 
 [dependency-groups]

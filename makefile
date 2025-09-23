@@ -2,6 +2,9 @@ precommit:
 	pre-commit install
 	pre-commit run 
 
+check:
+	uv run ruff check && uv run pyright && cd packages/crawler && dg check defs --verbose
+
 dev:
 	uv run pygeoapi openapi generate pygeoapi-deployment/pygeoapi.config.yml --output-file pygeoapi-deployment/local.openapi.yml
 	PYGEOAPI_CONFIG=pygeoapi-deployment/pygeoapi.config.yml PYGEOAPI_OPENAPI=pygeoapi-deployment/local.openapi.yml uv run pygeoapi serve --starlette
