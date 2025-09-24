@@ -46,6 +46,11 @@
   width: 100%;
 }
 
+.accordions {
+  max-height: calc(100vh - 117px);
+  overflow-y: auto;
+}
+
 .toggleButton {
   height: inherit;
   width: 22px;
@@ -62,6 +67,12 @@
 
 .fallbackWrapper {
   padding: calc(var(--default-spacing) * 4);
+}
+
+.logo {
+  width: 150px;
+  height: 50px; /*TODO: height auto*/
+  background-color: pink; /*REMOVE AFTER WE GET THE LOGO*/
 }
 
 @media screen and (max-width: 899px) {

@@ -6,6 +6,7 @@
 import { Outlet } from 'react-router-dom';
 import { Box, Group, Stack } from '@mantine/core';
 import Loading from '@/features/Loading';
+import Notifications from '@/features/Notifications';
 import Panel from '@/features/Panel';
 import TopBar from '@/features/TopBar';
 import styles from '@/pages/pages.module.css';
@@ -23,6 +24,7 @@ export const LayoutPage: React.FC = () => {
         </Group>
         <Loading desktop />
       </Stack>
+      <Notifications />
     </Box>
   );
 };

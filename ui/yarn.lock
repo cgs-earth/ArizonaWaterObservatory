@@ -1014,6 +1014,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ogcapi-js/shared@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "@ogcapi-js/shared@npm:1.1.1"
+  checksum: 10c0/fe62535ef87f6f2861b1598071104b4639394bbac04fecb6969b0fa51e01acb49c90d09365cfdb0d16328b758783d2c1174ac0136aa87e309124cd1f417d6b63
+  languageName: node
+  linkType: hard
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -3915,6 +3922,7 @@ __metadata:
     "@mantine/hooks": "npm:8.1.2"
     "@mapbox/mapbox-gl-geocoder": "npm:^5.0.3"
     "@mapbox/mapbox-gl-sync-move": "npm:^0.3.1"
+    "@ogcapi-js/shared": "npm:^1.1.1"
     "@playwright/test": "npm:^1.53.2"
     "@storybook/react": "npm:^8.6.12"
     "@storybook/react-vite": "npm:^8.6.12"

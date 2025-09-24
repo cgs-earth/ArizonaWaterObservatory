@@ -5,6 +5,7 @@
 
 import { FeatureCollection, Polygon } from 'geojson';
 import { Properties } from '@/components/Map/types';
+import { ICollection } from '@/services/edr.service';
 
 export type ColorValueHex = `#${string}`;
 
@@ -53,27 +54,15 @@ export enum DatasourceType {
 }
 
 export type Filter = {
-  datasets: Datasource['dataset'][];
-  providers: Datasource['provider'][];
-  categories: Datasource['category'][];
-  dateAvailable: Datasource['dateAvailable'];
-};
-
-export type Datasource = {
-  id: string;
-  type: DatasourceType;
-  name: string; // Friendly Name of Datasource
-  provider: string; // NOAA, USGS etc
-  dateAvailable: string; // UTC timestamp
-  parameters: string[]; // curated list of parameters
-  category: string; // Streamflow, precip, temp etc
-  dataset: string; // real-time, forecast, short-term etc
-  dataVisualizations: DataVisualization[];
+  datasets: string[];
+  providers: string[];
+  categories: string[];
+  dateAvailable: string; // Date time?
 };
 
 export type Layer = {
   id: string; // uuid
-  datasourceId: Datasource['id'];
+  datasourceId: ICollection['id'];
   name: string; // User defined
   color: ColorValueHex; // User defined, restrict to 6 char code if possible
   parameters: string[]; // Id's of parameter as returned by datasource
