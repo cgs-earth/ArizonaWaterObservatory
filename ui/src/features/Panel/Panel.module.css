@@ -71,8 +71,8 @@
 
 .logo {
   width: 150px;
-  height: 50px; /*TODO: height auto*/
-  background-color: pink; /*REMOVE AFTER WE GET THE LOGO*/
+  height: 50px; /* TODO: height auto */
+  background-color: pink; /* REMOVE AFTER WE GET THE LOGO */
 }
 
 @media screen and (max-width: 899px) {
