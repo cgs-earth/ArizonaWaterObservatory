@@ -4,14 +4,14 @@
  */
 
 .item {
-  border-top: 1px solid #d0d0d0;
-  border-right: 1px solid #d0d0d0;
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   border-left: 0.5rem solid;
 }
 
 .control {
-  border-bottom: 1px solid #d0d0d0;
-  border-right: 1px solid #d0d0d0;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 
 .label {
@@ -20,7 +20,7 @@
 }
 
 .panel {
-  border-right: 1px solid #d0d0d0;
+  border-right: 1px solid var(--border);
 }
 
 .content {
@@ -28,13 +28,13 @@
 }
 
 .primary {
-  border-left-color: #ffc627;
+  border-left-color: var(--asu-color-primary);
 }
 
 .secondary {
-  border-left-color: #8c1d40;
+  border-left-color: var(--asu-color-secondary);
 }
 
 .tertiary {
-  border-left-color: #d0d0d0;
+  border-left-color: var(--asu-color-tertiary);
 }

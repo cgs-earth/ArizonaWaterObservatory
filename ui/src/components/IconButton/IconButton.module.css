@@ -1,0 +1,65 @@
+/**
+ * Copyright 2025 Lincoln Institute of Land Policy
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.icon {
+  stroke: inherit;
+  padding: 0.25em;
+}
+
+.root {
+  /* box-shadow: 0px 4px 4px rgb(0, 0, 0); */
+  box-shadow: 0px 4px 4px #00000040;
+  transition: transform 0.15s ease-in-out;
+}
+
+.primary {
+  stroke: #000;
+  background-color: var(--asu-color-primary);
+}
+
+.secondary {
+  stroke: #fff;
+  background-color: var(--asu-color-secondary);
+}
+
+.tertiary {
+  stroke: #000;
+  background-color: var(--asu-color-tertiary);
+}
+
+.unstyled {
+  stroke: var(--mantine-color-text);
+  background-color: var(--mantine-color-body);
+}
+
+.root:hover,
+.root:active,
+.root:focus {
+  transform: scale(1.1);
+}
+
+.primary:hover,
+.primary:active,
+.primary:focus {
+  background-color: var(--asu-color-primary);
+}
+
+.secondary:hover,
+.secondary:active,
+.secondary:focus {
+  background-color: var(--asu-color-secondary);
+}
+
+.tertiary:hover,
+.tertiary:active,
+.tertiary:focus {
+  background-color: var(--asu-color-tertiary);
+}
+
+.unstyled:hover,
+.unstyled:active,
+.unstyled:focus {
+  background-color: var(--mantine-color-body);
+}
