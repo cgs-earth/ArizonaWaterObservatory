@@ -25,6 +25,7 @@ dependencies = [
     "xarray>=2025.4.0",
     "zarr>=2.18.7",
     "netcdf4>=1.7.2",
+    "s3fs>=2025.9.0",
 ]
 
 [dependency-groups]
@@ -34,7 +35,11 @@ dev = [
     "pytest-xdist>=3.7.0",
     "radon>=6.0.1",
 ]
-
+server = [
+    "pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@wwdh",
+    "starlette>=0.47.0",
+    "uvicorn>=0.34.3",
+]
 
 [tool.uv.workspace]
 members = ["packages/*"]

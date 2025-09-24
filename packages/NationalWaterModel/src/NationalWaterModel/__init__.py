@@ -2,9 +2,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-def main():
-    print("Hello from server!")
-
-
-if __name__ == "__main__":
-    main()
+def hello() -> str:
+    return "Hello from nationalwatermodel!"

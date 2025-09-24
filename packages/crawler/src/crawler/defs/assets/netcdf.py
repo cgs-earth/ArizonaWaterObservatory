@@ -1,8 +1,10 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: Apache-2.0
 
-import glob
+import gc
+from glob import glob
 import io
+import os
 from pathlib import Path
 import zipfile
 
@@ -82,26 +84,73 @@ def download_netcdf(context: dg.AssetExecutionContext) -> None:
             logger.info("Extraction complete")
 
 
+def assert_all_datasets_have_same_variables(datasets: list[str]) -> None:
+    dsToVars = {}
+
+    for dataset_name in datasets:
+        opened_dataset = xr.open_dataset(dataset_name)
+        dsToVars[dataset_name] = list(opened_dataset.variables.keys())
+
+    for dataset_name in datasets:
+        if dsToVars[dataset_name] != dsToVars[datasets[0]]:
+            raise ValueError(
+                f"Dataset {dataset_name} has different variables than {datasets[0]}"
+            )
+
+
 @dg.asset(deps=[download_netcdf])
 def concat_netcdf_into_zarr(context: dg.AssetExecutionContext) -> None:
-    # Grab ALL .nc files under downloads/, regardless of subdir
-    nc_files = glob.glob(f"{Path(__file__).parent}/downloads/**/*.nc", recursive=True)
+    download_dir = Path(__file__).parent / "downloads"
+    zarr_dir = Path(__file__).parent / "zarr"
+    zarr_dir.mkdir(exist_ok=True)
 
-    if not nc_files:
-        raise FileNotFoundError("No NetCDF files found under downloads/")
+    dirs = [d for d in os.listdir(download_dir) if not d.startswith(".")]
 
-    context.log.info(f"Found {len(nc_files)} NetCDF files")
+    for dir_name in dirs:
+        context.log.info(f"Processing {dir_name}")
+        nc_files = glob(str(download_dir / dir_name / "*.nc"))
+        if not nc_files:
+            context.log.warning(f"No NetCDF files found in {dir_name}")
+            continue
 
-    ds = xr.open_mfdataset(
-        nc_files,
-        combine="nested",
-        parallel=True,  # parallelism can be unstable
-        chunks="auto",  # dask-backed arrays for scalability
-    )
+        assert_all_datasets_have_same_variables(nc_files)
 
-    context.log.info("All datasets read in")
+        out_path = zarr_dir / f"{dir_name}.zarr"
+        batch_size = 30  # adjust to system RAM
+        first_batch = True
 
-    # Write them all into one zarr
-    out_path = f"{Path(__file__).parent}/downloads/all_combined_data.zarr"
-    ds.to_zarr(out_path, mode="w")
-    context.log.info(f"Combined dataset written to {out_path}")
+        for i in range(0, len(nc_files), batch_size):
+            batch_files = nc_files[i : i + batch_size]
+            context.log.info(
+                f"Processing batch {i // batch_size + 1} / {((len(nc_files) - 1) // batch_size) + 1} "
+                f"with {len(batch_files)} files"
+            )
+
+            try:
+                ds_batch = xr.open_mfdataset(
+                    batch_files,
+                    combine="by_coords",
+                    decode_times=True,
+                    parallel=False,
+                )
+            except Exception as e:
+                context.log.error(f"Failed to open batch {batch_files}: {e}")
+                raise
+
+            # Write batch to Zarr
+            try:
+                if first_batch:
+                    ds_batch.to_zarr(out_path, mode="w")
+                    first_batch = False
+                else:
+                    ds_batch.to_zarr(out_path, mode="a", append_dim="time")
+            except Exception as e:
+                context.log.error(f"Failed to write batch {batch_files} to Zarr: {e}")
+                raise
+
+            # Clean up
+            ds_batch.close()
+            del ds_batch
+            gc.collect()
+
+        context.log.info(f"All batches combined into {out_path}")
