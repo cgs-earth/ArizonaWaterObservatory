@@ -9,7 +9,8 @@ import styles from '@/features/Panel/Panel.module.css';
 export const Header: React.FC = () => {
   return (
     <Stack justify="center" align="center" className={styles.headerWrapper}>
-      <Box w="80%" h="50px" style={{ backgroundColor: 'pink' }}>
+      {/* TODO: modularize */}
+      <Box w="80%" h="50px" style={{ backgroundColor: 'pink' }} className={styles.logo}>
         Logo Placeholder
       </Box>
       <Title order={1} size="h2" className={styles.title}>

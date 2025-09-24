@@ -8,7 +8,9 @@ import { Group, Stack, Text, Title, VisuallyHidden } from '@mantine/core';
 import Minus from '@/assets/Minus';
 import IconButton from '@/components/IconButton';
 import mainManager from '@/managers/Main.init';
-import { Datasource, Layer } from '@/stores/main/types';
+import { ICollection } from '@/services/edr.service';
+import { Layer } from '@/stores/main/types';
+import { getProvider } from '@/utils/provider';
 
 type Props = {
   layer: Layer;
@@ -17,7 +19,7 @@ type Props = {
 export const Header: React.FC<Props> = (props) => {
   const { layer } = props;
 
-  const [dataset, setDataset] = useState<Datasource>();
+  const [dataset, setDataset] = useState<ICollection>();
 
   useEffect(() => {
     const dataset = mainManager.getDatasource(layer.datasourceId);
@@ -32,10 +34,12 @@ export const Header: React.FC<Props> = (props) => {
       <Stack justify="center" gap={1}>
         {dataset && (
           <Group gap="xs" justify="flex-start">
-            <Text fw={700} size="xl">
-              {dataset.provider}
-            </Text>
-            <Text size="xl">{dataset.name}</Text>
+            {getProvider(dataset.id) && (
+              <Text fw={700} size="xl">
+                {getProvider(dataset.id)}
+              </Text>
+            )}
+            <Text size="xl">{dataset.title}</Text>
           </Group>
         )}
 

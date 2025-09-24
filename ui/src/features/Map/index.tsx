@@ -10,6 +10,7 @@ import { BasemapId } from '@/components/Map/types';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
+import mainManager from '@/managers/Main.init';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;
@@ -30,7 +31,7 @@ type Props = {
 const MainMap: React.FC<Props> = (props) => {
   const { accessToken } = props;
 
-  const { map } = useMap(MAP_ID);
+  const { map, hoverPopup } = useMap(MAP_ID);
 
   const isMounted = useRef(true);
   const initialMapLoad = useRef(true);
@@ -46,21 +47,31 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
+    mainManager.setMap(map);
+
     if (initialMapLoad.current) {
       map.resize();
       map.fitBounds(
         [
-          [-114.8183, 31.3322], // Southwest corner [lng, lat]
-          [-109.0452, 37.0043], // Northeast corner [lng, lat]
+          [-125, 24], // Southwest corner (California/Baja)
+          [-96.5, 49], // Northeast corner (MN/ND border)
         ],
         {
           padding: 50,
+          animate: false,
         }
       );
       initialMapLoad.current = false;
     }
-    return () => {};
   }, [map]);
+
+  useEffect(() => {
+    if (!hoverPopup) {
+      return;
+    }
+
+    mainManager.setPopup(hoverPopup);
+  }, [hoverPopup]);
 
   //   TODO: uncomment when basemap selector is implemented
   //   useEffect(() => {

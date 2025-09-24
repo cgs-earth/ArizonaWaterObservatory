@@ -5,6 +5,7 @@
 
 import { FeatureCollection, Polygon } from 'geojson';
 import { Properties } from '@/components/Map/types';
+import { ICollection } from '@/services/edr.service';
 
 export type ColorValueHex = `#${string}`;
 
@@ -53,27 +54,15 @@ export enum DatasourceType {
 }
 
 export type Filter = {
-  datasets: Datasource['dataset'][];
-  providers: Datasource['provider'][];
-  categories: Datasource['category'][];
-  dateAvailable: Datasource['dateAvailable'];
-};
-
-export type Datasource = {
-  id: string;
-  type: DatasourceType;
-  name: string; // Friendly Name of Datasource
-  provider: string; // NOAA, USGS etc
-  dateAvailable: string; // UTC timestamp
-  parameters: string[]; // curated list of parameters
-  category: string; // Streamflow, precip, temp etc
-  dataset: string; // real-time, forecast, short-term etc
-  dataVisualizations: DataVisualization[];
+  datasets: string[];
+  providers: string[];
+  categories: string[];
+  dateAvailable: string; // Date time?
 };
 
 export type Layer = {
   id: string; // uuid
-  datasourceId: Datasource['id'];
+  datasourceId: ICollection['id'];
   name: string; // User defined
   color: ColorValueHex; // User defined, restrict to 6 char code if possible
   parameters: string[]; // Id's of parameter as returned by datasource
@@ -96,16 +85,41 @@ export type Chart = {
   dataVisualization: DataVisualization;
 };
 
+export type Location = {
+  id: string | number; // location/{this}
+  layerId: Layer['id'];
+};
+
+export type Category = {
+  value: string;
+  label: string;
+};
+
 export interface MainState {
-  datasets: Datasource[];
-  setDatasets: (datasources: MainState['datasets']) => void;
-  layers: Layer[];
-  setLayers: (layers: MainState['layers']) => void;
-  addLayer: (layer: Layer) => void;
-  table: Table | null;
-  setTable: (table: MainState['table']) => void;
+  provider: string | null;
+  setProvider: (provider: MainState['provider']) => void;
+  category: Category | null;
+  setCategory: (category: MainState['category']) => void;
+  collection: string | null;
+  setCollection: (collection: MainState['collection']) => void;
+  geographyFilter: any | null;
+  setGeographyFilter: (geographyFilter: MainState['geographyFilter']) => void;
+  hasGeographyFilter: () => boolean;
+  collections: any[]; // TODO
+  setCollections: (collections: MainState['collections']) => void;
+  originalCollections: any[];
+  setOriginalCollections: (collections: MainState['collections']) => void;
+  addCollection: (collection: any) => void;
+  hasCollection: (collectionId: any['id']) => boolean;
   charts: Chart[];
   setCharts: (layers: MainState['charts']) => void;
-  spatialSelections: SpatialSelection[];
-  setSpatialSelections: (spatialSelections: MainState['spatialSelections']) => void;
+  layers: Layer[];
+  setLayers: (layers: Layer[]) => void;
+  addLayer: (layer: Layer) => void;
+  hasLayer: (options: { layerId?: Layer['id']; collectionId?: Layer['datasourceId'] }) => boolean;
+  locations: Location[];
+  setLocations: (locations: MainState['locations']) => void;
+  addLocation: (location: Location) => void;
+  hasLocation: (locationId: Location['id']) => boolean;
+  removeLocation: (locationId: Location['id']) => void;
 }

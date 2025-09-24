@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Datasource } from '@/stores/main/types';
+import { ICollection } from '@/services/edr.service';
 
 type Props = {
-  dataset: Datasource;
+  dataset: ICollection;
 };
 
 const Dataset: React.FC<Props> = (props) => {
