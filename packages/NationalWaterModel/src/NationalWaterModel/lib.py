@@ -121,15 +121,21 @@ def dataset_to_point_covjson(
 ) -> dict:
     x_values = dataset[x_axis].values.tolist()
     y_values = dataset[y_axis].values.tolist()
-    timeseries_values = dataset[timeseries_parameter_name].values.tolist()
 
-    # Normalize time to list of ISO strings
-    if np.issubdtype(dataset[time_axis].values.dtype, np.datetime64):
-        t_values = [
-            dataset[time_axis].values.astype("datetime64[ns]").astype(str).tolist()
-        ]
-    else:
-        t_values = np.atleast_1d(dataset[time_axis].values).tolist()
+    time_values = (
+        dataset[time_axis].values.astype("datetime64[ns]").astype(str).tolist()
+    )
+    timeseries_values = dataset[timeseries_parameter_name].values
+
+    try:
+        singleItem = len(dataset[time_axis].values) == 1
+    except TypeError:
+        singleItem = True
+
+    # if it is a single item we have to make sure it is nested properly in a list
+    if singleItem:
+        time_values = [time_values]
+        timeseries_values = [timeseries_values]
 
     coverages: list[CoverageDict] = []
 
@@ -138,17 +144,22 @@ def dataset_to_point_covjson(
             "type": "Coverage",
             "domain": {
                 "type": "Domain",
+                "domainType": "PointSeries",
                 "axes": {
                     "x": {"values": [x_values[i]]},
                     "y": {"values": [y_values[i]]},
-                    "t": {"values": t_values},
+                    "t": {"values": time_values},
                 },
             },
             "ranges": {
                 timeseries_parameter_name: {
                     "type": "NdArray",
                     "dataType": "float",
-                    "values": [timeseries_values[i]],
+                    "axisNames": ["t"],
+                    "shape": [len(time_values)],
+                    "values": [
+                        timeseries_arr[i] for timeseries_arr in timeseries_values
+                    ],
                 }
             },
         }
@@ -156,7 +167,6 @@ def dataset_to_point_covjson(
 
     coverage_collection = {
         "type": "CoverageCollection",
-        "domainType": "Point",
         "parameters": {
             timeseries_parameter_name: {
                 "type": "Parameter",

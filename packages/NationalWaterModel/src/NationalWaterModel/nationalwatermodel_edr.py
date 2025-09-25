@@ -96,6 +96,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         """
         Example: http://localhost:5005/collections/National_Water_Model_Channel_Runoff/cube?bbox=-112.5,31.7,-110.7,33.0&f=json&parameter-name=streamflow&datetime=2023-01-01
                  http://localhost:5005/collections/National_Water_Model_Channel_Runoff/cube?bbox=-112.5,31.7,-110.7,33.0&f=html&parameter-name=streamflow&datetime=2023-01-01
+                 http://localhost:5005/collections/National_Water_Model_Channel_Runoff/cube?bbox=-112.5,31.7,-111.7,31.9&f=html&parameter-name=streamflow&datetime=2023-01-01
         """
         if not select_properties:
             LOGGER.error(
