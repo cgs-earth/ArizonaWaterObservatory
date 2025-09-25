@@ -45,13 +45,14 @@ server = [
 members = ["packages/*"]
 
 [tool.uv.sources]
-usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace" }
-com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com" }
-rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise" }
-snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/snotel" }
-awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" }
-awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts" }
-noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" }
+# it appears that to get the latest code you need to specify the HEAD branch of each package
+usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
+com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
+rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise" , branch="main" }
+snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/snotel" , branch="main" }
+awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , branch="main" }
+awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
+noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
 
 [tool.coverage.run]
 # don't include tests 
