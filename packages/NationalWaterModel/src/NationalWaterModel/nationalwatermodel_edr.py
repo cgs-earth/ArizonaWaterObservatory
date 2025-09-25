@@ -1,7 +1,6 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: MIT
 
-import functools
 import logging
 from typing import TypedDict
 
@@ -10,7 +9,6 @@ from com.geojson.helpers import GeojsonFeatureCollectionDict, GeojsonFeatureDict
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
 from pygeoapi.provider.base_edr import BaseEDRProvider
-import s3fs
 import xarray as xr
 
 from NationalWaterModel.lib import (
@@ -18,6 +16,7 @@ from NationalWaterModel.lib import (
     fetch_data,
 )
 
+from .lib import get_zarr_dataset_handle
 from .nationalwatermodel import (
     ProviderSchema,
 )
@@ -32,23 +31,10 @@ class XarrayOutputDict(TypedDict):
     data_vars: dict[str, dict | list]
 
 
-@functools.cache
-def get_zarr_dataset_handle(endpoint_url: str, dataset_path: str) -> xr.Dataset:
-    """
-    Open the zarr dataset but don't actually load the data
-    """
-    fs = s3fs.S3FileSystem(
-        endpoint_url=endpoint_url,
-        anon=True,
-    )
-    mapper = fs.get_mapper(dataset_path)
-    return xr.open_zarr(mapper, consolidated=True, chunks="auto")
-
-
 class NationalWaterModelEDRProvider(BaseEDRProvider):
     """The EDR Provider"""
 
-    zarr_dataset: xr.Dataset | None = None
+    zarr_dataset: xr.Dataset
     fields_cache: EDRFieldsMapping = {}
     provider_def: ProviderSchema
 
@@ -61,11 +47,10 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         super().__init__(provider_def)
         self.instances = []
 
-        if self.zarr_dataset is None:
-            LOGGER.warning("Opening zarr dataset")
-            self.zarr_dataset = get_zarr_dataset_handle(
-                provider_def["data"], provider_def["dataset_path"]
-            )
+        LOGGER.warning("Opening zarr dataset")
+        self.zarr_dataset = get_zarr_dataset_handle(
+            provider_def["data"], provider_def["dataset_path"]
+        )
         self.provider_def = provider_def
 
     @otel_trace()
@@ -90,7 +75,6 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             return self.fields_cache
 
         edr_fields: EDRFieldsMapping = {}
-        assert self.zarr_dataset
         for var in self.zarr_dataset.variables:
             edr_fields[str(var)] = {
                 "title": str(var),
@@ -109,7 +93,10 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         z: str | None = None,
         **kwargs,
     ):
-        # http://localhost:5005/collections/National_Water_Model/cube?bbox=-112.5,31.7,-110.7,33.0&f=json&parameter-name=streamflow&datetime=2023-01-01
+        """
+        Example: http://localhost:5005/collections/National_Water_Model_Channel_Runoff/cube?bbox=-112.5,31.7,-110.7,33.0&f=json&parameter-name=streamflow&datetime=2023-01-01
+                 http://localhost:5005/collections/National_Water_Model_Channel_Runoff/cube?bbox=-112.5,31.7,-110.7,33.0&f=html&parameter-name=streamflow&datetime=2023-01-01
+        """
         if not select_properties:
             LOGGER.error(
                 "select_properties is required to prevent overfetching, falling back to streamflow default"
@@ -120,9 +107,10 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
                 f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
             )
         if not datetime_:
-            raise ValueError(
-                "datetime is required to prevent overfetching, falling back to current date"
-            )
+            raise ValueError("datetime is required to prevent overfetching")
+
+        if not bbox:
+            raise ValueError("bbox is required to prevent overfetching")
 
         assert self.zarr_dataset
         loaded_data = fetch_data(

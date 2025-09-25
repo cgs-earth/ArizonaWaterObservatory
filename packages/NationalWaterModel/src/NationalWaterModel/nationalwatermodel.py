@@ -13,6 +13,8 @@ from com.protocols.providers import OAFProviderProtocol
 from pygeoapi.provider.base import BaseProvider
 from pygeoapi.util import crs_transform
 
+from .lib import fetch_data, get_zarr_dataset_handle
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -35,6 +37,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         :param provider_def: provider definition
         """
         super().__init__(provider_def)
+        self.provider_def = provider_def
 
     def items(
         self,
@@ -54,7 +57,42 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         skip_geometry: bool | None = False,
         **kwargs,
     ) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
-        raise NotImplementedError
+        latestTime = "2020-01-01"
+        bbox_arizona = [-115, 31, -109, 37]
+        result = fetch_data(
+            bbox=bbox_arizona,
+            select_properties=[],
+            time_field=self.provider_def["time_field"],
+            datetime_filter=latestTime,
+            unopened_dataset=get_zarr_dataset_handle(
+                self.provider_def["data"], self.provider_def["dataset_path"]
+            ),
+        )
+        features: list[GeojsonFeatureDict] = []
+        x_values = result[self.provider_def["x_field"]].values
+        y_values = result[self.provider_def["y_field"]].values
+        for i, id in enumerate(result["feature_id"].values):
+            feature: GeojsonFeatureDict = {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        float(x_values[i]),
+                        float(y_values[i]),
+                    ],
+                },
+                "id": id,
+                "properties": {},
+            }
+
+            features.append(feature)
+            if i > 500:
+                break
+        geojsonResponse: GeojsonFeatureCollectionDict = {
+            "type": "FeatureCollection",
+            "features": features,
+        }
+        return geojsonResponse
 
     @crs_transform
     def query(self, **kwargs):

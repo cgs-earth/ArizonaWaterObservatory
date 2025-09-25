@@ -1,9 +1,25 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: Apache-2.0
 
+import functools
+
 import numpy as np
 from pygeoapi.provider.base import ProviderNoDataError
+import s3fs
 import xarray as xr
+
+
+@functools.cache
+def get_zarr_dataset_handle(endpoint_url: str, dataset_path: str) -> xr.Dataset:
+    """
+    Open the zarr dataset but don't actually load the data
+    """
+    fs = s3fs.S3FileSystem(
+        endpoint_url=endpoint_url,
+        anon=True,
+    )
+    mapper = fs.get_mapper(dataset_path)
+    return xr.open_zarr(mapper, consolidated=True, chunks="auto")
 
 
 def fetch_data(
@@ -13,8 +29,15 @@ def fetch_data(
     datetime_filter: str,
     bbox: list,
 ) -> xr.Dataset:
+    """
+    Fetch data from a remote zarr dataset. Lazily apply a
+    datatime, bbox, and select properties filter to the dataset
+    and only load the filtered data, not the entire dataset
+    """
+    assert isinstance(unopened_dataset, xr.Dataset)
     variables_to_select = select_properties
 
+    # if we are selecting a property, we should also select time since timeseries always needs time
     if time_field not in select_properties:
         variables_to_select.append(time_field)
 
@@ -63,10 +86,6 @@ def fetch_data(
             else:
                 times_to_select = available_times[mask]
                 selected = selected.sel(time=times_to_select, drop=False)
-    else:
-        # Pick latest time index
-        latest_time_index = selected[time_field].size - 1
-        selected = selected.isel({time_field: latest_time_index})
 
     # Geospatial filtering using latitude and longitude variables
     lon_min, lat_min, lon_max, lat_max = bbox

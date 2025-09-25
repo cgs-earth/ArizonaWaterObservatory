@@ -19,7 +19,7 @@ server:
     attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'
 
 logging:
-  level: ${PYGEOAPI_LOGLEVEL:-ERROR}
+  level: ${PYGEOAPI_LOGLEVEL:-WARNING}
   # logfile: /tmp/pygeoapi.log
 
 metadata:
@@ -50,10 +50,10 @@ metadata:
 
 resources:
 
-  National_Water_Model:
+  National_Water_Model_Channel_Runoff:
     type: collection
-    title: National Water Model
-    description: National Water Model
+    title: National Water Model Channel Runoff
+    description: National Water Model Channel Runoff
     keywords: ["NWM"]
     extents: 
       spatial:
@@ -71,6 +71,9 @@ resources:
         name: NationalWaterModel.nationalwatermodel.NationalWaterModelProvider
         data: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com
         dataset_path:  "CONUS/zarr/chrtout.zarr/"
+        x_field: longitude
+        y_field: latitude
+        time_field: time
 
   ADWR_GWSI_Sites:
     type: collection
