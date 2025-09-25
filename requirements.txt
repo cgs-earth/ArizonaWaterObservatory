@@ -50,9 +50,9 @@ attrs==25.3.0 \
     --hash=sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3 \
     --hash=sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b
     # via aiohttp
-awdb-com @ git+https://github.com/internetofwater/Western-Water-Datahub.git@4f91ae3c09c311ccf6b8902fd3416177f83e8d5b#subdirectory=packages/awdb_com
+awdb-com @ git+https://github.com/internetofwater/Western-Water-Datahub.git@2ad10379dc6879b76ad50315e20fa2b93e493650#subdirectory=packages/awdb_com
     # via arizonawaterobservatory
-awdb-forecasts @ git+https://github.com/internetofwater/Western-Water-Datahub.git@4f91ae3c09c311ccf6b8902fd3416177f83e8d5b#subdirectory=packages/awdb_forecasts
+awdb-forecasts @ git+https://github.com/internetofwater/Western-Water-Datahub.git@2ad10379dc6879b76ad50315e20fa2b93e493650#subdirectory=packages/awdb_forecasts
     # via arizonawaterobservatory
 botocore==1.40.18 \
     --hash=sha256:57025c46ca00cf8cec25de07a759521bfbfb3036a0f69b272654a354615dc45f \
@@ -96,7 +96,7 @@ colorama==0.4.6 \
     # via
     #   pytest
     #   radon
-com @ git+https://github.com/internetofwater/Western-Water-Datahub.git@4f91ae3c09c311ccf6b8902fd3416177f83e8d5b#subdirectory=packages/com
+com @ git+https://github.com/internetofwater/Western-Water-Datahub.git@2ad10379dc6879b76ad50315e20fa2b93e493650#subdirectory=packages/com
     # via arizonawaterobservatory
 covjson-pydantic==0.7.0 \
     --hash=sha256:9642672ce6c566a1a6dc6c1923c8dce13226cca43cc82b3c871421b521aaa5e2 \
@@ -220,7 +220,7 @@ netcdf4==1.7.2 \
     --hash=sha256:e73e3baa0b74afc414e53ff5095748fdbec7fb346eda351e567c23f2f0d247f1 \
     --hash=sha256:f9d8a848373723f41ef662590b4f5e1832227501c9fd4513e8ad8da58c269977
     # via arizonawaterobservatory
-noaa-rfc @ git+https://github.com/internetofwater/Western-Water-Datahub.git@4f91ae3c09c311ccf6b8902fd3416177f83e8d5b#subdirectory=packages/noaa_rfc
+noaa-rfc @ git+https://github.com/internetofwater/Western-Water-Datahub.git@2ad10379dc6879b76ad50315e20fa2b93e493650#subdirectory=packages/noaa_rfc
     # via arizonawaterobservatory
 nodeenv==1.9.1 \
     --hash=sha256:6ec12890a2dab7946721edbfbcd91f3319c6ccc9aec47be7c7e6b7011ee6645f \
@@ -444,7 +444,7 @@ requests==2.32.4 \
     --hash=sha256:27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c \
     --hash=sha256:27d0316682c8a29834d3264820024b62a36942083d52caf2f14c0591336d3422
     # via opentelemetry-exporter-otlp-proto-http
-rise @ git+https://github.com/internetofwater/Western-Water-Datahub.git@4f91ae3c09c311ccf6b8902fd3416177f83e8d5b#subdirectory=packages/rise
+rise @ git+https://github.com/internetofwater/Western-Water-Datahub.git@2ad10379dc6879b76ad50315e20fa2b93e493650#subdirectory=packages/rise
     # via arizonawaterobservatory
 s3fs==2025.9.0 \
     --hash=sha256:6d44257ef19ea64968d0720744c4af7a063a05f5c1be0e17ce943bef7302bc30 \
@@ -456,7 +456,7 @@ six==1.17.0 \
     # via
     #   mando
     #   python-dateutil
-snotel @ git+https://github.com/internetofwater/Western-Water-Datahub.git@4f91ae3c09c311ccf6b8902fd3416177f83e8d5b#subdirectory=packages/snotel
+snotel @ git+https://github.com/internetofwater/Western-Water-Datahub.git@2ad10379dc6879b76ad50315e20fa2b93e493650#subdirectory=packages/snotel
     # via arizonawaterobservatory
 typing-extensions==4.14.0 \
     --hash=sha256:8676b788e32f02ab42d9e7c61324048ae4c6d844a399eebace3d4979d75ceef4 \
@@ -485,7 +485,7 @@ urllib3==1.26.20 \
     # via
     #   botocore
     #   requests
-usace @ git+https://github.com/internetofwater/Western-Water-Datahub.git@4f91ae3c09c311ccf6b8902fd3416177f83e8d5b#subdirectory=packages/usace
+usace @ git+https://github.com/internetofwater/Western-Water-Datahub.git@2ad10379dc6879b76ad50315e20fa2b93e493650#subdirectory=packages/usace
     # via arizonawaterobservatory
 wrapt==1.17.2 \
     --hash=sha256:3fc7cb4c1c744f8c05cd5f9438a3caa6ab94ce8344e952d7c45a8ed59dd88392 \

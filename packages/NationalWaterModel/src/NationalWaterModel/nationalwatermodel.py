@@ -9,7 +9,6 @@ from com.geojson.helpers import (
     GeojsonFeatureDict,
     SortDict,
 )
-from com.otel import otel_trace
 from com.protocols.providers import OAFProviderProtocol
 from pygeoapi.provider.base import BaseProvider
 from pygeoapi.util import crs_transform
@@ -36,9 +35,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         :param provider_def: provider definition
         """
         super().__init__(provider_def)
-        self.get_fields()
 
-    @otel_trace()
     def items(
         self,
         properties: list[tuple[str, str]],
