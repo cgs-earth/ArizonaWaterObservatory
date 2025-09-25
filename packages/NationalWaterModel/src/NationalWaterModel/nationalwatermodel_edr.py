@@ -112,12 +112,17 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         if not bbox:
             raise ValueError("bbox is required to prevent overfetching")
 
+        if z:
+            raise NotImplementedError("Elevation filtering not implemented yet")
+
         assert self.zarr_dataset
         loaded_data = fetch_data(
             select_properties=select_properties,
             datetime_filter=datetime_,
             time_field=self.provider_def["time_field"],
             bbox=bbox,
+            y_field=self.provider_def["y_field"],
+            x_field=self.provider_def["x_field"],
             unopened_dataset=self.zarr_dataset,
         )
 
@@ -125,7 +130,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             dataset=loaded_data,
             x_axis=self.provider_def["x_field"],
             y_axis=self.provider_def["y_field"],
-            z_axis=select_properties[0],
+            timeseries_parameter_name=select_properties[0],
             time_axis=self.provider_def["time_field"],
         )
 

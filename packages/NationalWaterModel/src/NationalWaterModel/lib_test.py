@@ -28,6 +28,8 @@ def test_provider_no_data():
             bbox=ARIZONA_BBOX,
             select_properties=["streamflow"],
             time_field="time",
+            x_field="longitude",
+            y_field="latitude",
             datetime_filter="1900-01-01",
             unopened_dataset=provider.zarr_dataset,
         )
@@ -39,6 +41,8 @@ def test_new_data():
         select_properties=["streamflow"],
         time_field="time",
         datetime_filter="2023-01-01",
+        x_field="longitude",
+        y_field="latitude",
         unopened_dataset=provider.zarr_dataset,
     )
 
@@ -51,6 +55,8 @@ def test_range_of_dates():
         bbox=ARIZONA_BBOX,
         select_properties=["streamflow"],
         time_field="time",
+        x_field="longitude",
+        y_field="latitude",
         datetime_filter="2020-01-01/2020-01-02",
         unopened_dataset=provider.zarr_dataset,
     )
@@ -69,6 +75,8 @@ def test_no_parameters():
         bbox=ARIZONA_BBOX,
         select_properties=[],
         time_field="time",
+        x_field="longitude",
+        y_field="latitude",
         datetime_filter="2020-01-01",
         unopened_dataset=provider.zarr_dataset,
     )

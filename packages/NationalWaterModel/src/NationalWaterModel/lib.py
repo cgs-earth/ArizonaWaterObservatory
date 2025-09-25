@@ -3,8 +3,9 @@
 
 import functools
 
+from com.covjson import CoverageDict
 import numpy as np
-from pygeoapi.provider.base import ProviderNoDataError
+from pygeoapi.provider.base import ProviderNoDataError, ProviderQueryError
 import s3fs
 import xarray as xr
 
@@ -12,7 +13,9 @@ import xarray as xr
 @functools.cache
 def get_zarr_dataset_handle(endpoint_url: str, dataset_path: str) -> xr.Dataset:
     """
-    Open the zarr dataset but don't actually load the data
+    Open the zarr dataset but don't actually load the data.
+    We use functools cache over this since it's a slow operation
+    to establish the connection with S3 and read the metadata
     """
     fs = s3fs.S3FileSystem(
         endpoint_url=endpoint_url,
@@ -27,6 +30,8 @@ def fetch_data(
     select_properties: list[str],
     time_field: str,
     datetime_filter: str,
+    x_field: str,
+    y_field: str,
     bbox: list,
 ) -> xr.Dataset:
     """
@@ -41,59 +46,62 @@ def fetch_data(
     if time_field not in select_properties:
         variables_to_select.append(time_field)
 
-    # Add latitude/longitude if not already included
-    for coord in ["latitude", "longitude"]:
+    # Add x and y if not already included
+    for coord in [y_field, x_field]:
         if coord not in variables_to_select:
             variables_to_select.append(coord)
 
     selected = unopened_dataset[variables_to_select]
 
-    if datetime_filter is not None:
-        available_times = selected[time_field].values
-        available_start = available_times.min()
-        available_end = available_times.max()
+    if datetime_filter is None:
+        raise ProviderQueryError(
+            "No datetime filter provided, fetching all data would be too large"
+        )
 
-        datetime_range = datetime_filter.split("/")
+    available_times = selected[time_field].values
+    available_start = available_times.min()
+    available_end = available_times.max()
 
-        if len(datetime_range) == 1:
-            datetime_np = np.datetime64(datetime_filter)
-            if datetime_np in available_times:
-                selected = selected.sel(time=datetime_np, drop=False)
-            else:
-                raise ProviderNoDataError(
-                    f"{datetime_filter} not in available times. "
-                    f"Dataset time range is from {available_start} to {available_end}."
-                )
+    datetime_range = datetime_filter.split("/")
 
-        elif len(datetime_range) == 2:
-            # Date range
-            start, stop = datetime_range
+    if len(datetime_range) == 1:
+        datetime_np = np.datetime64(datetime_filter)
+        if datetime_np in available_times:
+            selected = selected.sel(time=datetime_np, drop=False)
+        else:
+            raise ProviderNoDataError(
+                f"{datetime_filter} not in available times. "
+                f"Dataset time range is from {available_start} to {available_end}."
+            )
 
-            # Resolve open-ended ranges
-            start = np.datetime64(start) if start != ".." else available_times.min()
-            stop = np.datetime64(stop) if stop != ".." else available_times.max()
+    elif len(datetime_range) == 2:
+        # Date range
+        start, stop = datetime_range
 
-            # Clip start/stop to available range
-            start = max(start, available_times.min())
-            stop = min(stop, available_times.max())
+        # Resolve open-ended ranges
+        start = np.datetime64(start) if start != ".." else available_times.min()
+        stop = np.datetime64(stop) if stop != ".." else available_times.max()
 
-            # Select only times that exist in the dataset
-            mask = (available_times >= start) & (available_times <= stop)
-            if not mask.any():
-                raise ProviderNoDataError(
-                    f"No data available between {start} and {stop}."
-                )
-            else:
-                times_to_select = available_times[mask]
-                selected = selected.sel(time=times_to_select, drop=False)
+        # Clip start/stop to available range
+        start = max(start, available_times.min())
+        stop = min(stop, available_times.max())
+
+        # Select only times that exist in the dataset
+        mask = (available_times >= start) & (available_times <= stop)
+        if not mask.any():
+            raise ProviderNoDataError(f"No data available between {start} and {stop}.")
+        else:
+            times_to_select = available_times[mask]
+            selected = selected.sel(time=times_to_select, drop=False)
 
     # Geospatial filtering using latitude and longitude variables
     lon_min, lat_min, lon_max, lat_max = bbox
 
     # latitude/longitude are 1D coords along "feature_id"
-    lon = selected.longitude.compute()
-    lat = selected.latitude.compute()
+    lon = selected[x_field].compute()
+    lat = selected[y_field].compute()
 
+    # get only data within the bbox
     mask = (lon >= lon_min) & (lon <= lon_max) & (lat >= lat_min) & (lat <= lat_max)
 
     if not mask.any():
@@ -105,13 +113,15 @@ def fetch_data(
 
 
 def dataset_to_point_covjson(
-    dataset: xr.Dataset, x_axis: str, y_axis: str, z_axis: str, time_axis: str
+    dataset: xr.Dataset,
+    x_axis: str,
+    y_axis: str,
+    timeseries_parameter_name: str,
+    time_axis: str,
 ) -> dict:
     x_values = dataset[x_axis].values.tolist()
     y_values = dataset[y_axis].values.tolist()
-    z_values = dataset[z_axis].values.tolist()
-
-    assert len(x_values) == len(y_values) == len(z_values)
+    timeseries_values = dataset[timeseries_parameter_name].values.tolist()
 
     # Normalize time to list of ISO strings
     if np.issubdtype(dataset[time_axis].values.dtype, np.datetime64):
@@ -121,7 +131,8 @@ def dataset_to_point_covjson(
     else:
         t_values = np.atleast_1d(dataset[time_axis].values).tolist()
 
-    coverages = []
+    coverages: list[CoverageDict] = []
+
     for i in range(len(x_values)):
         coverage = {
             "type": "Coverage",
@@ -134,10 +145,10 @@ def dataset_to_point_covjson(
                 },
             },
             "ranges": {
-                z_axis: {
+                timeseries_parameter_name: {
                     "type": "NdArray",
                     "dataType": "float",
-                    "values": [z_values[i]],
+                    "values": [timeseries_values[i]],
                 }
             },
         }
@@ -147,11 +158,14 @@ def dataset_to_point_covjson(
         "type": "CoverageCollection",
         "domainType": "Point",
         "parameters": {
-            z_axis: {
+            timeseries_parameter_name: {
                 "type": "Parameter",
-                "description": {"en": str(z_axis)},
+                "description": {"en": str(timeseries_parameter_name)},
                 "unit": {"symbol": "1"},
-                "observedProperty": {"id": z_axis, "label": {"en": str(z_axis)}},
+                "observedProperty": {
+                    "id": timeseries_parameter_name,
+                    "label": {"en": str(timeseries_parameter_name)},
+                },
             }
         },
         "referencing": [
@@ -176,7 +190,12 @@ def dataset_to_point_covjson(
 def dataset_to_grid_covjson(
     dataset: xr.Dataset, x_axis: str, y_axis: str, z_axis: str, time_axis: str
 ) -> dict:
-    """ " """
+    """
+    For some datasets it is possible that they return a grid
+    of values instead of a point time series. i.e. for atmospheric data
+
+    TODO: this is not fully implemented.
+    """
     # Coordinates
     x_values = dataset[x_axis].values
     y_values = dataset[y_axis].values

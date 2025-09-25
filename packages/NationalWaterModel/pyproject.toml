@@ -4,7 +4,7 @@
 [project]
 name = "NationalWaterModel"
 version = "0.1.0"
-description = "Add your description here"
+description = "EDR support for the national water model"
 readme = "README.md"
 authors = [
     { name = "Colton Loftus", email = "70598503+C-Loftus@users.noreply.github.com" }

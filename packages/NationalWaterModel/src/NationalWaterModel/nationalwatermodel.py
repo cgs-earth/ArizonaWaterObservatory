@@ -39,7 +39,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         super().__init__(provider_def)
         self.provider_def = provider_def
 
-    def items(
+    def items(  # type: ignore
         self,
         properties: list[tuple[str, str]],
         bbox: list,
@@ -64,6 +64,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             select_properties=[],
             time_field=self.provider_def["time_field"],
             datetime_filter=latestTime,
+            x_field=self.provider_def["x_field"],
+            y_field=self.provider_def["y_field"],
             unopened_dataset=get_zarr_dataset_handle(
                 self.provider_def["data"], self.provider_def["dataset_path"]
             ),
