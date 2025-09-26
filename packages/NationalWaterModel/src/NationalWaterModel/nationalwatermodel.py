@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import logging
-from typing import Literal, TypedDict
+from typing import Literal
 
 from com.geojson.helpers import (
     GeojsonFeatureCollectionDict,
@@ -12,24 +12,17 @@ from com.geojson.helpers import (
 from com.protocols.providers import OAFProviderProtocol
 from pygeoapi.provider.base import BaseProvider
 from pygeoapi.util import crs_transform
+import xarray as xr
 
-from .lib import fetch_data, get_zarr_dataset_handle
+from .lib import ProviderSchema, fetch_data, get_zarr_dataset_handle
 
 LOGGER = logging.getLogger(__name__)
 
 
-class ProviderSchema(TypedDict):
-    type: Literal["feature", "edr"]
-    data: str
-    name: str
-    dataset_path: str
-    time_field: str
-    x_field: str
-    y_field: str
-
-
 class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
     """Provider for OGC API Features"""
+
+    zarr_dataset: xr.Dataset
 
     def __init__(self, provider_def: ProviderSchema):
         """
@@ -38,6 +31,9 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         """
         super().__init__(provider_def)
         self.provider_def = provider_def
+        self.zarr_dataset = get_zarr_dataset_handle(
+            provider_def["data"], provider_def["dataset_path"]
+        )
 
     def items(  # type: ignore
         self,
@@ -50,30 +46,48 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         | None = None,  # query this with ?properties in the actual url
         # select only features that contains all the `properties` with their corresponding values
         sortby: list[SortDict] | None = None,
-        limit: int | None = None,
+        limit: int = 500,
         itemId: str
         | None = None,  # unlike edr, this is a string; we need to case to an int before filtering
         offset: int | None = 0,
         skip_geometry: bool | None = False,
         **kwargs,
     ) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
-        latestTime = "2020-01-01"
-        bbox_arizona = [-115, 31, -109, 37]
+        if not bbox:
+            LOGGER.error(
+                "bbox is required to prevent overfetching, falling back to Arizona"
+            )
+            ARIZONA_BBOX = [-112.5, 31.7, -110.7, 33.0]
+            bbox = ARIZONA_BBOX
+
+        latestValueInDataset = "2023-01-01"
         result = fetch_data(
-            bbox=bbox_arizona,
+            bbox=bbox,
             select_properties=[],
+            datetime_filter=latestValueInDataset if not datetime_ else datetime_,
             time_field=self.provider_def["time_field"],
-            datetime_filter=latestTime,
             x_field=self.provider_def["x_field"],
             y_field=self.provider_def["y_field"],
-            unopened_dataset=get_zarr_dataset_handle(
-                self.provider_def["data"], self.provider_def["dataset_path"]
-            ),
+            unopened_dataset=self.zarr_dataset,
         )
         features: list[GeojsonFeatureDict] = []
         x_values = result[self.provider_def["x_field"]].values
         y_values = result[self.provider_def["y_field"]].values
         for i, id in enumerate(result["feature_id"].values):
+            other_properties = {}
+            if result["coords"]:
+                # the coords contain extra metadata properties about the feature
+                for prop in result.coords:
+                    if (
+                        prop == self.provider_def["x_field"]
+                        or prop == self.provider_def["y_field"]
+                        or prop == "feature_id"
+                        or prop == "time"
+                    ):
+                        continue
+
+                    other_properties[prop] = str(result.coords[prop].values[i])
+                    other_properties["id"] = int(id)
             feature: GeojsonFeatureDict = {
                 "type": "Feature",
                 "geometry": {
@@ -83,12 +97,12 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
                         float(y_values[i]),
                     ],
                 },
-                "id": id,
-                "properties": {},
+                "id": int(id),
+                "properties": other_properties,
             }
 
             features.append(feature)
-            if i > 500:
+            if i > limit:
                 break
         geojsonResponse: GeojsonFeatureCollectionDict = {
             "type": "FeatureCollection",

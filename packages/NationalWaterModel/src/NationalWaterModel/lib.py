@@ -2,12 +2,27 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import functools
+from typing import Literal, TypedDict
 
 from com.covjson import CoverageDict
 import numpy as np
 from pygeoapi.provider.base import ProviderNoDataError, ProviderQueryError
 import s3fs
 import xarray as xr
+
+
+class ProviderSchema(TypedDict):
+    """
+    The config used to configure the provider
+    """
+
+    type: Literal["feature", "edr"]
+    data: str
+    name: str
+    dataset_path: str
+    time_field: str
+    x_field: str
+    y_field: str
 
 
 @functools.cache
@@ -39,7 +54,9 @@ def fetch_data(
     datatime, bbox, and select properties filter to the dataset
     and only load the filtered data, not the entire dataset
     """
-    assert isinstance(unopened_dataset, xr.Dataset)
+    assert isinstance(unopened_dataset, xr.Dataset), (
+        "The dataset was not an xarray dataset"
+    )
     variables_to_select = select_properties
 
     # if we are selecting a property, we should also select time since timeseries always needs time
@@ -119,9 +136,14 @@ def dataset_to_point_covjson(
     timeseries_parameter_name: str,
     time_axis: str,
 ) -> dict:
+    """
+    Given a dataset, return a covjson point series which essentially
+    represents a list of points with a timeseries line graph for eawch
+    """
     x_values = dataset[x_axis].values.tolist()
     y_values = dataset[y_axis].values.tolist()
 
+    # cast to list of ISO strings so that it is serializable into json
     time_values = (
         dataset[time_axis].values.astype("datetime64[ns]").astype(str).tolist()
     )
@@ -140,14 +162,17 @@ def dataset_to_point_covjson(
     coverages: list[CoverageDict] = []
 
     for i in range(len(x_values)):
-        coverage = {
+        coverage: CoverageDict = {
             "type": "Coverage",
             "domain": {
                 "type": "Domain",
                 "domainType": "PointSeries",
                 "axes": {
+                    # The x axis is one value since it represents a point
                     "x": {"values": [x_values[i]]},
+                    # The y axis is one value since it represents a point
                     "y": {"values": [y_values[i]]},
+                    # The t axis is a list of times since it represents a time series
                     "t": {"values": time_values},
                 },
             },
@@ -156,9 +181,15 @@ def dataset_to_point_covjson(
                     "type": "NdArray",
                     "dataType": "float",
                     "axisNames": ["t"],
+                    # The shape is the length of the time series
+                    # thus the number of time steps is the length of the shape
                     "shape": [len(time_values)],
                     "values": [
-                        timeseries_arr[i] for timeseries_arr in timeseries_values
+                        # get the timeseries value for this point at each
+                        # time step. Since it is a list of lists we need to
+                        # flatten
+                        timeseries_arr[i]
+                        for timeseries_arr in timeseries_values
                     ],
                 }
             },
@@ -204,8 +235,11 @@ def dataset_to_grid_covjson(
     For some datasets it is possible that they return a grid
     of values instead of a point time series. i.e. for atmospheric data
 
-    TODO: this is not fully implemented.
     """
+    raise NotImplementedError(
+        "TODO if we need grid covjson representation. Unclear if we need this"
+    )
+
     # Coordinates
     x_values = dataset[x_axis].values
     y_values = dataset[y_axis].values

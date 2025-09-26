@@ -94,6 +94,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         **kwargs,
     ):
         """
+        Given a bounding box, return all the data within it
+
         Example: http://localhost:5005/collections/National_Water_Model_Channel_Runoff/cube?bbox=-112.5,31.7,-110.7,33.0&f=json&parameter-name=streamflow&datetime=2023-01-01
                  http://localhost:5005/collections/National_Water_Model_Channel_Runoff/cube?bbox=-112.5,31.7,-110.7,33.0&f=html&parameter-name=streamflow&datetime=2023-01-01
                  http://localhost:5005/collections/National_Water_Model_Channel_Runoff/cube?bbox=-112.5,31.7,-111.7,31.9&f=html&parameter-name=streamflow&datetime=2023-01-01
@@ -118,20 +120,20 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         assert self.zarr_dataset
         loaded_data = fetch_data(
+            unopened_dataset=self.zarr_dataset,
             select_properties=select_properties,
             datetime_filter=datetime_,
-            time_field=self.provider_def["time_field"],
             bbox=bbox,
-            y_field=self.provider_def["y_field"],
             x_field=self.provider_def["x_field"],
-            unopened_dataset=self.zarr_dataset,
+            y_field=self.provider_def["y_field"],
+            time_field=self.provider_def["time_field"],
         )
 
         return dataset_to_point_covjson(
             dataset=loaded_data,
+            timeseries_parameter_name=select_properties[0],
             x_axis=self.provider_def["x_field"],
             y_axis=self.provider_def["y_field"],
-            timeseries_parameter_name=select_properties[0],
             time_axis=self.provider_def["time_field"],
         )
 
@@ -143,4 +145,11 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         z: str | None = None,
         **kwargs,
     ) -> CoverageCollectionDict:
-        raise NotImplementedError
+        raise NotImplementedError(
+            "Area queries not implemented yet; unclear if arbitrary wkt is possible in zarr serverside"
+        )
+
+    def items(self, **kwargs):
+        # This needs to be defined for pygeoapi to register items/ in the UI
+        # https://github.com/geopython/pygeoapi/issues/1748
+        pass
