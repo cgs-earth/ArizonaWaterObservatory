@@ -75,7 +75,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         y_values = result[self.provider_def["y_field"]].values
         for i, id in enumerate(result["feature_id"].values):
             other_properties = {}
-            if result["coords"]:
+            if result.coords:
                 # the coords contain extra metadata properties about the feature
                 for prop in result.coords:
                     if (
