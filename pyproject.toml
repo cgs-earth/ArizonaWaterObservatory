@@ -26,6 +26,7 @@ dependencies = [
     "zarr>=2.18.7",
     "netcdf4>=1.7.2",
     "s3fs>=2025.9.0",
+    "nationalwatermodel",
 ]
 
 [dependency-groups]
@@ -36,6 +37,7 @@ dev = [
     "radon>=6.0.1",
 ]
 server = [
+    "gunicorn>=23.0.0",
     "pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@wwdh",
     "starlette>=0.47.0",
     "uvicorn>=0.34.3",
@@ -53,6 +55,7 @@ snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git",
 awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , branch="main" }
 awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
 noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
+nationalwatermodel = { workspace = true }
 
 [tool.coverage.run]
 # don't include tests 

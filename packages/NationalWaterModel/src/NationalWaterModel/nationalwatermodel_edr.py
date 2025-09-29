@@ -47,10 +47,13 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         super().__init__(provider_def)
         self.instances = []
 
-        LOGGER.warning("Opening zarr dataset")
         self.zarr_dataset = get_zarr_dataset_handle(
-            provider_def["remote_base_url"], provider_def["remote_dataset"]
+            provider_def["data"],
+            provider_def["remote_dataset"]
+            if "remote_dataset" in provider_def
+            else None,
         )
+
         self.provider_def = provider_def
 
     @otel_trace()
@@ -76,6 +79,13 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         edr_fields: EDRFieldsMapping = {}
         for var in self.zarr_dataset.variables:
+            if var in (
+                self.provider_def["x_field"],
+                self.provider_def["y_field"],
+                self.provider_def["time_field"],
+            ):
+                continue
+
             edr_fields[str(var)] = {
                 "title": str(var),
                 "x-ogc-unit": str(var),

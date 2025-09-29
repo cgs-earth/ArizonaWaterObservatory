@@ -29,3 +29,6 @@ clean:
 	rm -rf storage
 	rm -rf .logs_queue
 	rm -rf .venv/
+
+build:
+	docker compose build pygeoapi

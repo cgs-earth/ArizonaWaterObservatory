@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import functools
+import logging
 from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageDict
@@ -17,27 +18,36 @@ class ProviderSchema(TypedDict):
     """
 
     type: Literal["feature", "edr"]
-    remote_base_url: str
-    remote_dataset: str
-    local_data: NotRequired[str]
+    data: str
+    remote_dataset: NotRequired[str]
     name: str
     time_field: str
     x_field: str
     y_field: str
 
 
+LOGGER = logging.getLogger(__name__)
+
+
 @functools.cache
-def get_zarr_dataset_handle(endpoint_url: str, dataset_path: str) -> xr.Dataset:
+def get_zarr_dataset_handle(data: str, remote_dataset: str | None) -> xr.Dataset:
     """
     Open the zarr dataset but don't actually load the data.
     We use functools cache over this since it's a slow operation
-    to establish the connection with S3 and read the metadata
+    either to open a large file or establish the connection with S3 and read the metadata
     """
+    if not remote_dataset:
+        try:
+            LOGGER.debug(f"Opening local zarr dataset {data}")
+            return xr.open_zarr(data, consolidated=True, chunks="auto")
+        except Exception as e:
+            raise ProviderNoDataError(f"Failed to open {data}, {e}") from e
+
     fs = s3fs.S3FileSystem(
-        endpoint_url=endpoint_url,
+        endpoint_url=data,
         anon=True,
     )
-    mapper = fs.get_mapper(dataset_path)
+    mapper = fs.get_mapper(remote_dataset)
     return xr.open_zarr(mapper, consolidated=True, chunks="auto")
 
 
@@ -87,14 +97,19 @@ def fetch_data(
     datetime_range = datetime_filter.split("/")
 
     if len(datetime_range) == 1:
-        datetime_np = np.datetime64(datetime_filter)
-        if datetime_np in available_times:
-            selected = selected.sel(time=datetime_np, drop=False)
-        else:
-            raise ProviderNoDataError(
-                f"{datetime_filter} not in available times. "
-                f"Dataset time range is from {available_start} to {available_end}."
+        try:
+            # Select the closest available time (for datasets with monthly or irregular timestamps)
+            selected = selected.sel(
+                time=datetime_filter,
+                method="nearest",
+                tolerance=np.timedelta64(31, "D"),
             )
+        except KeyError as e:
+            # No valid time within tolerance
+            raise ProviderNoDataError(
+                f"No data available for {datetime_filter}. "
+                f"Dataset time range is from {available_start} to {available_end}."
+            ) from e
 
     elif len(datetime_range) == 2:
         # Date range

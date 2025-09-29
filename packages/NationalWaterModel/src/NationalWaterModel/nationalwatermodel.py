@@ -32,7 +32,10 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         super().__init__(provider_def)
         self.provider_def = provider_def
         self.zarr_dataset = get_zarr_dataset_handle(
-            provider_def["remote_base_url"], provider_def["remote_dataset"]
+            provider_def["data"],
+            provider_def["remote_dataset"]
+            if "remote_dataset" in provider_def
+            else None,
         )
 
     def items(  # type: ignore

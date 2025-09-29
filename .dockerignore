@@ -1,0 +1,6 @@
+**/.venv/
+**/.tmp_dagster*/
+**/downloads/
+**/zarr/
+**/*.zarr/
+**/*.nc

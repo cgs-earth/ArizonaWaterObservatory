@@ -157,6 +157,7 @@ dependencies = [
     { name = "com" },
     { name = "covjson-pydantic" },
     { name = "geojson-pydantic" },
+    { name = "nationalwatermodel" },
     { name = "netcdf4" },
     { name = "noaa-rfc" },
     { name = "opentelemetry-exporter-otlp" },
@@ -179,6 +180,7 @@ dev = [
     { name = "radon" },
 ]
 server = [
+    { name = "gunicorn" },
     { name = "pygeoapi" },
     { name = "starlette" },
     { name = "uvicorn" },
@@ -192,6 +194,7 @@ requires-dist = [
     { name = "com", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&branch=main" },
     { name = "covjson-pydantic", specifier = ">=0.7.0" },
     { name = "geojson-pydantic", specifier = ">=2.0.0" },
+    { name = "nationalwatermodel", editable = "packages/NationalWaterModel" },
     { name = "netcdf4", specifier = ">=1.7.2" },
     { name = "noaa-rfc", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fnoaa_rfc&branch=main" },
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.35.0" },
@@ -214,6 +217,7 @@ dev = [
     { name = "radon", specifier = ">=6.0.1" },
 ]
 server = [
+    { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=wwdh" },
     { name = "starlette", specifier = ">=0.47.0" },
     { name = "uvicorn", specifier = ">=0.34.3" },
@@ -957,6 +961,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8b/0e/62743c098e80dde057afc50f9d681a5ef06cfbd4be377801d0d7e2a0737d/grpcio_health_checking-1.71.0.tar.gz", hash = "sha256:ff9bd55beb97ce3322fda2ae58781c9d6c6fcca6a35ca3b712975d9f75dd30af", size = 16766 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/69/7b/55fafdff4a7ec6b4721484eb1a2483da14db8c106980a82d4736ddcbf047/grpcio_health_checking-1.71.0-py3-none-any.whl", hash = "sha256:b7d9b7a7606ab4cd02d23bd1d3943843f784ffc987c9bfec14c9d058d9e279db", size = 18922 },
+]
+
+[[package]]
+name = "gunicorn"
+version = "23.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/72/9614c465dc206155d93eff0ca20d42e1e35afc533971379482de953521a4/gunicorn-23.0.0.tar.gz", hash = "sha256:f014447a0101dc57e294f6c18ca6b40227a4c90e9bdb586042628030cba004ec", size = 375031 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/7d/6dac2a6e1eba33ee43f318edbed4ff29151a49b5d37f080aad1e6469bca4/gunicorn-23.0.0-py3-none-any.whl", hash = "sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d", size = 85029 },
 ]
 
 [[package]]
