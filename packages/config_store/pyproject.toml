@@ -4,7 +4,7 @@
 [project]
 name = "config-store"
 version = "0.1.0"
-description = "Add your description here"
+description = "A reusable process for storing and retrieving configs"
 readme = "README.md"
 authors = [
     { name = "Colton Loftus", email = "70598503+C-Loftus@users.noreply.github.com" }
