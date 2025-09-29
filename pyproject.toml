@@ -27,6 +27,7 @@ dependencies = [
     "netcdf4>=1.7.2",
     "s3fs>=2025.9.0",
     "nationalwatermodel",
+    "config-store",
 ]
 
 [dependency-groups]
@@ -56,6 +57,7 @@ awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git
 awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
 noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
 nationalwatermodel = { workspace = true }
+config-store = { workspace = true }
 
 [tool.coverage.run]
 # don't include tests 

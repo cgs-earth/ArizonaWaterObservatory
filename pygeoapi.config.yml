@@ -321,3 +321,8 @@ resources:
         data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
         id_field: REGISTRY_ID
         time_field: installed
+
+  config-store:
+      type: process
+      processor:
+          name: config_store.ConfigStoreProcessor

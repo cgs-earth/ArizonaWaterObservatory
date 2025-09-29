@@ -2,6 +2,8 @@
 #    uv export --frozen --output-file=requirements.txt
 -e ./packages/NationalWaterModel
     # via arizonawaterobservatory
+-e ./packages/config_store
+    # via arizonawaterobservatory
 aiobotocore==2.24.2 \
     --hash=sha256:808c63b2bd344b91e2f2acb874831118a9f53342d248acd16a68455a226e283a \
     --hash=sha256:dfb21bdb2610e8de4d22f401e91a24d50f1330a302d03c62c485757becd439a9

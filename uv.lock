@@ -5,6 +5,7 @@ requires-python = "==3.12.*"
 [manifest]
 members = [
     "arizonawaterobservatory",
+    "config-store",
     "crawler",
     "nationalwatermodel",
 ]
@@ -155,6 +156,7 @@ dependencies = [
     { name = "awdb-com" },
     { name = "awdb-forecasts" },
     { name = "com" },
+    { name = "config-store" },
     { name = "covjson-pydantic" },
     { name = "geojson-pydantic" },
     { name = "nationalwatermodel" },
@@ -192,6 +194,7 @@ requires-dist = [
     { name = "awdb-com", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&branch=main" },
     { name = "awdb-forecasts", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&branch=main" },
     { name = "com", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&branch=main" },
+    { name = "config-store", editable = "packages/config_store" },
     { name = "covjson-pydantic", specifier = ">=0.7.0" },
     { name = "geojson-pydantic", specifier = ">=2.0.0" },
     { name = "nationalwatermodel", editable = "packages/NationalWaterModel" },
@@ -441,6 +444,11 @@ wheels = [
 name = "com"
 version = "0.1.0"
 source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&branch=main#c2fe95a347af6b51f5760d34130cb0fb148f6203" }
+
+[[package]]
+name = "config-store"
+version = "0.1.0"
+source = { editable = "packages/config_store" }
 
 [[package]]
 name = "covjson-pydantic"
