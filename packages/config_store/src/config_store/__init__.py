@@ -4,7 +4,7 @@
 from dataclasses import dataclass
 import json
 import logging
-from typing import Literal, TypedDict
+from typing import Literal, NotRequired, TypedDict
 import uuid
 
 from com.env import REDIS_HOST, REDIS_PORT
@@ -12,16 +12,41 @@ from pygeoapi.process.base import BaseProcessor, ProcessorExecuteError
 import redis
 
 
-class ConfigStoreOptions(TypedDict):
+class ProcessorOptions(TypedDict):
+    """Options for configuring hte provider in redis"""
+
     id: str
     title: str
+    name: str
     description: str
 
 
 @dataclass
 class ConfigSchema:
+    """The config to be stored in redis."""
+
     name: str
     # TODO ask john and fill in more fields
+
+
+class ExecutionInput(TypedDict):
+    """The data that"""
+
+    action: Literal["store", "retrieve"]
+    # Must comply to the config schema
+    config: NotRequired[dict]
+    id: NotRequired[str]
+
+
+class ExecutionResponse(TypedDict):
+    """
+    The json response that the processor returns. Both are required since the Python type
+    system doesn't allow disciminated unions
+    """
+
+    id: NotRequired[str]
+    # Must comply to the config schema
+    config: NotRequired[dict]
 
 
 LOGGER = logging.getLogger(__name__)
@@ -59,7 +84,7 @@ class ConfigStoreProcessor(BaseProcessor):
 
     client: redis.Redis
 
-    def __init__(self, processor_def: ConfigStoreOptions):
+    def __init__(self, processor_def: ProcessorOptions):
         """
         Initialize object
         :param processor_def: provider definition
@@ -70,22 +95,45 @@ class ConfigStoreProcessor(BaseProcessor):
         self.client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
         self.supports_outputs = True
 
-    def execute(
-        self, data: dict, outputs=None
-    ) -> tuple[Literal["application/json"], dict]:
-        try:
-            _ = ConfigSchema(**data)
-        except Exception as e:
+    def execute(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self,
+        data: ExecutionInput,
+        outputs=None,
+    ) -> tuple[Literal["application/json"], ExecutionResponse]:
+        if not data or "action" not in data:
             raise ProcessorExecuteError(
-                f"Data {data} does not match the schema and threw error: {e}"
-            ) from e
-        # reduce uuid length so the urls are of reasonable size
-        associated_uuid = uuid.uuid1().int % 1000000
-        self.client.set(
-            str(associated_uuid),
-            json.dumps(data).encode("utf-8"),
-        )
+                "Missing an action to perform. You must either 'store' or 'retrieve' a config."
+            )
 
-        return "application/json", {
-            "id": str(associated_uuid),
-        }
+        if data["action"] == "retrieve":
+            if "id" not in data:
+                raise ProcessorExecuteError("Missing an id to retrieve")
+
+            retrievedData = self.client.get(data["id"])
+            return "application/json", json.loads(retrievedData)  # pyright: ignore[reportArgumentType] redis py doesn't type properly
+        elif data["action"] == "store":
+            if "config" not in data:
+                raise ProcessorExecuteError("Missing a config to store")
+
+            try:
+                _ = ConfigSchema(**data["config"])
+            except Exception as e:
+                raise ProcessorExecuteError(
+                    f"Data {data} does not match the schema and threw error: {e}"
+                ) from e
+
+            # reduce uuid length so the urls are of reasonable size for sharing in a url. Extremely unlikely to have enough users to collide
+            associated_uuid = uuid.uuid1().int % 1000000
+            self.client.set(
+                str(associated_uuid),
+                json.dumps(data).encode("utf-8"),
+            )
+
+            return "application/json", {
+                "id": str(associated_uuid),
+            }
+
+        else:
+            raise ProcessorExecuteError(
+                f"Unrecognized action: {data['action']}. You must either 'store' or 'retrieve' a config."
+            )
