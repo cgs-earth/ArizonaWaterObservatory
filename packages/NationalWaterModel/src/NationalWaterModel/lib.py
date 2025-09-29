@@ -97,19 +97,14 @@ def fetch_data(
     datetime_range = datetime_filter.split("/")
 
     if len(datetime_range) == 1:
-        try:
-            # Select the closest available time (for datasets with monthly or irregular timestamps)
-            selected = selected.sel(
-                time=datetime_filter,
-                method="nearest",
-                tolerance=np.timedelta64(31, "D"),
-            )
-        except KeyError as e:
-            # No valid time within tolerance
+        datetime_np = np.datetime64(datetime_filter)
+        if datetime_np in available_times:
+            selected = selected.sel(time=datetime_np, drop=False)
+        else:
             raise ProviderNoDataError(
-                f"No data available for {datetime_filter}. "
+                f"{datetime_filter} not in available times. "
                 f"Dataset time range is from {available_start} to {available_end}."
-            ) from e
+            )
 
     elif len(datetime_range) == 2:
         # Date range
