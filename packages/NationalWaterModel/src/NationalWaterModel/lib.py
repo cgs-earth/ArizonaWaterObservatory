@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import functools
-from typing import Literal, TypedDict
+from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageDict
 import numpy as np
@@ -17,9 +17,10 @@ class ProviderSchema(TypedDict):
     """
 
     type: Literal["feature", "edr"]
-    data: str
+    remote_base_url: str
+    remote_dataset: str
+    local_data: NotRequired[str]
     name: str
-    dataset_path: str
     time_field: str
     x_field: str
     y_field: str

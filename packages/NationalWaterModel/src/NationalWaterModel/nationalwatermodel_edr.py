@@ -49,7 +49,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         LOGGER.warning("Opening zarr dataset")
         self.zarr_dataset = get_zarr_dataset_handle(
-            provider_def["data"], provider_def["dataset_path"]
+            provider_def["remote_base_url"], provider_def["remote_dataset"]
         )
         self.provider_def = provider_def
 
