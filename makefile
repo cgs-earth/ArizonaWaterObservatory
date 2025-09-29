@@ -6,8 +6,8 @@ check:
 	uv run ruff check && uv run pyright && cd packages/crawler && dg check defs --verbose
 
 dev:
-	uv run pygeoapi openapi generate pygeoapi-deployment/pygeoapi.config.yml --output-file pygeoapi-deployment/local.openapi.yml
-	PYGEOAPI_CONFIG=pygeoapi-deployment/pygeoapi.config.yml PYGEOAPI_OPENAPI=pygeoapi-deployment/local.openapi.yml uv run pygeoapi serve --starlette
+	uv run pygeoapi openapi generate pygeoapi.config.yml --output-file local.openapi.yml
+	PYGEOAPI_CONFIG=pygeoapi.config.yml PYGEOAPI_OPENAPI=local.openapi.yml uv run pygeoapi serve --starlette
 
 deps:
 	# Using uv, install all Python dependencies needed for local development and spin up necessary docker services

@@ -67,8 +67,12 @@ def fetch_data(
     for coord in [y_field, x_field]:
         if coord not in variables_to_select:
             variables_to_select.append(coord)
-
-    selected = unopened_dataset[variables_to_select]
+    try:
+        selected = unopened_dataset[variables_to_select]
+    except KeyError as e:
+        raise KeyError(
+            f"Could not find {variables_to_select} in {unopened_dataset.variables}; resulted in error {e}"
+        ) from e
 
     if datetime_filter is None:
         raise ProviderQueryError(

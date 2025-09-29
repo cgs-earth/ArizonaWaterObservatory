@@ -113,8 +113,6 @@ def concat_netcdf_into_zarr(context: dg.AssetExecutionContext) -> None:
             context.log.warning(f"No NetCDF files found in {dir_name}")
             continue
 
-        assert_all_datasets_have_same_variables(nc_files)
-
         out_path = zarr_dir / f"{dir_name}.zarr"
         batch_size = 30  # adjust to system RAM
         first_batch = True
@@ -131,7 +129,10 @@ def concat_netcdf_into_zarr(context: dg.AssetExecutionContext) -> None:
                     batch_files,
                     combine="by_coords",
                     decode_times=True,
-                    parallel=False,
+                    parallel=False,  # dask can throw errors or OOM issues if parallelized
+                    join="outer",
+                    coords="minimal",
+                    compat="override",  # ignore differing attrs
                 )
             except Exception as e:
                 context.log.error(f"Failed to open batch {batch_files}: {e}")
