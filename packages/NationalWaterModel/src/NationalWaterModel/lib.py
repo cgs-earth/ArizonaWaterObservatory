@@ -64,16 +64,18 @@ def fetch_data(
 ) -> xr.Dataset:
     """
     Fetch data from a remote zarr dataset. Lazily apply a
-    datatime, bbox, and select properties filter to the dataset
-    and only load the filtered data, not the entire dataset
+    datetime, bbox, and select properties filter to the dataset
+    and only load the filtered data, not the entire dataset.
+
+    Optionally, limit the number of features returned.
     """
     assert isinstance(unopened_dataset, xr.Dataset), (
         "The dataset was not an xarray dataset"
     )
-    variables_to_select = timeseries_properties_to_fetch
+    variables_to_select = timeseries_properties_to_fetch.copy()
 
     # if we are selecting a property, we should also select time since timeseries always needs time
-    if time_field not in timeseries_properties_to_fetch:
+    if time_field not in variables_to_select:
         variables_to_select.append(time_field)
 
     # Add x and y if not already included
@@ -132,7 +134,11 @@ def fetch_data(
             times_to_select = available_times[mask]
             selected = selected.sel(time=times_to_select, drop=False)
 
-    if not feature_id:
+    # Apply feature limit if provided
+    if feature_limit is not None:
+        selected = selected.isel(feature_id=slice(0, feature_limit))
+
+    if not feature_id and bbox:
         # Geospatial filtering using latitude and longitude variables
         lon_min, lat_min, lon_max, lat_max = bbox
 
@@ -148,6 +154,7 @@ def fetch_data(
 
         # Use isel instead of where (avoids Dask boolean indexing issue)
         selected = selected.isel(feature_id=mask)
+
     return selected.load()
 
 
