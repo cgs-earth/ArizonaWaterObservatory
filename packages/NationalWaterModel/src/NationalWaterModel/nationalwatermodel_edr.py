@@ -64,7 +64,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         if "storage_crs_override" in provider_def:
             self.storage_crs_override = pyproj.CRS.from_user_input(
-                provider_def["storagestorage_crs_override_crs"]
+                provider_def["storage_crs_override"]
             )
         else:
             self.storage_crs_override = None
