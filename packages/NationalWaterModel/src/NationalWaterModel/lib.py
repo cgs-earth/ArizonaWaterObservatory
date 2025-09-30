@@ -274,6 +274,7 @@ def dataset_to_covjson(
         return coverage_collection
 
     if raster:
+        assert isinstance(timeseries_values, np.ndarray)
         return {
             "type": "Coverage",
             "domain": {
@@ -292,7 +293,7 @@ def dataset_to_covjson(
                     {
                         "coordinates": ["x", "y"],
                         "system": {
-                            "type": "GeographicCRS",
+                            "type": "ProjectedCRS",
                             "id": "http://www.opengis.net/def/crs/EPSG/0/3857",
                         },
                     },
@@ -319,7 +320,7 @@ def dataset_to_covjson(
                     "dataType": "float",
                     "axisNames": ["t", "y", "x"],
                     "shape": [
-                        len(time_values),
+                        len(time_values) if not singleItem else 1,
                         len(y_values),
                         len(x_values),
                     ],
