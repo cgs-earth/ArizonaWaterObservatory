@@ -61,6 +61,11 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         if "raster" not in self.provider_def:
             self.provider_def["raster"] = False
 
+        if "storage_crs" in provider_def:
+            self.storage_crs = pyproj.CRS.from_user_input(provider_def["storage_crs"])
+        else:
+            self.storage_crs = None
+
         self.output_crs = (
             pyproj.CRS.from_epsg(provider_def["output_crs"])
             if "output_crs" in provider_def
@@ -109,8 +114,11 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             time_field=self.provider_def["time_field"],
         )
 
-        storage_crs = get_crs_from_dataset(loaded_data)
-
+        storage_crs = (
+            get_crs_from_dataset(loaded_data)
+            if self.storage_crs is None
+            else self.storage_crs
+        )
         projected_dataset = project_dataset(
             loaded_data,
             storage_crs,
@@ -192,7 +200,11 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             raster=self.provider_def["raster"] or False,
         )
 
-        storage_crs = get_crs_from_dataset(loaded_data)
+        storage_crs = (
+            get_crs_from_dataset(loaded_data)
+            if self.storage_crs is None
+            else self.storage_crs
+        )
 
         projected_dataset = project_dataset(
             loaded_data,

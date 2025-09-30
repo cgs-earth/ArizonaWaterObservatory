@@ -39,6 +39,8 @@ class ProviderSchema(TypedDict):
     # Whether the dataset is a raster image. If not, it is a vector and
     # we will try to represent it as points in covjson
     raster: bool
+    # The crs of the dataset that was ingested
+    storage_crs: NotRequired[str]
     # The crs of the dataset that should be output in covjson
     output_crs: NotRequired[str]
 
@@ -103,6 +105,9 @@ def project_dataset(
     Project a dataset from storage CRS to output CRS.
     Returns flat 1D arrays for coordinates, even if raster=True.
     """
+    if storage_crs == output_crs:
+        return dataset
+
     transformer = pyproj.Transformer.from_crs(storage_crs, output_crs, always_xy=True)
 
     if not raster:
@@ -325,7 +330,7 @@ def dataset_to_covjson(
             },
             "referencing": [
                 {
-                    "coordinates": ["x", "y"],
+                    "coordinates": ["y", "x"],
                     "system": {
                         "type": "GeographicCRS",
                         "id": output_uri,

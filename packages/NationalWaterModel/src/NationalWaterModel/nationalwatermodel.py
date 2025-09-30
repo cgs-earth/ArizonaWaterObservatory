@@ -15,7 +15,13 @@ from pygeoapi.util import crs_transform
 import pyproj
 import xarray as xr
 
-from .lib import ProviderSchema, fetch_data, get_zarr_dataset_handle
+from .lib import (
+    ProviderSchema,
+    fetch_data,
+    get_crs_from_dataset,
+    get_zarr_dataset_handle,
+    project_dataset,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +30,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
     """Provider for OGC API Features"""
 
     zarr_dataset: xr.Dataset
-    storage_crs: pyproj.CRS
+    storage_crs: pyproj.CRS | None
     output_crs: pyproj.CRS
 
     def __init__(self, provider_def: ProviderSchema):
@@ -40,6 +46,12 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             if "remote_dataset" in provider_def
             else None,
         )
+
+        if "storage_crs" in provider_def:
+            self.storage_crs = pyproj.CRS.from_user_input(provider_def["storage_crs"])
+        else:
+            self.storage_crs = None
+
         self.output_crs = (
             pyproj.CRS.from_epsg(provider_def["output_crs"])
             if "output_crs" in provider_def
@@ -81,6 +93,22 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             unopened_dataset=self.zarr_dataset,
             feature_id=itemId,
         )
+
+        storage_crs = (
+            get_crs_from_dataset(result)
+            if self.storage_crs is None
+            else self.storage_crs
+        )
+
+        result = project_dataset(
+            result,
+            storage_crs,
+            self.output_crs,
+            self.provider_def["x_field"],
+            self.provider_def["y_field"],
+            raster=False,
+        )
+
         features: list[GeojsonFeatureDict] = []
         x_values = result[self.provider_def["x_field"]].values
         y_values = result[self.provider_def["y_field"]].values
