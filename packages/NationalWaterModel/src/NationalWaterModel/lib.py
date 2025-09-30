@@ -294,7 +294,7 @@ def dataset_to_covjson(
                         "coordinates": ["x", "y"],
                         "system": {
                             "type": "ProjectedCRS",
-                            "id": "http://www.opengis.net/def/crs/EPSG/0/3857",
+                            "id": "http://www.opengis.net/def/crs/EPSG/0/5070",
                         },
                     },
                     {
