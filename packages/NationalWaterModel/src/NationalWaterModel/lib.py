@@ -17,13 +17,23 @@ class ProviderSchema(TypedDict):
     The config used to configure the provider
     """
 
+    # The type of provider
     type: Literal["feature", "edr"]
+    # The url or path to the dataset
     data: str
+    # If the dataset is remote, the subpath from the root url to the dataset
     remote_dataset: NotRequired[str]
+    # The name of the provider
     name: str
+    # The field used to represent time in the dataset
     time_field: str
+    # The field used to represent x in the dataset
     x_field: str
+    # The field used to represent y in the dataset
     y_field: str
+    # Whether the dataset is a raster image. If not, it is a vector and
+    # we will try to represent it as points in covjson
+    raster: bool
 
 
 LOGGER = logging.getLogger(__name__)
@@ -61,6 +71,7 @@ def fetch_data(
     bbox: list,
     feature_id: str | None = None,
     feature_limit: int | None = None,
+    raster: bool = False,
 ) -> xr.Dataset:
     """
     Fetch data from a remote zarr dataset. Lazily apply a
@@ -152,8 +163,12 @@ def fetch_data(
         if not mask.any():
             raise ProviderNoDataError(f"No data in bbox {bbox}")
 
-        # Use isel instead of where (avoids Dask boolean indexing issue)
-        selected = selected.isel(feature_id=mask)
+        if raster:
+            # if it is raster tehre is no feature_id
+            # and thus the mask needs to be applied to the dataset as a whole
+            selected = selected.where(mask, drop=True)
+        else:
+            selected = selected.isel(feature_id=mask)
 
     return selected.load()
 
@@ -164,7 +179,8 @@ def dataset_to_point_covjson(
     y_axis: str,
     timeseries_parameter_name: str,
     time_axis: str,
-) -> CoverageCollectionDict:
+    raster: bool = False,
+) -> CoverageCollectionDict | CoverageDict:
     """
     Given a dataset, return a covjson point series which essentially
     represents a list of points with a timeseries line graph for eawch
@@ -184,125 +200,60 @@ def dataset_to_point_covjson(
         singleItem = True
 
     # if it is a single item we have to make sure it is nested properly in a list
-    if singleItem:
+    if singleItem and not raster:
         time_values = [time_values]
         timeseries_values = [timeseries_values]
 
     coverages: list[CoverageDict] = []
 
-    for i in range(len(x_values)):
-        coverage: CoverageDict = {
-            "type": "Coverage",
-            "domain": {
-                "type": "Domain",
-                "domainType": "PointSeries",
-                "axes": {
-                    # The x axis is one value since it represents a point
-                    "x": {"values": [x_values[i]]},
-                    # The y axis is one value since it represents a point
-                    "y": {"values": [y_values[i]]},
-                    # The t axis is a list of times since it represents a time series
-                    "t": {"values": time_values},
+    if not raster:
+        for i in range(len(x_values)):
+            coverage: CoverageDict = {
+                "type": "Coverage",
+                "domain": {
+                    "type": "Domain",
+                    "domainType": "PointSeries",
+                    "axes": {
+                        # The x axis is one value since it represents a point
+                        "x": {"values": [x_values[i]]},
+                        # The y axis is one value since it represents a point
+                        "y": {"values": [y_values[i]]},
+                        # The t axis is a list of times since it represents a time series
+                        "t": {"values": time_values},
+                    },
                 },
-            },
-            "ranges": {
-                timeseries_parameter_name: {
-                    "type": "NdArray",
-                    "dataType": "float",
-                    "axisNames": ["t"],
-                    # The shape is the length of the time series
-                    # thus the number of time steps is the length of the shape
-                    "shape": [len(time_values)],
-                    "values": [
-                        # get the timeseries value for this point at each
-                        # time step. Since it is a list of lists we need to
-                        # flatten
-                        timeseries_arr[i]
-                        for timeseries_arr in timeseries_values
-                    ],
-                }
-            },
-        }
-        coverages.append(coverage)
-
-    coverage_collection: CoverageCollectionDict = {
-        "type": "CoverageCollection",
-        "parameters": {
-            timeseries_parameter_name: {
-                "type": "Parameter",
-                "description": {"en": str(timeseries_parameter_name)},
-                "unit": {"symbol": "1"},
-                "observedProperty": {
-                    "id": timeseries_parameter_name,
-                    "label": {"en": str(timeseries_parameter_name)},
+                "ranges": {
+                    timeseries_parameter_name: {
+                        "type": "NdArray",
+                        "dataType": "float",
+                        "axisNames": ["t"],
+                        # The shape is the length of the time series
+                        # thus the number of time steps is the length of the shape
+                        "shape": [len(time_values)],
+                        "values": [
+                            # get the timeseries value for this point at each
+                            # time step. Since it is a list of lists we need to
+                            # flatten
+                            timeseries_arr[i]
+                            for timeseries_arr in timeseries_values
+                        ],
+                    }
                 },
             }
-        },
-        "referencing": [
-            {
-                "coordinates": ["x", "y"],
-                "system": {
-                    "type": "GeographicCRS",
-                    "id": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
-                },
-            },
-            {
-                "coordinates": ["t"],
-                "system": {"type": "TemporalRS", "calendar": "Gregorian"},
-            },
-        ],
-        "coverages": coverages,
-    }
+            coverages.append(coverage)
 
-    return coverage_collection
-
-
-def dataset_to_grid_covjson(
-    dataset: xr.Dataset, x_axis: str, y_axis: str, z_axis: str, time_axis: str
-) -> dict:
-    """
-    For some datasets it is possible that they return a grid
-    of values instead of a point time series. i.e. for atmospheric data
-
-    """
-    raise NotImplementedError(
-        "TODO if we need grid covjson representation. Unclear if we need this"
-    )
-
-    # Coordinates
-    x_values = dataset[x_axis].values
-    y_values = dataset[y_axis].values
-
-    # Normalize time to list of ISO strings
-    if np.issubdtype(dataset[time_axis].values.dtype, np.datetime64):
-        t_values = [
-            dataset[time_axis].values.astype("datetime64[ns]").astype(str).tolist()
-        ]
-    else:
-        t_values = np.atleast_1d(dataset[time_axis].values).tolist()
-
-    # Shape
-    z_data = dataset[z_axis].values
-
-    values_flat = z_data.flatten(order="C").tolist()
-
-    return {
-        "type": "Coverage",
-        "domain": {
-            "type": "Domain",
-            "domainType": "Grid",
-            "axes": {
-                "x": {
-                    "start": float(x_values.min()),
-                    "stop": float(x_values.max()),
-                    "num": len(x_values),
-                },
-                "y": {
-                    "start": float(y_values.min()),
-                    "stop": float(y_values.max()),
-                    "num": len(y_values),
-                },
-                "t": {"values": t_values},
+        coverage_collection: CoverageCollectionDict = {
+            "type": "CoverageCollection",
+            "parameters": {
+                timeseries_parameter_name: {
+                    "type": "Parameter",
+                    "description": {"en": str(timeseries_parameter_name)},
+                    "unit": {"symbol": "1"},
+                    "observedProperty": {
+                        "id": timeseries_parameter_name,
+                        "label": {"en": str(timeseries_parameter_name)},
+                    },
+                }
             },
             "referencing": [
                 {
@@ -317,27 +268,69 @@ def dataset_to_grid_covjson(
                     "system": {"type": "TemporalRS", "calendar": "Gregorian"},
                 },
             ],
-        },
-        "parameters": {
-            z_axis: {
-                "type": "Parameter",
-                "description": {"en": str(z_axis)},
-                "unit": {"symbol": "1"},
-                "observedProperty": {"id": z_axis, "label": {"en": str(z_axis)}},
-            }
-        },
-        "ranges": {
-            z_axis: {
-                "type": "NdArray",
-                "dataType": "float",
-                "axisNames": ["t", "y", "x"],
-                "shape": [
-                    len(t_values),
-                    len(y_values),
-                    len(x_values),
+            "coverages": coverages,
+        }
+
+        return coverage_collection
+
+    if raster:
+        return {
+            "type": "Coverage",
+            "domain": {
+                "type": "Domain",
+                "domainType": "Grid",
+                "axes": {
+                    "x": {
+                        "start": min(x_values),
+                        "stop": max(x_values),
+                        "num": len(x_values),
+                    },
+                    "y": {
+                        "start": min(y_values),
+                        "stop": max(y_values),
+                        "num": len(y_values),
+                    },
+                    "t": {"values": time_values},
+                },
+                "referencing": [
+                    {
+                        "coordinates": ["x", "y"],
+                        "system": {
+                            "type": "GeographicCRS",
+                            "id": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                        },
+                    },
+                    {
+                        "coordinates": ["t"],
+                        "system": {"type": "TemporalRS", "calendar": "Gregorian"},
+                    },
                 ],
-                # "values": [40] * (len(values_flat) * len(t_values) * len(y_values)),
-                "values": values_flat,
-            }
-        },
-    }
+            },
+            "parameters": {
+                timeseries_parameter_name: {
+                    "type": "Parameter",
+                    "description": {"en": str(timeseries_parameter_name)},
+                    "unit": {"symbol": "1"},
+                    "observedProperty": {
+                        "id": str(timeseries_parameter_name),
+                        "label": {"en": str(timeseries_parameter_name)},
+                    },
+                }
+            },
+            "ranges": {
+                timeseries_parameter_name: {
+                    "type": "NdArray",
+                    "dataType": "float",
+                    "axisNames": ["t", "y", "x"],
+                    "shape": [
+                        len(time_values),
+                        len(y_values),
+                        len(x_values),
+                    ],
+                    "values": [
+                        0 if np.isnan(val) else val
+                        for val in timeseries_values.reshape(-1).tolist()
+                    ],
+                },
+            },
+        }

@@ -4,7 +4,7 @@
 import logging
 from typing import TypedDict
 
-from com.covjson import CoverageCollectionDict
+from com.covjson import CoverageCollectionDict, CoverageDict
 from com.geojson.helpers import GeojsonFeatureCollectionDict, GeojsonFeatureDict
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
@@ -56,6 +56,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         )
 
         self.provider_def = provider_def
+        if "raster" not in self.provider_def:
+            self.provider_def["raster"] = False
 
     @otel_trace()
     def locations(
@@ -67,10 +69,20 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         format_: str | None = None,
         limit: int | None = None,
         **kwargs,
-    ) -> CoverageCollectionDict | GeojsonFeatureCollectionDict | GeojsonFeatureDict:
+    ) -> (
+        CoverageCollectionDict
+        | CoverageDict
+        | GeojsonFeatureCollectionDict
+        | GeojsonFeatureDict
+    ):
         """
         Extract data from location
         """
+        if self.provider_def["raster"]:
+            raise ProviderQueryError(
+                "Locations cannot be queried from a raster dataset"
+            )
+
         if not select_properties or len(select_properties) > 1:
             raise ProviderQueryError(
                 f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
@@ -95,6 +107,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             x_axis=self.provider_def["x_field"],
             y_axis=self.provider_def["y_field"],
             time_axis=self.provider_def["time_field"],
+            raster=False,
         )
 
     def get_fields(self) -> EDRFieldsMapping:
@@ -157,6 +170,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             x_field=self.provider_def["x_field"],
             y_field=self.provider_def["y_field"],
             time_field=self.provider_def["time_field"],
+            raster=self.provider_def["raster"] or False,
         )
 
         return dataset_to_point_covjson(
@@ -165,6 +179,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             x_axis=self.provider_def["x_field"],
             y_axis=self.provider_def["y_field"],
             time_axis=self.provider_def["time_field"],
+            raster=self.provider_def["raster"] or False,
         )
 
     def area(

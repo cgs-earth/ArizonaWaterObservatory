@@ -16,6 +16,7 @@ provider = NationalWaterModelEDRProvider(
         "x_field": "longitude",
         "y_field": "latitude",
         "time_field": "time",
+        "raster": False,
     }
 )
 

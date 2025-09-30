@@ -79,7 +79,7 @@ resources:
         title_field: id
 
   
-  National_Water_Model_Land Data Assimilation_System_Output:
+  National_Water_Model_Land_Data_Assimilation_System_Output:
     type: collection
     title: National Water Model Land Data Assimilation System Output
     description: National Water Model Land Data Assimilation System Output
@@ -93,10 +93,7 @@ resources:
         remote_dataset:  "CONUS/zarr/ldasout.zarr"
         x_field: x 
         y_field: y
-      - <<: *default_nwm_feature_config
-        remote_dataset:  "CONUS/zarr/ldasout.zarr"
-        x_field: x 
-        y_field: y
+        raster: true
 
 
   National_Water_Model_Lakeout:
