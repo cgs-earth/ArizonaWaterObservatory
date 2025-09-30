@@ -110,11 +110,6 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-110.7,33.0&f=html&parameter-name=streamflow&datetime=2023-01-01
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-111.7,31.9&f=html&parameter-name=velocity&datetime=2023-01-01/2023-01-02
         """
-        if not select_properties:
-            LOGGER.error(
-                "select_properties is required to prevent overfetching, falling back to streamflow default"
-            )
-
         if not select_properties or len(select_properties) > 1:
             raise ValueError(
                 f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
@@ -126,12 +121,12 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             raise ValueError("bbox is required to prevent overfetching")
 
         if z:
-            raise NotImplementedError("Elevation filtering not implemented yet")
+            raise NotImplementedError("Elevation filtering not implemented")
 
         assert self.zarr_dataset
         loaded_data = fetch_data(
             unopened_dataset=self.zarr_dataset,
-            select_properties=select_properties,
+            timeseries_properties_to_fetch=select_properties,
             datetime_filter=datetime_,
             bbox=bbox,
             x_field=self.provider_def["x_field"],

@@ -26,7 +26,7 @@ def test_provider_no_data():
     with pytest.raises(ProviderNoDataError):
         fetch_data(
             bbox=ARIZONA_BBOX,
-            select_properties=["streamflow"],
+            timeseries_properties_to_fetch=["streamflow"],
             time_field="time",
             x_field="longitude",
             y_field="latitude",
@@ -38,7 +38,7 @@ def test_provider_no_data():
 def test_new_data():
     result = fetch_data(
         bbox=ARIZONA_BBOX,
-        select_properties=["streamflow"],
+        timeseries_properties_to_fetch=["streamflow"],
         time_field="time",
         datetime_filter="2023-01-01",
         x_field="longitude",
@@ -53,7 +53,7 @@ def test_new_data():
 def test_range_of_dates():
     result = fetch_data(
         bbox=ARIZONA_BBOX,
-        select_properties=["streamflow"],
+        timeseries_properties_to_fetch=["streamflow"],
         time_field="time",
         x_field="longitude",
         y_field="latitude",
@@ -73,7 +73,7 @@ def test_range_of_dates():
 def test_no_parameters():
     result = fetch_data(
         bbox=ARIZONA_BBOX,
-        select_properties=[],
+        timeseries_properties_to_fetch=[],
         time_field="time",
         x_field="longitude",
         y_field="latitude",

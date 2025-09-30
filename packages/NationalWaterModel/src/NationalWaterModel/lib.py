@@ -53,12 +53,13 @@ def get_zarr_dataset_handle(data: str, remote_dataset: str | None) -> xr.Dataset
 
 def fetch_data(
     unopened_dataset: xr.Dataset,
-    select_properties: list[str],
+    timeseries_properties_to_fetch: list[str],
     time_field: str,
     datetime_filter: str,
     x_field: str,
     y_field: str,
     bbox: list,
+    feature_id: str | None = None,
 ) -> xr.Dataset:
     """
     Fetch data from a remote zarr dataset. Lazily apply a
@@ -68,22 +69,26 @@ def fetch_data(
     assert isinstance(unopened_dataset, xr.Dataset), (
         "The dataset was not an xarray dataset"
     )
-    variables_to_select = select_properties
+    variables_to_select = timeseries_properties_to_fetch
 
     # if we are selecting a property, we should also select time since timeseries always needs time
-    if time_field not in select_properties:
+    if time_field not in timeseries_properties_to_fetch:
         variables_to_select.append(time_field)
 
     # Add x and y if not already included
     for coord in [y_field, x_field]:
         if coord not in variables_to_select:
             variables_to_select.append(coord)
+
     try:
         selected = unopened_dataset[variables_to_select]
     except KeyError as e:
         raise KeyError(
             f"Could not find {variables_to_select} in {unopened_dataset.variables}; resulted in error {e}"
         ) from e
+
+    if feature_id is not None:
+        selected = selected.sel(feature_id=int(feature_id))
 
     if datetime_filter is None:
         raise ProviderQueryError(
@@ -126,21 +131,22 @@ def fetch_data(
             times_to_select = available_times[mask]
             selected = selected.sel(time=times_to_select, drop=False)
 
-    # Geospatial filtering using latitude and longitude variables
-    lon_min, lat_min, lon_max, lat_max = bbox
+    if not feature_id:
+        # Geospatial filtering using latitude and longitude variables
+        lon_min, lat_min, lon_max, lat_max = bbox
 
-    # latitude/longitude are 1D coords along "feature_id"
-    lon = selected[x_field].compute()
-    lat = selected[y_field].compute()
+        # latitude/longitude are 1D coords along "feature_id"
+        lon = selected[x_field].compute()
+        lat = selected[y_field].compute()
 
-    # get only data within the bbox
-    mask = (lon >= lon_min) & (lon <= lon_max) & (lat >= lat_min) & (lat <= lat_max)
+        # get only data within the bbox
+        mask = (lon >= lon_min) & (lon <= lon_max) & (lat >= lat_min) & (lat <= lat_max)
 
-    if not mask.any():
-        raise ProviderNoDataError(f"No data in bbox {bbox}")
+        if not mask.any():
+            raise ProviderNoDataError(f"No data in bbox {bbox}")
 
-    # Use isel instead of where (avoids Dask boolean indexing issue)
-    selected = selected.isel(feature_id=mask)
+        # Use isel instead of where (avoids Dask boolean indexing issue)
+        selected = selected.isel(feature_id=mask)
     return selected.load()
 
 

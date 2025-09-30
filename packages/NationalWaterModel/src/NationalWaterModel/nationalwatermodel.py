@@ -40,9 +40,9 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
 
     def items(  # type: ignore
         self,
-        properties: list[tuple[str, str]],
         bbox: list,
         datetime_: str | None = None,
+        properties: list[tuple[str, str]] | None = None,
         resulttype: Literal["hits", "results"] | None = "results",
         # select only features that contains all the `select_properties` values
         select_properties: list[str]
@@ -56,6 +56,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         skip_geometry: bool | None = False,
         **kwargs,
     ) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
+        if properties is None:
+            properties = []
         if not bbox:
             LOGGER.error(
                 "bbox is required to prevent overfetching, falling back to Arizona"
@@ -66,17 +68,19 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         latestValueInDataset = "2023-01-01"
         result = fetch_data(
             bbox=bbox,
-            select_properties=[],
+            timeseries_properties_to_fetch=[],
             datetime_filter=latestValueInDataset if not datetime_ else datetime_,
             time_field=self.provider_def["time_field"],
             x_field=self.provider_def["x_field"],
             y_field=self.provider_def["y_field"],
             unopened_dataset=self.zarr_dataset,
+            feature_id=itemId,
         )
         features: list[GeojsonFeatureDict] = []
         x_values = result[self.provider_def["x_field"]].values
         y_values = result[self.provider_def["y_field"]].values
-        for i, id in enumerate(result["feature_id"].values):
+
+        for i, id in enumerate(result["feature_id"].values if not itemId else [itemId]):
             other_properties = {}
             if result.coords:
                 # the coords contain extra metadata properties about the feature
@@ -89,20 +93,26 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
                     ):
                         continue
 
-                    other_properties[prop] = str(result.coords[prop].values[i])
-                    other_properties["id"] = int(id)
+                    other_properties[prop] = str(
+                        result.coords[prop].values[i]
+                        if not itemId
+                        else result.coords[prop].values
+                    )
+                    other_properties["id"] = str(id)
             feature: GeojsonFeatureDict = {
                 "type": "Feature",
                 "geometry": {
                     "type": "Point",
                     "coordinates": [
-                        float(x_values[i]),
-                        float(y_values[i]),
+                        float(x_values[i] if not itemId else x_values),
+                        float(y_values[i] if not itemId else y_values),
                     ],
                 },
-                "id": int(id),
+                "id": str(id),
                 "properties": other_properties,
             }
+            if itemId:
+                return feature
 
             features.append(feature)
             if i > limit:
