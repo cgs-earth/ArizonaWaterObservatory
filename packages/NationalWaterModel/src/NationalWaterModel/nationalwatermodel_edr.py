@@ -64,7 +64,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         self.output_crs = (
             pyproj.CRS.from_epsg(provider_def["output_crs"])
             if "output_crs" in provider_def
-            else pyproj.CRS.from_user_input("ogc:CRS84")
+            else pyproj.CRS.from_epsg(4326)
         )
 
     @otel_trace()

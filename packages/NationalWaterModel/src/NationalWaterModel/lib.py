@@ -100,25 +100,26 @@ def project_dataset(
     raster: bool,
 ) -> xr.Dataset:
     """
-    Project a dataset from storage crs to output crs. CRS is ambiguous in zarr
-    and thus must be parsed with a heuristic
+    Project a dataset from storage CRS to output CRS.
+    Returns flat 1D arrays for coordinates, even if raster=True.
     """
     transformer = pyproj.Transformer.from_crs(storage_crs, output_crs, always_xy=True)
+
     if not raster:
-        x, y = transformer.transform(dataset[x_field].values, dataset[y_field].values)
-        return dataset.assign_coords({x_field: x, y_field: y})
+        # Non-raster: simple 1D projection
+        x_proj, y_proj = transformer.transform(
+            dataset[x_field].values, dataset[y_field].values
+        )
+        return dataset.assign_coords({x_field: x_proj, y_field: y_proj})
+
     if raster:
-        X, Y = np.meshgrid(
-            dataset[x_field].values, dataset[y_field].values, indexing="xy"
-        )
-        x_proj, y_proj = transformer.transform(X, Y)
-        dataset = dataset.assign_coords(
-            {
-                x_field: (("y", "x"), x_proj),
-                y_field: (("y", "x"), y_proj),
-            }
-        )
-        return dataset
+        x_proj = transformer.transform(
+            dataset[x_field].values, np.zeros_like(dataset[x_field].values)
+        )[0]
+        y_proj = transformer.transform(
+            np.zeros_like(dataset[y_field].values), dataset[y_field].values
+        )[1]
+        return dataset.assign_coords({x_field: x_proj, y_field: y_proj})
 
 
 def fetch_data(
@@ -358,7 +359,7 @@ def dataset_to_covjson(
                 },
                 "referencing": [
                     {
-                        "coordinates": ["x", "y"],
+                        "coordinates": ["y", "x"],
                         "system": {
                             "type": "GeographicCRS",
                             "id": output_uri,
