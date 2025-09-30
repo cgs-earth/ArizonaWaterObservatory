@@ -13,7 +13,7 @@ from pygeoapi.provider.base_edr import BaseEDRProvider
 import xarray as xr
 
 from NationalWaterModel.lib import (
-    dataset_to_point_covjson,
+    dataset_to_covjson,
     fetch_data,
 )
 
@@ -101,7 +101,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             time_field=self.provider_def["time_field"],
         )
 
-        return dataset_to_point_covjson(
+        return dataset_to_covjson(
             dataset=loaded_data,
             timeseries_parameter_name=select_properties[0],
             x_axis=self.provider_def["x_field"],
@@ -173,7 +173,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             raster=self.provider_def["raster"] or False,
         )
 
-        return dataset_to_point_covjson(
+        return dataset_to_covjson(
             dataset=loaded_data,
             timeseries_parameter_name=select_properties[0],
             x_axis=self.provider_def["x_field"],

@@ -173,7 +173,7 @@ def fetch_data(
     return selected.load()
 
 
-def dataset_to_point_covjson(
+def dataset_to_covjson(
     dataset: xr.Dataset,
     x_axis: str,
     y_axis: str,
@@ -281,23 +281,19 @@ def dataset_to_point_covjson(
                 "domainType": "Grid",
                 "axes": {
                     "x": {
-                        "start": min(x_values),
-                        "stop": max(x_values),
-                        "num": len(x_values),
+                        "values": x_values,
                     },
                     "y": {
-                        "start": min(y_values),
-                        "stop": max(y_values),
-                        "num": len(y_values),
+                        "values": y_values,
                     },
-                    "t": {"values": time_values},
+                    "t": {"values": [time_values]},
                 },
                 "referencing": [
                     {
                         "coordinates": ["x", "y"],
                         "system": {
                             "type": "GeographicCRS",
-                            "id": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                            "id": "http://www.opengis.net/def/crs/EPSG/0/3857",
                         },
                     },
                     {
