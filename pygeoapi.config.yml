@@ -108,11 +108,11 @@ resources:
     providers:
       - <<: *default_nwm_edr_config
         remote_dataset:  "CONUS/zarr/lakeout.zarr"
-        storage_crs: epsg:4326
+        storage_crs_override: epsg:4326
 
       - <<: *default_nwm_feature_config
         remote_dataset:  "CONUS/zarr/lakeout.zarr"
-        storage_crs: epsg:4326
+        storage_crs_override: epsg:4326
 
 
   ADWR_GWSI_Sites:

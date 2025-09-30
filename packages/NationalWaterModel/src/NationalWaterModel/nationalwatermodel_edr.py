@@ -40,6 +40,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
     fields_cache: EDRFieldsMapping = {}
     provider_def: ProviderSchema
     output_crs: pyproj.CRS
+    storage_crs_override: pyproj.CRS
 
     def __init__(self, provider_def: ProviderSchema):
         """
@@ -61,10 +62,12 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         if "raster" not in self.provider_def:
             self.provider_def["raster"] = False
 
-        if "storage_crs" in provider_def:
-            self.storage_crs = pyproj.CRS.from_user_input(provider_def["storage_crs"])
+        if "storage_crs_override" in provider_def:
+            self.storage_crs_override = pyproj.CRS.from_user_input(
+                provider_def["storagestorage_crs_override_crs"]
+            )
         else:
-            self.storage_crs = None
+            self.storage_crs_override = None
 
         self.output_crs = (
             pyproj.CRS.from_epsg(provider_def["output_crs"])
@@ -116,8 +119,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         storage_crs = (
             get_crs_from_dataset(loaded_data)
-            if self.storage_crs is None
-            else self.storage_crs
+            if self.storage_crs_override is None
+            else self.storage_crs_override
         )
         projected_dataset = project_dataset(
             loaded_data,
@@ -202,8 +205,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         storage_crs = (
             get_crs_from_dataset(loaded_data)
-            if self.storage_crs is None
-            else self.storage_crs
+            if self.storage_crs_override is None
+            else self.storage_crs_override
         )
 
         projected_dataset = project_dataset(

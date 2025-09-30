@@ -40,7 +40,7 @@ class ProviderSchema(TypedDict):
     # we will try to represent it as points in covjson
     raster: bool
     # The crs of the dataset that was ingested
-    storage_crs: NotRequired[str]
+    storage_crs_override: NotRequired[str]
     # The crs of the dataset that should be output in covjson
     output_crs: NotRequired[str]
 

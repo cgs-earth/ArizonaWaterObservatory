@@ -30,7 +30,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
     """Provider for OGC API Features"""
 
     zarr_dataset: xr.Dataset
-    storage_crs: pyproj.CRS | None
+    storage_crs_override: pyproj.CRS | None
     output_crs: pyproj.CRS
 
     def __init__(self, provider_def: ProviderSchema):
@@ -47,10 +47,12 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             else None,
         )
 
-        if "storage_crs" in provider_def:
-            self.storage_crs = pyproj.CRS.from_user_input(provider_def["storage_crs"])
+        if "storage_crs_override" in provider_def:
+            self.storage_crs_override = pyproj.CRS.from_user_input(
+                provider_def["storage_crs_override"]
+            )
         else:
-            self.storage_crs = None
+            self.storage_crs_override = None
 
         self.output_crs = (
             pyproj.CRS.from_epsg(provider_def["output_crs"])
@@ -96,8 +98,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
 
         storage_crs = (
             get_crs_from_dataset(result)
-            if self.storage_crs is None
-            else self.storage_crs
+            if self.storage_crs_override is None
+            else self.storage_crs_override
         )
 
         result = project_dataset(
