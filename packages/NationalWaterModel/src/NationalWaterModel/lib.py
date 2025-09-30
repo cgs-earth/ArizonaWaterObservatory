@@ -5,7 +5,7 @@ import functools
 import logging
 from typing import Literal, NotRequired, TypedDict
 
-from com.covjson import CoverageDict
+from com.covjson import CoverageCollectionDict, CoverageDict
 import numpy as np
 from pygeoapi.provider.base import ProviderNoDataError, ProviderQueryError
 import s3fs
@@ -60,6 +60,7 @@ def fetch_data(
     y_field: str,
     bbox: list,
     feature_id: str | None = None,
+    feature_limit: int | None = None,
 ) -> xr.Dataset:
     """
     Fetch data from a remote zarr dataset. Lazily apply a
@@ -156,7 +157,7 @@ def dataset_to_point_covjson(
     y_axis: str,
     timeseries_parameter_name: str,
     time_axis: str,
-) -> dict:
+) -> CoverageCollectionDict:
     """
     Given a dataset, return a covjson point series which essentially
     represents a list of points with a timeseries line graph for eawch
@@ -217,7 +218,7 @@ def dataset_to_point_covjson(
         }
         coverages.append(coverage)
 
-    coverage_collection = {
+    coverage_collection: CoverageCollectionDict = {
         "type": "CoverageCollection",
         "parameters": {
             timeseries_parameter_name: {

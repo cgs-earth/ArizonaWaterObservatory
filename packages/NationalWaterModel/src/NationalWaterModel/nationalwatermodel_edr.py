@@ -8,6 +8,7 @@ from com.covjson import CoverageCollectionDict
 from com.geojson.helpers import GeojsonFeatureCollectionDict, GeojsonFeatureDict
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
+from pygeoapi.provider.base import ProviderQueryError
 from pygeoapi.provider.base_edr import BaseEDRProvider
 import xarray as xr
 
@@ -70,7 +71,31 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         """
         Extract data from location
         """
-        raise NotImplementedError("Locations cannot be queried from a raster dataset")
+        if not select_properties or len(select_properties) > 1:
+            raise ProviderQueryError(
+                f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
+            )
+        if not datetime_:
+            raise ProviderQueryError("datetime is required to prevent overfetching")
+
+        loaded_data = fetch_data(
+            unopened_dataset=self.zarr_dataset,
+            timeseries_properties_to_fetch=select_properties,
+            datetime_filter=datetime_,
+            feature_id=location_id,
+            bbox=[],
+            x_field=self.provider_def["x_field"],
+            y_field=self.provider_def["y_field"],
+            time_field=self.provider_def["time_field"],
+        )
+
+        return dataset_to_point_covjson(
+            dataset=loaded_data,
+            timeseries_parameter_name=select_properties[0],
+            x_axis=self.provider_def["x_field"],
+            y_axis=self.provider_def["y_field"],
+            time_axis=self.provider_def["time_field"],
+        )
 
     def get_fields(self) -> EDRFieldsMapping:
         """Get the list of all parameters (i.e. fields) that the user can filter by"""
@@ -154,7 +179,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             "Area queries not implemented yet; unclear if arbitrary wkt is possible in zarr serverside"
         )
 
-    def items(self, **kwargs):
+    def items(self, **kwargs) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
         # This needs to be defined for pygeoapi to register items/ in the UI
         # https://github.com/geopython/pygeoapi/issues/1748
-        pass
+        ...

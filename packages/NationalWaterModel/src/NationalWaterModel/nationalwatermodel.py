@@ -58,12 +58,9 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
     ) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
         if properties is None:
             properties = []
+
         if not bbox:
-            LOGGER.error(
-                "bbox is required to prevent overfetching, falling back to Arizona"
-            )
-            ARIZONA_BBOX = [-112.5, 31.7, -110.7, 33.0]
-            bbox = ARIZONA_BBOX
+            LOGGER.warning("bbox should be set to prevent overfetching")
 
         latestValueInDataset = "2023-01-01"
         result = fetch_data(
