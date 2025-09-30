@@ -85,6 +85,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             if result.coords:
                 # the coords contain extra metadata properties about the feature
                 for prop in result.coords:
+                    other_properties["id"] = str(id)
+
                     if (
                         prop == self.provider_def["x_field"]
                         or prop == self.provider_def["y_field"]
@@ -98,7 +100,6 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
                         if not itemId
                         else result.coords[prop].values
                     )
-                    other_properties["id"] = str(id)
             feature: GeojsonFeatureDict = {
                 "type": "Feature",
                 "geometry": {
