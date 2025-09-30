@@ -12,6 +12,7 @@ from com.geojson.helpers import (
 from com.protocols.providers import OAFProviderProtocol
 from pygeoapi.provider.base import BaseProvider
 from pygeoapi.util import crs_transform
+import pyproj
 import xarray as xr
 
 from .lib import ProviderSchema, fetch_data, get_zarr_dataset_handle
@@ -23,6 +24,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
     """Provider for OGC API Features"""
 
     zarr_dataset: xr.Dataset
+    storage_crs: pyproj.CRS
+    output_crs: pyproj.CRS
 
     def __init__(self, provider_def: ProviderSchema):
         """
@@ -36,6 +39,11 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             provider_def["remote_dataset"]
             if "remote_dataset" in provider_def
             else None,
+        )
+        self.output_crs = (
+            pyproj.CRS.from_epsg(provider_def["output_crs"])
+            if "output_crs" in provider_def
+            else pyproj.CRS.from_user_input("ogc:CRS84")
         )
 
     def items(  # type: ignore

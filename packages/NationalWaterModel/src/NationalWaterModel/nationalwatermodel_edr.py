@@ -10,6 +10,7 @@ from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
 from pygeoapi.provider.base import ProviderQueryError
 from pygeoapi.provider.base_edr import BaseEDRProvider
+import pyproj
 import xarray as xr
 
 from NationalWaterModel.lib import (
@@ -17,7 +18,7 @@ from NationalWaterModel.lib import (
     fetch_data,
 )
 
-from .lib import get_zarr_dataset_handle
+from .lib import get_crs_from_dataset, get_zarr_dataset_handle, project_dataset
 from .nationalwatermodel import (
     ProviderSchema,
 )
@@ -38,6 +39,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
     zarr_dataset: xr.Dataset
     fields_cache: EDRFieldsMapping = {}
     provider_def: ProviderSchema
+    output_crs: pyproj.CRS
 
     def __init__(self, provider_def: ProviderSchema):
         """
@@ -58,6 +60,12 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         self.provider_def = provider_def
         if "raster" not in self.provider_def:
             self.provider_def["raster"] = False
+
+        self.output_crs = (
+            pyproj.CRS.from_epsg(provider_def["output_crs"])
+            if "output_crs" in provider_def
+            else pyproj.CRS.from_user_input("ogc:CRS84")
+        )
 
     @otel_trace()
     def locations(
@@ -101,12 +109,23 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             time_field=self.provider_def["time_field"],
         )
 
+        storage_crs = get_crs_from_dataset(loaded_data)
+
+        projected_dataset = project_dataset(
+            loaded_data,
+            storage_crs,
+            self.output_crs,
+            self.provider_def["x_field"],
+            self.provider_def["y_field"],
+        )
+
         return dataset_to_covjson(
-            dataset=loaded_data,
+            dataset=projected_dataset,
             timeseries_parameter_name=select_properties[0],
             x_axis=self.provider_def["x_field"],
             y_axis=self.provider_def["y_field"],
             time_axis=self.provider_def["time_field"],
+            output_crs=self.output_crs,
             raster=False,
         )
 
@@ -173,11 +192,23 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             raster=self.provider_def["raster"] or False,
         )
 
+        storage_crs = get_crs_from_dataset(loaded_data)
+
+        projected_dataset = project_dataset(
+            loaded_data,
+            storage_crs,
+            self.output_crs,
+            self.provider_def["x_field"],
+            self.provider_def["y_field"],
+            self.provider_def["raster"] or False,
+        )
+
         return dataset_to_covjson(
-            dataset=loaded_data,
+            dataset=projected_dataset,
             timeseries_parameter_name=select_properties[0],
             x_axis=self.provider_def["x_field"],
             y_axis=self.provider_def["y_field"],
+            output_crs=self.output_crs,
             time_axis=self.provider_def["time_field"],
             raster=self.provider_def["raster"] or False,
         )

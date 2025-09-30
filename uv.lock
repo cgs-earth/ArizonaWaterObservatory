@@ -164,6 +164,7 @@ dependencies = [
     { name = "opentelemetry-instrumentation-aiohttp-client" },
     { name = "orjson" },
     { name = "redis" },
+    { name = "rioxarray" },
     { name = "rise" },
     { name = "s3fs" },
     { name = "snotel" },
@@ -201,6 +202,7 @@ requires-dist = [
     { name = "opentelemetry-instrumentation-aiohttp-client", specifier = ">=0.56b0" },
     { name = "orjson", specifier = ">=3.11.0" },
     { name = "redis", specifier = ">=6.2.0" },
+    { name = "rioxarray", specifier = ">=0.19.0" },
     { name = "rise", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&branch=main" },
     { name = "s3fs", specifier = ">=2025.9.0" },
     { name = "snotel", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&branch=main" },
@@ -1990,6 +1992,22 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a1/53/830aa4c3066a8ab0ae9a9955976fb770fe9c6102117c8ec4ab3ea62d89e8/rich-14.0.0.tar.gz", hash = "sha256:82f1bc23a6a21ebca4ae0c45af9bdbc492ed20231dcb63f297d6d1021a9d5725", size = 224078 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0d/9b/63f4c7ebc259242c89b3acafdb37b41d1185c07ff0011164674e9076b491/rich-14.0.0-py3-none-any.whl", hash = "sha256:1c9491e1951aac09caffd42f448ee3d04e58923ffe14993f6e83068dc395d7e0", size = 243229 },
+]
+
+[[package]]
+name = "rioxarray"
+version = "0.19.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "pyproj" },
+    { name = "rasterio" },
+    { name = "xarray" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3d/8e/fe4e87460f8c62d8d5c683e09f19fbde5d9cfcfd0342d02df1f452999b5d/rioxarray-0.19.0.tar.gz", hash = "sha256:7819a0036fd874c8c8e280447cbbe43d8dc72fc4a14ac7852a665b1bdb7d4b04", size = 54600 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl", hash = "sha256:494ee4fff1781072d55ee5276f5d07b63d93b05093cb33b926a12186ba5bb8ef", size = 62151 },
 ]
 
 [[package]]

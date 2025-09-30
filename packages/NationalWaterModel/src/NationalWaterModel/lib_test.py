@@ -2,10 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pygeoapi.provider.base import ProviderNoDataError
+import pyproj
 import pytest
 
-from NationalWaterModel.lib import fetch_data
+from NationalWaterModel.lib import fetch_data, project_dataset
 from NationalWaterModel.nationalwatermodel_edr import NationalWaterModelEDRProvider
+
+from .lib import get_crs_from_dataset
 
 provider = NationalWaterModelEDRProvider(
     provider_def={
@@ -82,3 +85,16 @@ def test_no_parameters():
         unopened_dataset=provider.zarr_dataset,
     )
     assert len(result.data_vars.items()) == 0
+
+
+def test_crs():
+    crs = get_crs_from_dataset(provider.zarr_dataset)
+
+    projected_dataset = project_dataset(
+        provider.zarr_dataset, crs, pyproj.CRS.from_epsg(3857), "longitude", "latitude"
+    )
+
+    assert (
+        projected_dataset["longitude"].values[0]
+        != provider.zarr_dataset["longitude"].values[0]
+    )
