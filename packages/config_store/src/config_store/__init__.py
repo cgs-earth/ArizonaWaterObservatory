@@ -4,7 +4,6 @@
 from dataclasses import dataclass
 import logging
 from typing import Literal, TypedDict
-import uuid
 
 from pygeoapi.process.base import BaseProcessor, ProcessorExecuteError
 import redis
@@ -87,11 +86,6 @@ class ConfigStoreProcessor(BaseProcessor):
                 f"Data {data} does not match the schema and threw error: {e}"
             ) from e
 
-        associated_uuid = str(uuid.uuid1())
-
         # the result of the job will be stored in the job manager
         # thus making it so we don't need to worry about storing it in the db
-        return "application/json", {
-            "id": associated_uuid,
-            **data,
-        }
+        return "application/json", data
