@@ -13,5 +13,6 @@ def test_store_and_retrieve():
             "name": "test",
         }
     )
-    result = processor.execute({"name": "test"})
-    assert "id" in result[1] and result[1]["id"]
+    mimeType, config = processor.execute({"name": "test"})
+    assert mimeType == "application/json"
+    assert config["name"] == "test"
