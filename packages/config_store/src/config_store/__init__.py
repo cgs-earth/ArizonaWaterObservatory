@@ -6,11 +6,10 @@ import logging
 from typing import Literal, TypedDict
 
 from pygeoapi.process.base import BaseProcessor, ProcessorExecuteError
-import redis
 
 
 class ProcessorOptions(TypedDict):
-    """Options for configuring hte provider in redis"""
+    """Options for configuring the processor."""
 
     id: str
     title: str
@@ -20,7 +19,7 @@ class ProcessorOptions(TypedDict):
 
 @dataclass
 class ConfigSchema:
-    """The config to be stored in redis."""
+    """The config to be stored in the manager."""
 
     name: str
     # TODO ask john and fill in more fields
@@ -36,7 +35,7 @@ PROCESS_METADATA = {
     "title": {"en": "Config Store"},
     "description": {"en": "Store and retrieve configuration info"},
     "jobControlOptions": ["sync-execute", "async-execute"],
-    "keywords": ["redis", "config", "store"],
+    "keywords": ["config", "store"],
     "inputs": {
         "name": {
             "title": "Name",
@@ -60,9 +59,7 @@ PROCESS_METADATA = {
 
 
 class ConfigStoreProcessor(BaseProcessor):
-    """A processor for storing config data in redis"""
-
-    client: redis.Redis
+    """A processor for storing config data"""
 
     def __init__(self, processor_def: ProcessorOptions):
         """
@@ -88,4 +85,6 @@ class ConfigStoreProcessor(BaseProcessor):
 
         # the result of the job will be stored in the job manager
         # thus making it so we don't need to worry about storing it in the db
+        # in our integration code. as a result we just return the data directly
+        # as a pass through
         return "application/json", data
