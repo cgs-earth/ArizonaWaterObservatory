@@ -5,7 +5,10 @@ import logging
 from typing import TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
-from com.geojson.helpers import GeojsonFeatureCollectionDict, GeojsonFeatureDict
+from com.geojson.helpers import (
+    GeojsonFeatureCollectionDict,
+    GeojsonFeatureDict,
+)
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
 from pygeoapi.provider.base import ProviderQueryError
@@ -104,7 +107,9 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
                 f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
             )
         if not datetime_:
-            raise ProviderQueryError("datetime is required to prevent overfetching")
+            raise ProviderQueryError(
+                "datetime is required to prevent overfetching"
+            )
 
         loaded_data = fetch_data(
             unopened_dataset=self.zarr_dataset,
@@ -242,7 +247,9 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             "Area queries not implemented yet; unclear if arbitrary wkt is possible in zarr serverside"
         )
 
-    def items(self, **kwargs) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
+    def items(
+        self, **kwargs
+    ) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
         # This needs to be defined for pygeoapi to register items/ in the UI
         # https://github.com/geopython/pygeoapi/issues/1748
         ...

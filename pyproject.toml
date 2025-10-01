@@ -67,6 +67,9 @@ omit = [
     "test/",
 ]
 
+[tool.ruff]
+line-length = 79
+
 [tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors

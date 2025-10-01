@@ -88,7 +88,9 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         result = fetch_data(
             bbox=bbox,
             timeseries_properties_to_fetch=[],
-            datetime_filter=latestValueInDataset if not datetime_ else datetime_,
+            datetime_filter=latestValueInDataset
+            if not datetime_
+            else datetime_,
             time_field=self.provider_def["time_field"],
             x_field=self.provider_def["x_field"],
             y_field=self.provider_def["y_field"],
@@ -115,7 +117,9 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         x_values = result[self.provider_def["x_field"]].values
         y_values = result[self.provider_def["y_field"]].values
 
-        for i, id in enumerate(result["feature_id"].values if not itemId else [itemId]):
+        for i, id in enumerate(
+            result["feature_id"].values if not itemId else [itemId]
+        ):
             other_properties = {}
             if result.coords:
                 # the coords contain extra metadata properties about the feature

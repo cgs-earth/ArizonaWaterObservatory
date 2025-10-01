@@ -6,7 +6,9 @@ import pyproj
 import pytest
 
 from NationalWaterModel.lib import fetch_data, project_dataset
-from NationalWaterModel.nationalwatermodel_edr import NationalWaterModelEDRProvider
+from NationalWaterModel.nationalwatermodel_edr import (
+    NationalWaterModelEDRProvider,
+)
 
 from .lib import get_crs_from_dataset
 
