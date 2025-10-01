@@ -11,8 +11,10 @@ from com.geojson.helpers import (
 )
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
+from pygeoapi.api import DEFAULT_CRS
 from pygeoapi.provider.base import ProviderQueryError
 from pygeoapi.provider.base_edr import BaseEDRProvider
+from pygeoapi.util import transform_bbox
 import pyproj
 import xarray as xr
 
@@ -44,6 +46,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
     provider_def: ProviderSchema
     output_crs: pyproj.CRS
     storage_crs_override: pyproj.CRS | None
+    raster: bool = False
 
     def __init__(self, provider_def: ProviderSchema):
         """
@@ -61,22 +64,28 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             else None,
         )
 
-        self.provider_def = provider_def
-        if "raster" not in self.provider_def:
-            self.provider_def["raster"] = False
+    def get_fields(self) -> EDRFieldsMapping:
+        """Get the list of all parameters (i.e. fields) that the user can filter by"""
+        if not self._fields:
+            for var, meta in self.zarr_dataset.variables.items():
+                var = str(var)
+                if var in (self.x_field, self.y_field, self.time_field):
+                    continue
 
-        if "storage_crs_override" in provider_def:
-            self.storage_crs_override = pyproj.CRS.from_user_input(
-                provider_def["storage_crs_override"]
-            )
-        else:
-            self.storage_crs_override = None
+                if meta.attrs.get("units") is None:
+                    LOGGER.warning(
+                        f"Variable {var} does not have units; skipping"
+                    )
+                    continue
 
-        self.output_crs = (
-            pyproj.CRS.from_epsg(provider_def["output_crs"])
-            if "output_crs" in provider_def
-            else pyproj.CRS.from_epsg(4326)
-        )
+                self._fields[var] = {
+                    "title": meta.attrs["long_name"].title(),
+                    "x-ogc-unit": meta.attrs.get("units"),
+                    "description": var,
+                    "type": "number",
+                }
+
+        return self._fields
 
     @otel_trace()
     def locations(
@@ -97,10 +106,6 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         """
         Extract data from location
         """
-        if self.provider_def["raster"]:
-            raise ProviderQueryError(
-                "Locations cannot be queried from a raster dataset"
-            )
 
         if not select_properties or len(select_properties) > 1:
             raise ProviderQueryError(
@@ -118,57 +123,32 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             feature_id=location_id,
             bbox=[],
             feature_limit=limit,
-            x_field=self.provider_def["x_field"],
-            y_field=self.provider_def["y_field"],
-            time_field=self.provider_def["time_field"],
+            x_field=self.x_field,
+            y_field=self.y_field,
+            time_field=self.time_field,
         )
 
-        storage_crs = (
-            get_crs_from_dataset(loaded_data)
-            if self.storage_crs_override is None
-            else self.storage_crs_override
-        )
+        storage_crs = get_crs_from_dataset(loaded_data)
         projected_dataset = project_dataset(
             loaded_data,
             storage_crs,
             self.output_crs,
-            self.provider_def["x_field"],
-            self.provider_def["y_field"],
-            raster=False,
+            self.x_field,
+            self.y_field,
         )
+
+        parameter_name = select_properties[0]
+        parameter_unit = self.fields[parameter_name]["x-ogc-unit"]
 
         return dataset_to_covjson(
             dataset=projected_dataset,
-            timeseries_parameter_name=select_properties[0],
-            x_axis=self.provider_def["x_field"],
-            y_axis=self.provider_def["y_field"],
-            time_axis=self.provider_def["time_field"],
-            output_crs=self.output_crs,
-            raster=False,
+            timeseries_parameter_name=parameter_name,
+            timeseries_parameter_unit=parameter_unit,
+            x_axis=self.x_field,
+            y_axis=self.y_field,
+            time_axis=self.time_field,
+            output_crs=pyproj.CRS.from_epsg(4326),
         )
-
-    def get_fields(self) -> EDRFieldsMapping:
-        """Get the list of all parameters (i.e. fields) that the user can filter by"""
-        if self.fields_cache:
-            return self.fields_cache
-
-        edr_fields: EDRFieldsMapping = {}
-        for var in self.zarr_dataset.variables:
-            if var in (
-                self.provider_def["x_field"],
-                self.provider_def["y_field"],
-                self.provider_def["time_field"],
-            ):
-                continue
-
-            edr_fields[str(var)] = {
-                "title": str(var),
-                "x-ogc-unit": str(var),
-                "description": str(var),
-                "type": "number",
-            }
-        self.fields_cache = edr_fields
-        return edr_fields
 
     def cube(
         self,
@@ -195,6 +175,10 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         if not bbox:
             raise ValueError("bbox is required to prevent overfetching")
 
+        storage_crs = get_crs_from_dataset(self.zarr_dataset)
+
+        bbox = transform_bbox(bbox, DEFAULT_CRS, storage_crs)
+
         if z:
             raise NotImplementedError("Elevation filtering not implemented")
 
@@ -204,35 +188,33 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             timeseries_properties_to_fetch=select_properties,
             datetime_filter=datetime_,
             bbox=bbox,
-            x_field=self.provider_def["x_field"],
-            y_field=self.provider_def["y_field"],
-            time_field=self.provider_def["time_field"],
-            raster=self.provider_def["raster"] or False,
-        )
-
-        storage_crs = (
-            get_crs_from_dataset(loaded_data)
-            if self.storage_crs_override is None
-            else self.storage_crs_override
+            x_field=self.x_field,
+            y_field=self.y_field,
+            time_field=self.time_field,
+            raster=self.raster,
         )
 
         projected_dataset = project_dataset(
             loaded_data,
             storage_crs,
-            self.output_crs,
-            self.provider_def["x_field"],
-            self.provider_def["y_field"],
-            self.provider_def["raster"] or False,
+            pyproj.CRS.from_epsg(4326),
+            self.x_field,
+            self.y_field,
+            self.raster,
         )
+
+        parameter_name = select_properties[0]
+        parameter_unit = self.fields[parameter_name]["x-ogc-unit"]
 
         return dataset_to_covjson(
             dataset=projected_dataset,
-            timeseries_parameter_name=select_properties[0],
-            x_axis=self.provider_def["x_field"],
-            y_axis=self.provider_def["y_field"],
-            output_crs=self.output_crs,
-            time_axis=self.provider_def["time_field"],
-            raster=self.provider_def["raster"] or False,
+            timeseries_parameter_name=parameter_name,
+            timeseries_parameter_unit=parameter_unit,
+            x_axis=self.x_field,
+            y_axis=self.y_field,
+            output_crs=pyproj.CRS.from_epsg(4326),
+            time_axis=self.time_field,
+            raster=self.raster,
         )
 
     def area(
@@ -253,3 +235,20 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         # This needs to be defined for pygeoapi to register items/ in the UI
         # https://github.com/geopython/pygeoapi/issues/1748
         ...
+
+
+class NationalWaterModelRasterEDRProvider(NationalWaterModelEDRProvider):
+    """The EDR Provider for raster datasets"""
+
+    raster: bool = True
+
+    def __init__(self, provider_def: ProviderSchema):
+        """
+        Initialize object
+
+        :param provider_def: provider definition
+        """
+        super().__init__(provider_def)
+
+    def cube(self, *args, **kwargs):
+        return super().cube(*args, **kwargs)

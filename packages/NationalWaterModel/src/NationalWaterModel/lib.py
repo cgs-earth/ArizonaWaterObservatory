@@ -83,6 +83,11 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
                     f"Failed to parse storage crs: {spatial_ref}"
                 ) from e
 
+    try:
+        return pyproj.CRS.from_dict(dataset.attrs)
+    except Exception:
+        LOGGER.warning("Could not find storage crs in attr dict")
+
     for var in dataset.attrs:
         if str(var).lower() == "proj4":
             spatial_ref = dataset.attrs[var]
@@ -92,6 +97,7 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
                 raise ProviderInvalidDataError(
                     f"Failed to parse storage crs: {spatial_ref}"
                 ) from e
+
     raise ProviderInvalidDataError("Could not find storage crs")
 
 
@@ -101,7 +107,7 @@ def project_dataset(
     output_crs: pyproj.CRS,
     x_field: str,
     y_field: str,
-    raster: bool,
+    raster: bool = False,
 ) -> xr.Dataset:
     if storage_crs == output_crs:
         return dataset
@@ -253,6 +259,7 @@ def dataset_to_covjson(
     y_axis: str,
     output_crs: pyproj.CRS,
     timeseries_parameter_name: str,
+    timeseries_parameter_unit: str,
     time_axis: str,
     raster: bool = False,
 ) -> CoverageCollectionDict | CoverageDict:
@@ -281,9 +288,9 @@ def dataset_to_covjson(
 
     coverages: list[CoverageDict] = []
 
-    authority = output_crs.to_authority()
+    authority, code = output_crs.to_authority()
     LATEST = 0
-    output_uri = f"http://www.opengis.net/def/crs/{authority[0]}/{LATEST}/{authority[1]}"
+    output_uri = f"http://www.opengis.net/def/crs/{authority}/{LATEST}/{code}"
 
     if not raster:
         for i in range(len(x_values)):
@@ -327,7 +334,7 @@ def dataset_to_covjson(
                 timeseries_parameter_name: {
                     "type": "Parameter",
                     "description": {"en": str(timeseries_parameter_name)},
-                    "unit": {"symbol": "1"},
+                    "unit": {"symbol": timeseries_parameter_unit},
                     "observedProperty": {
                         "id": timeseries_parameter_name,
                         "label": {"en": str(timeseries_parameter_name)},
@@ -389,7 +396,7 @@ def dataset_to_covjson(
                 timeseries_parameter_name: {
                     "type": "Parameter",
                     "description": {"en": str(timeseries_parameter_name)},
-                    "unit": {"symbol": "1"},
+                    "unit": {"symbol": timeseries_parameter_unit},
                     "observedProperty": {
                         "id": str(timeseries_parameter_name),
                         "label": {"en": str(timeseries_parameter_name)},
@@ -407,7 +414,7 @@ def dataset_to_covjson(
                         len(x_values),
                     ],
                     "values": [
-                        0 if np.isnan(val) else val
+                        None if np.isnan(val) else val
                         for val in timeseries_values.reshape(-1).tolist()
                     ],
                 },
