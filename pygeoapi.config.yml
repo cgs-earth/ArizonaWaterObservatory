@@ -96,6 +96,25 @@ resources:
         raster: true
 
 
+
+  
+  National_Water_Model_Groundwater_Output:
+    type: collection
+    title: National Water Model Groundwater Output
+    description: National Water Model Groundwater Output
+    keywords: ["NWM"]
+    extents: 
+      spatial:
+        bbox: [-170, 15, -51, 72]
+        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS8
+    providers:
+      - <<: *default_nwm_edr_config
+        remote_dataset:  "CONUS/zarr/gwout.zarr"
+        x_field: x 
+        y_field: y
+        raster: true
+
+
   National_Water_Model_Lakeout:
     type: collection
     title: National Water Model Lake Output
