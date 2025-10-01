@@ -4,19 +4,21 @@
 import logging
 from typing import TypedDict
 
-from com.covjson import CoverageCollectionDict
+from com.covjson import CoverageCollectionDict, CoverageDict
 from com.geojson.helpers import GeojsonFeatureCollectionDict, GeojsonFeatureDict
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
+from pygeoapi.provider.base import ProviderQueryError
 from pygeoapi.provider.base_edr import BaseEDRProvider
+import pyproj
 import xarray as xr
 
 from NationalWaterModel.lib import (
-    dataset_to_point_covjson,
+    dataset_to_covjson,
     fetch_data,
 )
 
-from .lib import get_zarr_dataset_handle
+from .lib import get_crs_from_dataset, get_zarr_dataset_handle, project_dataset
 from .nationalwatermodel import (
     ProviderSchema,
 )
@@ -37,6 +39,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
     zarr_dataset: xr.Dataset
     fields_cache: EDRFieldsMapping = {}
     provider_def: ProviderSchema
+    output_crs: pyproj.CRS
+    storage_crs_override: pyproj.CRS | None
 
     def __init__(self, provider_def: ProviderSchema):
         """
@@ -55,6 +59,21 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         )
 
         self.provider_def = provider_def
+        if "raster" not in self.provider_def:
+            self.provider_def["raster"] = False
+
+        if "storage_crs_override" in provider_def:
+            self.storage_crs_override = pyproj.CRS.from_user_input(
+                provider_def["storage_crs_override"]
+            )
+        else:
+            self.storage_crs_override = None
+
+        self.output_crs = (
+            pyproj.CRS.from_epsg(provider_def["output_crs"])
+            if "output_crs" in provider_def
+            else pyproj.CRS.from_epsg(4326)
+        )
 
     @otel_trace()
     def locations(
@@ -66,11 +85,62 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         format_: str | None = None,
         limit: int | None = None,
         **kwargs,
-    ) -> CoverageCollectionDict | GeojsonFeatureCollectionDict | GeojsonFeatureDict:
+    ) -> (
+        CoverageCollectionDict
+        | CoverageDict
+        | GeojsonFeatureCollectionDict
+        | GeojsonFeatureDict
+    ):
         """
         Extract data from location
         """
-        raise NotImplementedError("Locations cannot be queried from a raster dataset")
+        if self.provider_def["raster"]:
+            raise ProviderQueryError(
+                "Locations cannot be queried from a raster dataset"
+            )
+
+        if not select_properties or len(select_properties) > 1:
+            raise ProviderQueryError(
+                f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
+            )
+        if not datetime_:
+            raise ProviderQueryError("datetime is required to prevent overfetching")
+
+        loaded_data = fetch_data(
+            unopened_dataset=self.zarr_dataset,
+            timeseries_properties_to_fetch=select_properties,
+            datetime_filter=datetime_,
+            feature_id=location_id,
+            bbox=[],
+            feature_limit=limit,
+            x_field=self.provider_def["x_field"],
+            y_field=self.provider_def["y_field"],
+            time_field=self.provider_def["time_field"],
+        )
+
+        storage_crs = (
+            get_crs_from_dataset(loaded_data)
+            if self.storage_crs_override is None
+            else self.storage_crs_override
+        )
+        projected_dataset = project_dataset(
+            loaded_data,
+            storage_crs,
+            self.output_crs,
+            self.provider_def["x_field"],
+            self.provider_def["y_field"],
+            raster=False,
+        )
+
+        return dataset_to_covjson(
+            dataset=projected_dataset,
+            timeseries_parameter_name=select_properties[0],
+            x_axis=self.provider_def["x_field"],
+            y_axis=self.provider_def["y_field"],
+            time_axis=self.provider_def["time_field"],
+            output_crs=self.output_crs,
+            raster=False,
+        )
 
     def get_fields(self) -> EDRFieldsMapping:
         """Get the list of all parameters (i.e. fields) that the user can filter by"""
@@ -110,11 +180,6 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-110.7,33.0&f=html&parameter-name=streamflow&datetime=2023-01-01
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-111.7,31.9&f=html&parameter-name=velocity&datetime=2023-01-01/2023-01-02
         """
-        if not select_properties:
-            LOGGER.error(
-                "select_properties is required to prevent overfetching, falling back to streamflow default"
-            )
-
         if not select_properties or len(select_properties) > 1:
             raise ValueError(
                 f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
@@ -126,25 +191,43 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             raise ValueError("bbox is required to prevent overfetching")
 
         if z:
-            raise NotImplementedError("Elevation filtering not implemented yet")
+            raise NotImplementedError("Elevation filtering not implemented")
 
         assert self.zarr_dataset
         loaded_data = fetch_data(
             unopened_dataset=self.zarr_dataset,
-            select_properties=select_properties,
+            timeseries_properties_to_fetch=select_properties,
             datetime_filter=datetime_,
             bbox=bbox,
             x_field=self.provider_def["x_field"],
             y_field=self.provider_def["y_field"],
             time_field=self.provider_def["time_field"],
+            raster=self.provider_def["raster"] or False,
         )
 
-        return dataset_to_point_covjson(
-            dataset=loaded_data,
+        storage_crs = (
+            get_crs_from_dataset(loaded_data)
+            if self.storage_crs_override is None
+            else self.storage_crs_override
+        )
+
+        projected_dataset = project_dataset(
+            loaded_data,
+            storage_crs,
+            self.output_crs,
+            self.provider_def["x_field"],
+            self.provider_def["y_field"],
+            self.provider_def["raster"] or False,
+        )
+
+        return dataset_to_covjson(
+            dataset=projected_dataset,
             timeseries_parameter_name=select_properties[0],
             x_axis=self.provider_def["x_field"],
             y_axis=self.provider_def["y_field"],
+            output_crs=self.output_crs,
             time_axis=self.provider_def["time_field"],
+            raster=self.provider_def["raster"] or False,
         )
 
     def area(
@@ -159,7 +242,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             "Area queries not implemented yet; unclear if arbitrary wkt is possible in zarr serverside"
         )
 
-    def items(self, **kwargs):
+    def items(self, **kwargs) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
         # This needs to be defined for pygeoapi to register items/ in the UI
         # https://github.com/geopython/pygeoapi/issues/1748
-        pass
+        ...

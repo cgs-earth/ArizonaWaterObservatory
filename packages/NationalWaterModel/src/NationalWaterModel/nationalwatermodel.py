@@ -12,9 +12,16 @@ from com.geojson.helpers import (
 from com.protocols.providers import OAFProviderProtocol
 from pygeoapi.provider.base import BaseProvider
 from pygeoapi.util import crs_transform
+import pyproj
 import xarray as xr
 
-from .lib import ProviderSchema, fetch_data, get_zarr_dataset_handle
+from .lib import (
+    ProviderSchema,
+    fetch_data,
+    get_crs_from_dataset,
+    get_zarr_dataset_handle,
+    project_dataset,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +30,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
     """Provider for OGC API Features"""
 
     zarr_dataset: xr.Dataset
+    storage_crs_override: pyproj.CRS | None
+    output_crs: pyproj.CRS
 
     def __init__(self, provider_def: ProviderSchema):
         """
@@ -38,11 +47,24 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             else None,
         )
 
+        if "storage_crs_override" in provider_def:
+            self.storage_crs_override = pyproj.CRS.from_user_input(
+                provider_def["storage_crs_override"]
+            )
+        else:
+            self.storage_crs_override = None
+
+        self.output_crs = (
+            pyproj.CRS.from_epsg(provider_def["output_crs"])
+            if "output_crs" in provider_def
+            else pyproj.CRS.from_epsg(4326)
+        )
+
     def items(  # type: ignore
         self,
-        properties: list[tuple[str, str]],
         bbox: list,
         datetime_: str | None = None,
+        properties: list[tuple[str, str]] | None = None,
         resulttype: Literal["hits", "results"] | None = "results",
         # select only features that contains all the `select_properties` values
         select_properties: list[str]
@@ -56,31 +78,50 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         skip_geometry: bool | None = False,
         **kwargs,
     ) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
+        if properties is None:
+            properties = []
+
         if not bbox:
-            LOGGER.error(
-                "bbox is required to prevent overfetching, falling back to Arizona"
-            )
-            ARIZONA_BBOX = [-112.5, 31.7, -110.7, 33.0]
-            bbox = ARIZONA_BBOX
+            LOGGER.warning("bbox should be set to prevent overfetching")
 
         latestValueInDataset = "2023-01-01"
         result = fetch_data(
             bbox=bbox,
-            select_properties=[],
+            timeseries_properties_to_fetch=[],
             datetime_filter=latestValueInDataset if not datetime_ else datetime_,
             time_field=self.provider_def["time_field"],
             x_field=self.provider_def["x_field"],
             y_field=self.provider_def["y_field"],
             unopened_dataset=self.zarr_dataset,
+            feature_id=itemId,
         )
+
+        storage_crs = (
+            get_crs_from_dataset(result)
+            if self.storage_crs_override is None
+            else self.storage_crs_override
+        )
+
+        result = project_dataset(
+            result,
+            storage_crs,
+            self.output_crs,
+            self.provider_def["x_field"],
+            self.provider_def["y_field"],
+            raster=False,
+        )
+
         features: list[GeojsonFeatureDict] = []
         x_values = result[self.provider_def["x_field"]].values
         y_values = result[self.provider_def["y_field"]].values
-        for i, id in enumerate(result["feature_id"].values):
+
+        for i, id in enumerate(result["feature_id"].values if not itemId else [itemId]):
             other_properties = {}
             if result.coords:
                 # the coords contain extra metadata properties about the feature
                 for prop in result.coords:
+                    other_properties["id"] = str(id)
+
                     if (
                         prop == self.provider_def["x_field"]
                         or prop == self.provider_def["y_field"]
@@ -89,24 +130,30 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
                     ):
                         continue
 
-                    other_properties[prop] = str(result.coords[prop].values[i])
-                    other_properties["id"] = int(id)
+                    other_properties[prop] = str(
+                        result.coords[prop].values[i]
+                        if not itemId
+                        else result.coords[prop].values
+                    )
             feature: GeojsonFeatureDict = {
                 "type": "Feature",
                 "geometry": {
                     "type": "Point",
                     "coordinates": [
-                        float(x_values[i]),
-                        float(y_values[i]),
+                        float(x_values[i] if not itemId else x_values),
+                        float(y_values[i] if not itemId else y_values),
                     ],
                 },
-                "id": int(id),
+                "id": str(id),
                 "properties": other_properties,
             }
+            if itemId:
+                return feature
 
             features.append(feature)
             if i > limit:
                 break
+
         geojsonResponse: GeojsonFeatureCollectionDict = {
             "type": "FeatureCollection",
             "features": features,
