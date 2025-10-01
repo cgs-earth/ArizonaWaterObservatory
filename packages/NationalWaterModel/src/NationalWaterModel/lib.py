@@ -7,11 +7,13 @@ from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
 import numpy as np
+from pygeoapi.api import DEFAULT_STORAGE_CRS
 from pygeoapi.provider.base import (
     ProviderInvalidDataError,
     ProviderNoDataError,
     ProviderQueryError,
 )
+from pygeoapi.util import get_crs_from_uri
 import pyproj
 import s3fs
 import xarray as xr
@@ -98,7 +100,7 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
                     f"Failed to parse storage crs: {spatial_ref}"
                 ) from e
 
-    raise ProviderInvalidDataError("Could not find storage crs")
+    return get_crs_from_uri(DEFAULT_STORAGE_CRS)
 
 
 def project_dataset(
@@ -244,7 +246,7 @@ def fetch_data(
             raise ProviderNoDataError(f"No data in bbox {bbox}")
 
         if raster:
-            # if it is raster tehre is no feature_id
+            # if it is raster there is no feature_id
             # and thus the mask needs to be applied to the dataset as a whole
             selected = selected.where(mask, drop=True)
         else:
