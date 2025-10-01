@@ -9,7 +9,7 @@ server:
   language: en-US
   cors: true
   pretty_print: true
-  admin: true
+  # admin: true
   templates:
     path: /opt/pygeoapi/pygeoapi-deployment/templates
   limits:
