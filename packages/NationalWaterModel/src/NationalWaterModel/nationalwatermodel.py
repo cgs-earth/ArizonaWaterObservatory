@@ -46,6 +46,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             if "remote_dataset" in provider_def
             else None,
         )
+        if "storage_crs" not in provider_def:
+            self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
 
     def items(  # type: ignore
         self,
@@ -83,11 +85,9 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             feature_limit=limit,
         )
 
-        storage_crs = get_crs_from_dataset(result)
-
         result = project_dataset(
             result,
-            storage_crs,
+            self.storage_crs,
             pyproj.CRS.from_epsg(4326),
             self.x_field,
             self.y_field,
