@@ -86,7 +86,7 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
                 ) from e
 
     try:
-        return pyproj.CRS.from_dict(dataset.attrs)
+        return pyproj.CRS.from_json_dict(dataset.attrs)
     except Exception:
         LOGGER.warning("Could not find storage crs in attr dict")
 
@@ -176,6 +176,7 @@ def fetch_data(
 
     if feature_id is not None:
         selected = selected.sel(feature_id=int(feature_id))
+        return selected.load()
 
     if datetime_filter is None:
         raise ProviderQueryError(
@@ -226,7 +227,7 @@ def fetch_data(
     if feature_limit is not None:
         selected = selected.isel(feature_id=slice(0, feature_limit))
 
-    if not feature_id and bbox:
+    if bbox:
         # Geospatial filtering using latitude and longitude variables
         lon_min, lat_min, lon_max, lat_max = bbox
 
