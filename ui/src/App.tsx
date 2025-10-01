@@ -4,15 +4,21 @@
  */
 
 import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import '@/global.css';
 
-import { MantineProvider } from '@mantine/core';
-import { Router } from './Router';
-import { theme } from './theme';
+import { Providers } from '@/providers';
+import { Router } from '@/Router';
 
+/**
+ * This component renderes the router and wraps it in the map and mantine providers.
+ *
+ * @component
+ */
 export default function App() {
   return (
-    <MantineProvider theme={theme}>
+    <Providers>
       <Router />
-    </MantineProvider>
+    </Providers>
   );
 }

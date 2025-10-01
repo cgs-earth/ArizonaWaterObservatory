@@ -4,12 +4,19 @@
  */
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { HomePage } from './pages/Home.page';
+import { DataPage } from '@/pages/Data.page';
+import { LayoutPage } from '@/pages/Layout.page';
+import { MapPage } from '@/pages/Map.page';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
+    element: <LayoutPage />,
+    children: [
+      { index: true, element: <MapPage /> }, // renders at '/'
+      { path: 'map', element: <MapPage /> }, // renders at '/map'
+      { path: 'data', element: <DataPage /> }, // renders at '/data'
+    ],
   },
 ]);
 
