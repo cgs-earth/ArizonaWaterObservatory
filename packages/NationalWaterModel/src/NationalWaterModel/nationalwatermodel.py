@@ -12,9 +12,16 @@ from com.geojson.helpers import (
 from com.protocols.providers import OAFProviderProtocol
 from pygeoapi.provider.base import BaseProvider
 from pygeoapi.util import crs_transform
+import pyproj
 import xarray as xr
 
-from .lib import ProviderSchema, fetch_data, get_zarr_dataset_handle
+from .lib import (
+    ProviderSchema,
+    fetch_data,
+    get_crs_from_dataset,
+    get_zarr_dataset_handle,
+    project_dataset,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +30,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
     """Provider for OGC API Features"""
 
     zarr_dataset: xr.Dataset
+    storage_crs_override: pyproj.CRS | None
+    output_crs: pyproj.CRS
 
     def __init__(self, provider_def: ProviderSchema):
         """
@@ -36,6 +45,19 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             provider_def["remote_dataset"]
             if "remote_dataset" in provider_def
             else None,
+        )
+
+        if "storage_crs_override" in provider_def:
+            self.storage_crs_override = pyproj.CRS.from_user_input(
+                provider_def["storage_crs_override"]
+            )
+        else:
+            self.storage_crs_override = None
+
+        self.output_crs = (
+            pyproj.CRS.from_epsg(provider_def["output_crs"])
+            if "output_crs" in provider_def
+            else pyproj.CRS.from_epsg(4326)
         )
 
     def items(  # type: ignore
@@ -73,6 +95,22 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             unopened_dataset=self.zarr_dataset,
             feature_id=itemId,
         )
+
+        storage_crs = (
+            get_crs_from_dataset(result)
+            if self.storage_crs_override is None
+            else self.storage_crs_override
+        )
+
+        result = project_dataset(
+            result,
+            storage_crs,
+            self.output_crs,
+            self.provider_def["x_field"],
+            self.provider_def["y_field"],
+            raster=False,
+        )
+
         features: list[GeojsonFeatureDict] = []
         x_values = result[self.provider_def["x_field"]].values
         y_values = result[self.provider_def["y_field"]].values
@@ -115,6 +153,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             features.append(feature)
             if i > limit:
                 break
+
         geojsonResponse: GeojsonFeatureCollectionDict = {
             "type": "FeatureCollection",
             "features": features,

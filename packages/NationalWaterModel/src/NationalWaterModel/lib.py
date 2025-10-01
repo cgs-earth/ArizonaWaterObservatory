@@ -7,7 +7,12 @@ from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
 import numpy as np
-from pygeoapi.provider.base import ProviderNoDataError, ProviderQueryError
+from pygeoapi.provider.base import (
+    ProviderInvalidDataError,
+    ProviderNoDataError,
+    ProviderQueryError,
+)
+import pyproj
 import s3fs
 import xarray as xr
 
@@ -34,6 +39,10 @@ class ProviderSchema(TypedDict):
     # Whether the dataset is a raster image. If not, it is a vector and
     # we will try to represent it as points in covjson
     raster: bool
+    # The crs of the dataset that was ingested
+    storage_crs_override: NotRequired[str]
+    # The crs of the dataset that should be output in covjson
+    output_crs: NotRequired[str]
 
 
 LOGGER = logging.getLogger(__name__)
@@ -59,6 +68,58 @@ def get_zarr_dataset_handle(data: str, remote_dataset: str | None) -> xr.Dataset
     )
     mapper = fs.get_mapper(remote_dataset)
     return xr.open_zarr(mapper, consolidated=True, chunks="auto")
+
+
+def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
+    for var in dataset.variables:
+        if str(var).lower() == "crs":
+            spatial_ref = dataset[var].attrs["spatial_ref"]
+            try:
+                return pyproj.CRS.from_wkt(spatial_ref)
+            except Exception as e:
+                raise ProviderInvalidDataError(
+                    f"Failed to parse storage crs: {spatial_ref}"
+                ) from e
+
+    for var in dataset.attrs:
+        if str(var).lower() == "proj4":
+            spatial_ref = dataset.attrs[var]
+            try:
+                return pyproj.CRS.from_proj4(spatial_ref)
+            except Exception as e:
+                raise ProviderInvalidDataError(
+                    f"Failed to parse storage crs: {spatial_ref}"
+                ) from e
+    raise ProviderInvalidDataError("Could not find storage crs")
+
+
+def project_dataset(
+    dataset: xr.Dataset,
+    storage_crs: pyproj.CRS,
+    output_crs: pyproj.CRS,
+    x_field: str,
+    y_field: str,
+    raster: bool,
+) -> xr.Dataset:
+    if storage_crs == output_crs:
+        return dataset
+
+    transformer = pyproj.Transformer.from_crs(storage_crs, output_crs, always_xy=True)
+
+    if not raster:
+        # Point dataset: simple 1D projection
+        x_proj, y_proj = transformer.transform(
+            dataset[x_field].values, dataset[y_field].values
+        )
+        return dataset.assign_coords({x_field: x_proj, y_field: y_proj})
+
+    else:
+        # if the dataset is raster we need to reproject it. raster datasets
+        # a non linear crs are non trivial to reproject so it is easiest to just
+        # use rio.reproject
+        dataset = dataset.rio.set_spatial_dims(x_dim=x_field, y_dim=y_field)
+        dataset = dataset.rio.write_crs(storage_crs.to_wkt())
+        return dataset.rio.reproject(dst_crs=output_crs.to_wkt())
 
 
 def fetch_data(
@@ -177,6 +238,7 @@ def dataset_to_covjson(
     dataset: xr.Dataset,
     x_axis: str,
     y_axis: str,
+    output_crs: pyproj.CRS,
     timeseries_parameter_name: str,
     time_axis: str,
     raster: bool = False,
@@ -205,6 +267,12 @@ def dataset_to_covjson(
         timeseries_values = [timeseries_values]
 
     coverages: list[CoverageDict] = []
+
+    authority = output_crs.to_authority()
+    LATEST = 0
+    output_uri = (
+        f"http://www.opengis.net/def/crs/{authority[0]}/{LATEST}/{authority[1]}"
+    )
 
     if not raster:
         for i in range(len(x_values)):
@@ -257,10 +325,10 @@ def dataset_to_covjson(
             },
             "referencing": [
                 {
-                    "coordinates": ["x", "y"],
+                    "coordinates": ["y", "x"],
                     "system": {
                         "type": "GeographicCRS",
-                        "id": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                        "id": output_uri,
                     },
                 },
                 {
@@ -291,10 +359,10 @@ def dataset_to_covjson(
                 },
                 "referencing": [
                     {
-                        "coordinates": ["x", "y"],
+                        "coordinates": ["y", "x"],
                         "system": {
-                            "type": "ProjectedCRS",
-                            "id": "http://www.opengis.net/def/crs/EPSG/0/5070",
+                            "type": "GeographicCRS",
+                            "id": output_uri,
                         },
                     },
                     {
