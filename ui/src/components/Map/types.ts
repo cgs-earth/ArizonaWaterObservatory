@@ -4,6 +4,7 @@
  */
 
 import { FeatureServiceOptions } from '@hansdo/mapbox-gl-arcgis-featureserver';
+import MapboxDraw, { MapboxDrawOptions } from '@mapbox/mapbox-gl-draw';
 import { GeocoderOptions } from '@mapbox/mapbox-gl-geocoder';
 import {
   ControlPosition,
@@ -95,6 +96,7 @@ export type CustomListenerFunction = (
   map: Map,
   hoverPopup: Popup,
   persistentPopup: Popup,
+  draw: MapboxDraw | null,
   root: Root,
   container: HTMLDivElement
 ) => (e: MapMouseEvent) => void;
@@ -184,6 +186,9 @@ export interface MapComponentProps {
   customControls?: ICustomControl[];
   persist?: boolean;
   geocoder?: Omit<GeocoderOptions, 'accessToken'> & {
+    position?: ControlPosition;
+  };
+  draw?: MapboxDrawOptions & {
     position?: ControlPosition;
   };
 }

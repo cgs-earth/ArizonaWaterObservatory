@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DrawingSlice } from './slices/drawing';
+import { LoadingSlice } from './slices/loading';
+import { NotificationsSlice } from './slices/notifications';
+
 export enum NotificationType {
   Success = 'success',
   Error = 'error',
@@ -39,6 +43,12 @@ export type LegendEntry = {
   visible: boolean;
 };
 
+export enum DrawMode {
+  Polygon = 'polygon',
+  Measure = 'measure',
+  Select = 'select',
+}
+
 export type SessionState = {
   legendEntries: LegendEntry[];
   setLegendEntries: (legendEntries: SessionState['legendEntries']) => void;
@@ -48,11 +58,6 @@ export type SessionState = {
     [Tools.Legend]: boolean;
   };
   setOpenTools: (tool: Tools, open: boolean) => void;
-  loadingInstances: Loading[];
-  addLoadingInstance: (loadingInstance: Loading) => void;
-  removeLoadingInstance: (id: string) => void;
-  hasLoadingInstance: (text: string) => boolean;
-  notifications: Notification[];
-  addNotification: (notification: Notification) => void;
-  removeNotification: (id: string) => void;
-};
+} & NotificationsSlice &
+  LoadingSlice &
+  DrawingSlice;

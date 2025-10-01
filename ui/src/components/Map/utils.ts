@@ -4,6 +4,7 @@
  */
 
 import { FeatureServiceOptions } from '@hansdo/mapbox-gl-arcgis-featureserver';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import {
   FullscreenControl,
   Map,
@@ -89,6 +90,7 @@ export const addHoverFunctions = (
   layerDefinitions: MainLayerDefinition[],
   hoverPopup: Popup,
   persistentPopup: Popup,
+  draw: MapboxDraw | null,
   root: Root,
   container: HTMLDivElement
 ) => {
@@ -97,13 +99,13 @@ export const addHoverFunctions = (
       map.on(
         'mouseenter',
         layer.id,
-        layer.hoverFunction(map, hoverPopup, persistentPopup, root, container)
+        layer.hoverFunction(map, hoverPopup, persistentPopup, draw, root, container)
       );
       if (layer.customHoverExitFunction) {
         map.on(
           'mouseleave',
           layer.id,
-          layer.customHoverExitFunction(map, hoverPopup, persistentPopup, root, container)
+          layer.customHoverExitFunction(map, hoverPopup, persistentPopup, draw, root, container)
         );
       } else {
         map.on('mouseleave', layer.id, () => {
@@ -118,13 +120,20 @@ export const addHoverFunctions = (
           map.on(
             'mouseenter',
             subLayer.id,
-            subLayer.hoverFunction(map, hoverPopup, persistentPopup, root, container)
+            subLayer.hoverFunction(map, hoverPopup, persistentPopup, draw, root, container)
           );
           if (subLayer.customHoverExitFunction) {
             map.on(
               'mouseleave',
               subLayer.id,
-              subLayer.customHoverExitFunction(map, hoverPopup, persistentPopup, root, container)
+              subLayer.customHoverExitFunction(
+                map,
+                hoverPopup,
+                persistentPopup,
+                draw,
+                root,
+                container
+              )
             );
           } else {
             map.on('mouseleave', subLayer.id, () => {
@@ -151,6 +160,7 @@ export const addMouseMoveFunctions = (
   layerDefinitions: MainLayerDefinition[],
   hoverPopup: Popup,
   persistentPopup: Popup,
+  draw: MapboxDraw | null,
   root: Root,
   container: HTMLDivElement
 ) => {
@@ -159,7 +169,7 @@ export const addMouseMoveFunctions = (
       map.on(
         'mousemove',
         layer.id,
-        layer.mouseMoveFunction(map, hoverPopup, persistentPopup, root, container)
+        layer.mouseMoveFunction(map, hoverPopup, persistentPopup, draw, root, container)
       );
     }
     if ((layer?.subLayers ?? []).length > 0) {
@@ -168,7 +178,7 @@ export const addMouseMoveFunctions = (
           map.on(
             'mousemove',
             subLayer.id,
-            subLayer.mouseMoveFunction(map, hoverPopup, persistentPopup, root, container)
+            subLayer.mouseMoveFunction(map, hoverPopup, persistentPopup, draw, root, container)
           );
         }
       });
@@ -189,6 +199,7 @@ export const addClickFunctions = (
   layerDefinitions: MainLayerDefinition[],
   hoverPopup: Popup,
   persistentPopup: Popup,
+  draw: MapboxDraw | null,
   root: Root,
   container: HTMLDivElement
 ) => {
@@ -197,7 +208,7 @@ export const addClickFunctions = (
       map.on(
         'click',
         layer.id,
-        layer.clickFunction(map, hoverPopup, persistentPopup, root, container)
+        layer.clickFunction(map, hoverPopup, persistentPopup, draw, root, container)
       );
     }
     if ((layer?.subLayers ?? []).length > 0) {
@@ -206,7 +217,7 @@ export const addClickFunctions = (
           map.on(
             'click',
             subLayer.id,
-            subLayer.clickFunction(map, hoverPopup, persistentPopup, root, container)
+            subLayer.clickFunction(map, hoverPopup, persistentPopup, draw, root, container)
           );
         }
       });

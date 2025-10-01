@@ -53,14 +53,15 @@ const MainMap: React.FC<Props> = (props) => {
       map.resize();
       map.fitBounds(
         [
-          [-125, 24], // Southwest corner (California/Baja)
-          [-96.5, 49], // Northeast corner (MN/ND border)
+          [-114.8183, 31.3322], // Southwest corner [lng, lat]
+          [-109.0452, 37.0043], // Northeast corner [lng, lat]
         ],
         {
           padding: 50,
           animate: false,
         }
       );
+      console.log('map resize');
       initialMapLoad.current = false;
     }
   }, [map]);
@@ -125,7 +126,7 @@ const MainMap: React.FC<Props> = (props) => {
           scaleControl: true,
           navigationControl: true,
         }}
-        persist
+        draw={{ clickBuffer: 5, touchEnabled: true, displayControlsDefault: false }}
       />
     </>
   );

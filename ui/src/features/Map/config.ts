@@ -3,15 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { DataDrivenPropertyValueSpecification, LayerSpecification, Map, Popup } from 'mapbox-gl';
 import { Root } from 'react-dom/client';
 import { CustomListenerFunction, MainLayerDefinition } from '@/components/Map/types';
+import { getMessage } from './utils';
 
 export const MAP_ID = 'main-map';
 
-export enum LayerId {}
+export enum LayerId {
+  DrawCold = 'mapbox-gl-draw-cold',
+  DrawHot = 'mapbox-gl-draw-hot',
+}
 
-export enum SubLayerId {}
+export enum SubLayerId {
+  PolygonFillCold = 'gl-draw-polygon-fill.cold',
+  LinesCold = 'gl-draw-lines.cold',
+  PointOuterCold = 'gl-draw-point-outer.cold',
+  PointInnerCold = 'gl-draw-point-inner.cold',
+  VertexOuterCold = 'gl-draw-vertex-outer.cold',
+  VertexInnerCold = 'gl-draw-vertex-inner.cold',
+  MidpointCold = 'gl-draw-midpoint.cold',
+
+  PolygonFillHot = 'gl-draw-polygon-fill.hot',
+  LinesHot = 'gl-draw-lines.hot',
+  PointOuterHot = 'gl-draw-point-outer.hot',
+  PointInnerHot = 'gl-draw-point-inner.hot',
+  VertexOuterHot = 'gl-draw-vertex-outer.hot',
+  VertexInnerHot = 'gl-draw-vertex-inner.hot',
+  MidpointHot = 'gl-draw-midpoint.hot',
+}
 
 export const allLayerIds = [];
 
@@ -86,10 +107,43 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
     map: Map,
     hoverPopup: Popup,
     persistentPopup: Popup,
+    draw: MapboxDraw | null,
     root: Root,
     container: HTMLDivElement
   ) => {
     switch (id) {
+      case SubLayerId.PolygonFillCold:
+      case SubLayerId.LinesCold:
+      case SubLayerId.PointOuterCold:
+      case SubLayerId.PointInnerCold:
+      case SubLayerId.VertexOuterCold:
+      case SubLayerId.VertexInnerCold:
+      case SubLayerId.MidpointCold:
+      case SubLayerId.PolygonFillHot:
+      case SubLayerId.LinesHot:
+      case SubLayerId.PointOuterHot:
+      case SubLayerId.PointInnerHot:
+      case SubLayerId.VertexOuterHot:
+      case SubLayerId.VertexInnerHot:
+      case SubLayerId.MidpointHot:
+        return (e) => {
+          if (!draw) {
+            return;
+          }
+          const feature = e.features?.[0];
+          if (feature && feature.properties && feature.properties?.active) {
+            const active = feature.properties.active === 'true';
+            const mode = draw.getMode();
+
+            const message = getMessage(id, active, mode);
+            if (message.length > 0) {
+              console.log('feature', feature.properties);
+              const html = `<strong style="color:black;">${message}</strong>`;
+              hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            }
+          }
+        };
+
       default:
         return (e) => {
           console.log('Hover Event Triggered: ', e);
@@ -97,6 +151,7 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
           console.log('Available Popups: ');
           console.log('Hover: ', hoverPopup);
           console.log('Persistent: ', persistentPopup);
+          console.log('Draw: ', draw);
           console.log('Content Root: ', root);
           console.log('Content Container: ', container);
 
@@ -125,6 +180,7 @@ export const getLayerCustomHoverExitFunction = (
     map: Map,
     hoverPopup: Popup,
     persistentPopup: Popup,
+    draw: MapboxDraw | null,
     root: Root,
     container: HTMLDivElement
   ) => {
@@ -136,6 +192,7 @@ export const getLayerCustomHoverExitFunction = (
           console.log('Available Popups: ');
           console.log('Hover: ', hoverPopup);
           console.log('Persistent: ', persistentPopup);
+          console.log('Draw: ', draw);
           console.log('Content Root: ', root);
           console.log('Content Container: ', container);
         };
@@ -160,10 +217,42 @@ export const getLayerMouseMoveFunction = (id: LayerId | SubLayerId): CustomListe
     map: Map,
     hoverPopup: Popup,
     persistentPopup: Popup,
+    draw: MapboxDraw | null,
     root: Root,
     container: HTMLDivElement
   ) => {
     switch (id) {
+      case SubLayerId.PolygonFillCold:
+      case SubLayerId.LinesCold:
+      case SubLayerId.PointOuterCold:
+      case SubLayerId.PointInnerCold:
+      case SubLayerId.VertexOuterCold:
+      case SubLayerId.VertexInnerCold:
+      case SubLayerId.MidpointCold:
+      case SubLayerId.PolygonFillHot:
+      case SubLayerId.LinesHot:
+      case SubLayerId.PointOuterHot:
+      case SubLayerId.PointInnerHot:
+      case SubLayerId.VertexOuterHot:
+      case SubLayerId.VertexInnerHot:
+      case SubLayerId.MidpointHot:
+        return (e) => {
+          if (!draw) {
+            return;
+          }
+          const feature = e.features?.[0];
+          if (feature && feature.properties && feature.properties?.active) {
+            const active = feature.properties.active === 'true';
+            const mode = draw.getMode();
+
+            const message = getMessage(id, active, mode);
+            if (message.length > 0) {
+              const html = `<strong style="color:black;">${message}</strong>`;
+              hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            }
+          }
+        };
+
       default:
         return (e) => {
           console.log('Hover Exit Event Triggered: ', e);
@@ -171,6 +260,7 @@ export const getLayerMouseMoveFunction = (id: LayerId | SubLayerId): CustomListe
           console.log('Available Popups: ');
           console.log('Hover: ', hoverPopup);
           console.log('Persistent: ', persistentPopup);
+          console.log('Draw: ', draw);
           console.log('Content Root: ', root);
           console.log('Content Container: ', container);
         };
@@ -194,6 +284,7 @@ export const getLayerClickFunction = (id: LayerId | SubLayerId): CustomListenerF
     map: Map,
     hoverPopup: Popup,
     persistentPopup: Popup,
+    draw: MapboxDraw | null,
     root: Root,
     container: HTMLDivElement
   ) => {
@@ -205,6 +296,7 @@ export const getLayerClickFunction = (id: LayerId | SubLayerId): CustomListenerF
           console.log('Available Popups: ');
           console.log('Hover: ', hoverPopup);
           console.log('Persistent: ', persistentPopup);
+          console.log('Draw: ', draw);
           console.log('Content Root: ', root);
           console.log('Content Container: ', container);
         };
@@ -237,4 +329,132 @@ export const layerDefinitions: MainLayerDefinition[] = [
   // Use this as the master object to define layer hierarchies. Sublayers are nested layer definitions,
   // meaning they have their own click and hover listeners. The order of layers and sublayers dictates the draw
   // order on the map.
+  {
+    id: LayerId.DrawCold,
+    controllable: false,
+    legend: false,
+    config: getLayerConfig(LayerId.DrawCold),
+    subLayers: [
+      {
+        id: SubLayerId.PolygonFillCold,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.PolygonFillCold),
+        hoverFunction: getLayerHoverFunction(SubLayerId.PolygonFillCold),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.PolygonFillCold),
+      },
+      {
+        id: SubLayerId.LinesCold,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.LinesCold),
+        hoverFunction: getLayerHoverFunction(SubLayerId.LinesCold),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.LinesCold),
+      },
+      {
+        id: SubLayerId.PointOuterCold,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.PointOuterCold),
+        hoverFunction: getLayerHoverFunction(SubLayerId.PointOuterCold),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.PointOuterCold),
+      },
+      {
+        id: SubLayerId.PointInnerCold,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.PointInnerCold),
+        hoverFunction: getLayerHoverFunction(SubLayerId.PointInnerCold),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.PointInnerCold),
+      },
+      {
+        id: SubLayerId.VertexOuterCold,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.VertexOuterCold),
+        hoverFunction: getLayerHoverFunction(SubLayerId.VertexOuterCold),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.VertexOuterCold),
+      },
+      {
+        id: SubLayerId.VertexInnerCold,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.VertexInnerCold),
+        hoverFunction: getLayerHoverFunction(SubLayerId.VertexInnerCold),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.VertexInnerCold),
+      },
+      {
+        id: SubLayerId.MidpointCold,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.MidpointCold),
+        hoverFunction: getLayerHoverFunction(SubLayerId.MidpointCold),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.MidpointCold),
+      },
+    ],
+  },
+  {
+    id: LayerId.DrawHot,
+    controllable: false,
+    legend: false,
+    config: getLayerConfig(LayerId.DrawHot),
+    subLayers: [
+      {
+        id: SubLayerId.PolygonFillHot,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.PolygonFillHot),
+        hoverFunction: getLayerHoverFunction(SubLayerId.PolygonFillHot),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.PolygonFillHot),
+      },
+      {
+        id: SubLayerId.LinesHot,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.LinesHot),
+        hoverFunction: getLayerHoverFunction(SubLayerId.LinesHot),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.LinesHot),
+      },
+      {
+        id: SubLayerId.PointOuterHot,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.PointOuterHot),
+        hoverFunction: getLayerHoverFunction(SubLayerId.PointOuterHot),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.PointOuterHot),
+      },
+      {
+        id: SubLayerId.PointInnerHot,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.PointInnerHot),
+        hoverFunction: getLayerHoverFunction(SubLayerId.PointInnerHot),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.PointInnerHot),
+      },
+      {
+        id: SubLayerId.VertexOuterHot,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.VertexOuterHot),
+        hoverFunction: getLayerHoverFunction(SubLayerId.VertexOuterHot),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.VertexOuterHot),
+      },
+      {
+        id: SubLayerId.VertexInnerHot,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.VertexInnerHot),
+        hoverFunction: getLayerHoverFunction(SubLayerId.VertexInnerHot),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.VertexInnerHot),
+      },
+      {
+        id: SubLayerId.MidpointHot,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.MidpointHot),
+        hoverFunction: getLayerHoverFunction(SubLayerId.MidpointHot),
+        mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.MidpointHot),
+      },
+    ],
+  },
 ];

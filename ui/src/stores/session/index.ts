@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { createDrawingSlice } from './slices/drawing';
 import { createLoadingSlice } from './slices/loading';
 import { createNotificationsSlice } from './slices/notifications';
 import { SessionState, Tools } from './types';
@@ -15,6 +16,7 @@ const useSessionStore = create<SessionState>()(
     setLegendEntries: (legendEntries) => set({ legendEntries }),
     downloadModalOpen: false,
     setDownloadModalOpen: (downloadModalOpen) => set({ downloadModalOpen }),
+
     tools: {
       [Tools.Legend]: false,
     },
@@ -27,6 +29,7 @@ const useSessionStore = create<SessionState>()(
       })),
     ...createLoadingSlice(set, get, store),
     ...createNotificationsSlice(set, get, store),
+    ...createDrawingSlice(set, get, store),
   }))
 );
 
