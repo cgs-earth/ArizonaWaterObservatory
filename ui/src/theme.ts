@@ -6,5 +6,8 @@
 import { createTheme } from '@mantine/core';
 
 export const theme = createTheme({
-  /** Put your mantine theme override here */
+  fontFamily: 'Arial, Helvetica, sans-serif',
+  headings: {
+    fontFamily: 'Arial, Helvetica, sans-serif',
+  },
 });
