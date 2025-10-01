@@ -40,7 +40,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
     fields_cache: EDRFieldsMapping = {}
     provider_def: ProviderSchema
     output_crs: pyproj.CRS
-    storage_crs_override: pyproj.CRS
+    storage_crs_override: pyproj.CRS | None
 
     def __init__(self, provider_def: ProviderSchema):
         """
@@ -112,6 +112,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             datetime_filter=datetime_,
             feature_id=location_id,
             bbox=[],
+            feature_limit=limit,
             x_field=self.provider_def["x_field"],
             y_field=self.provider_def["y_field"],
             time_field=self.provider_def["time_field"],
@@ -128,6 +129,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             self.output_crs,
             self.provider_def["x_field"],
             self.provider_def["y_field"],
+            raster=False,
         )
 
         return dataset_to_covjson(

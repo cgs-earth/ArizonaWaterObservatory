@@ -101,30 +101,25 @@ def project_dataset(
     y_field: str,
     raster: bool,
 ) -> xr.Dataset:
-    """
-    Project a dataset from storage CRS to output CRS.
-    Returns flat 1D arrays for coordinates, even if raster=True.
-    """
     if storage_crs == output_crs:
         return dataset
 
     transformer = pyproj.Transformer.from_crs(storage_crs, output_crs, always_xy=True)
 
     if not raster:
-        # Non-raster: simple 1D projection
+        # Point dataset: simple 1D projection
         x_proj, y_proj = transformer.transform(
             dataset[x_field].values, dataset[y_field].values
         )
         return dataset.assign_coords({x_field: x_proj, y_field: y_proj})
 
-    if raster:
-        x_proj = transformer.transform(
-            dataset[x_field].values, np.zeros_like(dataset[x_field].values)
-        )[0]
-        y_proj = transformer.transform(
-            np.zeros_like(dataset[y_field].values), dataset[y_field].values
-        )[1]
-        return dataset.assign_coords({x_field: x_proj, y_field: y_proj})
+    else:
+        # if the dataset is raster we need to reproject it. raster datasets
+        # a non linear crs are non trivial to reproject so it is easiest to just
+        # use rio.reproject
+        dataset = dataset.rio.set_spatial_dims(x_dim=x_field, y_dim=y_field)
+        dataset = dataset.rio.write_crs(storage_crs.to_wkt())
+        return dataset.rio.reproject(dst_crs=output_crs.to_wkt())
 
 
 def fetch_data(

@@ -91,7 +91,12 @@ def test_crs():
     crs = get_crs_from_dataset(provider.zarr_dataset)
 
     projected_dataset = project_dataset(
-        provider.zarr_dataset, crs, pyproj.CRS.from_epsg(3857), "longitude", "latitude"
+        provider.zarr_dataset,
+        crs,
+        pyproj.CRS.from_epsg(3857),
+        "longitude",
+        "latitude",
+        raster=False,
     )
 
     assert (
