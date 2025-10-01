@@ -49,7 +49,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 @functools.cache
-def get_zarr_dataset_handle(data: str, remote_dataset: str | None) -> xr.Dataset:
+def get_zarr_dataset_handle(
+    data: str, remote_dataset: str | None
+) -> xr.Dataset:
     """
     Open the zarr dataset but don't actually load the data.
     We use functools cache over this since it's a slow operation
@@ -104,7 +106,9 @@ def project_dataset(
     if storage_crs == output_crs:
         return dataset
 
-    transformer = pyproj.Transformer.from_crs(storage_crs, output_crs, always_xy=True)
+    transformer = pyproj.Transformer.from_crs(
+        storage_crs, output_crs, always_xy=True
+    )
 
     if not raster:
         # Point dataset: simple 1D projection
@@ -191,7 +195,9 @@ def fetch_data(
         start, stop = datetime_range
 
         # Resolve open-ended ranges
-        start = np.datetime64(start) if start != ".." else available_times.min()
+        start = (
+            np.datetime64(start) if start != ".." else available_times.min()
+        )
         stop = np.datetime64(stop) if stop != ".." else available_times.max()
 
         # Clip start/stop to available range
@@ -201,7 +207,9 @@ def fetch_data(
         # Select only times that exist in the dataset
         mask = (available_times >= start) & (available_times <= stop)
         if not mask.any():
-            raise ProviderNoDataError(f"No data available between {start} and {stop}.")
+            raise ProviderNoDataError(
+                f"No data available between {start} and {stop}."
+            )
         else:
             times_to_select = available_times[mask]
             selected = selected.sel(time=times_to_select, drop=False)
@@ -219,7 +227,12 @@ def fetch_data(
         lat = selected[y_field].compute()
 
         # get only data within the bbox
-        mask = (lon >= lon_min) & (lon <= lon_max) & (lat >= lat_min) & (lat <= lat_max)
+        mask = (
+            (lon >= lon_min)
+            & (lon <= lon_max)
+            & (lat >= lat_min)
+            & (lat <= lat_max)
+        )
 
         if not mask.any():
             raise ProviderNoDataError(f"No data in bbox {bbox}")
@@ -270,9 +283,7 @@ def dataset_to_covjson(
 
     authority = output_crs.to_authority()
     LATEST = 0
-    output_uri = (
-        f"http://www.opengis.net/def/crs/{authority[0]}/{LATEST}/{authority[1]}"
-    )
+    output_uri = f"http://www.opengis.net/def/crs/{authority[0]}/{LATEST}/{authority[1]}"
 
     if not raster:
         for i in range(len(x_values)):
@@ -367,7 +378,10 @@ def dataset_to_covjson(
                     },
                     {
                         "coordinates": ["t"],
-                        "system": {"type": "TemporalRS", "calendar": "Gregorian"},
+                        "system": {
+                            "type": "TemporalRS",
+                            "calendar": "Gregorian",
+                        },
                     },
                 ],
             },
