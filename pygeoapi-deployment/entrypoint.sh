@@ -23,6 +23,8 @@ WSGI_WORKERS=${WSGI_WORKERS:=4}
 WSGI_WORKER_TIMEOUT=${WSGI_WORKER_TIMEOUT:=6000}
 WSGI_WORKER_CLASS=${WSGI_WORKER_CLASS:=uvicorn.workers.UvicornH11Worker}
 
+mkdir -p ${JOB_MANAGER_DIRECTORY:=/tmp/pygeoapi/jobs}
+
 # What to invoke: default is to run gunicorn server
 entry_cmd=${1:-run}
 
