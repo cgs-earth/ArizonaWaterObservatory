@@ -107,8 +107,8 @@ def project_dataset(
     dataset: xr.Dataset,
     storage_crs: pyproj.CRS,
     output_crs: pyproj.CRS,
-    x_field: str,
-    y_field: str,
+    x_field: str | None,
+    y_field: str | None,
     raster: bool = False,
 ) -> xr.Dataset:
     if storage_crs == output_crs:
@@ -137,10 +137,10 @@ def project_dataset(
 def fetch_data(
     unopened_dataset: xr.Dataset,
     timeseries_properties_to_fetch: list[str],
-    time_field: str,
-    datetime_filter: str,
-    x_field: str,
-    y_field: str,
+    time_field: str | None,
+    datetime_filter: str | None,
+    x_field: str | None,
+    y_field: str | None,
     bbox: list,
     feature_id: str | None = None,
     feature_limit: int | None = None,
@@ -159,12 +159,12 @@ def fetch_data(
     variables_to_select = timeseries_properties_to_fetch.copy()
 
     # if we are selecting a property, we should also select time since timeseries always needs time
-    if time_field not in variables_to_select:
+    if time_field and time_field not in variables_to_select:
         variables_to_select.append(time_field)
 
     # Add x and y if not already included
     for coord in [y_field, x_field]:
-        if coord not in variables_to_select:
+        if coord and coord not in variables_to_select:
             variables_to_select.append(coord)
 
     try:
@@ -258,12 +258,12 @@ def fetch_data(
 
 def dataset_to_covjson(
     dataset: xr.Dataset,
-    x_axis: str,
-    y_axis: str,
+    x_axis: str | None,
+    y_axis: str | None,
     output_crs: pyproj.CRS,
     timeseries_parameter_name: str,
     timeseries_parameter_unit: str,
-    time_axis: str,
+    time_axis: str | None,
     raster: bool = False,
 ) -> CoverageCollectionDict | CoverageDict:
     """
