@@ -38,7 +38,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         Initialize object
         :param provider_def: provider definition
         """
-        super().__init__(provider_def)
+        super().__init__(dict(provider_def))
         self.provider_def = provider_def
         self.zarr_dataset = get_zarr_dataset_handle(
             provider_def["data"],
