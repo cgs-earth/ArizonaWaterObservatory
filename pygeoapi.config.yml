@@ -9,6 +9,7 @@ server:
   language: en-US
   cors: true
   pretty_print: true
+  # admin: true
   templates:
     path: /opt/pygeoapi/pygeoapi-deployment/templates
   limits:
@@ -18,37 +19,123 @@ server:
     url: https://tile.openstreetmap.org/{z}/{x}/{y}.png
     attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'
 
+  manager:  # optional OGC API - Processes asynchronous job management
+      name: TinyDB  # plugin name (see pygeoapi.plugin for supported process_manager's)
+      connection: ${JOB_MANAGER_CONNECTION:-/tmp/pygeoapi-process-manager.db}  # connection info to store jobs (e.g. filepath)
+      output_dir: ${JOB_MANAGER_DIRECTORY:-/tmp/}  # directory to store process outputs (e.g. files)
+      
 logging:
-  level: ${PYGEOAPI_LOGLEVEL:-ERROR}
+  level: ${PYGEOAPI_LOGLEVEL:-WARNING}
   # logfile: /tmp/pygeoapi.log
 
 metadata:
   identification:
     title: Arizona Water Observatory
-    description: The Arizona Water Observatory (AWO) provides water quality and water supply information for Arizona's water resources.
+    description: |
+      The Arizona Water Observatory (AWO) provides water
+      quality and water supply information for Arizona's
+      water resources.
     keywords:
       - awo
     keywords_type: theme
     terms_of_service: https://opensource.org/license/MIT
-    url: https://github.com/internetofwater/WWDH
+    url: https://github.com/cgs-earth/ArizonaWaterObservatory
   license:
     name: MIT License
     url: https://opensource.org/license/MIT
   provider:
     name: Internet of Water
-    url: https://github.com/internetofwater/ArizonaWaterObservatory
+    url: https://github.com/cgs-earth/ArizonaWaterObservatory
   contact:
     address: 113 Brattle St
     city: Cambridge
     stateorprovince: Massachussetts
     postalcode: 02138
     country: USA
-    email: bwebb@lincolninst.edu
+    email: internetofwater@lincolninst.edu
     url: https://cgsearth.org
     role: pointOfContact
-    name: Benjamin Webb
+    name: Colton Loftus
 
 resources:
+
+  National_Water_Model_Channel_Routing_Output:
+    type: collection
+    title: National Water Model Channel Routing Output
+    description: National Water Model Channel Routing Output
+    keywords: ["NWM"]
+    extents:  &nwm-extents
+      spatial:
+        bbox: [-170, 15, -51, 72]
+        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+      temporal:
+        begin: 1979-02-01T00:00:00Z
+        end: 2023-02-01T00:00:00Z
+        trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
+    providers:
+      - &nwm-edr
+        type: edr
+        name: NationalWaterModel.EDRProvider
+        data: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com
+        remote_dataset: CONUS/zarr/chrtout.zarr/
+        x_field: longitude
+        y_field: latitude
+        time_field: time
+      - &nwm-feature
+        type: feature
+        name: NationalWaterModel.FeatureProvider
+        data: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com
+        remote_dataset: CONUS/zarr/chrtout.zarr/
+        x_field: longitude
+        y_field: latitude
+        time_field: time
+        title_field: id
+
+  National_Water_Model_Land_Data_Assimilation_System_Output:
+    type: collection
+    title: National Water Model Land Data Assimilation System Output
+    description: National Water Model Land Data Assimilation System Output
+    keywords: ["NWM"]
+    extents: *nwm-extents
+    providers:
+      - &nwm-raster-edr
+        <<: *nwm-edr
+        name: NationalWaterModel.RasterEDRProvider
+        remote_dataset: CONUS/zarr/ldasout.zarr
+        x_field: "x"
+        y_field: "y"
+
+  National_Water_Data_Reach_to_Reach_Routing_Output:
+    type: collection
+    title: National Water Model Reach to Reach Routing Output
+    description: National Water Model Reach to Reach Routing Output
+    keywords: ["NWM"]
+    extents: *nwm-extents
+    providers:
+      - <<: *nwm-raster-edr
+        remote_dataset: CONUS/zarr/rtout.zarr
+
+  National_Water_Model_Lakeout:
+    type: collection
+    title: National Water Model Lake Output
+    description: National Water Model Lake Output
+    keywords: ["NWM"]
+    extents: *nwm-extents
+    providers:  
+      - <<: *nwm-edr
+        remote_dataset: CONUS/zarr/lakeout.zarr
+      - <<: *nwm-feature
+        remote_dataset: CONUS/zarr/lakeout.zarr
+  
+  # National_Water_Model_Groundwater_Output:
+  #   type: collection
+  #   title: National Water Model Groundwater Output
+  #   description: National Water Model Groundwater Output
+  #   keywords: ["NWM"]
+  #   extents: *nwm-extents
+  #   providers:
+  #     - <<: *nwm-raster-edr
+  #       remote_dataset: CONUS/zarr/gwout.zarr
 
   ADWR_GWSI_Sites:
     type: collection
@@ -264,3 +351,8 @@ resources:
         data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
         id_field: REGISTRY_ID
         time_field: installed
+
+  config-store:
+      type: process
+      processor:
+          name: config_store.ConfigStoreProcessor
