@@ -6,7 +6,7 @@
 import React, { useEffect, useRef } from 'react';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
-import mapboxgl, { IControl } from 'mapbox-gl';
+import mapboxgl, { Map as _Map, IControl } from 'mapbox-gl';
 import { MapComponentProps } from '@/components/Map/types';
 import {
   addClickFunctions,
@@ -120,7 +120,7 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
       newMap.once('load', () => {
         const createFeatureService = (
           sourceId: string,
-          map: mapboxgl.Map,
+          map: _Map,
           options: FeatureServiceOptions
         ) => new FeatureService(sourceId, map, options);
 
@@ -167,11 +167,8 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
     }
 
     map.on('style.load', () => {
-      const createFeatureService = (
-        sourceId: string,
-        map: mapboxgl.Map,
-        options: FeatureServiceOptions
-      ) => new FeatureService(sourceId, map, options);
+      const createFeatureService = (sourceId: string, map: _Map, options: FeatureServiceOptions) =>
+        new FeatureService(sourceId, map, options);
 
       // Layers reset on style changes
       addSources(map, sources, createFeatureService);

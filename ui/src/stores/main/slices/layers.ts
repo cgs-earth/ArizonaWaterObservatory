@@ -6,7 +6,7 @@
 import { StateCreator } from 'zustand';
 import { Layer, MainState } from '@/stores/main/types';
 
-interface LayerSlice {
+export interface LayerSlice {
   layers: Layer[];
   setLayers: (layers: Layer[]) => void;
   addLayer: (layer: Layer) => void;

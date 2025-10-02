@@ -61,7 +61,6 @@ const MainMap: React.FC<Props> = (props) => {
           animate: false,
         }
       );
-      console.log('map resize');
       initialMapLoad.current = false;
     }
   }, [map]);

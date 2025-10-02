@@ -137,7 +137,6 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
 
             const message = getMessage(id, active, mode);
             if (message.length > 0) {
-              console.log('feature', feature.properties);
               const html = `<strong style="color:black;">${message}</strong>`;
               hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
             }

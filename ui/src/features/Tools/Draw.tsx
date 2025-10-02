@@ -4,6 +4,9 @@
  */
 
 import { useEffect, useState } from 'react';
+import { DrawCreateEvent, DrawUpdateEvent } from '@mapbox/mapbox-gl-draw';
+import { booleanIntersects, buffer, featureCollection, union } from '@turf/turf';
+import { Feature, MultiPolygon, Polygon } from 'geojson';
 import { Box, Stack } from '@mantine/core';
 import Plus from '@/assets/Plus';
 import IconButton from '@/components/IconButton';
@@ -32,17 +35,65 @@ export const Draw: React.FC = () => {
     // Map is loaded and draw is set
     setLoaded(true);
 
-    map.on('draw.create', (e) => {
-      console.log('draw.create', e);
+    const combineFeatures = (feature: Feature<Polygon | MultiPolygon>) => {
+      const { features } = draw.getAll();
+      const overlappingFeatures: Feature<Polygon | MultiPolygon>[] = [];
+
+      const polygonFeatures = features.filter(
+        (f): f is Feature<Polygon | MultiPolygon> =>
+          f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon'
+      );
+
+      // Hack to produce valid shapes
+      const validFeature = buffer(feature, 0);
+
+      if (validFeature) {
+        polygonFeatures.forEach((existingFeature) => {
+          if (existingFeature.id !== feature.id && booleanIntersects(existingFeature, feature)) {
+            overlappingFeatures.push(existingFeature);
+          }
+        });
+
+        if (overlappingFeatures.length > 0) {
+          let combined = feature;
+
+          overlappingFeatures.forEach((feature) => {
+            const unionShape = union(
+              featureCollection<Polygon | MultiPolygon>([combined, feature])
+            );
+            if (unionShape) {
+              combined = unionShape;
+            }
+          });
+
+          const idsToDelete = overlappingFeatures.map((f) => String(f.id));
+          draw.delete(idsToDelete);
+
+          draw.delete(String(feature.id));
+
+          draw.add(combined);
+        }
+      }
+    };
+
+    map.on('draw.create', (e: DrawCreateEvent) => {
+      const feature = e.features[0] as Feature<Polygon | MultiPolygon>;
+      combineFeatures(feature);
     });
-    map.on('draw.update', (e) => {
+
+    map.on('draw.update', (e: DrawUpdateEvent) => {
       console.log('draw.update', e);
+      const feature = e.features[0] as Feature<Polygon | MultiPolygon>;
+      combineFeatures(feature);
     });
-    // map.on('draw.render', (e) => {
-    //   console.log('draw.render', e);
-    // });
+
     map.on('draw.modechange', (e) => {
-      console.log('draw.modechange', e);
+      const { mode } = e;
+      if (mode === 'draw_polygon') {
+        setDrawMode(DrawMode.Polygon);
+      } else {
+        setDrawMode(null);
+      }
     });
   }, [map, draw]);
 
@@ -51,14 +102,20 @@ export const Draw: React.FC = () => {
   };
 
   const handlePolygon = () => {
-    setDrawMode(drawMode !== DrawMode.Polygon ? DrawMode.Polygon : null);
     if (!draw) {
       return;
     }
+    if (drawMode === DrawMode.Polygon) {
+      setDrawMode(null);
+      draw.changeMode('simple_select');
+      return;
+    }
 
+    // Set manually, modechange wont detect a manual change
+    setDrawMode(DrawMode.Polygon);
     draw.changeMode('draw_polygon');
     notificationManager.show(
-      'Click on the map to add vertices, click on the initial point again to complete the shape.',
+      'Click on the map to add vertices. Click on the original point again to complete the shape.',
       NotificationType.Info,
       10000
     );

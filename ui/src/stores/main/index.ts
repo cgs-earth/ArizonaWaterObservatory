@@ -9,6 +9,7 @@ import { MainState } from '@/stores/main/types';
 import { createCollectionSlice } from './slices/collections';
 import { createLayerSlice } from './slices/layers';
 import { createLocationSlice } from './slices/locations';
+import { createSpatialSelectionSlice } from './slices/spatialSelection';
 
 const useMainStore = create<MainState>()(
   immer((set, get, store) => ({
@@ -27,6 +28,7 @@ const useMainStore = create<MainState>()(
     ...createCollectionSlice(set, get, store),
     ...createLayerSlice(set, get, store),
     ...createLocationSlice(set, get, store),
+    ...createSpatialSelectionSlice(set, get, store),
   }))
 );
 
