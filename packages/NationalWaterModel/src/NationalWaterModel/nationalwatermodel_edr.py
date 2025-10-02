@@ -54,7 +54,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         :param provider_def: provider definition
         """
-        super().__init__(provider_def)
+        super().__init__(dict(provider_def))
         self.instances = []
 
         self.zarr_dataset = get_zarr_dataset_handle(

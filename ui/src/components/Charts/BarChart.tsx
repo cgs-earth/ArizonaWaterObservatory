@@ -129,11 +129,9 @@ const BarChart = <T extends GeoJsonProperties>(props: Props<T>) => {
   return (
     <ReactEChartsCore
       style={{
-        height: '50vh',
-        minHeight: '300px',
+        height: '100%',
         width: '98%',
         marginLeft: '8px',
-        // marginRight: '8px',
       }}
       echarts={echarts}
       option={option}

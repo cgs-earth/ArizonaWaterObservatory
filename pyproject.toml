@@ -27,6 +27,7 @@ dependencies = [
     "netcdf4>=1.7.2",
     "s3fs>=2025.9.0",
     "nationalwatermodel",
+    "config-store",
     "rioxarray>=0.19.0",
 ]
 
@@ -39,7 +40,7 @@ dev = [
 ]
 server = [
     "gunicorn>=23.0.0",
-    "pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@wwdh",
+    "pygeoapi",
     "starlette>=0.47.0",
     "uvicorn>=0.34.3",
 ]
@@ -48,6 +49,7 @@ server = [
 members = ["packages/*"]
 
 [tool.uv.sources]
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="6239cc0e82119bb0c1db22c25ed8442df8d090b4" }
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
@@ -57,6 +59,7 @@ awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git
 awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
 noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
 nationalwatermodel = { workspace = true }
+config-store = { workspace = true }
 
 [tool.coverage.run]
 # don't include tests 

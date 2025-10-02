@@ -5,15 +5,9 @@
 
 import { render } from '@test-utils';
 import { ECElementEvent } from 'echarts/core';
-import { FeatureCollection, GeoJsonProperties, Point } from 'geojson';
+import { FeatureCollection, Point } from 'geojson';
 import { describe, expect, it, vi } from 'vitest';
 import BarChart from '@/components/Charts/BarChart';
-
-type TestProps = GeoJsonProperties & {
-  name: string;
-  value: number;
-  id: string;
-};
 
 const mockData: FeatureCollection<Point, { name: string; value: number; id: string }> = {
   type: 'FeatureCollection',
@@ -50,7 +44,7 @@ describe('BarChart', () => {
 
   it('renders without crashing', async () => {
     const { container } = render(
-      <BarChart<TestProps>
+      <BarChart
         title="Test Chart"
         series={[
           {
@@ -73,7 +67,7 @@ describe('BarChart', () => {
     const onChartClick = vi.fn();
 
     render(
-      <BarChart<TestProps>
+      <BarChart
         title="Clickable Chart"
         onChartClick={onChartClick}
         series={[
