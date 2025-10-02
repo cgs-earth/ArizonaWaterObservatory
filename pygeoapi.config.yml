@@ -21,8 +21,8 @@ server:
 
   manager:  # optional OGC API - Processes asynchronous job management
       name: TinyDB  # plugin name (see pygeoapi.plugin for supported process_manager's)
-      connection: /tmp/pygeoapi-process-manager.db  # connection info to store jobs (e.g. filepath)
-      output_dir: /tmp/ 
+      connection: ${JOB_MANAGER_CONNECTION:-/tmp/pygeoapi-process-manager.db}  # connection info to store jobs (e.g. filepath)
+      output_dir: ${JOB_MANAGER_OUTPUT_DIR:-/tmp/}  # directory to store process outputs (e.g. files)
       
 logging:
   level: ${PYGEOAPI_LOGLEVEL:-WARNING}
