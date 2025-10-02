@@ -22,6 +22,13 @@ dependencies = [
     "awdb_forecasts",
     "noaa_rfc",
     "aiohttp>=3.12.12",
+    "xarray>=2025.4.0",
+    "zarr>=2.18.7",
+    "netcdf4>=1.7.2",
+    "s3fs>=2025.9.0",
+    "nationalwatermodel",
+    "config-store",
+    "rioxarray>=0.19.0",
 ]
 
 [dependency-groups]
@@ -31,19 +38,27 @@ dev = [
     "pytest-xdist>=3.7.0",
     "radon>=6.0.1",
 ]
-
+server = [
+    "gunicorn>=23.0.0",
+    "pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@wwdh",
+    "starlette>=0.47.0",
+    "uvicorn>=0.34.3",
+]
 
 [tool.uv.workspace]
 members = ["packages/*"]
 
 [tool.uv.sources]
-usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", rev = "includeStaticJson" }
-com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", rev = "includeStaticJson" }
-rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise", rev = "includeStaticJson" }
-snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/snotel", rev = "includeStaticJson" }
-awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com", rev = "includeStaticJson" }
-awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", rev = "includeStaticJson" }
-noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc", rev = "includeStaticJson" }
+# it appears that to get the latest code you need to specify the HEAD branch of each package
+usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
+com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
+rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise" , branch="main" }
+snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/snotel" , branch="main" }
+awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , branch="main" }
+awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
+noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
+nationalwatermodel = { workspace = true }
+config-store = { workspace = true }
 
 [tool.coverage.run]
 # don't include tests 
@@ -51,6 +66,9 @@ omit = [
     "**/*_test.py",
     "test/",
 ]
+
+[tool.ruff]
+line-length = 79
 
 [tool.ruff.lint]
 select = [
