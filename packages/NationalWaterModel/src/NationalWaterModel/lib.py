@@ -7,11 +7,13 @@ from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
 import numpy as np
+from pygeoapi.api import DEFAULT_STORAGE_CRS
 from pygeoapi.provider.base import (
     ProviderInvalidDataError,
     ProviderNoDataError,
     ProviderQueryError,
 )
+from pygeoapi.util import get_crs_from_uri
 import pyproj
 import s3fs
 import xarray as xr
@@ -83,6 +85,11 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
                     f"Failed to parse storage crs: {spatial_ref}"
                 ) from e
 
+    try:
+        return pyproj.CRS.from_json_dict(dataset.attrs)
+    except Exception:
+        LOGGER.warning("Could not find storage crs in attr dict")
+
     for var in dataset.attrs:
         if str(var).lower() == "proj4":
             spatial_ref = dataset.attrs[var]
@@ -92,16 +99,17 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
                 raise ProviderInvalidDataError(
                     f"Failed to parse storage crs: {spatial_ref}"
                 ) from e
-    raise ProviderInvalidDataError("Could not find storage crs")
+
+    return get_crs_from_uri(DEFAULT_STORAGE_CRS)
 
 
 def project_dataset(
     dataset: xr.Dataset,
     storage_crs: pyproj.CRS,
     output_crs: pyproj.CRS,
-    x_field: str,
-    y_field: str,
-    raster: bool,
+    x_field: str | None,
+    y_field: str | None,
+    raster: bool = False,
 ) -> xr.Dataset:
     if storage_crs == output_crs:
         return dataset
@@ -129,10 +137,10 @@ def project_dataset(
 def fetch_data(
     unopened_dataset: xr.Dataset,
     timeseries_properties_to_fetch: list[str],
-    time_field: str,
-    datetime_filter: str,
-    x_field: str,
-    y_field: str,
+    time_field: str | None,
+    datetime_filter: str | None,
+    x_field: str | None,
+    y_field: str | None,
     bbox: list,
     feature_id: str | None = None,
     feature_limit: int | None = None,
@@ -151,12 +159,12 @@ def fetch_data(
     variables_to_select = timeseries_properties_to_fetch.copy()
 
     # if we are selecting a property, we should also select time since timeseries always needs time
-    if time_field not in variables_to_select:
+    if time_field and time_field not in variables_to_select:
         variables_to_select.append(time_field)
 
     # Add x and y if not already included
     for coord in [y_field, x_field]:
-        if coord not in variables_to_select:
+        if coord and coord not in variables_to_select:
             variables_to_select.append(coord)
 
     try:
@@ -168,6 +176,7 @@ def fetch_data(
 
     if feature_id is not None:
         selected = selected.sel(feature_id=int(feature_id))
+        return selected.load()
 
     if datetime_filter is None:
         raise ProviderQueryError(
@@ -218,7 +227,7 @@ def fetch_data(
     if feature_limit is not None:
         selected = selected.isel(feature_id=slice(0, feature_limit))
 
-    if not feature_id and bbox:
+    if bbox:
         # Geospatial filtering using latitude and longitude variables
         lon_min, lat_min, lon_max, lat_max = bbox
 
@@ -238,7 +247,7 @@ def fetch_data(
             raise ProviderNoDataError(f"No data in bbox {bbox}")
 
         if raster:
-            # if it is raster tehre is no feature_id
+            # if it is raster there is no feature_id
             # and thus the mask needs to be applied to the dataset as a whole
             selected = selected.where(mask, drop=True)
         else:
@@ -249,11 +258,12 @@ def fetch_data(
 
 def dataset_to_covjson(
     dataset: xr.Dataset,
-    x_axis: str,
-    y_axis: str,
+    x_axis: str | None,
+    y_axis: str | None,
     output_crs: pyproj.CRS,
     timeseries_parameter_name: str,
-    time_axis: str,
+    timeseries_parameter_unit: str,
+    time_axis: str | None,
     raster: bool = False,
 ) -> CoverageCollectionDict | CoverageDict:
     """
@@ -281,9 +291,9 @@ def dataset_to_covjson(
 
     coverages: list[CoverageDict] = []
 
-    authority = output_crs.to_authority()
+    authority, code = output_crs.to_authority()
     LATEST = 0
-    output_uri = f"http://www.opengis.net/def/crs/{authority[0]}/{LATEST}/{authority[1]}"
+    output_uri = f"http://www.opengis.net/def/crs/{authority}/{LATEST}/{code}"
 
     if not raster:
         for i in range(len(x_values)):
@@ -327,7 +337,7 @@ def dataset_to_covjson(
                 timeseries_parameter_name: {
                     "type": "Parameter",
                     "description": {"en": str(timeseries_parameter_name)},
-                    "unit": {"symbol": "1"},
+                    "unit": {"symbol": timeseries_parameter_unit},
                     "observedProperty": {
                         "id": timeseries_parameter_name,
                         "label": {"en": str(timeseries_parameter_name)},
@@ -389,7 +399,7 @@ def dataset_to_covjson(
                 timeseries_parameter_name: {
                     "type": "Parameter",
                     "description": {"en": str(timeseries_parameter_name)},
-                    "unit": {"symbol": "1"},
+                    "unit": {"symbol": timeseries_parameter_unit},
                     "observedProperty": {
                         "id": str(timeseries_parameter_name),
                         "label": {"en": str(timeseries_parameter_name)},
@@ -407,7 +417,7 @@ def dataset_to_covjson(
                         len(x_values),
                     ],
                     "values": [
-                        0 if np.isnan(val) else val
+                        None if np.isnan(val) else val
                         for val in timeseries_values.reshape(-1).tolist()
                     ],
                 },

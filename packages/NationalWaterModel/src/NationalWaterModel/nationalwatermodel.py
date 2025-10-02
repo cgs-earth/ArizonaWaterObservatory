@@ -39,26 +39,14 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         :param provider_def: provider definition
         """
         super().__init__(dict(provider_def))
-        self.provider_def = provider_def
         self.zarr_dataset = get_zarr_dataset_handle(
             provider_def["data"],
             provider_def["remote_dataset"]
             if "remote_dataset" in provider_def
             else None,
         )
-
-        if "storage_crs_override" in provider_def:
-            self.storage_crs_override = pyproj.CRS.from_user_input(
-                provider_def["storage_crs_override"]
-            )
-        else:
-            self.storage_crs_override = None
-
-        self.output_crs = (
-            pyproj.CRS.from_epsg(provider_def["output_crs"])
-            if "output_crs" in provider_def
-            else pyproj.CRS.from_epsg(4326)
-        )
+        if "storage_crs" not in provider_def:
+            self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
 
     def items(  # type: ignore
         self,
@@ -81,9 +69,6 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         if properties is None:
             properties = []
 
-        if not bbox:
-            LOGGER.warning("bbox should be set to prevent overfetching")
-
         latestValueInDataset = "2023-01-01"
         result = fetch_data(
             bbox=bbox,
@@ -91,31 +76,26 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             datetime_filter=latestValueInDataset
             if not datetime_
             else datetime_,
-            time_field=self.provider_def["time_field"],
-            x_field=self.provider_def["x_field"],
-            y_field=self.provider_def["y_field"],
+            time_field=self.time_field,
+            x_field=self.x_field,
+            y_field=self.y_field,
             unopened_dataset=self.zarr_dataset,
             feature_id=itemId,
-        )
-
-        storage_crs = (
-            get_crs_from_dataset(result)
-            if self.storage_crs_override is None
-            else self.storage_crs_override
+            feature_limit=limit,
         )
 
         result = project_dataset(
             result,
-            storage_crs,
-            self.output_crs,
-            self.provider_def["x_field"],
-            self.provider_def["y_field"],
+            self.storage_crs,
+            pyproj.CRS.from_epsg(4326),
+            self.x_field,
+            self.y_field,
             raster=False,
         )
 
         features: list[GeojsonFeatureDict] = []
-        x_values = result[self.provider_def["x_field"]].values
-        y_values = result[self.provider_def["y_field"]].values
+        x_values = result[self.x_field].values
+        y_values = result[self.y_field].values
 
         for i, id in enumerate(
             result["feature_id"].values if not itemId else [itemId]
@@ -127,8 +107,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
                     other_properties["id"] = str(id)
 
                     if (
-                        prop == self.provider_def["x_field"]
-                        or prop == self.provider_def["y_field"]
+                        prop == self.x_field
+                        or prop == self.y_field
                         or prop == "feature_id"
                         or prop == "time"
                     ):
@@ -168,6 +148,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
     def query(self, **kwargs):
         return self.items(**kwargs)
 
+    @crs_transform
     def get(self, identifier, **kwargs):
         """
         query CSV id
