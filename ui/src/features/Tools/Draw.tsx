@@ -7,12 +7,15 @@ import { useEffect, useState } from 'react';
 import { DrawCreateEvent, DrawUpdateEvent } from '@mapbox/mapbox-gl-draw';
 import { booleanIntersects, buffer, featureCollection, union } from '@turf/turf';
 import { Feature, MultiPolygon, Polygon } from 'geojson';
-import { Box, Stack } from '@mantine/core';
+import { Group, Stack, Text, Title } from '@mantine/core';
 import Plus from '@/assets/Plus';
+import Button from '@/components/Button';
 import IconButton from '@/components/IconButton';
+import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
 import styles from '@/features/Tools/Tools.module.css';
+import { useMeasure } from '@/hooks/useMeasure';
 import notificationManager from '@/managers/Notification.init';
 import useSessionStore from '@/stores/session';
 import { DrawMode, NotificationType } from '@/stores/session/types';
@@ -26,6 +29,8 @@ export const Draw: React.FC = () => {
 
   const drawMode = useSessionStore((store) => store.drawMode);
   const setDrawMode = useSessionStore((store) => store.setDrawMode);
+
+  useMeasure(map, draw);
 
   useEffect(() => {
     if (!map || !draw) {
@@ -97,6 +102,8 @@ export const Draw: React.FC = () => {
     });
   }, [map, draw]);
 
+  const handleApply = () => {};
+
   const handleShow = () => {
     setShow(!show);
   };
@@ -114,11 +121,7 @@ export const Draw: React.FC = () => {
     // Set manually, modechange wont detect a manual change
     setDrawMode(DrawMode.Polygon);
     draw.changeMode('draw_polygon');
-    notificationManager.show(
-      'Click on the map to add vertices. Click on the original point again to complete the shape.',
-      NotificationType.Info,
-      10000
-    );
+    notificationManager.show('Click outside the shape to deselect.', NotificationType.Info, 10000);
   };
 
   const handleTrash = () => {
@@ -134,24 +137,43 @@ export const Draw: React.FC = () => {
   return (
     <>
       {loaded && (
-        <Stack>
-          <IconButton variant={show ? Variant.Selected : Variant.Secondary} onClick={handleShow}>
-            <Plus />
-          </IconButton>
-          {show && (
-            <Box className={styles.container}>
-              <IconButton
-                variant={drawMode === DrawMode.Polygon ? Variant.Selected : Variant.Secondary}
-                onClick={handlePolygon}
-              >
-                <Plus />
-              </IconButton>
-              <IconButton variant={Variant.Secondary} onClick={handleTrash}>
-                <Plus />
-              </IconButton>
-            </Box>
-          )}
-        </Stack>
+        <Popover
+          offset={16}
+          opened={show}
+          onChange={setShow}
+          target={
+            <IconButton variant={show ? Variant.Selected : Variant.Secondary} onClick={handleShow}>
+              <Plus />
+            </IconButton>
+          }
+          content={
+            <Stack className={styles.container} align="flex-start">
+              <Title order={4}>Draw Tools</Title>
+              <Group>
+                <IconButton
+                  variant={drawMode === DrawMode.Polygon ? Variant.Selected : Variant.Secondary}
+                  onClick={handlePolygon}
+                >
+                  <Plus />
+                </IconButton>
+                <IconButton
+                  variant={drawMode === DrawMode.Polygon ? Variant.Selected : Variant.Secondary}
+                  onClick={() => setDrawMode(DrawMode.Measure)}
+                >
+                  <Plus />
+                </IconButton>
+              </Group>
+              <Group>
+                <Button size="sm" variant={Variant.Primary} onClick={handleApply}>
+                  <Text size="sm">Apply</Text>
+                </Button>
+                <Button size="sm" variant={Variant.Tertiary} onClick={handleTrash}>
+                  <Text size="sm">Clear All</Text>
+                </Button>
+              </Group>
+            </Stack>
+          }
+        />
       )}
     </>
   );

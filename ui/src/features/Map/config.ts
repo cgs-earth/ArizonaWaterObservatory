@@ -6,14 +6,16 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { DataDrivenPropertyValueSpecification, LayerSpecification, Map, Popup } from 'mapbox-gl';
 import { Root } from 'react-dom/client';
-import { CustomListenerFunction, MainLayerDefinition } from '@/components/Map/types';
+import { CustomListenerFunction, LayerType, MainLayerDefinition } from '@/components/Map/types';
+import { SourceId } from './sources';
 import { getMessage } from './utils';
 
 export const MAP_ID = 'main-map';
 
 export enum LayerId {
-  DrawCold = 'mapbox-gl-draw-cold',
-  DrawHot = 'mapbox-gl-draw-hot',
+  DrawCold = 'draw-cold',
+  DrawHot = 'draw-hot',
+  Measure = 'measure',
 }
 
 export enum SubLayerId {
@@ -32,6 +34,10 @@ export enum SubLayerId {
   VertexOuterHot = 'gl-draw-vertex-outer.hot',
   VertexInnerHot = 'gl-draw-vertex-inner.hot',
   MidpointHot = 'gl-draw-midpoint.hot',
+
+  MeasurePoints = 'measure-points',
+  MeasureLine = 'measure-line',
+  MeasureLabel = 'measure-label',
 }
 
 export const allLayerIds = [];
@@ -96,6 +102,52 @@ export const getLayerColor = (
  */
 export const getLayerConfig = (id: LayerId | SubLayerId): null | LayerSpecification => {
   switch (id) {
+    case SubLayerId.MeasurePoints:
+      return {
+        id: SubLayerId.MeasurePoints,
+        type: LayerType.Circle,
+        source: SourceId.MeasurePoints,
+        paint: {
+          'circle-radius': 5,
+          'circle-color': '#000',
+        },
+        filter: ['in', '$type', 'Point'],
+      };
+    case SubLayerId.MeasureLine:
+      return {
+        id: SubLayerId.MeasureLine,
+        type: LayerType.Line,
+        source: SourceId.MeasureLine,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#000',
+          'line-width': 2.5,
+        },
+        filter: ['in', '$type', 'LineString'],
+      };
+    case SubLayerId.MeasureLabel:
+      return {
+        id: SubLayerId.MeasureLabel,
+        type: LayerType.Symbol,
+        source: SourceId.MeasureLine,
+        layout: {
+          'symbol-placement': 'line-center',
+          'text-field': ['get', 'distance'],
+          'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+          'text-size': 16,
+          'text-allow-overlap': false,
+        },
+        paint: {
+          'text-color': '#FFFFFF',
+          'text-halo-blur': 1,
+          'text-halo-color': '#000000',
+          'text-halo-width': 2,
+        },
+        filter: ['in', '$type', 'LineString'],
+      };
     default:
       return null;
   }
@@ -453,6 +505,32 @@ export const layerDefinitions: MainLayerDefinition[] = [
         config: getLayerConfig(SubLayerId.MidpointHot),
         hoverFunction: getLayerHoverFunction(SubLayerId.MidpointHot),
         mouseMoveFunction: getLayerMouseMoveFunction(SubLayerId.MidpointHot),
+      },
+    ],
+  },
+  {
+    id: LayerId.Measure,
+    controllable: false,
+    legend: false,
+    config: getLayerConfig(LayerId.Measure),
+    subLayers: [
+      {
+        id: SubLayerId.MeasurePoints,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.MeasurePoints),
+      },
+      {
+        id: SubLayerId.MeasureLine,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.MeasureLine),
+      },
+      {
+        id: SubLayerId.MeasureLabel,
+        controllable: false,
+        legend: false,
+        config: getLayerConfig(SubLayerId.MeasureLabel),
       },
     ],
   },

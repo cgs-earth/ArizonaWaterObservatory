@@ -3,6 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.container {
-  min-width: 250px;
+.root {
+  position: absolute;
 }
