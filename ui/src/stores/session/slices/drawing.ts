@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: MIT
  */
 
+import { FeatureCollection, Point } from 'geojson';
 import { StateCreator } from 'zustand';
 import { DrawMode, SessionState } from '@/stores/session/types';
 
 export interface DrawingSlice {
   drawMode: DrawMode | null;
   setDrawMode: (drawMode: DrawingSlice['drawMode']) => void;
+  points: FeatureCollection<Point>;
+  setPoints: (points: DrawingSlice['points']) => void;
 }
 
 export const createDrawingSlice: StateCreator<
@@ -18,5 +21,10 @@ export const createDrawingSlice: StateCreator<
   DrawingSlice
 > = (set) => ({
   drawMode: null,
-  setDrawMode: (drawMode: DrawingSlice['drawMode']) => set({ drawMode }),
+  setDrawMode: (drawMode) => set({ drawMode }),
+  points: {
+    type: 'FeatureCollection',
+    features: [],
+  },
+  setPoints: (points) => set({ points }),
 });
