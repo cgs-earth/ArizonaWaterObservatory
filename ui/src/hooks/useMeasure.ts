@@ -16,7 +16,7 @@ import { DrawMode } from '@/stores/session/types';
 
 export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
   const drawMode = useSessionStore((store) => store.drawMode);
-  const setPoints = useSessionStore((store) => store.setPoints);
+  const setPoints = useSessionStore((store) => store.setMeasurePoints);
 
   useEffect(() => {
     if (!map || !draw) {
@@ -61,7 +61,7 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
 
         map.getCanvas().style.cursor = 'grabbing';
 
-        const points = useSessionStore.getState().points;
+        const points = useSessionStore.getState().measurePoints;
 
         feature.geometry.coordinates = [coords.lng, coords.lat];
 
@@ -105,7 +105,7 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
         properties: { timeCreated: Date.now(), id: v6() },
       };
 
-      const currentPoints = useSessionStore.getState().points.features;
+      const currentPoints = useSessionStore.getState().measurePoints.features;
       let updatedFeatures: Feature<Point>[];
 
       if (currentPoints.length < 2) {

@@ -4,7 +4,7 @@
  */
 
 import * as turf from '@turf/turf';
-import { Feature, FeatureCollection, Geometry, Point, Polygon } from 'geojson';
+import { Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
 import { GeoJSONFeature, GeoJSONSource, Map, Popup } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
@@ -124,7 +124,7 @@ class MainManager {
       locations: [],
     };
 
-    const sourceId = await this.addLocationSource(datasource.id, signal);
+    const sourceId = await this.addLocationSource(datasource.id, { signal });
     this.addLocationLayer(datasource.id, sourceId);
 
     this.store.getState().addLayer(layer);
@@ -168,20 +168,22 @@ class MainManager {
 
   private filterByGeometryType(
     featureCollection: FeatureCollection<Geometry>,
-    geographyFilterFeature: Feature<Polygon>
+    filterFeatures: Feature<Polygon | MultiPolygon>[] = []
   ): FeatureCollection<Geometry> {
     return {
       type: 'FeatureCollection',
       features: featureCollection.features.filter((feature) => {
         switch (feature.geometry.type) {
           case 'Point':
-            return turf.booleanPointInPolygon(feature as Feature<Point>, geographyFilterFeature);
+            return filterFeatures.some((filter) =>
+              turf.booleanPointInPolygon(feature as Feature<Point>, filter)
+            );
 
           case 'LineString':
           case 'MultiLineString':
           case 'Polygon':
           case 'MultiPolygon':
-            return turf.booleanIntersects(feature, geographyFilterFeature);
+            return filterFeatures.some((filter) => turf.booleanIntersects(feature, filter));
 
           default:
             console.error(
@@ -195,35 +197,40 @@ class MainManager {
   }
 
   private filterLocations(
-    featureCollection: FeatureCollection<Geometry>
+    featureCollection: FeatureCollection<Geometry>,
+    filterFeatures: Feature<Polygon | MultiPolygon>[] = []
   ): FeatureCollection<Geometry> {
-    const geographyFilter = this.store.getState().geographyFilter;
-
-    if (geographyFilter) {
-      return this.filterByGeometryType(featureCollection, geographyFilter.feature);
+    if (filterFeatures.length > 0) {
+      return this.filterByGeometryType(featureCollection, filterFeatures);
     }
 
     return featureCollection;
   }
-
   /**
    *
    * @function
    */
   private async addLocationSource(
     collectionId: ICollection['id'],
-    signal?: AbortSignal
+    options?: { filterFeatures?: Feature<Polygon | MultiPolygon>[]; signal?: AbortSignal }
   ): Promise<string> {
     const sourceId = this.getSourceId(collectionId);
     if (this.map) {
       const source = this.map.getSource(sourceId) as GeoJSONSource;
       if (!source) {
-        const data = await this.fetchLocations(collectionId, signal);
+        const data = await this.fetchLocations(collectionId, options?.signal);
+
+        const filteredData = this.filterLocations(data, options?.filterFeatures);
 
         this.map.addSource(sourceId, {
           type: 'geojson',
-          data,
+          data: filteredData,
         });
+      } else if (source) {
+        const data = await this.fetchLocations(collectionId, options?.signal);
+
+        const filteredData = this.filterLocations(data, options?.filterFeatures);
+        source.setData(filteredData);
       }
     }
 
@@ -405,6 +412,22 @@ class MainManager {
           })
         );
       }
+    }
+  }
+
+  public async applySpatialFilter(drawnShapes: Feature<Polygon | MultiPolygon>[]): Promise<void> {
+    const layers = this.store.getState().layers;
+
+    const chunkSize = 5;
+
+    for (let i = 0; i < layers.length; i += chunkSize) {
+      const chunk = layers.slice(i, i + chunkSize);
+      await Promise.all(
+        chunk.map(async (layer) => {
+          const collectionId = layer.datasourceId;
+          return await this.addLocationSource(collectionId, { filterFeatures: drawnShapes });
+        })
+      );
     }
   }
 

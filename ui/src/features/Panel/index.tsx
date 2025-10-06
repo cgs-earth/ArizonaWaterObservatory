@@ -27,13 +27,13 @@ const Panel: React.FC = () => {
     const loadingInstance = loadingManager.add('Updating collections', LoadingType.Collections);
     try {
       await mainManager.getCollections();
-      loadingManager.remove(loadingInstance);
       notificationManager.show('Updated collections', NotificationType.Success);
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;
         notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
       }
+    } finally {
       loadingManager.remove(loadingInstance);
     }
   };
