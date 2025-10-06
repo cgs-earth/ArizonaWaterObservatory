@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-'use client';
-
 import React, { lazy, Suspense } from 'react';
 import { MapComponentProps } from '@/components/Map/types';
 

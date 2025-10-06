@@ -4,7 +4,7 @@
  */
 
 import {
-  Accordion,
+  Accordion as _Accordion,
   AccordionControl,
   AccordionItem,
   AccordionPanel,
@@ -12,31 +12,20 @@ import {
 } from '@mantine/core';
 import styles from '@/components/Accordion/Accordion.module.css';
 import { Item } from '@/components/Accordion/Accordion.types';
+import { Variant } from '@/components/types';
 
 type Props = AccordionProps & {
   items: Item[];
-  variant?: 'primary' | 'secondary' | 'tertiary';
+  variant?: Variant;
 };
 
-const CustomAccordion: React.FC<Props> = (props) => {
-  const { items, variant = 'primary', ...accordionProps } = props;
+const Accordion: React.FC<Props> = (props) => {
+  const { items, variant = Variant.Primary, ...accordionProps } = props;
 
-  const getVariantClass = (variant: 'primary' | 'secondary' | 'tertiary'): string => {
-    if (variant === 'secondary') {
-      return styles.secondary;
-    }
-
-    if (variant === 'tertiary') {
-      return styles.tertiary;
-    }
-
-    return styles.primary;
-  };
-
-  const variantClass = getVariantClass(variant);
+  const variantClass = styles[variant];
 
   return (
-    <Accordion
+    <_Accordion
       {...accordionProps}
       classNames={{
         item: `${styles.item} ${variantClass}`,
@@ -52,8 +41,8 @@ const CustomAccordion: React.FC<Props> = (props) => {
           <AccordionPanel>{item.content}</AccordionPanel>
         </AccordionItem>
       ))}
-    </Accordion>
+    </_Accordion>
   );
 };
 
-export default CustomAccordion;
+export default Accordion;
