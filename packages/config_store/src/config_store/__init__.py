@@ -1,11 +1,10 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: MIT
 
-from dataclasses import dataclass
 import logging
 from typing import Literal, TypedDict
 
-from pygeoapi.process.base import BaseProcessor, ProcessorExecuteError
+from pygeoapi.process.base import BaseProcessor
 
 
 class ProcessorOptions(TypedDict):
@@ -17,12 +16,12 @@ class ProcessorOptions(TypedDict):
     description: str
 
 
-@dataclass
-class ConfigSchema:
-    """The config to be stored in the manager."""
+# @dataclass
+# class ConfigSchema:
+#     """The config to be stored in the manager."""
 
-    name: str
-    # TODO ask john and fill in more fields
+#     name: str
+#     # TODO ask john and fill in more fields
 
 
 LOGGER = logging.getLogger(__name__)
@@ -76,12 +75,12 @@ class ConfigStoreProcessor(BaseProcessor):
         data: dict,
         outputs=None,
     ) -> tuple[Literal["application/json"], dict]:
-        try:
-            _ = ConfigSchema(**data)
-        except Exception as e:
-            raise ProcessorExecuteError(
-                f"Data {data} does not match the schema and threw error: {e}"
-            ) from e
+        # try:
+        #     _ = ConfigSchema(**data)
+        # except Exception as e:
+        #     raise ProcessorExecuteError(
+        #         f"Data {data} does not match the schema and threw error: {e}"
+        #     ) from e
 
         # the result of the job will be stored in the job manager
         # thus making it so we don't need to worry about storing it in the db
