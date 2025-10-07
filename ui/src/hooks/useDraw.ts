@@ -21,7 +21,7 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
   const addDrawnShape = useSessionStore((store) => store.addDrawnShape);
 
   const combineFeatures = (feature: Feature<Polygon | MultiPolygon>) => {
-    if (!draw) {
+    if (!draw || !feature) {
       return;
     }
 
@@ -111,66 +111,6 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
 
     // Map is loaded and draw is set
     setLoaded(true);
-
-    const combineFeatures = (feature: Feature<Polygon | MultiPolygon>) => {
-      const { features } = draw.getAll();
-      const overlappingFeatures: Feature<Polygon | MultiPolygon>[] = [];
-
-      const polygonFeatures = features.filter(
-        (f): f is Feature<Polygon | MultiPolygon> =>
-          f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon'
-      );
-
-      // Hack to produce valid shapes
-      const validFeature = buffer(feature, 0);
-
-      if (validFeature) {
-        polygonFeatures.forEach((existingFeature) => {
-          if (existingFeature.id !== feature.id && booleanIntersects(existingFeature, feature)) {
-            overlappingFeatures.push(existingFeature);
-          }
-        });
-
-        const hasDrawnShape = useSessionStore.getState().hasDrawnShape;
-        const removeDrawnShape = useSessionStore.getState().removeDrawnShape;
-
-        if (overlappingFeatures.length > 0) {
-          let combined = feature;
-
-          overlappingFeatures.forEach((feature) => {
-            const unionShape = union(
-              featureCollection<Polygon | MultiPolygon>([combined, feature])
-            );
-            if (unionShape) {
-              combined = unionShape;
-            }
-          });
-
-          const idsToDelete = overlappingFeatures.map((f) => String(f.id));
-          draw.delete(idsToDelete);
-          idsToDelete.forEach((id) => {
-            if (hasDrawnShape(id)) {
-              removeDrawnShape(id);
-            }
-          });
-          const newId = v6();
-          combined.id = newId;
-          if (!combined.properties) {
-            combined.properties = {};
-          }
-          combined.properties.id = newId;
-          draw.add(combined);
-
-          addDrawnShape(combined);
-        } else {
-          const id = feature.id ?? feature.properties?.id;
-          if (hasDrawnShape(id)) {
-            removeDrawnShape(id);
-          }
-          addDrawnShape(feature);
-        }
-      }
-    };
 
     map.on('draw.create', (e: DrawCreateEvent) => {
       const feature = e.features[0] as Feature<Polygon | MultiPolygon>;
