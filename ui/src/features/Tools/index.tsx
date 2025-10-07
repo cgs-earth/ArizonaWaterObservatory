@@ -4,7 +4,7 @@
  */
 
 import { Group } from '@mantine/core';
-import { Draw } from './Draw';
+import { Draw } from '@/features/Tools/Draw';
 
 const Tools: React.FC = () => {
   return (

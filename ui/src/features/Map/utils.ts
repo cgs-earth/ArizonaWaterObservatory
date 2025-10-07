@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LayerId, SubLayerId } from './config';
+import { LayerId, SubLayerId } from '@/features/Map/config';
 
 const getSimpleSelectMessage = (layerId: LayerId | SubLayerId): string => {
   switch (layerId) {

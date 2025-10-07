@@ -12,6 +12,7 @@ import IconButton from '@/components/IconButton';
 import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
+import { MAP_ID } from '@/features/Map/config';
 import styles from '@/features/Tools/Tools.module.css';
 import { useDraw } from '@/hooks/useDraw';
 import { useMeasure } from '@/hooks/useMeasure';
@@ -21,7 +22,6 @@ import notificationManager from '@/managers/Notification.init';
 import useSessionStore from '@/stores/session';
 import { MeasureUnit } from '@/stores/session/slices/drawing';
 import { DrawMode, LoadingType, NotificationType } from '@/stores/session/types';
-import { MAP_ID } from '../Map/config';
 
 export const Draw: React.FC = () => {
   const [show, setShow] = useState(false);

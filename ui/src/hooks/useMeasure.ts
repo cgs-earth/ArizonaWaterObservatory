@@ -240,6 +240,14 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null, hoverPopup:
       }
     };
 
+    // Draw action started, clear any current measurements
+    map.on('draw.modechange', (e) => {
+      const { mode } = e;
+      if (mode !== 'simple_select') {
+        clearMeasure();
+      }
+    });
+
     if (drawMode === DrawMode.Measure) {
       map.on('click', onClick);
       map.on('mousedown', SubLayerId.MeasurePoints, onMouseDown);

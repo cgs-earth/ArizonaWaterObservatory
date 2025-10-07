@@ -7,8 +7,8 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { DataDrivenPropertyValueSpecification, LayerSpecification, Map, Popup } from 'mapbox-gl';
 import { Root } from 'react-dom/client';
 import { CustomListenerFunction, LayerType, MainLayerDefinition } from '@/components/Map/types';
-import { SourceId } from './sources';
-import { getMessage } from './utils';
+import { SourceId } from '@/features/Map/sources';
+import { getMessage } from '@/features/Map/utils';
 
 export const MAP_ID = 'main-map';
 

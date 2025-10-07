@@ -5,8 +5,8 @@
 
 import { Group } from '@mantine/core';
 import Button from '@/components/Button';
+import Tools from '@/features/Tools';
 import styles from '@/features/TopBar/TopBar.module.css';
-import Tools from '../Tools';
 
 const TopBar: React.FC = () => {
   return (

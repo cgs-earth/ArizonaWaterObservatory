@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DrawingSlice } from './slices/drawing';
-import { LoadingSlice } from './slices/loading';
-import { NotificationsSlice } from './slices/notifications';
+import { DrawingSlice } from '@/stores/session/slices/drawing';
+import { LoadingSlice } from '@/stores/session/slices/loading';
+import { NotificationsSlice } from '@/stores/session/slices/notifications';
 
 export enum NotificationType {
   Success = 'success',

@@ -5,10 +5,10 @@
 
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { createDrawingSlice } from './slices/drawing';
-import { createLoadingSlice } from './slices/loading';
-import { createNotificationsSlice } from './slices/notifications';
-import { SessionState, Tools } from './types';
+import { createDrawingSlice } from '@/stores/session/slices/drawing';
+import { createLoadingSlice } from '@/stores/session/slices/loading';
+import { createNotificationsSlice } from '@/stores/session/slices/notifications';
+import { SessionState, Tools } from '@/stores/session/types';
 
 const useSessionStore = create<SessionState>()(
   immer((set, get, store) => ({

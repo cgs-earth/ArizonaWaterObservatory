@@ -5,11 +5,11 @@
 
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { createCollectionSlice } from '@/stores/main/slices/collections';
+import { createLayerSlice } from '@/stores/main/slices/layers';
+import { createLocationSlice } from '@/stores/main/slices/locations';
+import { createSpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
 import { MainState } from '@/stores/main/types';
-import { createCollectionSlice } from './slices/collections';
-import { createLayerSlice } from './slices/layers';
-import { createLocationSlice } from './slices/locations';
-import { createSpatialSelectionSlice } from './slices/spatialSelection';
 
 const useMainStore = create<MainState>()(
   immer((set, get, store) => ({
