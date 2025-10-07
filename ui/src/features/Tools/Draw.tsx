@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Feature, MultiPolygon, Polygon } from 'geojson';
-import { Collapse, Group, Stack, Text, Title } from '@mantine/core';
-import Plus from '@/assets/Plus';
+import { Collapse, Group, Radio, RadioGroup, Stack, Text, Title, Tooltip } from '@mantine/core';
+import DrawIcon from '@/assets/Draw';
 import Button from '@/components/Button';
 import IconButton from '@/components/IconButton';
 import Popover from '@/components/Popover';
@@ -19,22 +19,25 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import useSessionStore from '@/stores/session';
+import { MeasureUnit } from '@/stores/session/slices/drawing';
 import { DrawMode, LoadingType, NotificationType } from '@/stores/session/types';
 import { MAP_ID } from '../Map/config';
 
 export const Draw: React.FC = () => {
   const [show, setShow] = useState(false);
 
-  const { map, draw } = useMap(MAP_ID);
+  const { map, draw, hoverPopup } = useMap(MAP_ID);
 
   const drawMode = useSessionStore((store) => store.drawMode);
   const setDrawMode = useSessionStore((store) => store.setDrawMode);
   const drawnShapes = useSessionStore((store) => store.drawnShapes);
   const setDrawnShapes = useSessionStore((store) => store.setDrawnShapes);
+  const unit = useSessionStore((store) => store.measureUnit);
+  const setUnit = useSessionStore((store) => store.setMeasureUnit);
 
   const loadingInstance = useRef<string>(null);
 
-  useMeasure(map, draw);
+  const { clearMeasure } = useMeasure(map, draw, hoverPopup);
   const { loaded: drawLoaded } = useDraw(map, draw);
 
   const applySpatialFilter = async (drawnShapes: Feature<Polygon | MultiPolygon>[]) => {
@@ -67,30 +70,56 @@ export const Draw: React.FC = () => {
     if (!draw) {
       return;
     }
+
     if (drawMode === DrawMode.Polygon) {
       setDrawMode(null);
       draw.changeMode('simple_select');
-      return;
+    } else {
+      // Set manually, modechange wont detect a manual change
+      setDrawMode(DrawMode.Polygon);
+      draw.changeMode('draw_polygon');
+      notificationManager.show(
+        'Click outside the shape to deselect.',
+        NotificationType.Info,
+        10000
+      );
     }
+  };
 
-    // Set manually, modechange wont detect a manual change
-    setDrawMode(DrawMode.Polygon);
-    draw.changeMode('draw_polygon');
-    notificationManager.show('Click outside the shape to deselect.', NotificationType.Info, 10000);
+  const handleMeasure = () => {
+    if (drawMode === DrawMode.Measure) {
+      clearMeasure();
+      setDrawMode(null);
+    } else {
+      setDrawMode(DrawMode.Measure);
+      notificationManager.show(
+        'Click two points on the map to measure the distance between.',
+        NotificationType.Info,
+        10000
+      );
+    }
   };
 
   const handleTrash = async () => {
     setDrawMode(null);
-    if (!draw) {
+    if (!draw || !map) {
       return;
     }
 
     setDrawnShapes([]);
 
+    clearMeasure();
+
     draw.trash();
     draw.deleteAll();
     void applySpatialFilter([]);
   };
+
+  useEffect(() => {
+    if (drawMode !== DrawMode.Measure) {
+      clearMeasure();
+    }
+  }, [drawMode]);
 
   return (
     <>
@@ -99,51 +128,89 @@ export const Draw: React.FC = () => {
           offset={16}
           opened={show}
           onChange={setShow}
+          closeOnClickOutside={false}
           target={
-            <IconButton variant={show ? Variant.Selected : Variant.Secondary} onClick={handleShow}>
-              <Plus />
-            </IconButton>
+            <Tooltip label="Measure distances and filter by drawn or existing geometries">
+              <IconButton
+                variant={show ? Variant.Selected : Variant.Secondary}
+                onClick={handleShow}
+              >
+                <DrawIcon />
+              </IconButton>
+            </Tooltip>
           }
           content={
-            <Stack className={styles.container} align="flex-start">
+            <Stack gap={8} className={styles.container} align="flex-start">
               <Title order={4}>Draw Tools</Title>
               <Group>
                 <Button
                   size="sm"
+                  className={styles.drawButton}
                   variant={drawMode === DrawMode.Polygon ? Variant.Selected : Variant.Secondary}
                   onClick={handlePolygon}
                 >
-                  {drawMode === DrawMode.Polygon ? 'Cancel' : 'Draw'}
+                  <Text size="sm">{drawMode === DrawMode.Polygon ? 'Cancel' : 'Draw'}</Text>
                 </Button>
                 <Button
                   size="sm"
+                  className={styles.drawButton}
                   variant={drawMode === DrawMode.Measure ? Variant.Selected : Variant.Secondary}
-                  onClick={() => setDrawMode(DrawMode.Measure)}
+                  onClick={handleMeasure}
                 >
-                  {drawMode === DrawMode.Measure ? 'Cancel' : 'Measure'}
+                  <Text size="sm">{drawMode === DrawMode.Measure ? 'Cancel' : 'Measure'}</Text>
                 </Button>
-                <Button
-                  size="sm"
-                  variant={drawMode === DrawMode.Select ? Variant.Selected : Variant.Secondary}
-                  onClick={() => setDrawMode(DrawMode.Select)}
-                  disabled
-                >
-                  {drawMode === DrawMode.Select ? 'Cancel' : 'Select'}
-                </Button>
-                <Collapse in={drawMode === DrawMode.Measure}>
-                  <Text>{/* ... content */}</Text>
-                </Collapse>
+                <Tooltip label="Feature in development">
+                  <Button
+                    size="sm"
+                    className={styles.drawButton}
+                    variant={drawMode === DrawMode.Select ? Variant.Selected : Variant.Secondary}
+                    onClick={() => setDrawMode(DrawMode.Select)}
+                    disabled
+                    data-disabled
+                  >
+                    <Text size="sm">{drawMode === DrawMode.Select ? 'Cancel' : 'Select'}</Text>
+                  </Button>
+                </Tooltip>
               </Group>
+              <Collapse in={drawMode === DrawMode.Measure}>
+                <RadioGroup
+                  name="measure-unit"
+                  label="Unit of Measure"
+                  value={unit}
+                  onChange={(value) => setUnit(value as MeasureUnit)}
+                >
+                  <Group mt={0}>
+                    <Radio value="miles" label="Miles" />
+                    <Radio value="feet" label="Feet" />
+                    <Radio value="kilometers" label="Kilometers" />
+                  </Group>
+                </RadioGroup>
+              </Collapse>
               <Group>
+                <Tooltip
+                  label={
+                    drawnShapes.length === 0
+                      ? 'Draw or select shapes to restrict shown locations'
+                      : 'Apply shapes to shown locations'
+                  }
+                >
+                  <Button
+                    size="sm"
+                    className={styles.drawButton}
+                    variant={Variant.Primary}
+                    onClick={handleApply}
+                    disabled={drawnShapes.length === 0}
+                    data-disabled={drawnShapes.length === 0}
+                  >
+                    <Text size="sm">Apply</Text>
+                  </Button>
+                </Tooltip>
                 <Button
                   size="sm"
-                  variant={Variant.Primary}
-                  onClick={handleApply}
-                  disabled={drawnShapes.length === 0}
+                  className={styles.drawButton}
+                  variant={Variant.Tertiary}
+                  onClick={handleTrash}
                 >
-                  <Text size="sm">Apply</Text>
-                </Button>
-                <Button size="sm" variant={Variant.Tertiary} onClick={handleTrash}>
                   <Text size="sm">Clear All</Text>
                 </Button>
               </Group>

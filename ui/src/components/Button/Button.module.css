@@ -58,5 +58,6 @@
 .root:disabled,
 .root[data-disabled='true'] {
   opacity: 0.5;
+  color: #000;
   background-color: var(--asu-color-tertiary);
 }

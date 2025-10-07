@@ -5,7 +5,10 @@
 
 import { Feature, FeatureCollection, LineString, MultiPolygon, Point, Polygon } from 'geojson';
 import { StateCreator } from 'zustand';
+import { getDefaultGeoJSON } from '@/consts/geojson';
 import { DrawMode, SessionState } from '@/stores/session/types';
+
+export type MeasureUnit = 'miles' | 'feet' | 'kilometers';
 
 export interface DrawingSlice {
   drawMode: DrawMode | null;
@@ -19,7 +22,7 @@ export interface DrawingSlice {
   setMeasurePoints: (points: DrawingSlice['measurePoints']) => void;
   measureLine: FeatureCollection<LineString>;
   setMeasureLine: (measureLine: DrawingSlice['measureLine']) => void;
-  measureUnit: 'miles' | 'feet' | 'kilometers';
+  measureUnit: MeasureUnit;
   setMeasureUnit: (measureUnits: DrawingSlice['measureUnit']) => void;
 }
 
@@ -47,15 +50,9 @@ export const createDrawingSlice: StateCreator<
     get().drawnShapes.some(
       (drawnShape) => drawnShape.id === id || drawnShape.properties?.id !== id
     ),
-  measurePoints: {
-    type: 'FeatureCollection',
-    features: [],
-  },
+  measurePoints: getDefaultGeoJSON<Point>(),
   setMeasurePoints: (measurePoints) => set({ measurePoints }),
-  measureLine: {
-    type: 'FeatureCollection',
-    features: [],
-  },
+  measureLine: getDefaultGeoJSON<LineString>(),
   setMeasureLine: (measureLine) => set({ measureLine }),
   measureUnit: 'miles',
   setMeasureUnit: (measureUnit) => set({ measureUnit }),

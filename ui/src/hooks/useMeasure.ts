@@ -7,14 +7,17 @@ import { useEffect } from 'react';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { featureCollection, length, lineString } from '@turf/turf';
 import { Feature, LineString, Point } from 'geojson';
-import { GeoJSONSource, Map, MapMouseEvent, MapTouchEvent } from 'mapbox-gl';
+import { GeoJSONSource, Map, MapMouseEvent, MapTouchEvent, Popup } from 'mapbox-gl';
 import { v6 } from 'uuid';
+import { getDefaultGeoJSON } from '@/consts/geojson';
 import { SubLayerId } from '@/features/Map/config';
 import { SourceId } from '@/features/Map/sources';
 import useSessionStore from '@/stores/session';
+import { MeasureUnit } from '@/stores/session/slices/drawing';
 import { DrawMode } from '@/stores/session/types';
+import { getUnitShorthand } from '@/utils/units';
 
-export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
+export const useMeasure = (map: Map | null, draw: MapboxDraw | null, hoverPopup: Popup | null) => {
   const drawMode = useSessionStore((store) => store.drawMode);
   const setPoints = useSessionStore((store) => store.setMeasurePoints);
   const measureLine = useSessionStore((store) => store.measureLine);
@@ -31,6 +34,90 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
     source?.setData(collection);
     setLine(collection);
   };
+
+  const updateLineString = (feature: Feature<LineString>, unit: MeasureUnit) => {
+    const units = unit === 'kilometers' ? 'kilometers' : 'miles';
+
+    let distance: string | number = length(feature, { units });
+
+    if (unit === 'feet') {
+      distance *= 5280;
+    }
+
+    const unitLabel = getUnitShorthand(unit);
+
+    distance = distance.toFixed(2);
+
+    const measuredLine = {
+      ...feature,
+      properties: {
+        ...feature.properties,
+        distance: `${Number(distance).toLocaleString('en-us')} ${unitLabel}`,
+      },
+    };
+
+    updateLineSource(measuredLine);
+  };
+
+  useEffect(() => {
+    if (!map || !hoverPopup) {
+      return;
+    }
+
+    const handleLeave = () => {
+      map.getCanvas().style.cursor = '';
+      hoverPopup.remove();
+    };
+
+    const handlePointsHover = (e: MapMouseEvent) => {
+      const drawMode = useSessionStore.getState().drawMode;
+
+      let message = 'Activate the measure tool to interact with this point.';
+      let cursor = '';
+
+      if (drawMode === DrawMode.Measure) {
+        message = 'Click and drag this point to adjust the line.';
+        cursor = 'pointer';
+      }
+      map.getCanvas().style.cursor = cursor;
+
+      const feature = e.features?.[0];
+      if (feature) {
+        const html = `<strong style="color:black;">${message}</strong>`;
+        hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+      }
+    };
+
+    const handleLineHover = (e: MapMouseEvent) => {
+      const drawMode = useSessionStore.getState().drawMode;
+
+      if (drawMode !== DrawMode.Measure) {
+        return;
+      }
+
+      const feature = e.features?.[0];
+      if (feature) {
+        const html = `<strong style="color:black;">Click in a new location to reposition the first point dropped, or click and drag the end points to adjust this line.</strong>`;
+        hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+      }
+    };
+
+    map.on('mousemove', SubLayerId.MeasurePoints, handlePointsHover);
+    map.on('mouseenter', SubLayerId.MeasurePoints, handlePointsHover);
+    map.on('mouseleave', SubLayerId.MeasurePoints, handleLeave);
+    map.on('mousemove', SubLayerId.MeasureLine, handleLineHover);
+    map.on('mouseenter', SubLayerId.MeasureLine, handleLineHover);
+    map.on('mouseleave', SubLayerId.MeasureLine, handleLeave);
+
+    return () => {
+      map.off('mousemove', SubLayerId.MeasurePoints, handlePointsHover);
+      map.off('mouseenter', SubLayerId.MeasurePoints, handlePointsHover);
+      map.off('mouseleave', SubLayerId.MeasurePoints, handleLeave);
+      map.off('mousemove', SubLayerId.MeasureLine, handleLineHover);
+      map.off('mouseenter', SubLayerId.MeasureLine, handleLineHover);
+      map.off('mouseleave', SubLayerId.MeasureLine, handleLeave);
+    };
+  }, [map]);
 
   useEffect(() => {
     if (!map || !draw) {
@@ -51,25 +138,7 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
 
       const line = lineString([pointA.geometry.coordinates, pointB.geometry.coordinates]);
 
-      const units = unit === 'kilometers' ? 'kilometers' : 'miles';
-
-      let distance: string | number = length(line, { units });
-
-      if (unit === 'feet') {
-        distance /= 5280;
-      }
-
-      distance = distance.toFixed(2);
-
-      const measuredLine = {
-        ...line,
-        properties: {
-          ...line.properties,
-          distance: `${distance}mi`,
-        },
-      };
-
-      updateLineSource(measuredLine);
+      updateLineString(line, unit);
     };
 
     const onMove = (e: MapMouseEvent | MapTouchEvent) => {
@@ -193,25 +262,32 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
     const line = measureLine.features[0];
 
     if (line) {
-      const units = unit === 'kilometers' ? 'kilometers' : 'miles';
-
-      let distance: string | number = length(line, { units });
-
-      if (unit === 'feet') {
-        distance /= 5280;
-      }
-
-      distance = distance.toFixed(2);
-
-      const measuredLine = {
-        ...line,
-        properties: {
-          ...line.properties,
-          distance: `${distance}mi`,
-        },
-      };
-
-      updateLineSource(measuredLine);
+      updateLineString(line, unit);
     }
   }, [unit]);
+
+  const clearMeasure = () => {
+    if (!map) {
+      return;
+    }
+
+    const points = getDefaultGeoJSON<Point>();
+    const line = getDefaultGeoJSON<LineString>();
+
+    const pointsSource = map.getSource(SourceId.MeasurePoints) as GeoJSONSource;
+    const lineSource = map.getSource(SourceId.MeasureLine) as GeoJSONSource;
+
+    setPoints(points);
+    setLine(line);
+
+    if (pointsSource) {
+      pointsSource.setData(points);
+    }
+
+    if (lineSource) {
+      lineSource.setData(line);
+    }
+  };
+
+  return { clearMeasure };
 };
