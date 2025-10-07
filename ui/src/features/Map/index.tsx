@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
 import { BasemapId } from '@/components/Map/types';
@@ -11,6 +11,7 @@ import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
 import mainManager from '@/managers/Main.init';
+import useSessionStore from '@/stores/session';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;
@@ -30,6 +31,10 @@ type Props = {
  */
 const MainMap: React.FC<Props> = (props) => {
   const { accessToken } = props;
+
+  const loadingInstances = useSessionStore((state) => state.loadingInstances);
+
+  const [shouldResize, setShouldResize] = useState(false);
 
   const { map, hoverPopup } = useMap(MAP_ID);
 
@@ -72,6 +77,18 @@ const MainMap: React.FC<Props> = (props) => {
 
     mainManager.setPopup(hoverPopup);
   }, [hoverPopup]);
+
+  useEffect(() => {
+    setShouldResize(loadingInstances.length > 0);
+  }, [loadingInstances]);
+
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+
+    map.resize();
+  }, [shouldResize]);
 
   //   TODO: uncomment when basemap selector is implemented
   //   useEffect(() => {

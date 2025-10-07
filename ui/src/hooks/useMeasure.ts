@@ -6,7 +6,7 @@
 import { useEffect } from 'react';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { featureCollection, length, lineString } from '@turf/turf';
-import { Feature, Point } from 'geojson';
+import { Feature, LineString, Point } from 'geojson';
 import { GeoJSONSource, Map, MapMouseEvent, MapTouchEvent } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { SubLayerId } from '@/features/Map/config';
@@ -17,6 +17,20 @@ import { DrawMode } from '@/stores/session/types';
 export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
   const drawMode = useSessionStore((store) => store.drawMode);
   const setPoints = useSessionStore((store) => store.setMeasurePoints);
+  const measureLine = useSessionStore((store) => store.measureLine);
+  const setLine = useSessionStore((store) => store.setMeasureLine);
+  const unit = useSessionStore((store) => store.measureUnit);
+
+  const updateLineSource = (feature: Feature<LineString>) => {
+    if (!map) {
+      return;
+    }
+
+    const collection = featureCollection([feature]);
+    const source = map.getSource(SourceId.MeasureLine) as GeoJSONSource;
+    source?.setData(collection);
+    setLine(collection);
+  };
 
   useEffect(() => {
     if (!map || !draw) {
@@ -33,10 +47,19 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
     };
 
     const createLine = (pointA: Feature<Point>, pointB: Feature<Point>) => {
+      const unit = useSessionStore.getState().measureUnit;
+
       const line = lineString([pointA.geometry.coordinates, pointB.geometry.coordinates]);
 
-      const source = map.getSource(SourceId.MeasureLine) as GeoJSONSource;
-      const distance = length(line, { units: 'miles' }).toFixed(2);
+      const units = unit === 'kilometers' ? 'kilometers' : 'miles';
+
+      let distance: string | number = length(line, { units });
+
+      if (unit === 'feet') {
+        distance /= 5280;
+      }
+
+      distance = distance.toFixed(2);
 
       const measuredLine = {
         ...line,
@@ -46,7 +69,7 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
         },
       };
 
-      source.setData(measuredLine);
+      updateLineSource(measuredLine);
     };
 
     const onMove = (e: MapMouseEvent | MapTouchEvent) => {
@@ -165,4 +188,30 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null) => {
       map.off('touchstart', SubLayerId.MeasurePoints, onTouchStart);
     };
   }, [drawMode]);
+
+  useEffect(() => {
+    const line = measureLine.features[0];
+
+    if (line) {
+      const units = unit === 'kilometers' ? 'kilometers' : 'miles';
+
+      let distance: string | number = length(line, { units });
+
+      if (unit === 'feet') {
+        distance /= 5280;
+      }
+
+      distance = distance.toFixed(2);
+
+      const measuredLine = {
+        ...line,
+        properties: {
+          ...line.properties,
+          distance: `${distance}mi`,
+        },
+      };
+
+      updateLineSource(measuredLine);
+    }
+  }, [unit]);
 };

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { Feature, FeatureCollection, MultiPolygon, Point, Polygon } from 'geojson';
+import { Feature, FeatureCollection, LineString, MultiPolygon, Point, Polygon } from 'geojson';
 import { StateCreator } from 'zustand';
 import { DrawMode, SessionState } from '@/stores/session/types';
 
@@ -17,6 +17,10 @@ export interface DrawingSlice {
   hasDrawnShape: (id: string) => boolean;
   measurePoints: FeatureCollection<Point>;
   setMeasurePoints: (points: DrawingSlice['measurePoints']) => void;
+  measureLine: FeatureCollection<LineString>;
+  setMeasureLine: (measureLine: DrawingSlice['measureLine']) => void;
+  measureUnit: 'miles' | 'feet' | 'kilometers';
+  setMeasureUnit: (measureUnits: DrawingSlice['measureUnit']) => void;
 }
 
 export const createDrawingSlice: StateCreator<
@@ -48,4 +52,11 @@ export const createDrawingSlice: StateCreator<
     features: [],
   },
   setMeasurePoints: (measurePoints) => set({ measurePoints }),
+  measureLine: {
+    type: 'FeatureCollection',
+    features: [],
+  },
+  setMeasureLine: (measureLine) => set({ measureLine }),
+  measureUnit: 'miles',
+  setMeasureUnit: (measureUnit) => set({ measureUnit }),
 });

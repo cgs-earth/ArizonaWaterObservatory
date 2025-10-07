@@ -5,7 +5,7 @@
 
 import { useRef, useState } from 'react';
 import { Feature, MultiPolygon, Polygon } from 'geojson';
-import { Group, Stack, Text, Title } from '@mantine/core';
+import { Collapse, Group, Stack, Text, Title } from '@mantine/core';
 import Plus from '@/assets/Plus';
 import Button from '@/components/Button';
 import IconButton from '@/components/IconButton';
@@ -108,18 +108,31 @@ export const Draw: React.FC = () => {
             <Stack className={styles.container} align="flex-start">
               <Title order={4}>Draw Tools</Title>
               <Group>
-                <IconButton
+                <Button
+                  size="sm"
                   variant={drawMode === DrawMode.Polygon ? Variant.Selected : Variant.Secondary}
                   onClick={handlePolygon}
                 >
-                  <Plus />
-                </IconButton>
-                <IconButton
-                  variant={drawMode === DrawMode.Polygon ? Variant.Selected : Variant.Secondary}
+                  {drawMode === DrawMode.Polygon ? 'Cancel' : 'Draw'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={drawMode === DrawMode.Measure ? Variant.Selected : Variant.Secondary}
                   onClick={() => setDrawMode(DrawMode.Measure)}
                 >
-                  <Plus />
-                </IconButton>
+                  {drawMode === DrawMode.Measure ? 'Cancel' : 'Measure'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={drawMode === DrawMode.Select ? Variant.Selected : Variant.Secondary}
+                  onClick={() => setDrawMode(DrawMode.Select)}
+                  disabled
+                >
+                  {drawMode === DrawMode.Select ? 'Cancel' : 'Select'}
+                </Button>
+                <Collapse in={drawMode === DrawMode.Measure}>
+                  <Text>{/* ... content */}</Text>
+                </Collapse>
               </Group>
               <Group>
                 <Button
