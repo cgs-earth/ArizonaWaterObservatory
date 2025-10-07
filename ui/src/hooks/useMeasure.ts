@@ -65,7 +65,7 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null, hoverPopup:
     }
 
     const handleLeave = () => {
-      map.getCanvas().style.cursor = '';
+      map.getCanvas().style.cursor = 'crosshair';
       hoverPopup.remove();
     };
 

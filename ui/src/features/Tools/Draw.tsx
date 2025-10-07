@@ -79,7 +79,7 @@ export const Draw: React.FC = () => {
       setDrawMode(DrawMode.Polygon);
       draw.changeMode('draw_polygon');
       notificationManager.show(
-        'Click outside the shape to deselect.',
+        'Finish drawing the shape, or click the cancel button to exit the draw tool.',
         NotificationType.Info,
         10000
       );
@@ -90,6 +90,9 @@ export const Draw: React.FC = () => {
     if (drawMode === DrawMode.Measure) {
       clearMeasure();
       setDrawMode(null);
+      if (map) {
+        map.getCanvas().style.cursor = '';
+      }
     } else {
       setDrawMode(DrawMode.Measure);
       notificationManager.show(
@@ -97,6 +100,9 @@ export const Draw: React.FC = () => {
         NotificationType.Info,
         10000
       );
+      if (map) {
+        map.getCanvas().style.cursor = 'crosshair';
+      }
     }
   };
 
@@ -119,6 +125,11 @@ export const Draw: React.FC = () => {
     if (drawMode !== DrawMode.Measure) {
       clearMeasure();
     }
+    if (drawMode !== DrawMode.Polygon) {
+      if (draw) {
+        draw.changeMode('simple_select');
+      }
+    }
   }, [drawMode]);
 
   return (
@@ -130,7 +141,10 @@ export const Draw: React.FC = () => {
           onChange={setShow}
           closeOnClickOutside={false}
           target={
-            <Tooltip label="Measure distances and filter by drawn or existing geometries">
+            <Tooltip
+              label="Measure distances and filter by drawn or existing geometries"
+              disabled={show}
+            >
               <IconButton
                 variant={show ? Variant.Selected : Variant.Secondary}
                 onClick={handleShow}
@@ -186,7 +200,7 @@ export const Draw: React.FC = () => {
                   </Group>
                 </RadioGroup>
               </Collapse>
-              <Group>
+              <Group mt="md">
                 <Tooltip
                   label={
                     drawnShapes.length === 0
