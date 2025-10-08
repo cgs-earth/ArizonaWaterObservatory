@@ -54,6 +54,7 @@
 .accordionContent {
   /* border-top: 1px solid var(--border); */
   padding: calc(var(--default-spacing) * 2);
+  border-bottom: 0.5rem solid var(--asu-color-secondary);
 }
 
 .toggleButton {

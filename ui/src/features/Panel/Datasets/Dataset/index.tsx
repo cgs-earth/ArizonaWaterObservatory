@@ -73,7 +73,7 @@ const Dataset: React.FC<Props> = (props) => {
       <Divider />
       <Stack gap={0}>
         <Text size="lg" fw={500}>
-          Parameters:
+          Available Parameters:
         </Text>
         {filteredParameters.length === 0 ? (
           <Text size="xs">No Parameters</Text>

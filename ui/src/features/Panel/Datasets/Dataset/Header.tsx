@@ -20,11 +20,11 @@ export const Header: React.FC<Props> = (props) => {
   return (
     <Tooltip label="Click to show dataset details" openDelay={500}>
       <Stack justify="center" gap={1}>
-        <Text component="h3" size="lg" lineClamp={2} title={dataset.title}>
+        <Text component="h3" size="lg" lineClamp={2} title={dataset.title} fw={500}>
           <strong>{provider}</strong> {dataset.title}
         </Text>
         <Text size="xs" lineClamp={2}>
-          Parameters: {getParameterList(dataset).join(', ')}
+          <strong>Parameters:</strong> {getParameterList(dataset).join(', ')}
         </Text>
       </Stack>
     </Tooltip>
