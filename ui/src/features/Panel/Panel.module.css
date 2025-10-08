@@ -15,9 +15,6 @@
   height: 100vh;
   max-height: 100vh;
 
-  width: 400px;
-  min-width: 400px;
-
   overflow: hidden;
 }
 
@@ -35,8 +32,6 @@
 }
 
 .panelBody {
-  transition: width 1s ease-in;
-
   flex-grow: 0;
 
   overflow: hidden;
@@ -100,6 +95,19 @@
 }
 
 @media screen and (max-width: 899px) {
+  .toggleButton {
+    display: none;
+  }
+
+  .panelOpen {
+    width: 100%;
+  }
+
+  .panelClosed {
+    width: 100%;
+    max-width: unset;
+  }
+
   .panelWrapper {
     height: unset;
     max-height: unset;

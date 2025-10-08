@@ -21,7 +21,7 @@ const Panel: React.FC = () => {
   const provider = useMainStore((state) => state.provider);
   const category = useMainStore((state) => state.category);
 
-  const [opened, { toggle }] = useDisclosure(true);
+  const [opened, { toggle, open }] = useDisclosure(true);
 
   const getCollections = async () => {
     const loadingInstance = loadingManager.add('Updating collections', LoadingType.Collections);
@@ -41,6 +41,18 @@ const Panel: React.FC = () => {
   useEffect(() => {
     void getCollections();
   }, [provider, category]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 899) {
+        open();
+      }
+    };
+
+    handleResize(); // Run on mount
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [open]);
 
   return (
     <Box className={styles.panelWrapper}>
