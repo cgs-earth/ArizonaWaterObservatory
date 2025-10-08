@@ -4,14 +4,16 @@
  */
 
 import { ReactElement, useMemo } from 'react';
-import { Title } from '@mantine/core';
+import { Box, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import Dataset from '@/features/Panel/Datasets/Dataset';
 import { Header } from '@/features/Panel/Datasets/Dataset/Header';
 import Filter from '@/features/Panel/Datasets/Filter';
 import { FilterTitle } from '@/features/Panel/Datasets/Filter/Header';
+import styles from '@/features/Panel/Panel.module.css';
 import useMainStore from '@/stores/main';
+import { Control } from './Dataset/Control';
 
 const Datasets: React.FC = () => {
   const datasets = useMainStore((state) => state.collections);
@@ -38,6 +40,7 @@ const Datasets: React.FC = () => {
               id: `datasets-accordion-${dataset.id}`,
               title: <Header dataset={dataset} />,
               content: <Dataset dataset={dataset} />,
+              control: <Control dataset={dataset} />,
             },
           ]}
           variant={Variant.Secondary}
@@ -57,7 +60,7 @@ const Datasets: React.FC = () => {
               Datasets
             </Title>
           ),
-          content: accordions,
+          content: <Box className={styles.datasetsBody}>{accordions}</Box>,
         },
       ]}
       variant={Variant.Primary}

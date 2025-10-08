@@ -15,7 +15,8 @@
   height: 100vh;
   max-height: 100vh;
 
-  max-width: 25%;
+  width: 400px;
+  min-width: 400px;
 
   overflow: hidden;
 }
@@ -47,8 +48,12 @@
 }
 
 .accordions {
-  max-height: calc(100vh - 117px);
-  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.accordionContent {
+  /* border-top: 1px solid var(--border); */
+  padding: calc(var(--default-spacing) * 2);
 }
 
 .toggleButton {
@@ -73,6 +78,24 @@
   width: 150px;
   height: 50px; /* TODO: height auto */
   background-color: pink; /* REMOVE AFTER WE GET THE LOGO */
+}
+
+.actionIcon {
+  margin-left: var(--default-spacing);
+  margin-right: var(--default-spacing);
+  stroke: var(--asu-gray-2);
+}
+
+.actionIcon:hover,
+.actionIcon:focus,
+.actionIcon:active {
+  stroke: var(--asu-gray-3);
+}
+
+.datasetsBody {
+  max-height: calc(100vh - 214px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @media screen and (max-width: 899px) {

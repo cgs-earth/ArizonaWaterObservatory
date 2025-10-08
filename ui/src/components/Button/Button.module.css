@@ -5,7 +5,7 @@
 
 .root {
   /* box-shadow: 0px 4px 4px rgb(0, 0, 0); */
-  box-shadow: 0px 4px 4px #00000040;
+  box-shadow: 0px 2px 2px #00000040;
   transition: transform 0.15s ease-in-out;
 }
 

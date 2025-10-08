@@ -9,4 +9,5 @@ export type Item = {
   id: string;
   title: ReactNode;
   content: ReactNode;
+  control?: ReactNode;
 };
