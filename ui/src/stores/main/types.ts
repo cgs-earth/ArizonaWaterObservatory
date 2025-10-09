@@ -68,7 +68,7 @@ export type Layer = {
   id: string; // uuid
   datasourceId: ICollection['id'];
   name: string; // User defined
-  color: ColorValueHex; // User defined, restrict to 6 char code if possible
+  color: string; // User defined, restrict to 6 char code if possible
   parameters: string[]; // Id's of parameter as returned by datasource
   from: string | null; // UTC timestamp
   to: string | null; // UTC timestamp

@@ -4,9 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Group, Stack, Text, Title, VisuallyHidden } from '@mantine/core';
-import Minus from '@/assets/Minus';
-import IconButton from '@/components/IconButton';
+import { Group, Stack, Text, Title } from '@mantine/core';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
 import { Layer } from '@/stores/main/types';
@@ -20,45 +18,42 @@ export const Header: React.FC<Props> = (props) => {
   const { layer } = props;
 
   const [dataset, setDataset] = useState<ICollection>();
+  const [parameters, setParameters] = useState<string[]>([]);
 
   useEffect(() => {
     const dataset = mainManager.getDatasource(layer.datasourceId);
 
     if (dataset) {
       setDataset(dataset);
+      const paramObjects = Object.values(dataset?.parameter_names ?? {});
+
+      console.log();
+      const parameters = paramObjects
+        .filter((object) => layer.parameters.includes(object.id))
+        .map((object) => object.name);
+      setParameters(parameters);
     }
-  }, []);
+  }, [layer]);
 
   return (
-    <Group>
-      <Stack justify="center" gap={1}>
-        {dataset && (
-          <Group gap="xs" justify="flex-start">
-            {getProvider(dataset.id) && (
-              <Text fw={700} size="xl">
-                {getProvider(dataset.id)}
-              </Text>
-            )}
-            <Text size="xl">{dataset.title}</Text>
-          </Group>
-        )}
+    <Stack justify="center" gap={1}>
+      {dataset && (
+        <Text component="h3" size="lg" lineClamp={1} title={dataset.title}>
+          <strong>{getProvider(dataset.id)}</strong> {dataset.title}
+        </Text>
+      )}
 
-        <Title order={3} size="h4">
-          {layer.name}
-        </Title>
-        <Group justify="space-between">
-          <Text size="sm">{layer.parameters.join(', ')}</Text>
-          {(layer.from || layer.to) && (
-            <Text size="sm">
-              {layer.from ?? '..'} - {layer.to ?? '..'}
-            </Text>
-          )}
-        </Group>
-      </Stack>
-      <IconButton ml="auto" mr="md" onClick={() => mainManager.deleteLayer(layer.id)}>
-        <Minus />
-        <VisuallyHidden>Remove Layer</VisuallyHidden>
-      </IconButton>
-    </Group>
+      <Title order={3} size="md" lineClamp={2} title={layer.name}>
+        {layer.name}
+      </Title>
+      <Group justify="space-between">
+        <Text size="sm">{parameters.join(', ')}</Text>
+        {(layer.from || layer.to) && (
+          <Text size="sm">
+            {layer.from ?? '..'} - {layer.to ?? '..'}
+          </Text>
+        )}
+      </Group>
+    </Stack>
   );
 };

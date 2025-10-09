@@ -19,6 +19,7 @@ export const LayoutPage: React.FC = () => {
           <Panel />
           <Stack gap={0} className={styles.right}>
             <TopBar />
+            <Loading desktop={false} />
             <Outlet />
           </Stack>
         </Group>
