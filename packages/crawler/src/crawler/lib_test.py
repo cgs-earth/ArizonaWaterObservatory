@@ -4,10 +4,15 @@
 from pathlib import Path
 
 import pytest
-import s3fs
 from testcontainers.minio import MinioContainer
+import xarray as xr
 
-from crawler.lib import get_adwr_link, upload_dataset_to_s3, xlsx_to_xarray
+from crawler.lib import (
+    add_shapefile_info_to_dataset,
+    get_adwr_link,
+    upload_xlsx_to_s3,
+    xlsx_to_xarray,
+)
 
 
 def test_find_link():
@@ -24,20 +29,52 @@ def test_read_xlsx_as_xarray():
     path = (
         Path(__file__).parent / "testdata" / "GWSI_WW_LEVELS_abbreviated.xlsx"
     )
-    assert xlsx_to_xarray(path)
+    result = xlsx_to_xarray(path)
+    assert result
+    assert len(result.dims) == 3
+    assert result.dims.get("WLWA_SITE_WELL_SITE_ID")
 
 
 def test_xlsx_to_s3():
     with MinioContainer() as minio:
         conf = minio.get_config()
         client = minio.get_client()
-        upload_dataset_to_s3(
+        client.make_bucket("testbucket")
+
+        endpoint = f"http://{conf['endpoint']}"
+        upload_xlsx_to_s3(
             Path(__file__).parent
             / "testdata"
             / "GWSI_WW_LEVELS_abbreviated.xlsx",
-            s3fs.S3FileSystem(
-                endpoint_url="s3://" + conf["endpoint"],
-                key=conf["access_key"],
-                secret=conf["secret_key"],
-            ),
+            "testbucket",
+            conf["access_key"],
+            conf["secret_key"],
+            endpoint,
         )
+
+        ds = xr.open_zarr(
+            "s3://testbucket/GWSI_WW_LEVELS_abbreviated.zarr",
+            storage_options={
+                "key": conf["access_key"],
+                "secret": conf["secret_key"],
+                "client_kwargs": {"endpoint_url": endpoint},
+            },
+        )
+        assert "WLWA_SITE_WELL_SITE_ID" in ds.variables
+
+
+def test_add_shapefile():
+    path = (
+        Path(__file__).parent / "testdata" / "GWSI_WW_LEVELS_abbreviated.xlsx"
+    )
+    dataset = xlsx_to_xarray(path)
+
+    add_shapefile_info_to_dataset(
+        Path(__file__).parent
+        / "defs"
+        / "assets"
+        / "GWSI_ZIP_20250714"
+        / "Shape",
+        dataset,
+        path.name,
+    )

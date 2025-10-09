@@ -10,3 +10,7 @@ downloads/
 *.zarr/
 .tmp*/
 .DS_Store
+
+.env
+
+GWSI_ZIP_20250714/

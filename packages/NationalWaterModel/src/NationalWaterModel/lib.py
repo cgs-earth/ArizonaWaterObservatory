@@ -11,7 +11,6 @@ from pygeoapi.api import DEFAULT_STORAGE_CRS
 from pygeoapi.provider.base import (
     ProviderInvalidDataError,
     ProviderNoDataError,
-    ProviderQueryError,
 )
 from pygeoapi.util import get_crs_from_uri
 import pyproj
@@ -45,6 +44,8 @@ class ProviderSchema(TypedDict):
     storage_crs_override: NotRequired[str]
     # The crs of the dataset that should be output in covjson
     output_crs: NotRequired[str]
+    # The name of the field that contains the feature id
+    id_field: str
 
 
 LOGGER = logging.getLogger(__name__)
@@ -142,6 +143,7 @@ def fetch_data(
     x_field: str | None,
     y_field: str | None,
     bbox: list,
+    feature_id_name: str | None = None,
     feature_id: str | None = None,
     feature_limit: int | None = None,
     raster: bool = False,
@@ -158,7 +160,7 @@ def fetch_data(
     )
     variables_to_select = timeseries_properties_to_fetch.copy()
 
-    # if we are selecting a property, we should also select time since timeseries always needs time
+    # Ensure time field is included for time series
     if time_field and time_field not in variables_to_select:
         variables_to_select.append(time_field)
 
@@ -171,28 +173,36 @@ def fetch_data(
         selected = unopened_dataset[variables_to_select]
     except KeyError as e:
         raise KeyError(
-            f"Could not find {variables_to_select} in {unopened_dataset.variables}; resulted in error {e}"
+            f"Could not find {variables_to_select} in {list(unopened_dataset.variables)}; resulted in error {e}"
         ) from e
 
     if feature_id is not None:
-        selected = selected.sel(feature_id=int(feature_id))
+        selected = selected.sel({feature_id_name: int(feature_id)})
         return selected.load()
 
-    if datetime_filter is None:
-        raise ProviderQueryError(
-            "No datetime filter provided, fetching all data would be too large"
+    # Use the provided time field for all time-based operations
+    if time_field not in selected.variables:
+        raise KeyError(
+            f"Time field '{time_field}' not found in dataset variables"
         )
 
     available_times = selected[time_field].values
-    available_start = available_times.min()
-    available_end = available_times.max()
+    available_start: np.datetime64 = available_times.min()
+    available_end: np.datetime64 = available_times.max()
+
+    if datetime_filter is None:
+        LOGGER.warning(
+            "No datetime filter provided, fetching all data would be too large; "
+            "falling back to end of available data"
+        )
+        datetime_filter = str(available_end)
 
     datetime_range = datetime_filter.split("/")
 
     if len(datetime_range) == 1:
         datetime_np = np.datetime64(datetime_filter)
         if datetime_np in available_times:
-            selected = selected.sel(time=datetime_np, drop=False)
+            selected = selected.sel({time_field: datetime_np}, drop=False)
         else:
             raise ProviderNoDataError(
                 f"{datetime_filter} not in available times. "
@@ -221,21 +231,18 @@ def fetch_data(
             )
         else:
             times_to_select = available_times[mask]
-            selected = selected.sel(time=times_to_select, drop=False)
+            selected = selected.sel({time_field: times_to_select}, drop=False)
 
     # Apply feature limit if provided
     if feature_limit is not None:
-        selected = selected.isel(feature_id=slice(0, feature_limit))
+        selected = selected.isel({feature_id_name: slice(0, feature_limit)})
 
     if bbox:
-        # Geospatial filtering using latitude and longitude variables
         lon_min, lat_min, lon_max, lat_max = bbox
 
-        # latitude/longitude are 1D coords along "feature_id"
         lon = selected[x_field].compute()
         lat = selected[y_field].compute()
 
-        # get only data within the bbox
         mask = (
             (lon >= lon_min)
             & (lon <= lon_max)
@@ -247,11 +254,9 @@ def fetch_data(
             raise ProviderNoDataError(f"No data in bbox {bbox}")
 
         if raster:
-            # if it is raster there is no feature_id
-            # and thus the mask needs to be applied to the dataset as a whole
             selected = selected.where(mask, drop=True)
         else:
-            selected = selected.isel(feature_id=mask)
+            selected = selected.isel({feature_id_name: mask})
 
     return selected.load()
 

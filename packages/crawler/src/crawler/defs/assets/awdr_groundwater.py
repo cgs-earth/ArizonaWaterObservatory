@@ -2,12 +2,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from io import BytesIO
+import os
+from pathlib import Path
 from zipfile import ZipFile
 
-from crawler.lib import get_adwr_link
+from crawler.lib import (
+    add_shapefile_info_to_dataset,
+    get_adwr_link,
+    upload_dataset_to_s3,
+    xlsx_to_xarray,
+)
 import dagster as dg
 import requests
-import pandas
+import xarray
+
+LATEST_EXPORT = "20250714"
+ARIZONA_GROUNDWATER_XLSX_UNZIPPED_FOLDER = (
+    Path(__file__).parent / f"GWSI_ZIP_{LATEST_EXPORT}"
+)
 
 
 @dg.asset
@@ -25,19 +37,59 @@ def get_awdr_link(context: dg.AssetExecutionContext):
 
 @dg.asset
 def awdr_groundwater_zip(
-    context: dg.AssetExecutionContext, output_dir: str, awdr_link: str
+    context: dg.AssetExecutionContext, get_awdr_link: str
 ) -> dg.MaterializeResult:
-    url = f"https://www.azwater.gov/{awdr_link}"
+    url = f"https://www.azwater.gov/{get_awdr_link}"
 
     with requests.get(url, stream=True) as resp:
         resp.raise_for_status()
 
         with ZipFile(BytesIO(resp.content)) as zf:
-            zf.extractall(output_dir)
+            zf.extractall(ARIZONA_GROUNDWATER_XLSX_UNZIPPED_FOLDER)
 
     return dg.MaterializeResult()
 
 
 @dg.asset
 def xlsx_to_zarr(context: dg.AssetExecutionContext):
-    for  file in output_dir:
+    endpoint = os.environ.get("S3_ENDPOINT", "http://localhost:9000")
+    access_key = os.environ.get("S3_ACCESS_KEY", "minioadmin")
+    secret_key = os.environ.get("S3_SECRET_KEY", "minioadmin")
+    bucket = os.environ.get("S3_BUCKET", "iow")
+
+    for file in ARIZONA_GROUNDWATER_XLSX_UNZIPPED_FOLDER.iterdir():
+        if not file.is_dir():
+            continue
+
+        if file.name == "Data_Tables":
+            for path in file.glob("*.xlsx"):
+                if not path.is_file():
+                    continue
+
+                dataset = xlsx_to_xarray(path)
+
+                dataset = add_shapefile_info_to_dataset(
+                    Path(__file__).parent / "GWSI_ZIP_20250714" / "Shape",
+                    dataset,
+                    path.name,
+                )
+
+                assert len(dataset.dims) > 0
+
+                for date in ["WELM_DATE_MEASURED"]:
+                    if date in dataset:
+                        dataset[date] = xarray.DataArray(
+                            dataset[date].values.astype("datetime64[ns]"),
+                            dims=dataset[date].dims,
+                            coords=dataset[date].coords,
+                            attrs=dataset[date].attrs,
+                        )
+                assert len(dataset.dims) > 0
+
+                upload_dataset_to_s3(
+                    dataset,
+                    zarr_path=f"s3://{bucket}/{path.name.removesuffix('.xlsx')}.zarr",
+                    access_key=access_key,
+                    secret_key=secret_key,
+                    endpoint_url=endpoint,
+                )
