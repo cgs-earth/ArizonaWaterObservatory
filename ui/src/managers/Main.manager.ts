@@ -53,7 +53,7 @@ class MainManager {
   }
 
   private createHexColor(): ColorValueHex {
-    return '#fake';
+    return getRandomHexColor();
   }
 
   /**
@@ -125,7 +125,7 @@ class MainManager {
     };
 
     const sourceId = await this.addLocationSource(datasource.id, signal);
-    this.addLocationLayer(datasource.id, sourceId);
+    this.addLocationLayer(layer, sourceId);
 
     this.store.getState().addLayer(layer);
   }
@@ -150,15 +150,18 @@ class MainManager {
    *
    * @function
    */
-  public getLocationsLayerIds(collectionId: ICollection['id']): {
+  public getLocationsLayerIds(
+    collectionId: ICollection['id'],
+    layerId: Layer['id']
+  ): {
     pointLayerId: string;
     fillLayerId: string;
     lineLayerId: string;
   } {
     return {
-      pointLayerId: `${collectionId}-edr-locations-point`,
-      fillLayerId: `${collectionId}-edr-locations-fill`,
-      lineLayerId: `${collectionId}-edr-locations-line`,
+      pointLayerId: `${collectionId}-${layerId}-edr-locations-point`,
+      fillLayerId: `${collectionId}-${layerId}-edr-locations-fill`,
+      lineLayerId: `${collectionId}-${layerId}-edr-locations-line`,
     };
   }
 
@@ -246,22 +249,22 @@ class MainManager {
    *
    * @function
    */
-  private async addLocationLayer(layerId: Layer['id'], sourceId: string): Promise<void> {
+  private async addLocationLayer(layer: Layer, sourceId: string): Promise<void> {
     const geographyFilter = this.store.getState().geographyFilter;
 
-    const layers = this.store.getState().layers;
-
-    const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(layerId);
+    const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
+      layer.id,
+      layer.datasourceId
+    );
     if (this.map) {
-      const color = getRandomHexColor();
       if (
         !this.map.getLayer(pointLayerId) &&
         !this.map.getLayer(lineLayerId) &&
         !this.map.getLayer(pointLayerId)
       ) {
-        this.map.addLayer(getFillLayerDefinition(fillLayerId, sourceId, color));
-        this.map.addLayer(getLineLayerDefinition(lineLayerId, sourceId, color));
-        this.map.addLayer(getPointLayerDefinition(pointLayerId, sourceId, color));
+        this.map.addLayer(getFillLayerDefinition(fillLayerId, sourceId, layer.color));
+        this.map.addLayer(getLineLayerDefinition(lineLayerId, sourceId, layer.color));
+        this.map.addLayer(getPointLayerDefinition(pointLayerId, sourceId, layer.color));
 
         this.map.on('click', pointLayerId, (e) => {
           e.originalEvent.preventDefault();
@@ -277,7 +280,7 @@ class MainManager {
               } else {
                 this.store.getState().addLocation({
                   id: locationId,
-                  layerId,
+                  layerId: layer.id,
                 });
               }
             });
@@ -299,7 +302,7 @@ class MainManager {
                 } else {
                   this.store.getState().addLocation({
                     id: locationId,
-                    layerId,
+                    layerId: layer.id,
                   });
                 }
               });
@@ -322,7 +325,7 @@ class MainManager {
                 } else {
                   this.store.getState().addLocation({
                     id: locationId,
-                    layerId,
+                    layerId: layer.id,
                   });
                 }
               });
@@ -334,7 +337,6 @@ class MainManager {
           this.map!.getCanvas().style.cursor = 'pointer';
           const { features } = e;
           if (features && features.length > 0) {
-            const layer = layers.find((layer) => layer.id === layerId);
             const uniqueFeatures = this.getUniqueIds(features);
             if (layer) {
               const html = `
@@ -351,7 +353,6 @@ class MainManager {
           this.map!.getCanvas().style.cursor = 'pointer';
           const { features } = e;
           if (features && features.length > 0) {
-            const layer = layers.find((layer) => layer.id === layerId);
             const uniqueFeatures = this.getUniqueIds(features);
             if (layer) {
               const html = `
@@ -373,36 +374,6 @@ class MainManager {
         const geoFilterLayerId = this.getFilterLayerId(geographyFilter.collectionId);
         [fillLayerId, lineLayerId, pointLayerId].forEach((layerId) =>
           this.map!.moveLayer(geoFilterLayerId, layerId)
-        );
-      }
-    }
-  }
-
-  /**
-   *
-   * @function
-   */
-  public async getLocations(): Promise<void> {
-    // Specific user collection choice
-    const collection = this.store.getState().collection;
-    // All collections for selected filters
-    const collections = this.store.getState().collections;
-
-    if (collection) {
-      const sourceId = await this.addLocationSource(collection);
-      this.addLocationLayer(collection, sourceId);
-    } else {
-      const chunkSize = 5;
-
-      for (let i = 0; i < collections.length; i += chunkSize) {
-        const chunk = collections.slice(i, i + chunkSize);
-
-        await Promise.all(
-          chunk.map(async (collection) => {
-            const collectionId = collection.id;
-            const sourceId = await this.addLocationSource(collectionId);
-            this.addLocationLayer(collectionId, sourceId);
-          })
         );
       }
     }
@@ -435,10 +406,10 @@ class MainManager {
       return;
     }
 
-    const originalCollections = this.store.getState().originalCollections;
+    const layers = this.store.getState().layers;
 
-    for (const collection of originalCollections) {
-      const layerIds = Object.values(this.getLocationsLayerIds(collection.id));
+    for (const layer of layers) {
+      const layerIds = Object.values(this.getLocationsLayerIds(layer.datasourceId, layer.id));
       for (const layerId of layerIds) {
         if (this.map.getLayer(layerId)) {
           this.map.removeLayer(layerId);
