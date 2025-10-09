@@ -22,6 +22,7 @@ import Filter from '@/features/Panel/Datasets/Filter';
 import { FilterTitle } from '@/features/Panel/Datasets/Filter/Header';
 import styles from '@/features/Panel/Panel.module.css';
 import useMainStore from '@/stores/main';
+import useSessionStore from '@/stores/session';
 import { Control } from './Dataset/Control';
 
 type Props = {
@@ -33,6 +34,8 @@ const Datasets: React.FC<Props> = (props) => {
   const { layersRef, setDatasetsOpen } = props;
 
   const datasets = useMainStore((state) => state.collections);
+  const loadingInstances = useSessionStore((state) => state.loadingInstances);
+
   const [maxHeight, setMaxHeight] = useState(555);
 
   const [value, setValue] = useState<string | null>();
@@ -114,7 +117,10 @@ const Datasets: React.FC<Props> = (props) => {
             </Title>
           ),
           content: (
-            <Box className={styles.accordionBody} mah={`calc(100vh - ${maxHeight}px)`}>
+            <Box
+              className={styles.accordionBody}
+              mah={`calc(100vh - ${maxHeight + (loadingInstances.length > 0 ? 12 : 0)}px)`}
+            >
               {accordions}
             </Box>
           ),

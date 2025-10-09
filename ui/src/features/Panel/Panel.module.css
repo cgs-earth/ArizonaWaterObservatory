@@ -43,14 +43,17 @@
 }
 
 .accordions {
-  /* max-height: calc(100vh - 114px);
-  overflow-y: auto; */
   overflow-x: hidden;
 }
 
 .accordionContent {
   padding: calc(var(--default-spacing) * 2);
   border-bottom: 0.5rem solid var(--asu-color-secondary);
+}
+
+.filterBody {
+  padding: calc(var(--default-spacing) * 2);
+  border-bottom: 0.5rem solid var(--asu-color-tertiary);
 }
 
 .accordionBody {
@@ -94,17 +97,7 @@
 }
 
 .datasetsBody {
-  /* max-height: calc(100vh - 214px);
-  overflow-y: auto; */
   overflow-x: hidden;
-}
-
-.datasetsClosed {
-  max-height: calc(100vh - 12px - 215px);
-}
-
-.datasetsOpen {
-  max-height: calc(100vh - 12px - 605px);
 }
 
 .layerInput {
