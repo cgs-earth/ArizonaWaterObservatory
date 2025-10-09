@@ -4,7 +4,7 @@
  */
 
 import { useRef } from 'react';
-import { ActionIcon, Tooltip, VisuallyHidden } from '@mantine/core';
+import { ActionIcon, Tooltip } from '@mantine/core';
 import Plus from '@/assets/Plus';
 import styles from '@/features/Panel/Panel.module.css';
 import loadingManager from '@/managers/Loading.init';
@@ -43,11 +43,11 @@ export const Control: React.FC<Props> = (props) => {
     <Tooltip label="Add an instance of this dataset as an interactive layer" openDelay={500}>
       <ActionIcon
         variant="transparent"
+        title="Add Layer"
         className={styles.actionIcon}
         onClick={() => handleClick(dataset.title ?? dataset.id, dataset.id)}
       >
         <Plus />
-        <VisuallyHidden>Add Layer</VisuallyHidden>
       </ActionIcon>
     </Tooltip>
   );

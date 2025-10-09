@@ -10,6 +10,7 @@ export interface LayerSlice {
   layers: Layer[];
   setLayers: (layers: Layer[]) => void;
   addLayer: (layer: Layer) => void;
+  updateLayer: (layer: Layer) => void;
   hasLayer: (options: { layerId?: Layer['id']; collectionId?: Layer['datasourceId'] }) => boolean;
 }
 
@@ -24,6 +25,10 @@ export const createLayerSlice: StateCreator<
   addLayer: (layer) =>
     set((state) => ({
       layers: [...state.layers, layer],
+    })),
+  updateLayer: (updatedLayer) =>
+    set((state) => ({
+      layers: state.layers.map((layer) => (layer.id === updatedLayer.id ? updatedLayer : layer)),
     })),
   hasLayer: ({ layerId, collectionId }) => {
     if (layerId) {

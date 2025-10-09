@@ -56,6 +56,17 @@ class MainManager {
     return getRandomHexColor();
   }
 
+  private compareArrays<T>(a: T[], b: T[]): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+
+    const sorted1 = [...a].sort();
+    const sorted2 = [...b].sort();
+
+    return sorted1.every((val, index) => val === sorted2[index]);
+  }
+
   /**
    *
    * @function
@@ -78,9 +89,17 @@ class MainManager {
    */
   private async fetchLocations(
     collectionId: ICollection['id'],
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    parameterNames?: string[]
   ): Promise<FeatureCollection<Point>> {
-    return awoService.getLocations<FeatureCollection<Point>>(collectionId, { signal });
+    return awoService.getLocations<FeatureCollection<Point>>(collectionId, {
+      signal,
+      params: {
+        ...(parameterNames && parameterNames.length > 0
+          ? { 'parameter-name': parameterNames.join(',') }
+          : {}),
+      },
+    });
   }
 
   public getDatasourceCount = (datasourceId: ICollection['id']): number => {
@@ -130,9 +149,26 @@ class MainManager {
     this.store.getState().addLayer(layer);
   }
 
-  deleteLayer(layerId: Layer['id']) {
-    const charts = this.store.getState().charts.filter((chart) => chart.layer !== layerId);
-    const layers = this.store.getState().layers.filter((layer) => layer.id !== layerId);
+  public deleteLayer(layer: Layer) {
+    const charts = this.store.getState().charts.filter((chart) => chart.layer !== layer.id);
+    const layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
+
+    if (this.map) {
+      const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
+
+      if (this.map.getLayer(pointLayerId)) {
+        this.map.removeLayer(pointLayerId);
+      }
+      if (this.map.getLayer(fillLayerId)) {
+        this.map.removeLayer(fillLayerId);
+      }
+      if (this.map.getLayer(lineLayerId)) {
+        this.map.removeLayer(lineLayerId);
+      }
+    }
 
     this.store.getState().setCharts(charts);
     this.store.getState().setLayers(layers);
@@ -215,13 +251,21 @@ class MainManager {
    */
   private async addLocationSource(
     collectionId: ICollection['id'],
-    options?: { filterFeatures?: Feature<Polygon | MultiPolygon>[]; signal?: AbortSignal }
+    options?: {
+      filterFeatures?: Feature<Polygon | MultiPolygon>[];
+      signal?: AbortSignal;
+      parameterNames?: string[];
+    }
   ): Promise<string> {
     const sourceId = this.getSourceId(collectionId);
     if (this.map) {
       const source = this.map.getSource(sourceId) as GeoJSONSource;
       if (!source) {
-        const data = await this.fetchLocations(collectionId, options?.signal);
+        const data = await this.fetchLocations(
+          collectionId,
+          options?.signal,
+          options?.parameterNames
+        );
 
         const filteredData = this.filterLocations(data, options?.filterFeatures);
 
@@ -230,7 +274,11 @@ class MainManager {
           data: filteredData,
         });
       } else if (source) {
-        const data = await this.fetchLocations(collectionId, options?.signal);
+        const data = await this.fetchLocations(
+          collectionId,
+          options?.signal,
+          options?.parameterNames
+        );
 
         const filteredData = this.filterLocations(data, options?.filterFeatures);
         source.setData(filteredData);
@@ -260,8 +308,8 @@ class MainManager {
     const geographyFilter = this.store.getState().geographyFilter;
 
     const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
-      layer.id,
-      layer.datasourceId
+      layer.datasourceId,
+      layer.id
     );
     if (this.map) {
       if (
@@ -430,6 +478,42 @@ class MainManager {
         })
       );
     }
+  }
+
+  public async updateLayer(
+    layer: Layer,
+    name: Layer['name'],
+    color: Layer['color'],
+    parameters: Layer['parameters']
+  ): Promise<void> {
+    if (color !== layer.color) {
+      if (this.map) {
+        const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
+          layer.datasourceId,
+          layer.id
+        );
+        if (this.map.getLayer(pointLayerId)) {
+          this.map.setPaintProperty(pointLayerId, 'circle-color', color);
+        }
+        if (this.map.getLayer(fillLayerId)) {
+          this.map.setPaintProperty(fillLayerId, 'fill-color', color);
+        }
+        if (this.map.getLayer(lineLayerId)) {
+          this.map.setPaintProperty(lineLayerId, 'line-color', color);
+        }
+      }
+    }
+
+    if (!this.compareArrays(layer.parameters, parameters)) {
+      await this.addLocationSource(layer.datasourceId, { parameterNames: parameters });
+    }
+
+    this.store.getState().updateLayer({
+      ...layer,
+      name,
+      color,
+      parameters,
+    });
   }
 
   /**

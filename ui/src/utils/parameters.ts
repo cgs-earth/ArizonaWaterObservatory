@@ -20,16 +20,22 @@ const getParameters = (collection: ICollection, limit: number = 5) => {
     .map((parameterName) => parameterName.name);
 };
 
-export const getParameterList = (collection: ICollection, limit: number = 5): string[] => {
-  switch (collection.id) {
-    case CollectionId.RISEEdr:
-      return [
-        'Lake/Reservoir Storage',
-        'Lake/Reservoir Area',
-        'Air Temperature',
-        'Precipitation',
-        'Stream Gage Height',
-      ];
+export const getParameterList = (
+  collection: ICollection,
+  limit: number = 5,
+  useDefault: boolean = true
+): string[] => {
+  if (useDefault) {
+    switch (collection.id) {
+      case CollectionId.RISEEdr:
+        return [
+          'Lake/Reservoir Storage',
+          'Lake/Reservoir Area',
+          'Air Temperature',
+          'Precipitation',
+          'Stream Gage Height',
+        ];
+    }
   }
 
   return getParameters(collection, limit);

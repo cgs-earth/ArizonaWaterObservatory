@@ -48,7 +48,6 @@
 .sticky {
   position: sticky;
   background: var(--mantine-color-body);
-  z-index: 9999;
 }
 
 .top {

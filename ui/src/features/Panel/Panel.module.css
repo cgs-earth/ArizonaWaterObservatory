@@ -100,11 +100,15 @@
 }
 
 .datasetsClosed {
-  max-height: calc(100vh - 215px);
+  max-height: calc(100vh - 12px - 215px);
 }
 
 .datasetsOpen {
-  max-height: calc(100vh - 605px);
+  max-height: calc(100vh - 12px - 605px);
+}
+
+.layerInput {
+  width: 150px;
 }
 
 @media screen and (max-width: 899px) {
