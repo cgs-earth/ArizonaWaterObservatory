@@ -14,8 +14,8 @@ import styles from '@/pages/pages.module.css';
 export const LayoutPage: React.FC = () => {
   return (
     <Box className={styles.root}>
-      <Stack gap={0}>
-        <Group gap={0} align="flex-start">
+      <Stack gap={0} className={styles.fullHeight}>
+        <Group gap={0} align="flex-start" className={styles.fullHeight}>
           <Panel />
           <Stack gap={0} className={styles.right}>
             <TopBar />

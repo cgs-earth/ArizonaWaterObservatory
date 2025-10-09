@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
 import { BasemapId } from '@/components/Map/types';
@@ -11,6 +11,7 @@ import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
 import mainManager from '@/managers/Main.init';
+import useSessionStore from '@/stores/session';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;
@@ -30,6 +31,10 @@ type Props = {
  */
 const MainMap: React.FC<Props> = (props) => {
   const { accessToken } = props;
+
+  const loadingInstances = useSessionStore((state) => state.loadingInstances);
+
+  const [shouldResize, setShouldResize] = useState(false);
 
   const { map, hoverPopup } = useMap(MAP_ID);
 
@@ -53,8 +58,8 @@ const MainMap: React.FC<Props> = (props) => {
       map.resize();
       map.fitBounds(
         [
-          [-125, 24], // Southwest corner (California/Baja)
-          [-96.5, 49], // Northeast corner (MN/ND border)
+          [-114.8183, 31.3322], // Southwest corner [lng, lat]
+          [-109.0452, 37.0043], // Northeast corner [lng, lat]
         ],
         {
           padding: 50,
@@ -72,6 +77,18 @@ const MainMap: React.FC<Props> = (props) => {
 
     mainManager.setPopup(hoverPopup);
   }, [hoverPopup]);
+
+  useEffect(() => {
+    setShouldResize(loadingInstances.length > 0);
+  }, [loadingInstances]);
+
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+
+    map.resize();
+  }, [shouldResize]);
 
   //   TODO: uncomment when basemap selector is implemented
   //   useEffect(() => {
@@ -125,7 +142,7 @@ const MainMap: React.FC<Props> = (props) => {
           scaleControl: true,
           navigationControl: true,
         }}
-        persist
+        draw={{ clickBuffer: 5, touchEnabled: true, displayControlsDefault: false }}
       />
     </>
   );

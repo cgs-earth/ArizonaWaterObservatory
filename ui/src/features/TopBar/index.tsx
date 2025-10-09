@@ -5,6 +5,7 @@
 
 import { Group } from '@mantine/core';
 import Button from '@/components/Button';
+import Tools from '@/features/Tools';
 import styles from '@/features/TopBar/TopBar.module.css';
 
 const TopBar: React.FC = () => {
@@ -13,9 +14,7 @@ const TopBar: React.FC = () => {
       <Group>
         <Button size="sm">Placeholder</Button>
       </Group>
-      <Group>
-        <Button size="sm">Placeholder</Button>
-      </Group>
+      <Tools />
     </Group>
   );
 };

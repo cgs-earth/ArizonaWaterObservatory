@@ -4,8 +4,9 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { Map as _Map, IControl } from 'mapbox-gl';
 import { MapComponentProps } from '@/components/Map/types';
 import {
   addClickFunctions,
@@ -20,6 +21,7 @@ import { useMap } from '@/contexts/MapContexts';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
 import FeatureService, { FeatureServiceOptions } from '@hansdo/mapbox-gl-arcgis-featureserver';
 import { createRoot } from 'react-dom/client';
@@ -61,10 +63,19 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
     accessToken,
     persist = false,
     geocoder,
+    draw,
   } = props;
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const { map, hoverPopup, persistentPopup, root, container, setMap } = useMap(id);
+  const {
+    map,
+    hoverPopup,
+    persistentPopup,
+    draw: drawInstance,
+    root,
+    container,
+    setMap,
+  } = useMap(id);
 
   useEffect(() => {
     if (!map && mapContainerRef.current) {
@@ -91,6 +102,16 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
           newMap.addControl(_geocoder, position);
         }
       }
+      let _draw: MapboxDraw | null = null;
+      if (draw) {
+        const { position, ...drawWithoutPosition } = draw;
+        _draw = new MapboxDraw(drawWithoutPosition);
+        if (position) {
+          newMap.addControl(_draw as unknown as IControl, position);
+        } else {
+          newMap.addControl(_draw as unknown as IControl);
+        }
+      }
 
       const container = document.createElement('div');
       container.setAttribute('id', 'customPopupContent');
@@ -99,16 +120,16 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
       newMap.once('load', () => {
         const createFeatureService = (
           sourceId: string,
-          map: mapboxgl.Map,
+          map: _Map,
           options: FeatureServiceOptions
         ) => new FeatureService(sourceId, map, options);
 
-        setMap(newMap, hoverPopup, persistentPopup, _geocoder, root, container);
+        setMap(newMap, hoverPopup, persistentPopup, _geocoder, _draw, root, container);
         addSources(newMap, sources, createFeatureService);
         addLayers(newMap, layers);
-        addHoverFunctions(newMap, layers, hoverPopup, persistentPopup, root, container);
-        addClickFunctions(newMap, layers, hoverPopup, persistentPopup, root, container);
-        addMouseMoveFunctions(newMap, layers, hoverPopup, persistentPopup, root, container);
+        addHoverFunctions(newMap, layers, hoverPopup, persistentPopup, _draw, root, container);
+        addClickFunctions(newMap, layers, hoverPopup, persistentPopup, _draw, root, container);
+        addMouseMoveFunctions(newMap, layers, hoverPopup, persistentPopup, _draw, root, container);
         addControls(newMap, controls);
         addCustomControls(newMap, customControls);
       });
@@ -146,18 +167,23 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
     }
 
     map.on('style.load', () => {
-      const createFeatureService = (
-        sourceId: string,
-        map: mapboxgl.Map,
-        options: FeatureServiceOptions
-      ) => new FeatureService(sourceId, map, options);
+      const createFeatureService = (sourceId: string, map: _Map, options: FeatureServiceOptions) =>
+        new FeatureService(sourceId, map, options);
 
       // Layers reset on style changes
       addSources(map, sources, createFeatureService);
       addLayers(map, layers);
-      addHoverFunctions(map, layers, hoverPopup, persistentPopup, root, container);
-      addClickFunctions(map, layers, hoverPopup, persistentPopup, root, container);
-      addMouseMoveFunctions(map, layers, hoverPopup, persistentPopup, root, container);
+      addHoverFunctions(map, layers, hoverPopup, persistentPopup, drawInstance, root, container);
+      addClickFunctions(map, layers, hoverPopup, persistentPopup, drawInstance, root, container);
+      addMouseMoveFunctions(
+        map,
+        layers,
+        hoverPopup,
+        persistentPopup,
+        drawInstance,
+        root,
+        container
+      );
     });
   }, [map]);
 

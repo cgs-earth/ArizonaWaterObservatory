@@ -32,6 +32,10 @@ const Layer: React.FC<Props> = (props) => {
     const collection = originalCollections.find(
       (collection) => collection.id === layer.datasourceId
     );
+
+    if (collection) {
+      // const {parameter}
+    }
   }, [layer]);
 
   const handleSave = () => {};

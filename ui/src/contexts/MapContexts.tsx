@@ -4,6 +4,7 @@
  */
 
 import React, { createContext, ReactNode, useContext, useState } from 'react';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { Map, Popup } from 'mapbox-gl';
 import { Root } from 'react-dom/client';
@@ -23,6 +24,7 @@ interface MapContextType {
   hoverPopup: Popup | null;
   persistentPopup: Popup | null;
   geocoder: MapboxGeocoder | null;
+  draw: MapboxDraw | null;
   root: Root | null;
   container: HTMLDivElement | null;
   setMap: (
@@ -30,6 +32,7 @@ interface MapContextType {
     hoverPopup: Popup,
     persistentPopup: Popup,
     geocoder: MapboxGeocoder | null,
+    draw: MapboxDraw | null,
     root: Root,
     container: HTMLDivElement
   ) => void;
@@ -79,6 +82,7 @@ export const MapProvider: React.FC<{
     hoverPopup: Popup,
     persistentPopup: Popup,
     geocoder: MapboxGeocoder | null,
+    draw: MapboxDraw | null,
     root: Root,
     container: HTMLDivElement
   ) => {
@@ -89,6 +93,7 @@ export const MapProvider: React.FC<{
         hoverPopup,
         persistentPopup,
         geocoder,
+        draw,
         root,
         container,
         setMap: (
@@ -96,9 +101,10 @@ export const MapProvider: React.FC<{
           h: Popup,
           p: Popup,
           g: MapboxGeocoder | null,
+          d: MapboxDraw | null,
           r: Root,
           c: HTMLDivElement
-        ) => setMap(id, m, h, p, g, r, c),
+        ) => setMap(id, m, h, p, g, d, r, c),
       },
     }));
   };
@@ -111,6 +117,7 @@ export const MapProvider: React.FC<{
       hoverPopup: null,
       persistentPopup: null,
       geocoder: null,
+      draw: null,
       root: null,
       container: null,
       setMap: (
@@ -118,9 +125,10 @@ export const MapProvider: React.FC<{
         hoverPopup: Popup,
         persistentPopup: Popup,
         geocoder: MapboxGeocoder | null,
+        draw: MapboxDraw | null,
         root: Root,
         container: HTMLDivElement
-      ) => setMap(mapId, map, hoverPopup, persistentPopup, geocoder, root, container),
+      ) => setMap(mapId, map, hoverPopup, persistentPopup, geocoder, draw, root, container),
     };
   });
 

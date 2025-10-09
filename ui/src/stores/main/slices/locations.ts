@@ -6,7 +6,7 @@
 import { StateCreator } from 'zustand';
 import { Location, MainState } from '@/stores/main/types';
 
-interface LocationSlice {
+export interface LocationSlice {
   locations: Location[];
   setLocations: (locations: Location[]) => void;
   addLocation: (location: Location) => void;
