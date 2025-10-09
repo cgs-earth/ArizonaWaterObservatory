@@ -7,7 +7,7 @@ import { StateCreator } from 'zustand';
 import { ICollection } from '@/services/edr.service';
 import { MainState } from '@/stores/main/types';
 
-interface CollectionSlice {
+export interface CollectionSlice {
   collections: ICollection[];
   setCollections: (collections: ICollection[]) => void;
   originalCollections: ICollection[];

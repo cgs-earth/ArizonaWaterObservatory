@@ -29,6 +29,11 @@
   background-color: var(--asu-color-tertiary);
 }
 
+.selected {
+  stroke: #000;
+  background-color: var(--asu-color-selected);
+}
+
 .unstyled {
   stroke: var(--mantine-color-text);
   background-color: var(--mantine-color-body);
@@ -62,4 +67,10 @@
 .unstyled:active,
 .unstyled:focus {
   background-color: var(--mantine-color-body);
+}
+
+.selected:hover,
+.selected:active,
+.selected:focus {
+  background-color: var(--asu-color-selected);
 }

@@ -25,10 +25,7 @@ export const Header: React.FC<Props> = (props) => {
   const controller = useRef<AbortController | null>(null);
 
   const handleClick = async (name: string, id: ICollection['id']) => {
-    const loadingInstance = loadingManager.add(
-      'Fetching category dropdown options',
-      LoadingType.Data
-    );
+    const loadingInstance = loadingManager.add(`Creating layer for: ${name}`, LoadingType.Data);
 
     try {
       controller.current = new AbortController();

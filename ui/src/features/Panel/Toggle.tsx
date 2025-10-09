@@ -7,8 +7,8 @@ import { Dispatch, SetStateAction, useEffect } from 'react';
 import { Button } from '@mantine/core';
 import Arrow from '@/assets/Arrow';
 import { useMap } from '@/contexts/MapContexts';
+import { MAP_ID } from '@/features/Map/config';
 import styles from '@/features/Panel/Panel.module.css';
-import { MAP_ID } from '../Map/config';
 
 type Props = {
   open: boolean;

@@ -7,4 +7,5 @@ export enum Variant {
   Primary = 'primary',
   Secondary = 'secondary',
   Tertiary = 'tertiary',
+  Selected = 'selected',
 }

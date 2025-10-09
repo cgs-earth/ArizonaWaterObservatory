@@ -6,7 +6,7 @@
 import { StateCreator } from 'zustand';
 import { Notification, SessionState } from '@/stores/session/types';
 
-interface NotificationsSlice {
+export interface NotificationsSlice {
   notifications: Notification[];
   addNotification: (notification: Notification) => void;
   removeNotification: (id: string) => void;
