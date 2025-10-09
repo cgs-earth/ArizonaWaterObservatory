@@ -3,7 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ReactElement, useMemo } from 'react';
+import {
+  Dispatch,
+  ReactElement,
+  // Ref,
+  RefObject,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Box, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
@@ -15,8 +24,18 @@ import styles from '@/features/Panel/Panel.module.css';
 import useMainStore from '@/stores/main';
 import { Control } from './Dataset/Control';
 
-const Datasets: React.FC = () => {
+type Props = {
+  layersRef: RefObject<HTMLDivElement | null>;
+  setDatasetsOpen: Dispatch<SetStateAction<boolean>>;
+};
+
+const Datasets: React.FC<Props> = (props) => {
+  const { layersRef, setDatasetsOpen } = props;
+
   const datasets = useMainStore((state) => state.collections);
+  const [maxHeight, setMaxHeight] = useState(555);
+
+  const [value, setValue] = useState<string | null>();
 
   const accordions = useMemo(() => {
     const accordions: ReactElement[] = [
@@ -50,17 +69,55 @@ const Datasets: React.FC = () => {
     return accordions;
   }, [datasets]);
 
+  useEffect(() => {
+    if (!layersRef.current) {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      const header = document.getElementById('header-wrapper');
+      const layers = document.getElementById('layers-wrapper');
+      const datasets = document.getElementById('datasets-wrapper-control-datasets-accordion');
+
+      if (header && layers && datasets) {
+        const total =
+          header.getBoundingClientRect().height +
+          layers.getBoundingClientRect().height +
+          datasets.getBoundingClientRect().height;
+
+        setMaxHeight(Math.min(total, 555));
+      }
+    });
+
+    observer.observe(layersRef.current);
+    return () => observer.disconnect();
+  }, [layersRef.current]);
+
+  const handleChange = (value: string | null) => {
+    setDatasetsOpen(Boolean(value) && value === 'datasets-accordion');
+    setValue(value);
+  };
+
   return (
     <Accordion
+      id="datasets-wrapper"
+      value={value}
+      onChange={handleChange}
+      sticky="top"
       items={[
         {
           id: 'datasets-accordion',
+
           title: (
             <Title order={2} size="h3">
               Datasets
             </Title>
           ),
-          content: <Box className={styles.datasetsBody}>{accordions}</Box>,
+          content: (
+            <Box className={styles.accordionBody} mah={`calc(100vh - ${maxHeight}px)`}>
+              {accordions}
+            </Box>
+          ),
         },
       ]}
       variant={Variant.Primary}

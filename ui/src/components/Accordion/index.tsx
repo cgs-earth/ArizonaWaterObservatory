@@ -19,6 +19,7 @@ import { Variant } from '@/components/types';
 
 type Props = AccordionProps & {
   items: Item[];
+  sticky?: 'top' | 'bottom';
   variant?: Variant;
 };
 
@@ -38,13 +39,16 @@ const ExtendedAccordionControl: React.FC<ExtendedAccordionProps> = (props) => {
 };
 
 const Accordion: React.FC<Props> = (props) => {
-  const { items, variant = Variant.Primary, ...accordionProps } = props;
+  const { items, sticky = '', variant = Variant.Primary, ...accordionProps } = props;
 
   const variantClass = styles[variant];
 
   return (
     <_Accordion
       {...accordionProps}
+      className={
+        sticky.length > 0 ? `${styles.sticky} ${sticky === 'top' ? styles.top : styles.bottom}` : ''
+      }
       classNames={{
         item: `${styles.item} ${variantClass}`,
         control: styles.control,
@@ -56,7 +60,7 @@ const Accordion: React.FC<Props> = (props) => {
       chevron={<Chevron />}
     >
       {items.map((item) => (
-        <AccordionItem key={item.id} value={item.id}>
+        <AccordionItem key={item.id} value={item.id} ref={item.ref}>
           {item?.control ? (
             <ExtendedAccordionControl content={item.title} control={item.control} />
           ) : (

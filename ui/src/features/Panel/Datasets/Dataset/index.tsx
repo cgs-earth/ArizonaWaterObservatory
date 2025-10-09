@@ -59,8 +59,8 @@ const Dataset: React.FC<Props> = (props) => {
       <Text size="sm">{dataset.description}</Text>
       <TextInput
         size="sm"
-        label="Search"
-        placeholder="Search parameters by name"
+        label="Explore"
+        placeholder="Browse available parameters"
         value={search}
         onChange={(event) => setSearch(event.currentTarget.value)}
         __clearable

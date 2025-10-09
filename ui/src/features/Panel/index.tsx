@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Collapse, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Datasets from '@/features/Panel/Datasets';
@@ -22,6 +22,10 @@ const Panel: React.FC = () => {
   const category = useMainStore((state) => state.category);
 
   const [opened, { toggle, open }] = useDisclosure(true);
+
+  const [datasetsOpen, setDatasetsOpen] = useState(false);
+
+  const layersRef = useRef<HTMLDivElement>(null);
 
   const getCollections = async () => {
     const loadingInstance = loadingManager.add('Updating collections', LoadingType.Collections);
@@ -49,7 +53,7 @@ const Panel: React.FC = () => {
       }
     };
 
-    handleResize(); // Run on mount
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [open]);
@@ -65,8 +69,8 @@ const Panel: React.FC = () => {
           <Stack gap={0}>
             <Header />
             <Box className={styles.accordions}>
-              <Datasets />
-              <Layers />
+              <Datasets layersRef={layersRef} setDatasetsOpen={setDatasetsOpen} />
+              <Layers layersRef={layersRef} datasetsOpen={datasetsOpen} />
             </Box>
           </Stack>
         </Collapse>

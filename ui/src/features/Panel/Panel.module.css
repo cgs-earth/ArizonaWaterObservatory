@@ -43,13 +43,18 @@
 }
 
 .accordions {
+  /* max-height: calc(100vh - 114px);
+  overflow-y: auto; */
   overflow-x: hidden;
 }
 
 .accordionContent {
-  /* border-top: 1px solid var(--border); */
   padding: calc(var(--default-spacing) * 2);
   border-bottom: 0.5rem solid var(--asu-color-secondary);
+}
+
+.accordionBody {
+  overflow-y: auto;
 }
 
 .toggleButton {
@@ -89,9 +94,17 @@
 }
 
 .datasetsBody {
-  max-height: calc(100vh - 214px);
-  overflow-y: auto;
+  /* max-height: calc(100vh - 214px);
+  overflow-y: auto; */
   overflow-x: hidden;
+}
+
+.datasetsClosed {
+  max-height: calc(100vh - 215px);
+}
+
+.datasetsOpen {
+  max-height: calc(100vh - 605px);
 }
 
 @media screen and (max-width: 899px) {

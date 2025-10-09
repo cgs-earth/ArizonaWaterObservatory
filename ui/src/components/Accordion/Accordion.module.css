@@ -44,3 +44,17 @@
 .tertiary {
   border-left-color: var(--asu-color-tertiary);
 }
+
+.sticky {
+  position: sticky;
+  background: var(--mantine-color-body);
+  z-index: 9999;
+}
+
+.top {
+  top: 0;
+}
+
+.bottom {
+  bottom: 0;
+}
