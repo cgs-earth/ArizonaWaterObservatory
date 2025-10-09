@@ -14,7 +14,6 @@ import styles from '@/features/Panel/Panel.module.css';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
-import useMainStore from '@/stores/main';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 
@@ -25,8 +24,6 @@ type Props = {
 const Layer: React.FC<Props> = (props) => {
   const { layer } = props;
 
-  const originalCollections = useMainStore((state) => state.originalCollections);
-
   const [name, setName] = useState(layer.name);
   const [color, setColor] = useState(layer.color);
   const [parameters, setParameters] = useState(layer.parameters);
@@ -35,9 +32,7 @@ const Layer: React.FC<Props> = (props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const collection = originalCollections.find(
-      (collection) => collection.id === layer.datasourceId
-    );
+    const collection = mainManager.getDatasource(layer.datasourceId);
 
     if (collection) {
       const paramObjects = Object.values(collection?.parameter_names ?? {});
@@ -97,12 +92,13 @@ const Layer: React.FC<Props> = (props) => {
       </Group>
       <Divider />
       <Select
-        size="xs"
+        size="sm"
         label="Parameter"
         description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters"
         placeholder="Select a Parameter"
         multiple
         clearable
+        searchable
         data={data}
         value={parameters}
         onChange={setParameters}

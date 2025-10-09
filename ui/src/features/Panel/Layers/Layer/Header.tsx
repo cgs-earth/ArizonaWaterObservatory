@@ -18,14 +18,22 @@ export const Header: React.FC<Props> = (props) => {
   const { layer } = props;
 
   const [dataset, setDataset] = useState<ICollection>();
+  const [parameters, setParameters] = useState<string[]>([]);
 
   useEffect(() => {
     const dataset = mainManager.getDatasource(layer.datasourceId);
 
     if (dataset) {
       setDataset(dataset);
+      const paramObjects = Object.values(dataset?.parameter_names ?? {});
+
+      console.log();
+      const parameters = paramObjects
+        .filter((object) => layer.parameters.includes(object.id))
+        .map((object) => object.name);
+      setParameters(parameters);
     }
-  }, []);
+  }, [layer]);
 
   return (
     <Stack justify="center" gap={1}>
@@ -39,7 +47,7 @@ export const Header: React.FC<Props> = (props) => {
         {layer.name}
       </Title>
       <Group justify="space-between">
-        <Text size="sm">{layer.parameters.join(', ')}</Text>
+        <Text size="sm">{parameters.join(', ')}</Text>
         {(layer.from || layer.to) && (
           <Text size="sm">
             {layer.from ?? '..'} - {layer.to ?? '..'}

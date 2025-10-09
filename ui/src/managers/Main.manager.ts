@@ -108,7 +108,9 @@ class MainManager {
   };
 
   public getDatasource = (datasourceId: ICollection['id']): ICollection | undefined => {
-    return this.store.getState().collections.find((datasource) => datasource.id === datasourceId);
+    return this.store
+      .getState()
+      .originalCollections.find((datasource) => datasource.id === datasourceId);
   };
 
   public async createLayer(datasourceId: ICollection['id'], signal?: AbortSignal) {
