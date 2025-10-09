@@ -48,6 +48,15 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         if "storage_crs" not in provider_def:
             self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
 
+        if not self.id_field:
+            raise ValueError("id_field is required")
+        if not self.x_field:
+            raise ValueError("x_field is required")
+        if not self.y_field:
+            raise ValueError("y_field is required")
+        if not self.time_field:
+            raise ValueError("time_field is required")
+
     def items(  # type: ignore
         self,
         bbox: list,
@@ -69,18 +78,16 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         if properties is None:
             properties = []
 
-        latestValueInDataset = "2023-01-01"
         result = fetch_data(
             bbox=bbox,
             timeseries_properties_to_fetch=[],
-            datetime_filter=latestValueInDataset
-            if not datetime_
-            else datetime_,
+            datetime_filter=datetime_ if not datetime_ else datetime_,
             time_field=self.time_field,
             x_field=self.x_field,
             y_field=self.y_field,
             unopened_dataset=self.zarr_dataset,
             feature_id=itemId,
+            feature_id_name=self.id_field,
             feature_limit=limit,
         )
 
