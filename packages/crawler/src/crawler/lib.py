@@ -50,12 +50,9 @@ def xlsx_to_xarray(xlsx_file: Path) -> xr.Dataset:
 
     # Set the index
     if secondary_col:
-        # add obs to separate duplicate measurements
-        df["obs"] = df.groupby([primary_col, secondary_col]).cumcount()
-        df = df.set_index([primary_col, secondary_col, "obs"])
+        df = df.set_index([primary_col, secondary_col])
     else:
-        df["obs"] = df.groupby([primary_col]).cumcount()
-        df = df.set_index([primary_col, "obs"])
+        df = df.set_index(primary_col)
 
     # Convert to xarray.Dataset
     ds = xr.Dataset.from_dataframe(df)
