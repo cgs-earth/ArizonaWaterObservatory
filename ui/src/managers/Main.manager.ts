@@ -247,6 +247,10 @@ class MainManager {
     });
   }
 
+  /**
+   *
+   * @function
+   */
   public getDatasourceCount = (datasourceId: ICollection['id']): number => {
     return this.store.getState().layers.filter((layer) => layer.datasourceId === datasourceId)
       .length;
