@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
 import { Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
 import { GeoJSONFeature, GeoJSONSource, Map, Popup } from 'mapbox-gl';
@@ -24,6 +25,7 @@ class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
   private map: Map | null = null;
   private hoverPopup: Popup | null = null;
+  private draw: MapboxDraw | null = null;
 
   constructor(store: UseBoundStore<StoreApi<MainState>>) {
     this.store = store;
@@ -46,6 +48,16 @@ class MainManager {
   public setPopup(popup: Popup): void {
     if (!this.hoverPopup) {
       this.hoverPopup = popup;
+    }
+  }
+
+  /**
+   *
+   * @function
+   */
+  public setDraw(draw: MapboxDraw): void {
+    if (!this.draw) {
+      this.draw = draw;
     }
   }
 
@@ -183,7 +195,7 @@ class MainManager {
   }
 
   public async loadConfig(config: Config): Promise<boolean> {
-    if (!this.map || !this.isValidConfig(config)) {
+    if (!this.map || !this.draw || !this.isValidConfig(config)) {
       return false;
     }
 
@@ -194,6 +206,10 @@ class MainManager {
     this.store.getState().setCharts(config.charts);
     this.store.getState().setLocations(config.locations);
     this.store.getState().setDrawnShapes(config.drawnShapes);
+
+    for (const shape of config.drawnShapes) {
+      this.draw.add(shape);
+    }
 
     // if (config.bounds) {
     //   this.map.fitBounds(config.bounds);
@@ -294,7 +310,12 @@ class MainManager {
       locations: [],
     };
 
-    const sourceId = await this.addLocationSource(datasource.id, { signal });
+    const drawnShapes = this.store.getState().drawnShapes;
+
+    const sourceId = await this.addLocationSource(datasource.id, {
+      filterFeatures: drawnShapes,
+      signal,
+    });
     this.addLocationLayer(layer, sourceId);
 
     this.store.getState().addLayer(layer);
