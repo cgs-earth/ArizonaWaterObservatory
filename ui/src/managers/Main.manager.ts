@@ -18,7 +18,7 @@ import {
   getPointLayerDefinition,
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
-import { PostConfigResponse } from './types';
+import { Config, GetConfigResponse, PostConfigResponse } from './types';
 
 class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
@@ -70,8 +70,43 @@ class MainManager {
 
   // TODO: update to validate config
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private isValidConfig(config: any): boolean {
+  private isValidConfig(config: Config): boolean {
     return true;
+  }
+
+  private generateConfig(): Config | undefined {
+    if (!this.map) {
+      return;
+    }
+
+    const layers = this.store.getState().layers;
+    const provider = this.store.getState().provider;
+    const category = this.store.getState().category;
+    const collection = this.store.getState().collection;
+    const charts = this.store.getState().charts;
+    const locations = this.store.getState().locations;
+    const drawnShapes = this.store.getState().drawnShapes;
+
+    const bounds = this.map.getBounds();
+    const zoom = this.map.getZoom();
+    const center = this.map.getCenter();
+    const bearing = this.map.getBearing();
+    const pitch = this.map.getPitch();
+
+    return {
+      layers,
+      provider,
+      category,
+      collection,
+      charts,
+      locations,
+      drawnShapes,
+      bounds,
+      zoom,
+      center,
+      bearing,
+      pitch,
+    };
   }
 
   private getShareId(jobId: string): string | undefined {
@@ -79,8 +114,10 @@ class MainManager {
     return uuid;
   }
 
-  public async saveConfig(config: any, signal?: AbortSignal): Promise<PostConfigResponse> {
-    if (!this.isValidConfig(config)) {
+  public async saveConfig(signal?: AbortSignal): Promise<PostConfigResponse> {
+    const config = this.generateConfig();
+
+    if (!config || !this.isValidConfig(config)) {
       return {
         success: false,
         response: ['This config is invalid.'], // TODO: More robust response
@@ -116,6 +153,63 @@ class MainManager {
       success: false,
       response: ['Config generation unsuccessful'], // TODO: refine
     };
+  }
+
+  public async getConfig(shareId: string, signal?: AbortSignal): Promise<GetConfigResponse> {
+    const url = `${import.meta.env.VITE_AWO_CONFIG_SOURCE}/jobs/${shareId}/results?f=json`;
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal,
+    });
+
+    if (response.ok) {
+      const config = (await response.json()) as Config;
+
+      return {
+        success: true,
+        response: config,
+      };
+    }
+
+    return {
+      success: false,
+      response:
+        response.statusText.length > 0
+          ? response.statusText
+          : 'Unknown error encountered. Please provide this url to site maintainer.', // TODO: refine
+    };
+  }
+
+  public async loadConfig(config: Config): Promise<boolean> {
+    if (!this.map || !this.isValidConfig(config)) {
+      return false;
+    }
+
+    this.store.getState().setLayers(config.layers);
+    this.store.getState().setProvider(config.provider);
+    this.store.getState().setCategory(config.category);
+    this.store.getState().setCollection(config.collection);
+    this.store.getState().setCharts(config.charts);
+    this.store.getState().setLocations(config.locations);
+    this.store.getState().setDrawnShapes(config.drawnShapes);
+
+    // if (config.bounds) {
+    //   this.map.fitBounds(config.bounds);
+    // }
+    this.map.setZoom(config.zoom);
+    this.map.setCenter(config.center);
+    this.map.setBearing(config.bearing);
+    this.map.setPitch(config.pitch);
+
+    await this.applySpatialFilter(config.drawnShapes);
+    for (const layer of config.layers) {
+      const sourceId = this.getSourceId(layer.datasourceId);
+      this.addLocationLayer(layer, sourceId);
+    }
+
+    return true;
   }
 
   /**

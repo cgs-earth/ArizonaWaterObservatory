@@ -3,12 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { Feature, FeatureCollection, LineString, MultiPolygon, Point, Polygon } from 'geojson';
+import { Feature, MultiPolygon, Polygon } from 'geojson';
 import { StateCreator } from 'zustand';
-import { getDefaultGeoJSON } from '@/consts/geojson';
-import { DrawMode, SessionState } from '@/stores/session/types';
-
-export type MeasureUnit = 'miles' | 'feet' | 'kilometers';
+import { DrawMode, MainState } from '../types';
 
 export interface DrawingSlice {
   drawMode: DrawMode | null;
@@ -18,16 +15,10 @@ export interface DrawingSlice {
   addDrawnShape: (drawnShape: Feature<Polygon | MultiPolygon>) => void;
   removeDrawnShape: (id: string) => void;
   hasDrawnShape: (id: string) => boolean;
-  measurePoints: FeatureCollection<Point>;
-  setMeasurePoints: (points: DrawingSlice['measurePoints']) => void;
-  measureLine: FeatureCollection<LineString>;
-  setMeasureLine: (measureLine: DrawingSlice['measureLine']) => void;
-  measureUnit: MeasureUnit;
-  setMeasureUnit: (measureUnits: DrawingSlice['measureUnit']) => void;
 }
 
 export const createDrawingSlice: StateCreator<
-  SessionState,
+  MainState,
   [['zustand/immer', never]],
   [],
   DrawingSlice
@@ -50,10 +41,4 @@ export const createDrawingSlice: StateCreator<
     get().drawnShapes.some(
       (drawnShape) => drawnShape.id === id || drawnShape.properties?.id !== id
     ),
-  measurePoints: getDefaultGeoJSON<Point>(),
-  setMeasurePoints: (measurePoints) => set({ measurePoints }),
-  measureLine: getDefaultGeoJSON<LineString>(),
-  setMeasureLine: (measureLine) => set({ measureLine }),
-  measureUnit: 'miles',
-  setMeasureUnit: (measureUnit) => set({ measureUnit }),
 });

@@ -36,10 +36,7 @@ const Share: React.FC = () => {
     const loadingInstance = loadingManager.add('Generating share config', LoadingType.Share);
     try {
       controller.current = new AbortController();
-      const { success, response } = await mainManager.saveConfig(
-        { name: 'test_config' },
-        controller.current.signal
-      );
+      const { success, response } = await mainManager.saveConfig(controller.current.signal);
       loadingManager.remove(loadingInstance);
 
       if (success) {

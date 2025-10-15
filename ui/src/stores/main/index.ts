@@ -10,6 +10,7 @@ import { createLayerSlice } from '@/stores/main/slices/layers';
 import { createLocationSlice } from '@/stores/main/slices/locations';
 import { createSpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
 import { MainState } from '@/stores/main/types';
+import { createDrawingSlice } from './slices/drawing';
 import { createShareSlice } from './slices/share';
 
 const useMainStore = create<MainState>()(
@@ -27,6 +28,7 @@ const useMainStore = create<MainState>()(
     hasGeographyFilter: () => Boolean(get().geographyFilter),
 
     ...createCollectionSlice(set, get, store),
+    ...createDrawingSlice(set, get, store),
     ...createLayerSlice(set, get, store),
     ...createLocationSlice(set, get, store),
     ...createShareSlice(set, get, store),

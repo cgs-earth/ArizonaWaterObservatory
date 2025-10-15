@@ -19,19 +19,21 @@ import { useMeasure } from '@/hooks/useMeasure';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
+import useMainStore from '@/stores/main';
+import { DrawMode } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
-import { MeasureUnit } from '@/stores/session/slices/drawing';
-import { DrawMode, LoadingType, NotificationType } from '@/stores/session/types';
+import { MeasureUnit } from '@/stores/session/slices/measure';
+import { LoadingType, NotificationType } from '@/stores/session/types';
 
 export const Draw: React.FC = () => {
   const [show, setShow] = useState(false);
 
   const { map, draw, hoverPopup } = useMap(MAP_ID);
 
-  const drawMode = useSessionStore((store) => store.drawMode);
-  const setDrawMode = useSessionStore((store) => store.setDrawMode);
-  const drawnShapes = useSessionStore((store) => store.drawnShapes);
-  const setDrawnShapes = useSessionStore((store) => store.setDrawnShapes);
+  const drawMode = useMainStore((store) => store.drawMode);
+  const setDrawMode = useMainStore((store) => store.setDrawMode);
+  const drawnShapes = useMainStore((store) => store.drawnShapes);
+  const setDrawnShapes = useMainStore((store) => store.setDrawnShapes);
   const unit = useSessionStore((store) => store.measureUnit);
   const setUnit = useSessionStore((store) => store.setMeasureUnit);
 

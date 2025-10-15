@@ -10,15 +10,15 @@ import { Feature, MultiPolygon, Polygon } from 'geojson';
 import debounce from 'lodash.debounce';
 import { Map } from 'mapbox-gl';
 import { v6 } from 'uuid';
-import useSessionStore from '@/stores/session';
-import { DrawMode } from '@/stores/session/types';
+import useMainStore from '@/stores/main';
+import { DrawMode } from '@/stores/main/types';
 
 export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
   const [loaded, setLoaded] = useState(false);
 
-  const setDrawMode = useSessionStore((store) => store.setDrawMode);
+  const setDrawMode = useMainStore((store) => store.setDrawMode);
 
-  const addDrawnShape = useSessionStore((store) => store.addDrawnShape);
+  const addDrawnShape = useMainStore((store) => store.addDrawnShape);
 
   const combineFeatures = (feature: Feature<Polygon | MultiPolygon>) => {
     if (!draw || !feature) {
@@ -43,8 +43,8 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
         }
       });
 
-      const hasDrawnShape = useSessionStore.getState().hasDrawnShape;
-      const removeDrawnShape = useSessionStore.getState().removeDrawnShape;
+      const hasDrawnShape = useMainStore.getState().hasDrawnShape;
+      const removeDrawnShape = useMainStore.getState().removeDrawnShape;
 
       if (overlappingFeatures.length > 0) {
         let combined = feature;
