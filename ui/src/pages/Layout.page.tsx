@@ -16,11 +16,15 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import styles from '@/pages/pages.module.css';
+import useMainStore from '@/stores/main';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 
 export const LayoutPage: React.FC = () => {
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
+
+  const setShareId = useMainStore((state) => state.setShareId);
+  const setConfigGenerated = useMainStore((state) => state.setConfigGenerated);
 
   const { map } = useMap(MAP_ID);
 
@@ -37,6 +41,8 @@ export const LayoutPage: React.FC = () => {
               'Shared configuration loaded successfully.',
               NotificationType.Success
             );
+            setShareId(shareId);
+            setConfigGenerated(true);
           } else {
             notificationManager.show('Unable to load config.', NotificationType.Error);
           }

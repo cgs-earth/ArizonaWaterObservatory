@@ -80,10 +80,32 @@ class MainManager {
     return sorted1.every((val, index) => val === sorted2[index]);
   }
 
-  // TODO: update to validate config
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private isValidConfig(config: Config): boolean {
-    return true;
+  public isValidConfig(config: Config | undefined): { valid: boolean; reasons: string[] } {
+    if (!config) {
+      return {
+        valid: false,
+        reasons: ['No config provided.'],
+      };
+    }
+
+    const reasons: string[] = [];
+    if (!config.provider && !config.category && !config.collection && config.layers.length === 0) {
+      reasons.push('No provider, category, collection, or layers selected.');
+    }
+    if (!config.center) {
+      reasons.push('Missing map center.');
+    }
+    if (typeof config.zoom !== 'number') {
+      reasons.push('Zoom is not a number.');
+    }
+    if (typeof config.bearing !== 'number') {
+      reasons.push('Bearing is not a number.');
+    }
+    if (typeof config.pitch !== 'number') {
+      reasons.push('Pitch is not a number.');
+    }
+
+    return { valid: reasons.length === 0, reasons };
   }
 
   private generateConfig(): Config | undefined {
@@ -129,10 +151,11 @@ class MainManager {
   public async saveConfig(signal?: AbortSignal): Promise<PostConfigResponse> {
     const config = this.generateConfig();
 
-    if (!config || !this.isValidConfig(config)) {
+    const validate = this.isValidConfig(config);
+    if (!validate.valid) {
       return {
         success: false,
-        response: ['This config is invalid.'], // TODO: More robust response
+        response: validate.reasons, // TODO: More robust response
       };
     }
 
@@ -195,7 +218,7 @@ class MainManager {
   }
 
   public async loadConfig(config: Config): Promise<boolean> {
-    if (!this.map || !this.draw || !this.isValidConfig(config)) {
+    if (!this.map || !this.draw || !this.isValidConfig(config).valid) {
       return false;
     }
 
@@ -211,9 +234,6 @@ class MainManager {
       this.draw.add(shape);
     }
 
-    // if (config.bounds) {
-    //   this.map.fitBounds(config.bounds);
-    // }
     this.map.setZoom(config.zoom);
     this.map.setCenter(config.center);
     this.map.setBearing(config.bearing);
