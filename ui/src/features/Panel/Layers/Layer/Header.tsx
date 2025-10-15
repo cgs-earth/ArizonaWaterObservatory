@@ -27,7 +27,6 @@ export const Header: React.FC<Props> = (props) => {
       setDataset(dataset);
       const paramObjects = Object.values(dataset?.parameter_names ?? {});
 
-      console.log();
       const parameters = paramObjects
         .filter((object) => layer.parameters.includes(object.id))
         .map((object) => object.name);

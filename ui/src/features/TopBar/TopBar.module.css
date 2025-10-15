@@ -7,3 +7,30 @@
   padding: var(--default-spacing);
   border-bottom: 1px solid var(--border);
 }
+
+.modalBody {
+  padding: calc(var(--default-spacing) * 2);
+}
+
+.toolTip {
+  width: 30em;
+}
+
+.helpTitle {
+  width: 100%;
+  text-align: left;
+}
+
+.helpTitle > svg {
+  width: 18px;
+  height: auto;
+}
+
+.copyInputWrapper {
+  width: 100%;
+  min-height: 60px;
+}
+
+.copyInput {
+  width: inherit;
+}

@@ -10,12 +10,13 @@ import styles from '@/components/CopyInput/CopyInput.module.css';
 
 type Props = {
   url: string;
+  className?: string;
 };
 
 const CopyInput: React.FC<Props> = (props) => {
-  const { url } = props;
+  const { url, className = '' } = props;
   return (
-    <Box component="div" className={styles.input}>
+    <Box component="div" className={`${styles.input} ${className}`}>
       <Group justify="center" align="center" p={0} h="100%">
         <Text className={styles.text} title={url}>
           {url}

@@ -4,15 +4,15 @@
  */
 
 import { Group } from '@mantine/core';
-import Button from '@/components/Button';
 import Tools from '@/features/Tools';
 import styles from '@/features/TopBar/TopBar.module.css';
+import Share from './Share';
 
 const TopBar: React.FC = () => {
   return (
     <Group justify="space-between" className={styles.topBarWrapper}>
       <Group>
-        <Button size="sm">Placeholder</Button>
+        <Share />
       </Group>
       <Tools />
     </Group>

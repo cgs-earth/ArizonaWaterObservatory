@@ -18,6 +18,7 @@ import {
   getPointLayerDefinition,
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
+import { PostConfigResponse } from './types';
 
 class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
@@ -65,6 +66,56 @@ class MainManager {
     const sorted2 = [...b].sort();
 
     return sorted1.every((val, index) => val === sorted2[index]);
+  }
+
+  // TODO: update to validate config
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private isValidConfig(config: any): boolean {
+    return true;
+  }
+
+  private getShareId(jobId: string): string | undefined {
+    const uuid = jobId.split('/').pop();
+    return uuid;
+  }
+
+  public async saveConfig(config: any, signal?: AbortSignal): Promise<PostConfigResponse> {
+    if (!this.isValidConfig(config)) {
+      return {
+        success: false,
+        response: ['This config is invalid.'], // TODO: More robust response
+      };
+    }
+
+    const url = `${import.meta.env.VITE_AWO_CONFIG_SOURCE}/processes/config-store/execution?f=json`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ inputs: config }),
+      signal,
+    });
+
+    if (response.ok) {
+      const jobId = response.headers.get('location');
+      const shareId = this.getShareId(jobId ?? '');
+      if (shareId) {
+        return {
+          success: true,
+          response: [shareId],
+        };
+      }
+      return {
+        success: false,
+        response: [`Issue extracting shareId, original URL: ${jobId}`], // TODO: refine
+      };
+    }
+    return {
+      success: false,
+      response: ['Config generation unsuccessful'], // TODO: refine
+    };
   }
 
   /**

@@ -29,8 +29,7 @@
 }
 
 .root:hover:not(:disabled):not([data-disabled='true']),
-.root:active:not(:disabled):not([data-disabled='true']),
-.root:focus:not(:disabled):not([data-disabled='true']) {
+.root:active:not(:disabled):not([data-disabled='true']) {
   transform: scale(1.05);
 }
 

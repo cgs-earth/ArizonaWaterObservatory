@@ -10,6 +10,7 @@ import { CollectionSlice } from '@/stores/main/slices/collections';
 import { LayerSlice } from '@/stores/main/slices/layers';
 import { LocationSlice } from '@/stores/main/slices/locations';
 import { SpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
+import { ShareSlice } from './slices/share';
 
 export type ColorValueHex = `#${string}`;
 
@@ -111,8 +112,9 @@ export type MainState = {
   hasGeographyFilter: () => boolean;
 
   charts: Chart[];
-  setCharts: (layers: MainState['charts']) => void;
+  setCharts: (charts: MainState['charts']) => void;
 } & CollectionSlice &
   LocationSlice &
   LayerSlice &
-  SpatialSelectionSlice;
+  SpatialSelectionSlice &
+  ShareSlice;

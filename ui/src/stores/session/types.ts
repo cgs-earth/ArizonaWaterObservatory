@@ -18,6 +18,7 @@ export enum LoadingType {
   Collections = 'collections',
   Geography = 'geography',
   Data = 'data',
+  Share = 'share',
 }
 
 export enum Tools {

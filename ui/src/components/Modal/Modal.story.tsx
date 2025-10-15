@@ -13,6 +13,7 @@ export default {
 
 export const Usage = () => {
   const [opened, { open, close }] = useDisclosure(false);
+
   return (
     <>
       <Modal opened={opened} onClose={close}>
