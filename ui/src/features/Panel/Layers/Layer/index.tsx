@@ -11,6 +11,7 @@ import Select from '@/components/Select';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
 import styles from '@/features/Panel/Panel.module.css';
+import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
@@ -31,7 +32,13 @@ const Layer: React.FC<Props> = (props) => {
   const [data, setData] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
 
+  const { isFetchingCollections } = useLoading();
+
   useEffect(() => {
+    if (isFetchingCollections || data) {
+      return;
+    }
+
     const collection = mainManager.getDatasource(layer.datasourceId);
 
     if (collection) {
@@ -43,7 +50,7 @@ const Layer: React.FC<Props> = (props) => {
       }));
       setData(data);
     }
-  }, []);
+  }, [isFetchingCollections]);
 
   const handleSave = async () => {
     setIsLoading(true);

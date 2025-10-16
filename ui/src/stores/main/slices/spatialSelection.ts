@@ -32,13 +32,14 @@ export const createSpatialSelectionSlice: StateCreator<
   SpatialSelectionSlice
 > = (set, get) => ({
   spatialSelection: null,
-  setSpatialSelection: (spatialSelection) => set({ spatialSelection }),
+  setSpatialSelection: (spatialSelection) => set({ spatialSelection, configGenerated: false }),
   setSpatialSelectionDrawn: (featureCollection) =>
     set((state) => {
       state.spatialSelection = {
         type: SpatialSelectionType.Drawn,
         featureCollection,
       };
+      state.configGenerated = false;
     }),
   setSpatialSelectionUpload: (featureCollection) =>
     set((state) => {
@@ -46,6 +47,7 @@ export const createSpatialSelectionSlice: StateCreator<
         type: SpatialSelectionType.Upload,
         featureCollection,
       };
+      state.configGenerated = false;
     }),
   setSpatialSelectionSelected: (locations) =>
     set((state) => {
@@ -53,6 +55,7 @@ export const createSpatialSelectionSlice: StateCreator<
         type: SpatialSelectionType.Selected,
         locations,
       };
+      state.configGenerated = false;
     }),
   hasSpatialSelection: () => get().spatialSelection !== null,
   hasSpatialSelectionType: (type) => {

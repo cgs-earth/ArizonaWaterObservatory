@@ -21,14 +21,16 @@ export const createLayerSlice: StateCreator<
   LayerSlice
 > = (set, get) => ({
   layers: [],
-  setLayers: (layers) => set({ layers }),
+  setLayers: (layers) => set({ layers, configGenerated: false }),
   addLayer: (layer) =>
     set((state) => ({
       layers: [...state.layers, layer],
+      configGenerated: false,
     })),
   updateLayer: (updatedLayer) =>
     set((state) => ({
       layers: state.layers.map((layer) => (layer.id === updatedLayer.id ? updatedLayer : layer)),
+      configGenerated: false,
     })),
   hasLayer: ({ layerId, collectionId }) => {
     if (layerId) {

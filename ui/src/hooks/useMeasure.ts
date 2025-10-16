@@ -12,13 +12,14 @@ import { v6 } from 'uuid';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import { SubLayerId } from '@/features/Map/config';
 import { SourceId } from '@/features/Map/sources';
+import useMainStore from '@/stores/main';
+import { DrawMode } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
-import { MeasureUnit } from '@/stores/session/slices/drawing';
-import { DrawMode } from '@/stores/session/types';
+import { MeasureUnit } from '@/stores/session/slices/measure';
 import { getUnitShorthand } from '@/utils/units';
 
 export const useMeasure = (map: Map | null, draw: MapboxDraw | null, hoverPopup: Popup | null) => {
-  const drawMode = useSessionStore((store) => store.drawMode);
+  const drawMode = useMainStore((store) => store.drawMode);
   const setPoints = useSessionStore((store) => store.setMeasurePoints);
   const measureLine = useSessionStore((store) => store.measureLine);
   const setLine = useSessionStore((store) => store.setMeasureLine);
@@ -70,7 +71,7 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null, hoverPopup:
     };
 
     const handlePointsHover = (e: MapMouseEvent) => {
-      const drawMode = useSessionStore.getState().drawMode;
+      const drawMode = useMainStore.getState().drawMode;
 
       let message = 'Activate the measure tool to interact with this point.';
       let cursor = '';
@@ -89,7 +90,7 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null, hoverPopup:
     };
 
     const handleLineHover = (e: MapMouseEvent) => {
-      const drawMode = useSessionStore.getState().drawMode;
+      const drawMode = useMainStore.getState().drawMode;
 
       if (drawMode !== DrawMode.Measure) {
         return;
@@ -178,7 +179,7 @@ export const useMeasure = (map: Map | null, draw: MapboxDraw | null, hoverPopup:
     };
 
     const onClick = (e: MapMouseEvent) => {
-      const drawMode = useSessionStore.getState().drawMode;
+      const drawMode = useMainStore.getState().drawMode;
       if (drawMode !== DrawMode.Measure) {
         return;
       }

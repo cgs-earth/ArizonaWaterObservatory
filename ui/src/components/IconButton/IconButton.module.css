@@ -9,7 +9,6 @@
 }
 
 .root {
-  /* box-shadow: 0px 4px 4px rgb(0, 0, 0); */
   box-shadow: 0px 4px 4px #00000040;
   transition: transform 0.15s ease-in-out;
 }
@@ -40,7 +39,6 @@
 }
 
 .root:hover,
-.root:active,
 .root:focus {
   transform: scale(1.1);
 }

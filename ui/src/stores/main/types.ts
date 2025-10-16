@@ -10,6 +10,8 @@ import { CollectionSlice } from '@/stores/main/slices/collections';
 import { LayerSlice } from '@/stores/main/slices/layers';
 import { LocationSlice } from '@/stores/main/slices/locations';
 import { SpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
+import { DrawingSlice } from './slices/drawing';
+import { ShareSlice } from './slices/share';
 
 export type ColorValueHex = `#${string}`;
 
@@ -99,6 +101,12 @@ export type Category = {
   label: string;
 };
 
+export enum DrawMode {
+  Polygon = 'polygon',
+  Measure = 'measure',
+  Select = 'select',
+}
+
 export type MainState = {
   provider: string | null;
   setProvider: (provider: MainState['provider']) => void;
@@ -111,8 +119,10 @@ export type MainState = {
   hasGeographyFilter: () => boolean;
 
   charts: Chart[];
-  setCharts: (layers: MainState['charts']) => void;
+  setCharts: (charts: MainState['charts']) => void;
 } & CollectionSlice &
   LocationSlice &
   LayerSlice &
-  SpatialSelectionSlice;
+  SpatialSelectionSlice &
+  DrawingSlice &
+  ShareSlice;

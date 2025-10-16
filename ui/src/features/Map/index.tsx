@@ -36,7 +36,7 @@ const MainMap: React.FC<Props> = (props) => {
 
   const [shouldResize, setShouldResize] = useState(false);
 
-  const { map, hoverPopup } = useMap(MAP_ID);
+  const { map, hoverPopup, draw } = useMap(MAP_ID);
 
   const isMounted = useRef(true);
   const initialMapLoad = useRef(true);
@@ -77,6 +77,14 @@ const MainMap: React.FC<Props> = (props) => {
 
     mainManager.setPopup(hoverPopup);
   }, [hoverPopup]);
+
+  useEffect(() => {
+    if (!draw) {
+      return;
+    }
+
+    mainManager.setDraw(draw);
+  }, [draw]);
 
   useEffect(() => {
     setShouldResize(loadingInstances.length > 0);

@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { Group, Stack, Text, Title } from '@mantine/core';
+import { useLoading } from '@/hooks/useLoading';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
 import { Layer } from '@/stores/main/types';
@@ -19,27 +20,42 @@ export const Header: React.FC<Props> = (props) => {
 
   const [dataset, setDataset] = useState<ICollection>();
   const [parameters, setParameters] = useState<string[]>([]);
+  const [provider, setProvider] = useState<string>('');
+
+  const { isFetchingCollections } = useLoading();
 
   useEffect(() => {
-    const dataset = mainManager.getDatasource(layer.datasourceId);
+    if (isFetchingCollections || dataset) {
+      return;
+    }
 
-    if (dataset) {
-      setDataset(dataset);
-      const paramObjects = Object.values(dataset?.parameter_names ?? {});
+    const newDataset = mainManager.getDatasource(layer.datasourceId);
 
-      console.log();
+    if (newDataset) {
+      setDataset(newDataset);
+      const paramObjects = Object.values(newDataset?.parameter_names ?? {});
+
       const parameters = paramObjects
         .filter((object) => layer.parameters.includes(object.id))
         .map((object) => object.name);
       setParameters(parameters);
     }
-  }, [layer]);
+  }, [layer, isFetchingCollections]);
+
+  useEffect(() => {
+    if (!dataset || provider.length > 0) {
+      return;
+    }
+
+    const newProvider = getProvider(dataset.id);
+    setProvider(newProvider);
+  }, [dataset, isFetchingCollections]);
 
   return (
     <Stack justify="center" gap={1}>
       {dataset && (
         <Text component="h3" size="lg" lineClamp={1} title={dataset.title}>
-          <strong>{getProvider(dataset.id)}</strong> {dataset.title}
+          <strong>{provider}</strong> {dataset.title}
         </Text>
       )}
 

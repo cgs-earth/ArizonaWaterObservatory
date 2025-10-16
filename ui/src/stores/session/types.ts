@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DrawingSlice } from '@/stores/session/slices/drawing';
 import { LoadingSlice } from '@/stores/session/slices/loading';
 import { NotificationsSlice } from '@/stores/session/slices/notifications';
+import { MeasureSlice } from './slices/measure';
 
 export enum NotificationType {
   Success = 'success',
@@ -18,10 +18,16 @@ export enum LoadingType {
   Collections = 'collections',
   Geography = 'geography',
   Data = 'data',
+  Share = 'share',
 }
 
-export enum Tools {
+export enum Tool {
   Legend = 'legend',
+}
+
+export enum Overlay {
+  Share = 'share',
+  Draw = 'draw',
 }
 
 export type Notification = {
@@ -43,21 +49,17 @@ export type LegendEntry = {
   visible: boolean;
 };
 
-export enum DrawMode {
-  Polygon = 'polygon',
-  Measure = 'measure',
-  Select = 'select',
-}
-
 export type SessionState = {
   legendEntries: LegendEntry[];
   setLegendEntries: (legendEntries: SessionState['legendEntries']) => void;
+  overlay: Overlay | null;
+  setOverlay: (overlay: SessionState['overlay']) => void;
   downloadModalOpen: boolean;
   setDownloadModalOpen: (downloadModalOpen: SessionState['downloadModalOpen']) => void;
   tools: {
-    [Tools.Legend]: boolean;
+    [Tool.Legend]: boolean;
   };
-  setOpenTools: (tool: Tools, open: boolean) => void;
+  setOpenTools: (tool: Tool, open: boolean) => void;
 } & NotificationsSlice &
   LoadingSlice &
-  DrawingSlice;
+  MeasureSlice;
