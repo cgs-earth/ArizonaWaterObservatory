@@ -21,8 +21,13 @@ export enum LoadingType {
   Share = 'share',
 }
 
-export enum Tools {
+export enum Tool {
   Legend = 'legend',
+}
+
+export enum Overlay {
+  Share = 'share',
+  Draw = 'draw',
 }
 
 export type Notification = {
@@ -47,12 +52,14 @@ export type LegendEntry = {
 export type SessionState = {
   legendEntries: LegendEntry[];
   setLegendEntries: (legendEntries: SessionState['legendEntries']) => void;
+  overlay: Overlay | null;
+  setOverlay: (overlay: SessionState['overlay']) => void;
   downloadModalOpen: boolean;
   setDownloadModalOpen: (downloadModalOpen: SessionState['downloadModalOpen']) => void;
   tools: {
-    [Tools.Legend]: boolean;
+    [Tool.Legend]: boolean;
   };
-  setOpenTools: (tool: Tools, open: boolean) => void;
+  setOpenTools: (tool: Tool, open: boolean) => void;
 } & NotificationsSlice &
   LoadingSlice &
   MeasureSlice;

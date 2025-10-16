@@ -23,7 +23,7 @@ import useMainStore from '@/stores/main';
 import { DrawMode } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { MeasureUnit } from '@/stores/session/slices/measure';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationType, Overlay } from '@/stores/session/types';
 
 export const Draw: React.FC = () => {
   const [show, setShow] = useState(false);
@@ -36,6 +36,8 @@ export const Draw: React.FC = () => {
   const setDrawnShapes = useMainStore((store) => store.setDrawnShapes);
   const unit = useSessionStore((store) => store.measureUnit);
   const setUnit = useSessionStore((store) => store.setMeasureUnit);
+  const overlay = useSessionStore((store) => store.overlay);
+  const setOverlay = useSessionStore((store) => store.setOverlay);
 
   const loadingInstance = useRef<string>(null);
 
@@ -64,8 +66,9 @@ export const Draw: React.FC = () => {
     void applySpatialFilter(drawnShapes);
   };
 
-  const handleShow = () => {
-    setShow(!show);
+  const handleShow = (show: boolean) => {
+    setOverlay(show ? Overlay.Draw : null);
+    setShow(show);
   };
 
   const handlePolygon = () => {
@@ -134,6 +137,12 @@ export const Draw: React.FC = () => {
     }
   }, [drawMode]);
 
+  useEffect(() => {
+    if (overlay !== Overlay.Draw) {
+      setShow(false);
+    }
+  }, [overlay]);
+
   return (
     <>
       {drawLoaded && (
@@ -149,7 +158,7 @@ export const Draw: React.FC = () => {
             >
               <IconButton
                 variant={show ? Variant.Selected : Variant.Secondary}
-                onClick={handleShow}
+                onClick={() => handleShow(!show)}
               >
                 <DrawIcon />
               </IconButton>

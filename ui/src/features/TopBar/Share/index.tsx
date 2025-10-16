@@ -17,10 +17,13 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import { SHARE_VARIABLE } from '@/managers/types';
 import useMainStore from '@/stores/main';
-import { LoadingType } from '@/stores/session/types';
+import useSessionStore from '@/stores/session';
+import { LoadingType, Overlay } from '@/stores/session/types';
 
 const Share: React.FC = () => {
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { open, close }] = useDisclosure(false, {
+    onOpen: () => setOverlay(Overlay.Share),
+  });
 
   const { isGeneratingShare } = useLoading();
 
@@ -28,6 +31,9 @@ const Share: React.FC = () => {
   const setShareId = useMainStore((store) => store.setShareId);
   const configGenerated = useMainStore((store) => store.configGenerated);
   const setConfigGenerated = useMainStore((store) => store.setConfigGenerated);
+
+  const overlay = useSessionStore((store) => store.overlay);
+  const setOverlay = useSessionStore((store) => store.setOverlay);
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
@@ -79,6 +85,12 @@ const Share: React.FC = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (overlay !== Overlay.Share) {
+      close();
+    }
+  }, [overlay]);
 
   const helpText = (
     <>
