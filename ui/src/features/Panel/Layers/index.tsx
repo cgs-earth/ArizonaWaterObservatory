@@ -8,12 +8,12 @@ import { Box, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import Layer from '@/features/Panel/Layers/Layer';
+import { Control } from '@/features/Panel/Layers/Layer/Control';
 import { Fallback } from '@/features/Panel/Layers/Layer/Fallback';
 import { Header } from '@/features/Panel/Layers/Layer/Header';
 import styles from '@/features/Panel/Panel.module.css';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
-import { Control } from './Layer/Control';
 
 type Props = {
   datasetsOpen: boolean;

@@ -9,6 +9,7 @@ import { Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } fr
 import { GeoJSONFeature, GeoJSONSource, Map, Popup } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
+import { Config, GetConfigResponse, PostConfigResponse } from '@/managers/types';
 import { ICollection } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { ColorValueHex, Layer, Location, MainState } from '@/stores/main/types';
@@ -19,7 +20,6 @@ import {
   getPointLayerDefinition,
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
-import { Config, GetConfigResponse, PostConfigResponse } from './types';
 
 class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;

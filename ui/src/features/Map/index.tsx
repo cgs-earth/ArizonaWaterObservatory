@@ -10,11 +10,11 @@ import { BasemapId } from '@/components/Map/types';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
+import { getSelectedColor } from '@/features/Map/utils';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
-import { getSelectedColor } from './utils';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;

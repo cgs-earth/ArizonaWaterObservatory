@@ -4,8 +4,8 @@
  */
 
 import { LoadingSlice } from '@/stores/session/slices/loading';
+import { MeasureSlice } from '@/stores/session/slices/measure';
 import { NotificationsSlice } from '@/stores/session/slices/notifications';
-import { MeasureSlice } from './slices/measure';
 
 export enum NotificationType {
   Success = 'success',

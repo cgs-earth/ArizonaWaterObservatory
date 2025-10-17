@@ -7,11 +7,11 @@ import { FeatureCollection, Polygon } from 'geojson';
 import { Properties } from '@/components/Map/types';
 import { ICollection } from '@/services/edr.service';
 import { CollectionSlice } from '@/stores/main/slices/collections';
+import { DrawingSlice } from '@/stores/main/slices/drawing';
 import { LayerSlice } from '@/stores/main/slices/layers';
 import { LocationSlice } from '@/stores/main/slices/locations';
+import { ShareSlice } from '@/stores/main/slices/share';
 import { SpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
-import { DrawingSlice } from './slices/drawing';
-import { ShareSlice } from './slices/share';
 
 export type ColorValueHex = `#${string}`;
 

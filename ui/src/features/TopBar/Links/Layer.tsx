@@ -8,6 +8,7 @@ import { Feature } from 'geojson';
 import { Anchor, Box, Group, Text, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
+import { LocationBlock } from '@/features/TopBar/Links/LocationBlock';
 import styles from '@/features/TopBar/TopBar.module.css';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
@@ -16,7 +17,6 @@ import useMainStore from '@/stores/main';
 import { Layer as LayerType, Location as LocationType } from '@/stores/main/types';
 import { LoadingType } from '@/stores/session/types';
 import { getProvider } from '@/utils/provider';
-import { LocationBlock } from './LocationBlock';
 
 type Props = {
   layer: LayerType;

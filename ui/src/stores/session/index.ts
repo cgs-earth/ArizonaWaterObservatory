@@ -6,9 +6,9 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { createLoadingSlice } from '@/stores/session/slices/loading';
+import { createMeasureSlice } from '@/stores/session/slices/measure';
 import { createNotificationsSlice } from '@/stores/session/slices/notifications';
 import { SessionState, Tool } from '@/stores/session/types';
-import { createMeasureSlice } from './slices/measure';
 
 const useSessionStore = create<SessionState>()(
   immer((set, get, store) => ({

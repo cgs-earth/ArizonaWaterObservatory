@@ -7,11 +7,11 @@ import { useEffect, useState } from 'react';
 import { Feature } from 'geojson';
 import { Group, Pagination, Stack } from '@mantine/core';
 import NumberInput from '@/components/NumberInput';
+import { Location } from '@/features/TopBar/Links/Location';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { chunk } from '@/utils/chunk';
-import { Location } from './Location';
 
 type Props = {
   locations: (LocationType | Feature)[];

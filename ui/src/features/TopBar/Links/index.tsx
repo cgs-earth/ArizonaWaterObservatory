@@ -9,11 +9,11 @@ import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
+import { Layer } from '@/features/TopBar/Links/Layer';
 import styles from '@/features/TopBar/TopBar.module.css';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
-import { Layer } from './Layer';
 
 const Links: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
