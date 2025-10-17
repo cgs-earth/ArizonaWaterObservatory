@@ -8,8 +8,10 @@
   box-shadow: unset;
   border-radius: 0;
   width: fit-content;
+  height: 100%;
   min-width: 200px;
   padding: var(--default-spacing);
+  overflow: hidden;
 }
 
 .closeButton {
@@ -20,4 +22,6 @@
 
 .modalBody {
   background: var(--mantine-color-body);
+  overflow-y: auto;
+  max-height: calc(100% - 22px); /* Account for height of close button*/
 }

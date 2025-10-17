@@ -6,6 +6,7 @@
 import { Group } from '@mantine/core';
 import Tools from '@/features/Tools';
 import styles from '@/features/TopBar/TopBar.module.css';
+import Links from './Links';
 import Share from './Share';
 
 const TopBar: React.FC = () => {
@@ -13,6 +14,7 @@ const TopBar: React.FC = () => {
     <Group justify="space-between" className={styles.topBarWrapper}>
       <Group>
         <Share />
+        <Links />
       </Group>
       <Tools />
     </Group>
