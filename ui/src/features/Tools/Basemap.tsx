@@ -42,10 +42,7 @@ export const BasemapSelector: React.FC = () => {
       onChange={setShow}
       closeOnClickOutside={false}
       target={
-        <Tooltip
-          label="Measure distances and filter by drawn or existing geometries"
-          disabled={show}
-        >
+        <Tooltip label="Change map styling" disabled={show}>
           <IconButton
             variant={show ? Variant.Selected : Variant.Secondary}
             onClick={() => handleShow(!show)}
