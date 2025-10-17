@@ -120,6 +120,7 @@ class MainManager {
     const charts = this.store.getState().charts;
     const locations = this.store.getState().locations;
     const drawnShapes = this.store.getState().drawnShapes;
+    const basemap = this.store.getState().basemap;
 
     const bounds = this.map.getBounds();
     const zoom = this.map.getZoom();
@@ -135,6 +136,7 @@ class MainManager {
       charts,
       locations,
       drawnShapes,
+      basemap,
       bounds,
       zoom,
       center,
@@ -229,6 +231,7 @@ class MainManager {
     this.store.getState().setCharts(config.charts);
     this.store.getState().setLocations(config.locations);
     this.store.getState().setDrawnShapes(config.drawnShapes);
+    this.store.getState().setBasemap(config.basemap);
 
     for (const shape of config.drawnShapes) {
       this.draw.add(shape);
@@ -371,7 +374,7 @@ class MainManager {
    * @function
    */
   public getSourceId(collectionId: ICollection['id']): string {
-    return `${collectionId}-source`;
+    return `user-${collectionId}-source`;
   }
 
   /**
@@ -387,9 +390,9 @@ class MainManager {
     lineLayerId: string;
   } {
     return {
-      pointLayerId: `${collectionId}-${layerId}-edr-locations-point`,
-      fillLayerId: `${collectionId}-${layerId}-edr-locations-fill`,
-      lineLayerId: `${collectionId}-${layerId}-edr-locations-line`,
+      pointLayerId: `user-${collectionId}-${layerId}-edr-locations-point`,
+      fillLayerId: `user-${collectionId}-${layerId}-edr-locations-fill`,
+      lineLayerId: `user-${collectionId}-${layerId}-edr-locations-line`,
     };
   }
 

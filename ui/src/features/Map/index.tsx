@@ -6,7 +6,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
-import { BasemapId } from '@/components/Map/types';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
@@ -37,6 +36,7 @@ const MainMap: React.FC<Props> = (props) => {
 
   const locations = useMainStore((state) => state.locations);
   const layers = useMainStore((state) => state.layers);
+  const basemap = useMainStore((state) => state.basemap);
 
   const loadingInstances = useSessionStore((state) => state.loadingInstances);
 
@@ -129,38 +129,39 @@ const MainMap: React.FC<Props> = (props) => {
   }, [locations]);
 
   //   TODO: uncomment when basemap selector is implemented
-  //   useEffect(() => {
-  //     if (!map) {
-  //       return;
-  //     }
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
 
-  //     // Copy over all existing layers and sources when changing basemaps
-  //     const layers = map.getStyle().layers || [];
-  //     const sources = map.getStyle().sources || {};
+    // Copy over all existing layers and sources when changing basemaps
+    const layers = map.getStyle().layers || [];
+    const sources = map.getStyle().sources || {};
 
-  //     const customLayers = layers.filter((layer) => {
-  //       return !layer.id.startsWith('mapbox');
-  //     });
+    const customLayers = layers.filter((layer) => {
+      return layer.id.startsWith('user-');
+    });
 
-  //     const customSources = Object.entries(sources).filter(([id]) => {
-  //       return !id.startsWith('mapbox');
-  //     });
+    const customSources = Object.entries(sources).filter(([id]) => {
+      return id.startsWith('user-');
+    });
 
-  //     map.once('styledata', () => {
-  //       for (const [id, source] of customSources) {
-  //         if (!map.getSource(id)) {
-  //           map.addSource(id, source);
-  //         }
-  //       }
+    map.once('styledata', () => {
+      for (const [id, source] of customSources) {
+        if (!map.getSource(id)) {
+          map.addSource(id, source);
+        }
+      }
 
-  //       for (const layer of customLayers) {
-  //         if (!map.getLayer(layer.id)) {
-  //           map.addLayer(layer);
-  //         }
-  //       }
-  //     });
-  //     map.setStyle(basemaps[basemap]);
-  //   }, [basemap]);
+      for (const layer of customLayers) {
+        if (!map.getLayer(layer.id)) {
+          map.addLayer(layer);
+        }
+      }
+    });
+
+    map.setStyle(basemaps[basemap]);
+  }, [basemap]);
 
   return (
     <>
@@ -170,7 +171,7 @@ const MainMap: React.FC<Props> = (props) => {
         sources={sourceConfigs}
         layers={layerDefinitions}
         options={{
-          style: basemaps[BasemapId.Streets],
+          style: basemaps[basemap],
           projection: 'mercator',
           center: INITIAL_CENTER,
           zoom: INITIAL_ZOOM,

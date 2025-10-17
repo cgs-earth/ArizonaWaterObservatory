@@ -26,6 +26,7 @@ export type Config = {
   charts: MainState['charts'];
   locations: MainState['locations'];
   drawnShapes: MainState['drawnShapes'];
+  basemap: MainState['basemap'];
   bounds: LngLatBoundsLike | null;
   zoom: number;
   center: LngLat;

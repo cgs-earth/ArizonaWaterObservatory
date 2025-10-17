@@ -10,3 +10,7 @@
 .drawButton {
   width: 95px;
 }
+
+.capitalize {
+  text-transform: capitalize;
+}

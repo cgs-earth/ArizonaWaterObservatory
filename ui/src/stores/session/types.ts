@@ -28,6 +28,7 @@ export enum Tool {
 export enum Overlay {
   Share = 'share',
   Draw = 'draw',
+  Basemap = 'basemap',
 }
 
 export type Notification = {
