@@ -229,7 +229,6 @@ class MainManager {
     this.store.getState().setCategory(config.category);
     this.store.getState().setCollection(config.collection);
     this.store.getState().setCharts(config.charts);
-    this.store.getState().setLocations(config.locations);
     this.store.getState().setDrawnShapes(config.drawnShapes);
     this.store.getState().setBasemap(config.basemap);
 
@@ -247,6 +246,9 @@ class MainManager {
       const sourceId = this.getSourceId(layer.datasourceId);
       this.addLocationLayer(layer, sourceId);
     }
+
+    // Set locations after loading layer to reflect selected state in map
+    this.store.getState().setLocations(config.locations);
 
     return true;
   }
