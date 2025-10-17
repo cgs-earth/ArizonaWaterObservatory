@@ -630,6 +630,32 @@ class MainManager {
    *
    * @function
    */
+  public async getData(layer: Layer, signal: AbortSignal): Promise<FeatureCollection> {
+    try {
+      const sourceId = this.getSourceId(layer.datasourceId);
+
+      const source = this.map?.getSource(sourceId) as GeoJSONSource;
+
+      const data = source._data;
+      if (typeof data !== 'string') {
+        const featureCollection = turf.featureCollection(
+          (data as FeatureCollection).features as Feature[]
+        );
+
+        return featureCollection;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    const drawnShapes = this.store.getState().drawnShapes;
+
+    const data = await this.fetchLocations(layer.datasourceId, signal, layer.parameters);
+
+    const filteredData = this.filterLocations(data, drawnShapes);
+
+    return filteredData;
+  }
   // public async getLocations(): Promise<void> {
   //   // Specific user collection choice
   //   const collection = this.store.getState().collection;
@@ -697,7 +723,11 @@ class MainManager {
     }
 
     if (!this.compareArrays(layer.parameters, parameters)) {
-      await this.addLocationSource(layer.datasourceId, { parameterNames: parameters });
+      const drawnShapes = this.store.getState().drawnShapes;
+      await this.addLocationSource(layer.datasourceId, {
+        parameterNames: parameters,
+        filterFeatures: drawnShapes,
+      });
     }
 
     this.store.getState().updateLayer({

@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ExpressionSpecification } from 'mapbox-gl';
 import { LayerId, SubLayerId } from '@/features/Map/config';
+import { Location } from '@/stores/main/types';
 
 const getSimpleSelectMessage = (layerId: LayerId | SubLayerId): string => {
   switch (layerId) {
@@ -117,4 +119,11 @@ export const getMessage = (
   }
 
   return 'Click on this shape to move or reshape.';
+};
+
+export const getSelectedColor = (
+  locationIds: Array<Location['id']>,
+  originalColor: string = '#000'
+): ExpressionSpecification => {
+  return ['case', ['in', ['id'], ['literal', locationIds]], '#FFF', originalColor];
 };
