@@ -9,7 +9,6 @@
 }
 
 .root {
-  /* box-shadow: 0px 4px 4px rgb(0, 0, 0); */
   box-shadow: 0px 4px 4px #00000040;
   transition: transform 0.15s ease-in-out;
 }
@@ -29,13 +28,17 @@
   background-color: var(--asu-color-tertiary);
 }
 
+.selected {
+  stroke: #000;
+  background-color: var(--asu-color-selected);
+}
+
 .unstyled {
   stroke: var(--mantine-color-text);
   background-color: var(--mantine-color-body);
 }
 
 .root:hover,
-.root:active,
 .root:focus {
   transform: scale(1.1);
 }
@@ -62,4 +65,10 @@
 .unstyled:active,
 .unstyled:focus {
   background-color: var(--mantine-color-body);
+}
+
+.selected:hover,
+.selected:active,
+.selected:focus {
+  background-color: var(--asu-color-selected);
 }

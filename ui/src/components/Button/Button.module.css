@@ -5,7 +5,7 @@
 
 .root {
   /* box-shadow: 0px 4px 4px rgb(0, 0, 0); */
-  box-shadow: 0px 4px 4px #00000040;
+  box-shadow: 0px 2px 2px #00000040;
   transition: transform 0.15s ease-in-out;
 }
 
@@ -28,9 +28,8 @@
   background-color: var(--asu-color-tertiary);
 }
 
-.root:hover,
-.root:active,
-.root:focus {
+.root:hover:not(:disabled):not([data-disabled='true']),
+.root:active:not(:disabled):not([data-disabled='true']) {
   transform: scale(1.05);
 }
 
@@ -51,6 +50,13 @@
 .tertiary:hover,
 .tertiary:active,
 .tertiary:focus {
+  color: #000;
+  background-color: var(--asu-color-tertiary);
+}
+
+.root:disabled,
+.root[data-disabled='true'] {
+  opacity: 0.5;
   color: #000;
   background-color: var(--asu-color-tertiary);
 }

@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
-import { Feature, FeatureCollection, Geometry, Point, Polygon } from 'geojson';
+import { Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
 import { GeoJSONFeature, GeoJSONSource, Map, Popup } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
@@ -18,11 +19,13 @@ import {
   getPointLayerDefinition,
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
+import { Config, GetConfigResponse, PostConfigResponse } from './types';
 
 class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
   private map: Map | null = null;
   private hoverPopup: Popup | null = null;
+  private draw: MapboxDraw | null = null;
 
   constructor(store: UseBoundStore<StoreApi<MainState>>) {
     this.store = store;
@@ -48,12 +51,201 @@ class MainManager {
     }
   }
 
+  /**
+   *
+   * @function
+   */
+  public setDraw(draw: MapboxDraw): void {
+    if (!this.draw) {
+      this.draw = draw;
+    }
+  }
+
   private createUUID(): string {
     return v6();
   }
 
   private createHexColor(): ColorValueHex {
-    return '#fake';
+    return getRandomHexColor();
+  }
+
+  private compareArrays<T>(a: T[], b: T[]): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+
+    const sorted1 = [...a].sort();
+    const sorted2 = [...b].sort();
+
+    return sorted1.every((val, index) => val === sorted2[index]);
+  }
+
+  public isValidConfig(config: Config | undefined): { valid: boolean; reasons: string[] } {
+    if (!config) {
+      return {
+        valid: false,
+        reasons: ['No config provided.'],
+      };
+    }
+
+    const reasons: string[] = [];
+    if (!config.provider && !config.category && !config.collection && config.layers.length === 0) {
+      reasons.push('No provider, category, collection, or layers selected.');
+    }
+    if (!config.center) {
+      reasons.push('Missing map center.');
+    }
+    if (typeof config.zoom !== 'number') {
+      reasons.push('Zoom is not a number.');
+    }
+    if (typeof config.bearing !== 'number') {
+      reasons.push('Bearing is not a number.');
+    }
+    if (typeof config.pitch !== 'number') {
+      reasons.push('Pitch is not a number.');
+    }
+
+    return { valid: reasons.length === 0, reasons };
+  }
+
+  private generateConfig(): Config | undefined {
+    if (!this.map) {
+      return;
+    }
+
+    const layers = this.store.getState().layers;
+    const provider = this.store.getState().provider;
+    const category = this.store.getState().category;
+    const collection = this.store.getState().collection;
+    const charts = this.store.getState().charts;
+    const locations = this.store.getState().locations;
+    const drawnShapes = this.store.getState().drawnShapes;
+
+    const bounds = this.map.getBounds();
+    const zoom = this.map.getZoom();
+    const center = this.map.getCenter();
+    const bearing = this.map.getBearing();
+    const pitch = this.map.getPitch();
+
+    return {
+      layers,
+      provider,
+      category,
+      collection,
+      charts,
+      locations,
+      drawnShapes,
+      bounds,
+      zoom,
+      center,
+      bearing,
+      pitch,
+    };
+  }
+
+  private getShareId(jobId: string): string | undefined {
+    const uuid = jobId.split('/').pop();
+    return uuid;
+  }
+
+  public async saveConfig(signal?: AbortSignal): Promise<PostConfigResponse> {
+    const config = this.generateConfig();
+
+    const validate = this.isValidConfig(config);
+    if (!validate.valid) {
+      return {
+        success: false,
+        response: validate.reasons, // TODO: More robust response
+      };
+    }
+
+    const url = `${import.meta.env.VITE_AWO_CONFIG_SOURCE}/processes/config-store/execution?f=json`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ inputs: config }),
+      signal,
+    });
+
+    if (response.ok) {
+      const jobId = response.headers.get('location');
+      const shareId = this.getShareId(jobId ?? '');
+      if (shareId) {
+        return {
+          success: true,
+          response: [shareId],
+        };
+      }
+      return {
+        success: false,
+        response: [`Issue extracting shareId, original URL: ${jobId}`], // TODO: refine
+      };
+    }
+    return {
+      success: false,
+      response: ['Config generation unsuccessful'], // TODO: refine
+    };
+  }
+
+  public async getConfig(shareId: string, signal?: AbortSignal): Promise<GetConfigResponse> {
+    const url = `${import.meta.env.VITE_AWO_CONFIG_SOURCE}/jobs/${shareId}/results?f=json`;
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal,
+    });
+
+    if (response.ok) {
+      const config = (await response.json()) as Config;
+
+      return {
+        success: true,
+        response: config,
+      };
+    }
+
+    return {
+      success: false,
+      response:
+        response.statusText.length > 0
+          ? response.statusText
+          : 'Unknown error encountered. Please provide this url to site maintainer.', // TODO: refine
+    };
+  }
+
+  public async loadConfig(config: Config): Promise<boolean> {
+    if (!this.map || !this.draw || !this.isValidConfig(config).valid) {
+      return false;
+    }
+
+    this.store.getState().setLayers(config.layers);
+    this.store.getState().setProvider(config.provider);
+    this.store.getState().setCategory(config.category);
+    this.store.getState().setCollection(config.collection);
+    this.store.getState().setCharts(config.charts);
+    this.store.getState().setLocations(config.locations);
+    this.store.getState().setDrawnShapes(config.drawnShapes);
+
+    for (const shape of config.drawnShapes) {
+      this.draw.add(shape);
+    }
+
+    this.map.setZoom(config.zoom);
+    this.map.setCenter(config.center);
+    this.map.setBearing(config.bearing);
+    this.map.setPitch(config.pitch);
+
+    await this.applySpatialFilter(config.drawnShapes);
+    for (const layer of config.layers) {
+      const sourceId = this.getSourceId(layer.datasourceId);
+      this.addLocationLayer(layer, sourceId);
+    }
+
+    return true;
   }
 
   /**
@@ -78,18 +270,32 @@ class MainManager {
    */
   private async fetchLocations(
     collectionId: ICollection['id'],
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    parameterNames?: string[]
   ): Promise<FeatureCollection<Point>> {
-    return awoService.getLocations<FeatureCollection<Point>>(collectionId, { signal });
+    return awoService.getLocations<FeatureCollection<Point>>(collectionId, {
+      signal,
+      params: {
+        ...(parameterNames && parameterNames.length > 0
+          ? { 'parameter-name': parameterNames.join(',') }
+          : {}),
+      },
+    });
   }
 
+  /**
+   *
+   * @function
+   */
   public getDatasourceCount = (datasourceId: ICollection['id']): number => {
     return this.store.getState().layers.filter((layer) => layer.datasourceId === datasourceId)
       .length;
   };
 
   public getDatasource = (datasourceId: ICollection['id']): ICollection | undefined => {
-    return this.store.getState().collections.find((datasource) => datasource.id === datasourceId);
+    return this.store
+      .getState()
+      .originalCollections.find((datasource) => datasource.id === datasourceId);
   };
 
   public async createLayer(datasourceId: ICollection['id'], signal?: AbortSignal) {
@@ -124,15 +330,37 @@ class MainManager {
       locations: [],
     };
 
-    const sourceId = await this.addLocationSource(datasource.id, signal);
-    this.addLocationLayer(datasource.id, sourceId);
+    const drawnShapes = this.store.getState().drawnShapes;
+
+    const sourceId = await this.addLocationSource(datasource.id, {
+      filterFeatures: drawnShapes,
+      signal,
+    });
+    this.addLocationLayer(layer, sourceId);
 
     this.store.getState().addLayer(layer);
   }
 
-  deleteLayer(layerId: Layer['id']) {
-    const charts = this.store.getState().charts.filter((chart) => chart.layer !== layerId);
-    const layers = this.store.getState().layers.filter((layer) => layer.id !== layerId);
+  public deleteLayer(layer: Layer) {
+    const charts = this.store.getState().charts.filter((chart) => chart.layer !== layer.id);
+    const layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
+
+    if (this.map) {
+      const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
+
+      if (this.map.getLayer(pointLayerId)) {
+        this.map.removeLayer(pointLayerId);
+      }
+      if (this.map.getLayer(fillLayerId)) {
+        this.map.removeLayer(fillLayerId);
+      }
+      if (this.map.getLayer(lineLayerId)) {
+        this.map.removeLayer(lineLayerId);
+      }
+    }
 
     this.store.getState().setCharts(charts);
     this.store.getState().setLayers(layers);
@@ -150,15 +378,18 @@ class MainManager {
    *
    * @function
    */
-  public getLocationsLayerIds(collectionId: ICollection['id']): {
+  public getLocationsLayerIds(
+    collectionId: ICollection['id'],
+    layerId: Layer['id']
+  ): {
     pointLayerId: string;
     fillLayerId: string;
     lineLayerId: string;
   } {
     return {
-      pointLayerId: `${collectionId}-edr-locations-point`,
-      fillLayerId: `${collectionId}-edr-locations-fill`,
-      lineLayerId: `${collectionId}-edr-locations-line`,
+      pointLayerId: `${collectionId}-${layerId}-edr-locations-point`,
+      fillLayerId: `${collectionId}-${layerId}-edr-locations-fill`,
+      lineLayerId: `${collectionId}-${layerId}-edr-locations-line`,
     };
   }
 
@@ -168,20 +399,22 @@ class MainManager {
 
   private filterByGeometryType(
     featureCollection: FeatureCollection<Geometry>,
-    geographyFilterFeature: Feature<Polygon>
+    filterFeatures: Feature<Polygon | MultiPolygon>[] = []
   ): FeatureCollection<Geometry> {
     return {
       type: 'FeatureCollection',
       features: featureCollection.features.filter((feature) => {
         switch (feature.geometry.type) {
           case 'Point':
-            return turf.booleanPointInPolygon(feature as Feature<Point>, geographyFilterFeature);
+            return filterFeatures.some((filter) =>
+              turf.booleanPointInPolygon(feature as Feature<Point>, filter)
+            );
 
           case 'LineString':
           case 'MultiLineString':
           case 'Polygon':
           case 'MultiPolygon':
-            return turf.booleanIntersects(feature, geographyFilterFeature);
+            return filterFeatures.some((filter) => turf.booleanIntersects(feature, filter));
 
           default:
             console.error(
@@ -195,35 +428,52 @@ class MainManager {
   }
 
   private filterLocations(
-    featureCollection: FeatureCollection<Geometry>
+    featureCollection: FeatureCollection<Geometry>,
+    filterFeatures: Feature<Polygon | MultiPolygon>[] = []
   ): FeatureCollection<Geometry> {
-    const geographyFilter = this.store.getState().geographyFilter;
-
-    if (geographyFilter) {
-      return this.filterByGeometryType(featureCollection, geographyFilter.feature);
+    if (filterFeatures.length > 0) {
+      return this.filterByGeometryType(featureCollection, filterFeatures);
     }
 
     return featureCollection;
   }
-
   /**
    *
    * @function
    */
   private async addLocationSource(
     collectionId: ICollection['id'],
-    signal?: AbortSignal
+    options?: {
+      filterFeatures?: Feature<Polygon | MultiPolygon>[];
+      signal?: AbortSignal;
+      parameterNames?: string[];
+    }
   ): Promise<string> {
     const sourceId = this.getSourceId(collectionId);
     if (this.map) {
       const source = this.map.getSource(sourceId) as GeoJSONSource;
       if (!source) {
-        const data = await this.fetchLocations(collectionId, signal);
+        const data = await this.fetchLocations(
+          collectionId,
+          options?.signal,
+          options?.parameterNames
+        );
+
+        const filteredData = this.filterLocations(data, options?.filterFeatures);
 
         this.map.addSource(sourceId, {
           type: 'geojson',
-          data,
+          data: filteredData,
         });
+      } else if (source) {
+        const data = await this.fetchLocations(
+          collectionId,
+          options?.signal,
+          options?.parameterNames
+        );
+
+        const filteredData = this.filterLocations(data, options?.filterFeatures);
+        source.setData(filteredData);
       }
     }
 
@@ -246,22 +496,22 @@ class MainManager {
    *
    * @function
    */
-  private async addLocationLayer(layerId: Layer['id'], sourceId: string): Promise<void> {
+  private async addLocationLayer(layer: Layer, sourceId: string): Promise<void> {
     const geographyFilter = this.store.getState().geographyFilter;
 
-    const layers = this.store.getState().layers;
-
-    const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(layerId);
+    const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
+      layer.datasourceId,
+      layer.id
+    );
     if (this.map) {
-      const color = getRandomHexColor();
       if (
         !this.map.getLayer(pointLayerId) &&
         !this.map.getLayer(lineLayerId) &&
         !this.map.getLayer(pointLayerId)
       ) {
-        this.map.addLayer(getFillLayerDefinition(fillLayerId, sourceId, color));
-        this.map.addLayer(getLineLayerDefinition(lineLayerId, sourceId, color));
-        this.map.addLayer(getPointLayerDefinition(pointLayerId, sourceId, color));
+        this.map.addLayer(getFillLayerDefinition(fillLayerId, sourceId, layer.color));
+        this.map.addLayer(getLineLayerDefinition(lineLayerId, sourceId, layer.color));
+        this.map.addLayer(getPointLayerDefinition(pointLayerId, sourceId, layer.color));
 
         this.map.on('click', pointLayerId, (e) => {
           e.originalEvent.preventDefault();
@@ -277,7 +527,7 @@ class MainManager {
               } else {
                 this.store.getState().addLocation({
                   id: locationId,
-                  layerId,
+                  layerId: layer.id,
                 });
               }
             });
@@ -299,7 +549,7 @@ class MainManager {
                 } else {
                   this.store.getState().addLocation({
                     id: locationId,
-                    layerId,
+                    layerId: layer.id,
                   });
                 }
               });
@@ -322,7 +572,7 @@ class MainManager {
                 } else {
                   this.store.getState().addLocation({
                     id: locationId,
-                    layerId,
+                    layerId: layer.id,
                   });
                 }
               });
@@ -334,7 +584,6 @@ class MainManager {
           this.map!.getCanvas().style.cursor = 'pointer';
           const { features } = e;
           if (features && features.length > 0) {
-            const layer = layers.find((layer) => layer.id === layerId);
             const uniqueFeatures = this.getUniqueIds(features);
             if (layer) {
               const html = `
@@ -351,7 +600,6 @@ class MainManager {
           this.map!.getCanvas().style.cursor = 'pointer';
           const { features } = e;
           if (features && features.length > 0) {
-            const layer = layers.find((layer) => layer.id === layerId);
             const uniqueFeatures = this.getUniqueIds(features);
             if (layer) {
               const html = `
@@ -382,30 +630,82 @@ class MainManager {
    *
    * @function
    */
-  public async getLocations(): Promise<void> {
-    // Specific user collection choice
-    const collection = this.store.getState().collection;
-    // All collections for selected filters
-    const collections = this.store.getState().collections;
+  // public async getLocations(): Promise<void> {
+  //   // Specific user collection choice
+  //   const collection = this.store.getState().collection;
+  //   // All collections for selected filters
+  //   const collections = this.store.getState().collections;
 
-    if (collection) {
-      const sourceId = await this.addLocationSource(collection);
-      this.addLocationLayer(collection, sourceId);
-    } else {
-      const chunkSize = 5;
+  //   if (collection) {
+  //     const sourceId = await this.addLocationSource(collection);
+  //     this.addLocationLayer(collection, sourceId);
+  //   } else {
+  //     const chunkSize = 5;
 
-      for (let i = 0; i < collections.length; i += chunkSize) {
-        const chunk = collections.slice(i, i + chunkSize);
+  //     for (let i = 0; i < collections.length; i += chunkSize) {
+  //       const chunk = collections.slice(i, i + chunkSize);
 
-        await Promise.all(
-          chunk.map(async (collection) => {
-            const collectionId = collection.id;
-            const sourceId = await this.addLocationSource(collectionId);
-            this.addLocationLayer(collectionId, sourceId);
-          })
+  //       await Promise.all(
+  //         chunk.map(async (collection) => {
+  //           const collectionId = collection.id;
+  //           const sourceId = await this.addLocationSource(collectionId);
+  //           this.addLocationLayer(collectionId, sourceId);
+  //         })
+  //       );
+  //     }
+  //   }
+  // }
+
+  public async applySpatialFilter(drawnShapes: Feature<Polygon | MultiPolygon>[]): Promise<void> {
+    const layers = this.store.getState().layers;
+
+    const chunkSize = 5;
+
+    for (let i = 0; i < layers.length; i += chunkSize) {
+      const chunk = layers.slice(i, i + chunkSize);
+      await Promise.all(
+        chunk.map(async (layer) => {
+          const collectionId = layer.datasourceId;
+          return await this.addLocationSource(collectionId, { filterFeatures: drawnShapes });
+        })
+      );
+    }
+  }
+
+  public async updateLayer(
+    layer: Layer,
+    name: Layer['name'],
+    color: Layer['color'],
+    parameters: Layer['parameters']
+  ): Promise<void> {
+    if (color !== layer.color) {
+      if (this.map) {
+        const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
+          layer.datasourceId,
+          layer.id
         );
+        if (this.map.getLayer(pointLayerId)) {
+          this.map.setPaintProperty(pointLayerId, 'circle-color', color);
+        }
+        if (this.map.getLayer(fillLayerId)) {
+          this.map.setPaintProperty(fillLayerId, 'fill-color', color);
+        }
+        if (this.map.getLayer(lineLayerId)) {
+          this.map.setPaintProperty(lineLayerId, 'line-color', color);
+        }
       }
     }
+
+    if (!this.compareArrays(layer.parameters, parameters)) {
+      await this.addLocationSource(layer.datasourceId, { parameterNames: parameters });
+    }
+
+    this.store.getState().updateLayer({
+      ...layer,
+      name,
+      color,
+      parameters,
+    });
   }
 
   /**
@@ -435,10 +735,10 @@ class MainManager {
       return;
     }
 
-    const originalCollections = this.store.getState().originalCollections;
+    const layers = this.store.getState().layers;
 
-    for (const collection of originalCollections) {
-      const layerIds = Object.values(this.getLocationsLayerIds(collection.id));
+    for (const layer of layers) {
+      const layerIds = Object.values(this.getLocationsLayerIds(layer.datasourceId, layer.id));
       for (const layerId of layerIds) {
         if (this.map.getLayer(layerId)) {
           this.map.removeLayer(layerId);

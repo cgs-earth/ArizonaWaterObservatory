@@ -6,7 +6,7 @@
 import { StateCreator } from 'zustand';
 import { Loading, SessionState } from '@/stores/session/types';
 
-interface LoadingSlice {
+export interface LoadingSlice {
   loadingInstances: Loading[];
   addLoadingInstance: (loadingInstance: Loading) => void;
   removeLoadingInstance: (id: string) => void;

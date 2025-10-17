@@ -14,7 +14,7 @@ import { theme } from '@/theme';
  */
 export const Mantine: React.FC<PropsWithChildren> = ({ children }) => {
   return (
-    <MantineProvider defaultColorScheme="auto" theme={theme}>
+    <MantineProvider defaultColorScheme="light" theme={theme}>
       {children}
     </MantineProvider>
   );

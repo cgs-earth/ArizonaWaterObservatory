@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { LoadingSlice } from '@/stores/session/slices/loading';
+import { NotificationsSlice } from '@/stores/session/slices/notifications';
+import { MeasureSlice } from './slices/measure';
+
 export enum NotificationType {
   Success = 'success',
   Error = 'error',
@@ -14,10 +18,16 @@ export enum LoadingType {
   Collections = 'collections',
   Geography = 'geography',
   Data = 'data',
+  Share = 'share',
 }
 
-export enum Tools {
+export enum Tool {
   Legend = 'legend',
+}
+
+export enum Overlay {
+  Share = 'share',
+  Draw = 'draw',
 }
 
 export type Notification = {
@@ -42,17 +52,14 @@ export type LegendEntry = {
 export type SessionState = {
   legendEntries: LegendEntry[];
   setLegendEntries: (legendEntries: SessionState['legendEntries']) => void;
+  overlay: Overlay | null;
+  setOverlay: (overlay: SessionState['overlay']) => void;
   downloadModalOpen: boolean;
   setDownloadModalOpen: (downloadModalOpen: SessionState['downloadModalOpen']) => void;
   tools: {
-    [Tools.Legend]: boolean;
+    [Tool.Legend]: boolean;
   };
-  setOpenTools: (tool: Tools, open: boolean) => void;
-  loadingInstances: Loading[];
-  addLoadingInstance: (loadingInstance: Loading) => void;
-  removeLoadingInstance: (id: string) => void;
-  hasLoadingInstance: (text: string) => boolean;
-  notifications: Notification[];
-  addNotification: (notification: Notification) => void;
-  removeNotification: (id: string) => void;
-};
+  setOpenTools: (tool: Tool, open: boolean) => void;
+} & NotificationsSlice &
+  LoadingSlice &
+  MeasureSlice;

@@ -10,8 +10,7 @@
 }
 
 .control {
-  border-bottom: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  padding-inline-end: 0;
 }
 
 .label {
@@ -24,7 +23,13 @@
 }
 
 .content {
+  border-top: 1px solid var(--border);
+
   padding: 0;
+}
+
+.chevron {
+  width: 36px;
 }
 
 .primary {
@@ -37,4 +42,17 @@
 
 .tertiary {
   border-left-color: var(--asu-color-tertiary);
+}
+
+.sticky {
+  position: sticky;
+  background: var(--mantine-color-body);
+}
+
+.top {
+  top: 0;
+}
+
+.bottom {
+  bottom: 0;
 }

@@ -27,6 +27,7 @@
   --asu-color-primary: var(--asu-gold);
   --asu-color-secondary: var(--asu-maroon);
   --asu-color-tertiary: var(--asu-gray-5);
+  --asu-color-selected: var(--asu-blue);
 
   --default-spacing: 8px;
 }

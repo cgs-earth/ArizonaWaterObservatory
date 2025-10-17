@@ -6,6 +6,12 @@
 import { FeatureCollection, Polygon } from 'geojson';
 import { Properties } from '@/components/Map/types';
 import { ICollection } from '@/services/edr.service';
+import { CollectionSlice } from '@/stores/main/slices/collections';
+import { LayerSlice } from '@/stores/main/slices/layers';
+import { LocationSlice } from '@/stores/main/slices/locations';
+import { SpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
+import { DrawingSlice } from './slices/drawing';
+import { ShareSlice } from './slices/share';
 
 export type ColorValueHex = `#${string}`;
 
@@ -15,27 +21,27 @@ enum DataVisualization {
   Teacup = 'teacup',
 }
 
-enum SpatialSelectionType {
+export enum SpatialSelectionType {
   Drawn = 'custom-drawn-polygon',
   Selected = 'select-existing-polygons',
   Upload = 'custom-upload-shape',
 }
 
-interface SpatialSelectionBase {
+export interface SpatialSelectionBase {
   type: SpatialSelectionType;
 }
 
-interface SpatialSelectionDrawn extends SpatialSelectionBase {
+export interface SpatialSelectionDrawn extends SpatialSelectionBase {
   type: SpatialSelectionType.Drawn;
-  shapes: FeatureCollection<Polygon, Properties>[];
+  featureCollection: FeatureCollection<Polygon, Properties>[];
 }
 
-interface SpatialSelectionUpload extends SpatialSelectionBase {
+export interface SpatialSelectionUpload extends SpatialSelectionBase {
   type: SpatialSelectionType.Upload;
-  shapes: FeatureCollection<Polygon, Properties>[];
+  featureCollection: FeatureCollection<Polygon, Properties>[];
 }
 
-interface SpatialSelectionSelected extends SpatialSelectionBase {
+export interface SpatialSelectionSelected extends SpatialSelectionBase {
   type: SpatialSelectionType.Selected;
   locations: string[]; // location IDs
 }
@@ -64,7 +70,7 @@ export type Layer = {
   id: string; // uuid
   datasourceId: ICollection['id'];
   name: string; // User defined
-  color: ColorValueHex; // User defined, restrict to 6 char code if possible
+  color: string; // User defined, restrict to 6 char code if possible
   parameters: string[]; // Id's of parameter as returned by datasource
   from: string | null; // UTC timestamp
   to: string | null; // UTC timestamp
@@ -95,7 +101,13 @@ export type Category = {
   label: string;
 };
 
-export interface MainState {
+export enum DrawMode {
+  Polygon = 'polygon',
+  Measure = 'measure',
+  Select = 'select',
+}
+
+export type MainState = {
   provider: string | null;
   setProvider: (provider: MainState['provider']) => void;
   category: Category | null;
@@ -105,21 +117,12 @@ export interface MainState {
   geographyFilter: any | null;
   setGeographyFilter: (geographyFilter: MainState['geographyFilter']) => void;
   hasGeographyFilter: () => boolean;
-  collections: any[]; // TODO
-  setCollections: (collections: MainState['collections']) => void;
-  originalCollections: any[];
-  setOriginalCollections: (collections: MainState['collections']) => void;
-  addCollection: (collection: any) => void;
-  hasCollection: (collectionId: any['id']) => boolean;
+
   charts: Chart[];
-  setCharts: (layers: MainState['charts']) => void;
-  layers: Layer[];
-  setLayers: (layers: Layer[]) => void;
-  addLayer: (layer: Layer) => void;
-  hasLayer: (options: { layerId?: Layer['id']; collectionId?: Layer['datasourceId'] }) => boolean;
-  locations: Location[];
-  setLocations: (locations: MainState['locations']) => void;
-  addLocation: (location: Location) => void;
-  hasLocation: (locationId: Location['id']) => boolean;
-  removeLocation: (locationId: Location['id']) => void;
-}
+  setCharts: (charts: MainState['charts']) => void;
+} & CollectionSlice &
+  LocationSlice &
+  LayerSlice &
+  SpatialSelectionSlice &
+  DrawingSlice &
+  ShareSlice;

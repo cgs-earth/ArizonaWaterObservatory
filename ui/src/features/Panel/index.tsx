@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Collapse, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Datasets from '@/features/Panel/Datasets';
@@ -21,19 +21,23 @@ const Panel: React.FC = () => {
   const provider = useMainStore((state) => state.provider);
   const category = useMainStore((state) => state.category);
 
-  const [opened, { toggle }] = useDisclosure(true);
+  const [opened, { toggle, open }] = useDisclosure(true);
+
+  const [datasetsOpen, setDatasetsOpen] = useState(false);
+
+  const layersRef = useRef<HTMLDivElement>(null);
 
   const getCollections = async () => {
     const loadingInstance = loadingManager.add('Updating collections', LoadingType.Collections);
     try {
       await mainManager.getCollections();
-      loadingManager.remove(loadingInstance);
       notificationManager.show('Updated collections', NotificationType.Success);
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;
         notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
       }
+    } finally {
       loadingManager.remove(loadingInstance);
     }
   };
@@ -41,6 +45,18 @@ const Panel: React.FC = () => {
   useEffect(() => {
     void getCollections();
   }, [provider, category]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 899) {
+        open();
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [open]);
 
   return (
     <Box className={styles.panelWrapper}>
@@ -53,8 +69,8 @@ const Panel: React.FC = () => {
           <Stack gap={0}>
             <Header />
             <Box className={styles.accordions}>
-              <Datasets />
-              <Layers />
+              <Datasets layersRef={layersRef} setDatasetsOpen={setDatasetsOpen} />
+              <Layers layersRef={layersRef} datasetsOpen={datasetsOpen} />
             </Box>
           </Stack>
         </Collapse>
