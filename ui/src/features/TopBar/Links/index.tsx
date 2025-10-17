@@ -4,7 +4,7 @@
  */
 
 import { useEffect } from 'react';
-import { Stack } from '@mantine/core';
+import { Stack, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
@@ -31,16 +31,34 @@ const Links: React.FC = () => {
     }
   }, [overlay]);
 
+  const helpText = (
+    <>
+      <Text size="sm">Access the API links used to fetch data for each location.</Text>
+      <br />
+      <Text size="sm">At least one layer must have viable locations and parameters selected.</Text>
+    </>
+  );
+
+  const hasParametersSelected = layers.some((layer) => layer.parameters.length > 0);
+
   return (
     <>
-      <Button size="sm" variant={opened ? Variant.Selected : Variant.Primary} onClick={open}>
-        Links
-      </Button>
+      <Tooltip label={helpText}>
+        <Button
+          disabled={!hasParametersSelected}
+          data-disabled={!hasParametersSelected}
+          size="sm"
+          variant={opened ? Variant.Selected : Variant.Primary}
+          onClick={open}
+        >
+          Links
+        </Button>
+      </Tooltip>
       <Modal size="auto" opened={opened} onClose={close}>
-        <Stack className={styles.modalBody} align="center">
+        <Stack gap={0} className={styles.modalBody}>
           <>
-            {layers.map((layer, index) => (
-              <Layer layer={layer} open={index === 0} />
+            {layers.map((layer) => (
+              <Layer layer={layer} />
             ))}
           </>
         </Stack>

@@ -31,7 +31,7 @@ export const buildUrl = (
   );
 
   if (format) {
-    url.searchParams.set('format', csv ? 'csv' : 'json');
+    url.searchParams.set('f', csv ? 'csv' : 'json');
   }
 
   if (parameters.length > 0) {

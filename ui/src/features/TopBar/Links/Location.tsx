@@ -6,7 +6,6 @@
 import { useEffect, useState } from 'react';
 import { Feature } from 'geojson';
 import { Anchor, Group, Paper, Stack, Text } from '@mantine/core';
-import Checkbox from '@/components/Checkbox';
 import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
 import styles from '@/features/TopBar/TopBar.module.css';
@@ -24,8 +23,6 @@ type Props = {
 export const Location: React.FC<Props> = (props) => {
   const { location, layer, collection, provider } = props;
 
-  const [includeParameters, setIncludeParameters] = useState(true);
-
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
 
@@ -33,9 +30,9 @@ export const Location: React.FC<Props> = (props) => {
     const url = buildUrl(
       collection.id,
       String(location.id),
-      includeParameters ? layer.parameters : [],
-      includeParameters ? layer.from : null,
-      includeParameters ? layer.to : null,
+      layer.parameters,
+      layer.from,
+      layer.to,
       false,
       true
     );
@@ -43,16 +40,16 @@ export const Location: React.FC<Props> = (props) => {
     const codeUrl = buildUrl(
       collection.id,
       String(location.id),
-      includeParameters ? layer.parameters : [],
-      includeParameters ? layer.from : null,
-      includeParameters ? layer.to : null,
+      layer.parameters,
+      layer.from,
+      layer.to,
       false,
       false
     );
 
     setUrl(url);
     setCodeUrl(codeUrl);
-  }, [includeParameters]);
+  }, []);
 
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
@@ -77,15 +74,15 @@ export const Location: React.FC<Props> = (props) => {
               <Text size="md">{location.id}</Text>
             </Group>
           </Stack>
-          <Checkbox
+          {/* <Checkbox
             size="xs"
             label="Include Parameters"
             checked={includeParameters}
             onChange={(event) => setIncludeParameters(event.currentTarget.checked)}
-          />
+          /> */}
         </Group>
-        <CopyInput className={styles.copyInput} url={url} />
-        <Code code={code} />
+        <CopyInput size="xs" className={styles.copyInput} url={url} />
+        <Code size="xs" code={code} />
         <Anchor
           title="This location in the API"
           href={`${collection.data_queries.locations?.link?.href}/${location.id}`}

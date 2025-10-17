@@ -10,12 +10,36 @@
   background: var(--asu-gray-4);
 }
 
+.xs {
+  --input-height: 1.875rem;
+  font-size: 0.75rem;
+}
+
+.sm {
+  --input-height: 2.25rem;
+  font-size: 0.875rem;
+}
+
+.md {
+  --input-height: 2.625rem;
+  font-size: 1rem;
+}
+
+.lg {
+  --input-height: 3rem;
+  font-size: 1.125rem;
+}
+
+.xl {
+  --input-height: 3.375rem;
+  font-size: 1.25rem;
+}
+
 .code {
   max-width: 90%;
   flex-shrink: 1;
   border-radius: 8px;
   font-family: monospace;
-  font-size: 14px;
   overflow-x: auto;
   line-height: 1em;
   padding-top: 4px;
@@ -30,10 +54,33 @@
 }
 
 .button svg {
-  width: 32px;
-  height: 32px;
   padding-top: 3px;
   margin: 1px;
+}
+
+.button.xs svg {
+  width: 24px;
+  height: 24px;
+}
+
+.button.sm svg {
+  width: 28px;
+  height: 28px;
+}
+
+.button.md svg {
+  width: 32px;
+  height: 32px;
+}
+
+.button.lg svg {
+  width: 36px;
+  height: 36px;
+}
+
+.button.xl svg {
+  width: 40;
+  height: 40;
 }
 
 .button svg[data-identifier='code-copy-svg'] {

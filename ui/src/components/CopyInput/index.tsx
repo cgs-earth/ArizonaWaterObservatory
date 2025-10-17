@@ -11,21 +11,22 @@ import styles from '@/components/CopyInput/CopyInput.module.css';
 type Props = {
   url: string;
   className?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 };
 
 const CopyInput: React.FC<Props> = (props) => {
-  const { url, className = '' } = props;
+  const { url, className = '', size = 'md' } = props;
   return (
-    <Box component="div" className={`${styles.input} ${className}`}>
+    <Box component="div" className={`${styles.input} ${styles[size]} ${className}`}>
       <Group justify="center" align="center" p={0} h="100%">
-        <Text className={styles.text} title={url}>
+        <Text className={styles.text} title={url} size={size}>
           {url}
         </Text>
         <Box component="div" className={styles.buttonWrapper}>
           <CopyButton value={url}>
             {({ copied, copy }) => (
               <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
-                <UnstyledButton onClick={copy} className={styles.button}>
+                <UnstyledButton onClick={copy} className={`${styles.button} ${styles[size]}`}>
                   {copied ? <Check /> : <CopyCode />}
                 </UnstyledButton>
               </Tooltip>

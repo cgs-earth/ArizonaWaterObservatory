@@ -5,9 +5,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Feature } from 'geojson';
-import { Anchor, Box, Collapse, Divider, Group, Stack, Title } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import Button from '@/components/Button';
+import { Anchor, Box, Group, Text, Title } from '@mantine/core';
+import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import styles from '@/features/TopBar/TopBar.module.css';
 import loadingManager from '@/managers/Loading.init';
@@ -17,17 +16,14 @@ import useMainStore from '@/stores/main';
 import { Layer as LayerType, Location as LocationType } from '@/stores/main/types';
 import { LoadingType } from '@/stores/session/types';
 import { getProvider } from '@/utils/provider';
-import { Location } from './Location';
+import { LocationBlock } from './LocationBlock';
 
 type Props = {
   layer: LayerType;
-  open: boolean;
 };
 
 export const Layer: React.FC<Props> = (props) => {
-  const { layer, open } = props;
-
-  const [opened, { toggle }] = useDisclosure(open);
+  const { layer } = props;
 
   const locations = useMainStore((state) => state.locations);
 
@@ -55,7 +51,10 @@ export const Layer: React.FC<Props> = (props) => {
       );
 
       if (isMounted.current) {
-        console.log('set otherLocations');
+        // There are no locations on screen, dont show selected locations
+        if (allLocations.features.length === 0) {
+          setSelectedLocations([]);
+        }
         setOtherLocations(otherLocations);
       }
     } catch (error) {
@@ -84,7 +83,6 @@ export const Layer: React.FC<Props> = (props) => {
     const newDataset = mainManager.getDatasource(layer.datasourceId);
 
     if (newDataset) {
-      console.log('set dataset');
       setDataset(newDataset);
     }
   }, [layer]);
@@ -95,7 +93,6 @@ export const Layer: React.FC<Props> = (props) => {
     }
 
     const newProvider = getProvider(dataset.id);
-    console.log('set provider');
     setProvider(newProvider);
   }, [dataset]);
 
@@ -113,61 +110,102 @@ export const Layer: React.FC<Props> = (props) => {
     (link) => link.rel === 'alternate' && link.type === 'text/html'
   )?.href;
 
+  const hasParametersSelected = layer.parameters.length > 0;
+  const hasSelectedLocations = selectedLocations.length > 0;
+  const hasOtherLocations = otherLocations.length > 0;
+
   return (
-    <>
-      <Box p="lg">
-        <Group justify="space-between" mb="sm" className={styles.locationHeader}>
-          {/* TODO: figure out header level */}
-          {alternateLink ? (
-            <Anchor title="This dataset in the API" href={alternateLink} target="_blank">
-              <Title order={5} size="h3">
-                {layer.name}
-              </Title>
-            </Anchor>
-          ) : (
-            <Title order={5} size="h3">
-              {layer.name}
-            </Title>
-          )}
-          <Button size="sm" onClick={toggle} variant={Variant.Primary}>
-            {opened ? 'Hide' : 'Show'}
-          </Button>
-        </Group>
-        <Collapse in={opened}>
-          <Divider />
-          {selectedLocations.length > 0 && (
-            <Stack component="section" mt="sm">
-              <Title order={6}>Selected Locations</Title>
-              {dataset &&
-                selectedLocations.map((location) => (
-                  <Location
-                    key={`selected-location-${layer.id}-${location.id}`}
-                    location={location}
-                    layer={layer}
-                    collection={dataset}
-                    provider={provider}
-                  />
-                ))}
-            </Stack>
-          )}
-          {selectedLocations.length > 0 && otherLocations.length > 0 && <Divider />}
-          <Stack component="section" mt="sm">
-            <Title order={6} size="h4">
-              Unselected Locations
-            </Title>
-            {dataset &&
-              otherLocations.map((location) => (
-                <Location
-                  key={`unselected-location-${layer.id}-${location.id}`}
-                  location={location}
-                  layer={layer}
-                  collection={dataset}
-                  provider={provider}
-                />
-              ))}
-          </Stack>
-        </Collapse>
-      </Box>
-    </>
+    <Accordion
+      items={[
+        {
+          id: `links-${layer.id}-accordion`,
+
+          title: (
+            <>
+              {' '}
+              {alternateLink ? (
+                <Anchor
+                  title="This dataset in the API"
+                  href={alternateLink}
+                  target="_blank"
+                  className={styles.link}
+                >
+                  <Title order={5} size="h3">
+                    {layer.name}
+                  </Title>
+                </Anchor>
+              ) : (
+                <Title order={5} size="h3">
+                  {layer.name}
+                </Title>
+              )}
+            </>
+          ),
+          content: (
+            <Box className={styles.accordionBody}>
+              {!hasParametersSelected || (!hasSelectedLocations && !hasOtherLocations) ? (
+                <Group justify="center" align="center" className={styles.noParameterMessage}>
+                  <Text size="md">
+                    {!hasParametersSelected
+                      ? 'Select at least one parameter for this layer to access links.'
+                      : 'No locations found.'}
+                  </Text>
+                </Group>
+              ) : (
+                <>
+                  {selectedLocations.length > 0 && (
+                    <Accordion
+                      items={[
+                        {
+                          id: `links-${layer.id}-selected-accordion`,
+                          title: (
+                            <Title order={6} size="h4">
+                              {otherLocations.length > 0 && 'Selected '}Locations
+                            </Title>
+                          ),
+                          content: (
+                            <LocationBlock
+                              locations={selectedLocations}
+                              layer={layer}
+                              collection={dataset}
+                              provider={provider}
+                            />
+                          ),
+                        },
+                      ]}
+                      variant={Variant.Secondary}
+                    />
+                  )}
+                  {otherLocations.length > 0 && (
+                    <Accordion
+                      items={[
+                        {
+                          id: `links-${layer.id}-other-accordion`,
+                          title: (
+                            <Title order={6} size="h4">
+                              {selectedLocations.length > 0 && 'Unselected '}Locations
+                            </Title>
+                          ),
+                          content: (
+                            <LocationBlock
+                              locations={otherLocations}
+                              layer={layer}
+                              collection={dataset}
+                              provider={provider}
+                            />
+                          ),
+                        },
+                      ]}
+                      variant={Variant.Secondary}
+                    />
+                  )}
+                </>
+              )}
+            </Box>
+          ),
+        },
+      ]}
+      variant={Variant.Primary}
+    />
   );
 };
