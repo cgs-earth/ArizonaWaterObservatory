@@ -125,5 +125,5 @@ export const getSelectedColor = (
   locationIds: Array<Location['id']>,
   originalColor: string = '#000'
 ): ExpressionSpecification => {
-  return ['case', ['in', ['id'], ['literal', locationIds]], '#FFF', originalColor];
+  return ['case', ['in', ['to-string', ['id']], ['literal', locationIds]], '#FFF', originalColor];
 };

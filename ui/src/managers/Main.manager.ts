@@ -332,7 +332,7 @@ class MainManager {
 
     const drawnShapes = this.store.getState().drawnShapes;
 
-    const sourceId = await this.addLocationSource(datasource.id, {
+    const sourceId = await this.addLocationSource(datasource.id, layer.id, {
       filterFeatures: drawnShapes,
       signal,
     });
@@ -427,6 +427,24 @@ class MainManager {
     };
   }
 
+  private clearInvalidLocations = (
+    layerId: Layer['id'],
+    featureCollection: FeatureCollection<Geometry>
+  ) => {
+    const { locations, removeLocation } = this.store.getState();
+
+    const layerLocations = locations.filter((location) => location.layerId === layerId);
+
+    const validIds = new Set(featureCollection.features.map((feature) => feature.id));
+    const invalidLocations = layerLocations.filter((location) => !validIds.has(location.id));
+
+    if (invalidLocations.length === 0) {
+      return;
+    }
+
+    invalidLocations.forEach((location) => removeLocation(location));
+  };
+
   private filterLocations(
     featureCollection: FeatureCollection<Geometry>,
     filterFeatures: Feature<Polygon | MultiPolygon>[] = []
@@ -437,12 +455,14 @@ class MainManager {
 
     return featureCollection;
   }
+
   /**
    *
    * @function
    */
   private async addLocationSource(
     collectionId: ICollection['id'],
+    layerId: Layer['id'],
     options?: {
       filterFeatures?: Feature<Polygon | MultiPolygon>[];
       signal?: AbortSignal;
@@ -461,6 +481,8 @@ class MainManager {
 
         const filteredData = this.filterLocations(data, options?.filterFeatures);
 
+        this.clearInvalidLocations(layerId, filteredData);
+
         this.map.addSource(sourceId, {
           type: 'geojson',
           data: filteredData,
@@ -473,6 +495,9 @@ class MainManager {
         );
 
         const filteredData = this.filterLocations(data, options?.filterFeatures);
+
+        this.clearInvalidLocations(layerId, filteredData);
+
         source.setData(filteredData);
       }
     }
@@ -480,12 +505,12 @@ class MainManager {
     return sourceId;
   }
 
-  private getUniqueIds(features: GeoJSONFeature[]): Array<string | number> {
-    const uniques = new Set<string | number>();
+  private getUniqueIds(features: GeoJSONFeature[]): Array<string> {
+    const uniques = new Set<string>();
 
     for (const feature of features) {
       if (feature.id) {
-        uniques.add(feature.id);
+        uniques.add(String(feature.id));
       }
     }
 
@@ -523,7 +548,10 @@ class MainManager {
             const uniqueFeatures = this.getUniqueIds(features);
             uniqueFeatures.forEach((locationId) => {
               if (this.hasLocation(locationId)) {
-                this.store.getState().removeLocation(locationId);
+                this.store.getState().removeLocation({
+                  id: locationId,
+                  layerId: layer.id,
+                });
               } else {
                 this.store.getState().addLocation({
                   id: locationId,
@@ -545,7 +573,10 @@ class MainManager {
               const uniqueFeatures = this.getUniqueIds(features);
               uniqueFeatures.forEach((locationId) => {
                 if (this.hasLocation(locationId)) {
-                  this.store.getState().removeLocation(locationId);
+                  this.store.getState().removeLocation({
+                    id: locationId,
+                    layerId: layer.id,
+                  });
                 } else {
                   this.store.getState().addLocation({
                     id: locationId,
@@ -568,7 +599,10 @@ class MainManager {
               const uniqueFeatures = this.getUniqueIds(features);
               uniqueFeatures.forEach((locationId) => {
                 if (this.hasLocation(locationId)) {
-                  this.store.getState().removeLocation(locationId);
+                  this.store.getState().removeLocation({
+                    id: locationId,
+                    layerId: layer.id,
+                  });
                 } else {
                   this.store.getState().addLocation({
                     id: locationId,
@@ -692,7 +726,9 @@ class MainManager {
       await Promise.all(
         chunk.map(async (layer) => {
           const collectionId = layer.datasourceId;
-          return await this.addLocationSource(collectionId, { filterFeatures: drawnShapes });
+          return await this.addLocationSource(collectionId, layer.id, {
+            filterFeatures: drawnShapes,
+          });
         })
       );
     }
@@ -724,7 +760,7 @@ class MainManager {
 
     if (!this.compareArrays(layer.parameters, parameters)) {
       const drawnShapes = this.store.getState().drawnShapes;
-      await this.addLocationSource(layer.datasourceId, {
+      await this.addLocationSource(layer.datasourceId, layer.id, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
       });

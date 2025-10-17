@@ -92,7 +92,7 @@ export type Chart = {
 };
 
 export type Location = {
-  id: string | number; // location/{this}
+  id: string; // location/{this}
   layerId: Layer['id'];
 };
 
