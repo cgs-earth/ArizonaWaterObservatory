@@ -9,7 +9,7 @@ echo "START /entrypoint.sh"
 
 set +e
 
-export PYGEOAPI_HOME=/opt/pygeoapi/pygeoapi-deployment
+export PYGEOAPI_HOME=/opt/pygeoapi/
 export PYGEOAPI_CONFIG="${PYGEOAPI_HOME}/pygeoapi.config.yml"
 export PYGEOAPI_OPENAPI="${PYGEOAPI_HOME}/pygeoapi.openapi.yml"
 
@@ -22,6 +22,8 @@ WSGI_APP=${WSGI_APP:=pygeoapi.starlette_app:APP}
 WSGI_WORKERS=${WSGI_WORKERS:=4}
 WSGI_WORKER_TIMEOUT=${WSGI_WORKER_TIMEOUT:=6000}
 WSGI_WORKER_CLASS=${WSGI_WORKER_CLASS:=uvicorn.workers.UvicornH11Worker}
+
+mkdir -p ${JOB_MANAGER_DIRECTORY:=/tmp/pygeoapi/jobs}
 
 # What to invoke: default is to run gunicorn server
 entry_cmd=${1:-run}

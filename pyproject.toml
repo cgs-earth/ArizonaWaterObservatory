@@ -7,7 +7,29 @@ version = "0.1.0"
 description = "A datahub for water data in Arizona"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "opentelemetry-instrumentation-aiohttp-client>=0.56b0",
+    "opentelemetry-exporter-otlp>=1.35.0",
+    "orjson>=3.11.0",
+    "covjson-pydantic>=0.7.0",
+    "geojson-pydantic>=2.0.0",
+    "redis>=6.2.0",
+    "usace",
+    "com",
+    "rise",
+    "snotel",
+    "awdb_com",
+    "awdb_forecasts",
+    "noaa_rfc",
+    "aiohttp>=3.12.12",
+    "xarray>=2025.4.0",
+    "zarr>=2.18.7",
+    "netcdf4>=1.7.2",
+    "s3fs>=2025.9.0",
+    "nationalwatermodel",
+    "config-store",
+    "rioxarray>=0.19.0",
+]
 
 [dependency-groups]
 dev = [
@@ -16,10 +38,28 @@ dev = [
     "pytest-xdist>=3.7.0",
     "radon>=6.0.1",
 ]
-
+server = [
+    "gunicorn>=23.0.0",
+    "pygeoapi",
+    "starlette>=0.47.0",
+    "uvicorn>=0.34.3",
+]
 
 [tool.uv.workspace]
 members = ["packages/*"]
+
+[tool.uv.sources]
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="6239cc0e82119bb0c1db22c25ed8442df8d090b4" }
+# it appears that to get the latest code you need to specify the HEAD branch of each package
+usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
+com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
+rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise" , branch="main" }
+snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/snotel" , branch="main" }
+awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , branch="main" }
+awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
+noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
+nationalwatermodel = { workspace = true }
+config-store = { workspace = true }
 
 [tool.coverage.run]
 # don't include tests 
@@ -27,6 +67,9 @@ omit = [
     "**/*_test.py",
     "test/",
 ]
+
+[tool.ruff]
+line-length = 79
 
 [tool.ruff.lint]
 select = [
@@ -57,8 +100,3 @@ force-sort-within-sections = true
 # Order imports by type, which is determined by case, in addition to alphabetically.
 # By putting this to false we can force the order to be alphabetical.
 order-by-type = false
-# in some environments isort doesn't detect
-# the docker package as a third party import
-# seems like this is since the package uses dynamic
-# import functionality; we put this here for the sake of consistency
-known-third-party = ["docker"]

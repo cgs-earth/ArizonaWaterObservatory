@@ -2,3 +2,10 @@ node_modules/
 
 __pycache__/
 *.pyc
+
+*.openapi.yml
+
+downloads/
+*.zarr/
+.tmp*/
+.DS_Store

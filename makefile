@@ -2,13 +2,16 @@ precommit:
 	pre-commit install
 	pre-commit run 
 
-server:
-	uv run pygeoapi openapi generate pygeoapi-deployment/pygeoapi.config.yml --output-file pygeoapi-deployment/local.openapi.yml
-	PYGEOAPI_CONFIG=pygeoapi-deployment/pygeoapi.config.yml PYGEOAPI_OPENAPI=pygeoapi-deployment/local.openapi.yml uv run pygeoapi serve --starlette
+check:
+	uv run ruff check && uv run pyright && cd packages/crawler && dg check defs --verbose
+
+dev:
+	uv run pygeoapi openapi generate pygeoapi.config.yml --output-file local.openapi.yml
+	PYGEOAPI_CONFIG=pygeoapi.config.yml PYGEOAPI_OPENAPI=local.openapi.yml uv run pygeoapi serve --starlette
 
 deps:
 	# Using uv, install all Python dependencies needed for local development and spin up necessary docker services
-	uv sync --all-groups --locked
+	uv sync --all-groups --all-packages
 
 test:
 	# Run pyright to validate types, then spin up pydist with xdist to run tests in parallel
@@ -26,3 +29,6 @@ clean:
 	rm -rf storage
 	rm -rf .logs_queue
 	rm -rf .venv/
+
+build:
+	docker compose build pygeoapi
