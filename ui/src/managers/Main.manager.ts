@@ -435,7 +435,7 @@ class MainManager {
 
     const layerLocations = locations.filter((location) => location.layerId === layerId);
 
-    const validIds = new Set(featureCollection.features.map((feature) => feature.id));
+    const validIds = new Set(featureCollection.features.map((feature) => String(feature.id)));
     const invalidLocations = layerLocations.filter((location) => !validIds.has(location.id));
 
     if (invalidLocations.length === 0) {
