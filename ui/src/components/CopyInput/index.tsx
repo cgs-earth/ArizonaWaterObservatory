@@ -5,7 +5,7 @@
 
 import { Box, CopyButton, Group, Text, Tooltip, UnstyledButton } from '@mantine/core';
 import Check from '@/assets/Check';
-import CopyCode from '@/assets/CopyLink';
+import CopyLink from '@/assets/CopyLink';
 import styles from '@/components/CopyInput/CopyInput.module.css';
 
 type Props = {
@@ -17,7 +17,11 @@ type Props = {
 const CopyInput: React.FC<Props> = (props) => {
   const { url, className = '', size = 'md' } = props;
   return (
-    <Box component="div" className={`${styles.input} ${styles[size]} ${className}`}>
+    <Box
+      component="div"
+      data-testid="copy-input"
+      className={`${styles.input} ${styles[size]} ${className}`}
+    >
       <Group justify="center" align="center" p={0} h="100%">
         <Text className={styles.text} title={url} size={size}>
           {url}
@@ -27,7 +31,7 @@ const CopyInput: React.FC<Props> = (props) => {
             {({ copied, copy }) => (
               <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
                 <UnstyledButton onClick={copy} className={`${styles.button} ${styles[size]}`}>
-                  {copied ? <Check /> : <CopyCode />}
+                  {copied ? <Check /> : <CopyLink />}
                 </UnstyledButton>
               </Tooltip>
             )}

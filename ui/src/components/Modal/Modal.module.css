@@ -23,5 +23,5 @@
 .modalBody {
   background: var(--mantine-color-body);
   overflow-y: auto;
-  max-height: calc(100% - 22px); /* Account for height of close button*/
+  max-height: calc(100% - 22px); /* Account for height of close button */
 }

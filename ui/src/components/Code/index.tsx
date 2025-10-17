@@ -13,10 +13,10 @@ type Props = {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 };
 
-const CopyInput: React.FC<Props> = (props) => {
+const Code: React.FC<Props> = (props) => {
   const { code, size = 'md' } = props;
   return (
-    <Box component="div" className={`${styles.input} ${styles[size]}`}>
+    <Box component="div" data-testid="code-copy" className={`${styles.input} ${styles[size]}`}>
       <Group justify="center" align="center" p={0} h="100%">
         <Box component="pre" className={styles.code} data-testid="code-block">
           {code}
@@ -37,4 +37,4 @@ const CopyInput: React.FC<Props> = (props) => {
   );
 };
 
-export default CopyInput;
+export default Code;
