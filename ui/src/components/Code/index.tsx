@@ -10,12 +10,13 @@ import styles from '@/components/Code/Code.module.css';
 
 type Props = {
   code: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 };
 
-const CopyInput: React.FC<Props> = (props) => {
-  const { code } = props;
+const Code: React.FC<Props> = (props) => {
+  const { code, size = 'md' } = props;
   return (
-    <Box component="div" className={styles.input}>
+    <Box component="div" data-testid="code-copy" className={`${styles.input} ${styles[size]}`}>
       <Group justify="center" align="center" p={0} h="100%">
         <Box component="pre" className={styles.code} data-testid="code-block">
           {code}
@@ -24,7 +25,7 @@ const CopyInput: React.FC<Props> = (props) => {
           <CopyButton value={code}>
             {({ copied, copy }) => (
               <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
-                <UnstyledButton onClick={copy} className={styles.button}>
+                <UnstyledButton onClick={copy} className={`${styles.button} ${styles[size]}`}>
                   {copied ? <Check /> : <CopyCode />}
                 </UnstyledButton>
               </Tooltip>
@@ -36,4 +37,4 @@ const CopyInput: React.FC<Props> = (props) => {
   );
 };
 
-export default CopyInput;
+export default Code;

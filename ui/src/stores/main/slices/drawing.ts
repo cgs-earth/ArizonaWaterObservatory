@@ -5,7 +5,7 @@
 
 import { Feature, MultiPolygon, Polygon } from 'geojson';
 import { StateCreator } from 'zustand';
-import { DrawMode, MainState } from '../types';
+import { DrawMode, MainState } from '@/stores/main/types';
 
 export interface DrawingSlice {
   drawMode: DrawMode | null;

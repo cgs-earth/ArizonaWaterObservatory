@@ -10,8 +10,11 @@ import { BasemapId } from '@/components/Map/types';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
+import { getSelectedColor } from '@/features/Map/utils';
 import mainManager from '@/managers/Main.init';
+import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
+import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;
@@ -31,6 +34,9 @@ type Props = {
  */
 const MainMap: React.FC<Props> = (props) => {
   const { accessToken } = props;
+
+  const locations = useMainStore((state) => state.locations);
+  const layers = useMainStore((state) => state.layers);
 
   const loadingInstances = useSessionStore((state) => state.loadingInstances);
 
@@ -97,6 +103,30 @@ const MainMap: React.FC<Props> = (props) => {
 
     map.resize();
   }, [shouldResize]);
+
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+
+    const locationsByCollection = groupLocationIdsByLayer(locations);
+    layers.forEach((layer) => {
+      const locationIds = locationsByCollection[layer.id] ?? [];
+      const { pointLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
+
+      let color;
+      if (map.getLayer(pointLayerId)) {
+        color = map.getPaintProperty(pointLayerId, 'circle-color') as string;
+        map.setPaintProperty(pointLayerId, 'circle-stroke-color', getSelectedColor(locationIds));
+      }
+      if (map.getLayer(lineLayerId)) {
+        map.setPaintProperty(lineLayerId, 'line-color', getSelectedColor(locationIds, color));
+      }
+    });
+  }, [locations]);
 
   //   TODO: uncomment when basemap selector is implemented
   //   useEffect(() => {

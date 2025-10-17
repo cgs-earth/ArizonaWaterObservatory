@@ -17,13 +17,13 @@ import { Box, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import Dataset from '@/features/Panel/Datasets/Dataset';
+import { Control } from '@/features/Panel/Datasets/Dataset/Control';
 import { Header } from '@/features/Panel/Datasets/Dataset/Header';
 import Filter from '@/features/Panel/Datasets/Filter';
 import { FilterTitle } from '@/features/Panel/Datasets/Filter/Header';
 import styles from '@/features/Panel/Panel.module.css';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
-import { Control } from './Dataset/Control';
 
 type Props = {
   layersRef: RefObject<HTMLDivElement | null>;
