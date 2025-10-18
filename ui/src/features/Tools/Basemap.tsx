@@ -53,10 +53,10 @@ export const BasemapSelector: React.FC = () => {
       }
       content={
         <Stack gap={8} className={styles.container} align="flex-start">
-          <Title order={6} mb="xs">
+          <Title order={5} size="h3">
             Basemaps
           </Title>
-          <Grid w="500" gutter="sm">
+          <Grid className={styles.basemapWrapper} gutter="sm">
             {Object.keys(basemaps)
               .filter((key) =>
                 [
@@ -76,9 +76,8 @@ export const BasemapSelector: React.FC = () => {
                       role="radio"
                       id={basemapId}
                       withBorder
-                      radius="md"
-                      w="auto"
-                      p="xs"
+                      className={styles.basemapSelector}
+                      radius={0}
                       tabIndex={0}
                       onClick={() => setBasemap(basemapId)}
                       onKeyDown={(e) => {
@@ -95,8 +94,8 @@ export const BasemapSelector: React.FC = () => {
                       <Image
                         src={`/basemaps/${basemapId}.png`}
                         alt={`Image for ${basemapId.replace(/-/g, ' ')}`}
-                        width={150}
-                        height={90}
+                        width="auto"
+                        height={55}
                         fit="contain"
                         radius="sm"
                       />
@@ -104,6 +103,7 @@ export const BasemapSelector: React.FC = () => {
                         component="label"
                         htmlFor={basemapId}
                         mt="xs"
+                        mb={0}
                         size="sm"
                         className={styles.capitalize}
                       >
