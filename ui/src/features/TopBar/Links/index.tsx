@@ -4,7 +4,7 @@
  */
 
 import { useEffect } from 'react';
-import { Stack, Text, Tooltip } from '@mantine/core';
+import { Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
@@ -56,6 +56,9 @@ const Links: React.FC = () => {
       </Tooltip>
       <Modal size="auto" opened={opened} onClose={close}>
         <Stack gap={0} className={styles.modalBody}>
+          <Title order={5} size="h3">
+            API Links
+          </Title>
           <>
             {layers.map((layer) => (
               <Layer layer={layer} />

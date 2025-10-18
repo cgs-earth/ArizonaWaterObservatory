@@ -10,3 +10,17 @@
 .drawButton {
   width: 95px;
 }
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.basemapWrapper {
+  width: 300px;
+  --grid-gutter: calc(var(--default-spacing) * 2);
+}
+
+.basemapSelector {
+  cursor: pointer;
+  padding: var(--default-spacing);
+}

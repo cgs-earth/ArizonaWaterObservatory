@@ -28,6 +28,11 @@ export const LocationBlock: React.FC<Props> = (props) => {
   const [chunkedLocations, setChunkedLocations] = useState<(LocationType | Feature)[][]>([]);
   const [currentChunk, setCurrentChunk] = useState<(LocationType | Feature)[]>([]);
 
+  const handlePageSizeChange = (pageSize: number) => {
+    setPageSize(pageSize);
+    setPage(1);
+  };
+
   useEffect(() => {
     const chunkedLocations = chunk(locations, pageSize);
     setChunkedLocations(chunkedLocations);
@@ -59,7 +64,7 @@ export const LocationBlock: React.FC<Props> = (props) => {
           size="xs"
           label="Locations per page"
           value={pageSize}
-          onChange={(value) => setPageSize(Number(value))}
+          onChange={(value) => handlePageSizeChange(Number(value))}
           min={1}
           max={locations.length}
         />

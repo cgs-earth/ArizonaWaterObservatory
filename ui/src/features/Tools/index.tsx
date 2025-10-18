@@ -4,11 +4,13 @@
  */
 
 import { Group } from '@mantine/core';
+import BasemapSelector from '@/features/Tools/Basemap';
 import { Draw } from '@/features/Tools/Draw';
 
 const Tools: React.FC = () => {
   return (
     <Group>
+      <BasemapSelector />
       <Draw />
     </Group>
   );

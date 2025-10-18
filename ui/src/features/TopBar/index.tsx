@@ -5,9 +5,9 @@
 
 import { Group } from '@mantine/core';
 import Tools from '@/features/Tools';
+import Links from '@/features/TopBar/Links';
+import Share from '@/features/TopBar/Share';
 import styles from '@/features/TopBar/TopBar.module.css';
-import Links from './Links';
-import Share from './Share';
 
 const TopBar: React.FC = () => {
   return (

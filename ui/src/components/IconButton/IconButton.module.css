@@ -5,7 +5,8 @@
 
 .icon {
   stroke: inherit;
-  padding: 0.25em;
+  fill: inherit;
+  padding: 0.3em;
 }
 
 .root {
@@ -15,26 +16,32 @@
 
 .primary {
   stroke: #000;
+  fill: #000;
   background-color: var(--asu-color-primary);
 }
 
 .secondary {
   stroke: #fff;
+  fill: #fff;
+
   background-color: var(--asu-color-secondary);
 }
 
 .tertiary {
   stroke: #000;
+  fill: #000;
   background-color: var(--asu-color-tertiary);
 }
 
 .selected {
-  stroke: #000;
+  stroke: #fff;
+  fill: #fff;
   background-color: var(--asu-color-selected);
 }
 
 .unstyled {
   stroke: var(--mantine-color-text);
+  fill: var(--mantine-color-text);
   background-color: var(--mantine-color-body);
 }
 

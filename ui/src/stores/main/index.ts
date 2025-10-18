@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { BasemapId } from '@/components/Map/types';
 import { createCollectionSlice } from '@/stores/main/slices/collections';
 import { createDrawingSlice } from '@/stores/main/slices/drawing';
 import { createLayerSlice } from '@/stores/main/slices/layers';
@@ -21,6 +22,9 @@ const useMainStore = create<MainState>()(
     setCategory: (category) => set({ category, configGenerated: false }),
     collection: null,
     setCollection: (collection) => set({ collection }),
+    basemap: BasemapId.Streets,
+    setBasemap: (basemap) => set({ basemap }),
+
     charts: [],
     setCharts: (charts: MainState['charts']) => set({ charts }),
     geographyFilter: null,
