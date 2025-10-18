@@ -29,6 +29,7 @@ export enum Overlay {
   Share = 'share',
   Draw = 'draw',
   Basemap = 'basemap',
+  Legend = 'legend',
 }
 
 export type Notification = {
@@ -45,6 +46,7 @@ export type Loading = {
 };
 
 export type LegendEntry = {
+  layerId: string;
   collectionId: string;
   color: string;
   visible: boolean;

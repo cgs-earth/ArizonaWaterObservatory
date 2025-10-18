@@ -303,6 +303,10 @@ class MainManager {
       .originalCollections.find((datasource) => datasource.id === datasourceId);
   };
 
+  public getLayer = (layerId: Layer['id']): Layer | undefined => {
+    return this.store.getState().layers.find((layer) => layer.id === layerId);
+  };
+
   public async createLayer(datasourceId: ICollection['id'], signal?: AbortSignal) {
     const datasource = this.getDatasource(datasourceId);
 
