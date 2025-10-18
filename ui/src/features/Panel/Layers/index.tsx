@@ -48,8 +48,6 @@ const Layers: React.FC<Props> = (props) => {
     [layers]
   );
 
-  console.log('here', layers);
-
   useEffect(() => {
     const datasetOffset = datasetsOpen ? 605 : 215;
     const loadingBarOffset = loadingInstances.length > 0 ? 12 : 0;
