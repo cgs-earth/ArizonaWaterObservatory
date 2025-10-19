@@ -45,8 +45,8 @@
   background-color: var(--mantine-color-body);
 }
 
-.root:hover,
-.root:focus {
+.root:hover:not(:disabled):not([data-disabled='true']),
+.root:focus:not(:disabled):not([data-disabled='true']) {
   transform: scale(1.1);
 }
 
@@ -78,4 +78,12 @@
 .selected:active,
 .selected:focus {
   background-color: var(--asu-color-selected);
+}
+
+.root:disabled,
+.root[data-disabled='true'] {
+  opacity: 0.5;
+  stroke: #000;
+  fill: #000;
+  background-color: var(--asu-color-tertiary);
 }
