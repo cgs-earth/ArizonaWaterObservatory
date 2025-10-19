@@ -153,7 +153,7 @@ export const Draw: React.FC = () => {
           closeOnClickOutside={false}
           target={
             <Tooltip
-              label="Measure distances and filter by drawn or existing geometries"
+              label="Measure distances and filter by drawn or existing geometries."
               disabled={show}
             >
               <IconButton

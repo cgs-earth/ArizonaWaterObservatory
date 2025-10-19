@@ -183,7 +183,7 @@ export const Layer: React.FC<Props> = (props) => {
                           id: `links-${layer.id}-other-accordion`,
                           title: (
                             <Title order={6} size="h4">
-                              {selectedLocations.length > 0 && 'Unselected '}Locations
+                              {selectedLocations.length > 0 && 'Other '}Locations
                             </Title>
                           ),
                           content: (

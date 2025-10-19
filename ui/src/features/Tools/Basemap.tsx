@@ -40,9 +40,8 @@ export const BasemapSelector: React.FC = () => {
       offset={16}
       opened={show}
       onChange={setShow}
-      closeOnClickOutside={false}
       target={
-        <Tooltip label="Change map styling" disabled={show}>
+        <Tooltip label="Change map styling." disabled={show}>
           <IconButton
             variant={show ? Variant.Selected : Variant.Secondary}
             onClick={() => handleShow(!show)}

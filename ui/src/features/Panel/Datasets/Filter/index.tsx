@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Divider, Stack, Text } from '@mantine/core';
+import { Divider, Stack, Text, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import { Variant } from '@/components/types';
 import styles from '@/features/Panel/Panel.module.css';
@@ -37,9 +37,11 @@ const Filter: React.FC = () => {
           <Text>{collection}</Text>
         </>
       )}
-      <Button size="xs" variant={Variant.Tertiary}>
-        Configure
-      </Button>
+      <Tooltip label="Feature in development">
+        <Button data-disabled disabled size="xs" variant={Variant.Tertiary}>
+          Configure
+        </Button>
+      </Tooltip>
     </Stack>
   );
 };

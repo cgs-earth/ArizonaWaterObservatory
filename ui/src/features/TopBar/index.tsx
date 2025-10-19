@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Group } from '@mantine/core';
+import { Group, Tooltip } from '@mantine/core';
+import Button from '@/components/Button';
+import { Variant } from '@/components/types';
 import Tools from '@/features/Tools';
 import Links from '@/features/TopBar/Links';
 import Share from '@/features/TopBar/Share';
@@ -15,6 +17,11 @@ const TopBar: React.FC = () => {
       <Group>
         <Share />
         <Links />
+        <Tooltip label="Feature in development">
+          <Button disabled data-disabled size="sm" w="fit-content" variant={Variant.Primary}>
+            Download
+          </Button>
+        </Tooltip>
       </Group>
       <Tools />
     </Group>
