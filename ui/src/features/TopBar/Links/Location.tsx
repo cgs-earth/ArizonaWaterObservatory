@@ -31,8 +31,8 @@ export const Location: React.FC<Props> = (props) => {
       collection.id,
       String(location.id),
       layer.parameters,
-      layer.from,
-      layer.to,
+      layer.from ?? '2025-10-12', // TODO: remove hardcoded dates
+      layer.to ?? '2025-10-20',
       false,
       true
     );
@@ -41,8 +41,8 @@ export const Location: React.FC<Props> = (props) => {
       collection.id,
       String(location.id),
       layer.parameters,
-      layer.from,
-      layer.to,
+      layer.from ?? '2025-10-12',
+      layer.to ?? '2025-10-20',
       false,
       false
     );
