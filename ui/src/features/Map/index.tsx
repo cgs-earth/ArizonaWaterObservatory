@@ -128,7 +128,6 @@ const MainMap: React.FC<Props> = (props) => {
     });
   }, [locations]);
 
-  //   TODO: uncomment when basemap selector is implemented
   useEffect(() => {
     if (!map) {
       return;

@@ -4,7 +4,7 @@
  */
 
 import { RefObject, useEffect, useMemo, useState } from 'react';
-import { Box, Title } from '@mantine/core';
+import { Box, Text, Title, Tooltip } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import Layer from '@/features/Panel/Layers/Layer';
@@ -55,6 +55,18 @@ const Layers: React.FC<Props> = (props) => {
     setMaxHeight(datasetOffset + loadingBarOffset);
   }, [datasetsOpen, loadingInstances]);
 
+  const helpText = (
+    <>
+      <Text size="sm">Layers are customizable instances of a dataset.</Text>
+      <br />
+      <Text size="sm">
+        Add one or more instances of a dataset using the controls above, then <br />
+        customize it here. Filter locations by parameter, relabel/recolor the layer,
+        <br /> and set a default date range for data exports.
+      </Text>
+    </>
+  );
+
   return (
     <Accordion
       id="layers-wrapper"
@@ -66,9 +78,11 @@ const Layers: React.FC<Props> = (props) => {
           id: 'layers-accordion',
           ref: layersRef,
           title: (
-            <Title order={2} size="h3">
-              Layers
-            </Title>
+            <Tooltip label={helpText} openDelay={500}>
+              <Title order={2} size="h3">
+                Layers
+              </Title>
+            </Tooltip>
           ),
           content: (
             <Box mah={`calc(100vh - ${maxHeight}px)`} className={styles.accordionBody}>

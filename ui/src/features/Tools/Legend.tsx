@@ -137,10 +137,9 @@ export const Legend: React.FC = () => {
       offset={16}
       opened={show}
       onChange={setShow}
-      closeOnClickOutside={false}
       target={
         <Tooltip
-          label={legendEntries.length > 0 ? 'View map legend' : 'No layers added to legend'}
+          label={legendEntries.length > 0 ? 'View map legend.' : 'No layers added to legend.'}
           disabled={show}
         >
           <IconButton

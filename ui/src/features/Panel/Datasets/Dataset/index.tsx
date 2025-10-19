@@ -54,13 +54,24 @@ const Dataset: React.FC<Props> = (props) => {
   const showMore = filteredParameters.length > show;
   const showLess = show > 5;
 
+  const description = (
+    <>
+      <Text size="xs">
+        Browse parameters contained within this dataset. These are scientific measurements that can
+        be queried for after creating an instance of this dataset.
+      </Text>
+    </>
+  );
+
   return (
     <Stack gap="xs" className={styles.accordionContent}>
       <Text size="sm">{dataset.description}</Text>
       <TextInput
         size="sm"
         label="Explore"
-        placeholder="Browse available parameters"
+        description={description}
+        // description=""
+        placeholder="Parameters"
         value={search}
         onChange={(event) => setSearch(event.currentTarget.value)}
         __clearable
@@ -72,7 +83,7 @@ const Dataset: React.FC<Props> = (props) => {
       />
       <Divider />
       <Stack gap={0}>
-        <Text size="lg" fw={500}>
+        <Text size="md" fw={500}>
           Available Parameters:
         </Text>
         {filteredParameters.length === 0 ? (
