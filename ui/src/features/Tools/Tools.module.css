@@ -10,3 +10,30 @@
 .drawButton {
   width: 95px;
 }
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.basemapWrapper {
+  width: 300px;
+  --grid-gutter: calc(var(--default-spacing) * 2);
+}
+
+.legendWrapper {
+  width: 325px;
+}
+
+.colorPicker {
+  width: 135px;
+}
+
+.basemapSelector {
+  cursor: pointer;
+  padding: var(--default-spacing);
+}
+
+.legendContrast {
+  padding: 4px;
+  background: var(--mantine-color-gray-4);
+}

@@ -26,6 +26,23 @@
   height: auto;
 }
 
+.link {
+  display: block;
+  width: fit-content;
+}
+
+.noParameterMessage {
+  padding: var(--default-spacing);
+}
+
+.locationBlockWrapper {
+  padding: var(--default-spacing);
+}
+
+.locationWrapper {
+  padding: var(--default-spacing);
+}
+
 .copyInputWrapper {
   width: 100%;
   min-height: 60px;

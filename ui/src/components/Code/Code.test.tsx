@@ -42,4 +42,10 @@ describe('Code', () => {
       expect(screen.getByTestId('check')).toBeInTheDocument();
     });
   });
+
+  it('applies correct size class', () => {
+    render(<Code code={sampleCode} size="lg" />);
+    const wrapper = screen.getByTestId('code-copy');
+    expect(wrapper?.className).toMatch(/lg/);
+  });
 });

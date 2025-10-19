@@ -4,14 +4,14 @@
  */
 
 import { FeatureCollection, Polygon } from 'geojson';
-import { Properties } from '@/components/Map/types';
+import { BasemapId, Properties } from '@/components/Map/types';
 import { ICollection } from '@/services/edr.service';
 import { CollectionSlice } from '@/stores/main/slices/collections';
+import { DrawingSlice } from '@/stores/main/slices/drawing';
 import { LayerSlice } from '@/stores/main/slices/layers';
 import { LocationSlice } from '@/stores/main/slices/locations';
+import { ShareSlice } from '@/stores/main/slices/share';
 import { SpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
-import { DrawingSlice } from './slices/drawing';
-import { ShareSlice } from './slices/share';
 
 export type ColorValueHex = `#${string}`;
 
@@ -92,7 +92,7 @@ export type Chart = {
 };
 
 export type Location = {
-  id: string | number; // location/{this}
+  id: string; // location/{this}
   layerId: Layer['id'];
 };
 
@@ -117,6 +117,8 @@ export type MainState = {
   geographyFilter: any | null;
   setGeographyFilter: (geographyFilter: MainState['geographyFilter']) => void;
   hasGeographyFilter: () => boolean;
+  basemap: BasemapId;
+  setBasemap: (collection: MainState['basemap']) => void;
 
   charts: Chart[];
   setCharts: (charts: MainState['charts']) => void;

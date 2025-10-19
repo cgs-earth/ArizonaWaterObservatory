@@ -6,12 +6,14 @@
 import { useEffect, useRef, useState } from 'react';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
-import { BasemapId } from '@/components/Map/types';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
+import { getSelectedColor } from '@/features/Map/utils';
 import mainManager from '@/managers/Main.init';
+import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
+import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;
@@ -31,6 +33,10 @@ type Props = {
  */
 const MainMap: React.FC<Props> = (props) => {
   const { accessToken } = props;
+
+  const locations = useMainStore((state) => state.locations);
+  const layers = useMainStore((state) => state.layers);
+  const basemap = useMainStore((state) => state.basemap);
 
   const loadingInstances = useSessionStore((state) => state.loadingInstances);
 
@@ -98,39 +104,63 @@ const MainMap: React.FC<Props> = (props) => {
     map.resize();
   }, [shouldResize]);
 
-  //   TODO: uncomment when basemap selector is implemented
-  //   useEffect(() => {
-  //     if (!map) {
-  //       return;
-  //     }
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
 
-  //     // Copy over all existing layers and sources when changing basemaps
-  //     const layers = map.getStyle().layers || [];
-  //     const sources = map.getStyle().sources || {};
+    const locationsByCollection = groupLocationIdsByLayer(locations);
+    layers.forEach((layer) => {
+      const locationIds = locationsByCollection[layer.id] ?? [];
+      const { pointLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
 
-  //     const customLayers = layers.filter((layer) => {
-  //       return !layer.id.startsWith('mapbox');
-  //     });
+      let color;
+      if (map.getLayer(pointLayerId)) {
+        color = map.getPaintProperty(pointLayerId, 'circle-color') as string;
+        map.setPaintProperty(pointLayerId, 'circle-stroke-color', getSelectedColor(locationIds));
+      }
+      if (map.getLayer(lineLayerId)) {
+        map.setPaintProperty(lineLayerId, 'line-color', getSelectedColor(locationIds, color));
+      }
+    });
+  }, [locations]);
 
-  //     const customSources = Object.entries(sources).filter(([id]) => {
-  //       return !id.startsWith('mapbox');
-  //     });
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
 
-  //     map.once('styledata', () => {
-  //       for (const [id, source] of customSources) {
-  //         if (!map.getSource(id)) {
-  //           map.addSource(id, source);
-  //         }
-  //       }
+    // Copy over all existing layers and sources when changing basemaps
+    const layers = map.getStyle().layers || [];
+    const sources = map.getStyle().sources || {};
 
-  //       for (const layer of customLayers) {
-  //         if (!map.getLayer(layer.id)) {
-  //           map.addLayer(layer);
-  //         }
-  //       }
-  //     });
-  //     map.setStyle(basemaps[basemap]);
-  //   }, [basemap]);
+    const customLayers = layers.filter((layer) => {
+      return layer.id.startsWith('user-');
+    });
+
+    const customSources = Object.entries(sources).filter(([id]) => {
+      return id.startsWith('user-');
+    });
+
+    map.once('styledata', () => {
+      for (const [id, source] of customSources) {
+        if (!map.getSource(id)) {
+          map.addSource(id, source);
+        }
+      }
+
+      for (const layer of customLayers) {
+        if (!map.getLayer(layer.id)) {
+          map.addLayer(layer);
+        }
+      }
+    });
+
+    map.setStyle(basemaps[basemap]);
+  }, [basemap]);
 
   return (
     <>
@@ -140,7 +170,7 @@ const MainMap: React.FC<Props> = (props) => {
         sources={sourceConfigs}
         layers={layerDefinitions}
         options={{
-          style: basemaps[BasemapId.Streets],
+          style: basemaps[basemap],
           projection: 'mercator',
           center: INITIAL_CENTER,
           zoom: INITIAL_ZOOM,

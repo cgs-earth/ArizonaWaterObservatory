@@ -4,8 +4,8 @@
  */
 
 import { LoadingSlice } from '@/stores/session/slices/loading';
+import { MeasureSlice } from '@/stores/session/slices/measure';
 import { NotificationsSlice } from '@/stores/session/slices/notifications';
-import { MeasureSlice } from './slices/measure';
 
 export enum NotificationType {
   Success = 'success',
@@ -28,6 +28,8 @@ export enum Tool {
 export enum Overlay {
   Share = 'share',
   Draw = 'draw',
+  Basemap = 'basemap',
+  Legend = 'legend',
 }
 
 export type Notification = {
@@ -44,6 +46,7 @@ export type Loading = {
 };
 
 export type LegendEntry = {
+  layerId: string;
   collectionId: string;
   color: string;
   visible: boolean;

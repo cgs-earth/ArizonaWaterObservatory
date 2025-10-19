@@ -105,9 +105,16 @@ const Share: React.FC = () => {
 
   return (
     <>
-      <Button size="sm" variant={opened ? Variant.Selected : Variant.Primary} onClick={open}>
-        Share
-      </Button>
+      <Tooltip className={styles.toolTip} multiline label={helpText}>
+        <Button
+          size="sm"
+          w="fit-content"
+          variant={opened ? Variant.Selected : Variant.Primary}
+          onClick={open}
+        >
+          Share
+        </Button>
+      </Tooltip>
       <Modal opened={opened} onClose={handleClose}>
         <Stack className={styles.modalBody} align="center">
           <Tooltip className={styles.toolTip} multiline label={helpText}>

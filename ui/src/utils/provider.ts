@@ -10,6 +10,12 @@ export const getProvider = (collectionId: ICollection['id']): string => {
   switch (collectionId) {
     case CollectionId.RISEEdr:
       return 'USBR';
+    case CollectionId.SNOTELEdr:
+      return 'USDA';
+    case CollectionId.Streamgages:
+      return 'USGS';
+    case CollectionId.USACEEdr:
+      return 'USACE';
     default:
       return '';
   }

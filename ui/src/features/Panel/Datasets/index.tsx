@@ -13,17 +13,17 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { Box, Title } from '@mantine/core';
+import { Box, Text, Title, Tooltip, VisuallyHidden } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import Dataset from '@/features/Panel/Datasets/Dataset';
+import { Control } from '@/features/Panel/Datasets/Dataset/Control';
 import { Header } from '@/features/Panel/Datasets/Dataset/Header';
 import Filter from '@/features/Panel/Datasets/Filter';
 import { FilterTitle } from '@/features/Panel/Datasets/Filter/Header';
 import styles from '@/features/Panel/Panel.module.css';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
-import { Control } from './Dataset/Control';
 
 type Props = {
   layersRef: RefObject<HTMLDivElement | null>;
@@ -101,6 +101,17 @@ const Datasets: React.FC<Props> = (props) => {
     setValue(value);
   };
 
+  const datasetHelpText = (
+    <>
+      <Text size="sm">Datasets are collections of scientific measurements.</Text>
+      <br />
+      <Text size="sm">
+        Click the "+" button to create a layer from a dataset and start interacting <br /> with the
+        data on the map or in application tools.
+      </Text>
+    </>
+  );
+
   return (
     <Accordion
       id="datasets-wrapper"
@@ -112,9 +123,14 @@ const Datasets: React.FC<Props> = (props) => {
           id: 'datasets-accordion',
 
           title: (
-            <Title order={2} size="h3">
-              Datasets
-            </Title>
+            <>
+              <Tooltip label={datasetHelpText} openDelay={500}>
+                <Title order={2} size="h3">
+                  Datasets
+                </Title>
+              </Tooltip>
+              <VisuallyHidden>{datasetHelpText}</VisuallyHidden>
+            </>
           ),
           content: (
             <Box

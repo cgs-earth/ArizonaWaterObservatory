@@ -10,6 +10,31 @@
   border: calc(0.0625rem * var(--mantine-scale)) solid var(--input-border);
 }
 
+.xs {
+  height: 1.875rem;
+  /* font-size: 0.75rem; */
+}
+
+.sm {
+  height: 2.25rem;
+  /* font-size: 0.875rem; */
+}
+
+.md {
+  height: 2.625rem;
+  /* font-size: 1rem; */
+}
+
+.lg {
+  height: 3rem;
+  /* font-size: 1.125rem; */
+}
+
+.xl {
+  height: 3.375rem;
+  /* font-size: 1.25rem; */
+}
+
 .text {
   max-width: 80%;
   flex-shrink: 1;
@@ -25,10 +50,33 @@
 }
 
 .button svg {
-  width: 32px;
-  height: 32px;
   padding-top: 3px;
   margin: 1px;
+}
+
+.button.xs svg {
+  width: 24px;
+  height: 24px;
+}
+
+.button.sm svg {
+  width: 28px;
+  height: 28px;
+}
+
+.button.md svg {
+  width: 32px;
+  height: 32px;
+}
+
+.button.lg svg {
+  width: 36px;
+  height: 36px;
+}
+
+.button.xl svg {
+  width: 40;
+  height: 40;
 }
 
 [data-mantine-color-scheme='dark'] .button svg[data-identifier='link-copy-svg'] {

@@ -5,4 +5,7 @@
 
 export enum CollectionId {
   RISEEdr = 'rise-edr',
+  SNOTELEdr = 'snotel-edr',
+  USACEEdr = 'usace-edr',
+  Streamgages = 'usgs-sta',
 }

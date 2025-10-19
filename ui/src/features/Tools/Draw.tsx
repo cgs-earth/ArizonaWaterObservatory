@@ -153,7 +153,7 @@ export const Draw: React.FC = () => {
           closeOnClickOutside={false}
           target={
             <Tooltip
-              label="Measure distances and filter by drawn or existing geometries"
+              label="Measure distances and filter by drawn or existing geometries."
               disabled={show}
             >
               <IconButton
@@ -166,7 +166,9 @@ export const Draw: React.FC = () => {
           }
           content={
             <Stack gap={8} className={styles.container} align="flex-start">
-              <Title order={4}>Draw Tools</Title>
+              <Title order={5} size="h3">
+                Draw Tools
+              </Title>
               <Group>
                 <Button
                   size="sm"

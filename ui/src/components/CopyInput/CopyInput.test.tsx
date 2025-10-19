@@ -35,4 +35,10 @@ describe('CopyInput', () => {
       expect(screen.getByTestId('check')).toBeInTheDocument();
     });
   });
+
+  it('applies correct size class', () => {
+    render(<CopyInput url={testUrl} size="lg" />);
+    const wrapper = screen.getByTestId('copy-input');
+    expect(wrapper?.className).toMatch(/lg/);
+  });
 });

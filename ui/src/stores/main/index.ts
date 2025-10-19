@@ -5,13 +5,14 @@
 
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { BasemapId } from '@/components/Map/types';
 import { createCollectionSlice } from '@/stores/main/slices/collections';
+import { createDrawingSlice } from '@/stores/main/slices/drawing';
 import { createLayerSlice } from '@/stores/main/slices/layers';
 import { createLocationSlice } from '@/stores/main/slices/locations';
+import { createShareSlice } from '@/stores/main/slices/share';
 import { createSpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
 import { MainState } from '@/stores/main/types';
-import { createDrawingSlice } from './slices/drawing';
-import { createShareSlice } from './slices/share';
 
 const useMainStore = create<MainState>()(
   immer((set, get, store) => ({
@@ -21,6 +22,9 @@ const useMainStore = create<MainState>()(
     setCategory: (category) => set({ category, configGenerated: false }),
     collection: null,
     setCollection: (collection) => set({ collection }),
+    basemap: BasemapId.Streets,
+    setBasemap: (basemap) => set({ basemap }),
+
     charts: [],
     setCharts: (charts: MainState['charts']) => set({ charts }),
     geographyFilter: null,

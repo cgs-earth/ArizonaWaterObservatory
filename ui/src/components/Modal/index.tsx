@@ -4,21 +4,21 @@
  */
 
 import { PropsWithChildren } from 'react';
-import { Box, ModalContent, ModalOverlay, ModalRoot } from '@mantine/core';
+import { Box, ModalContent, ModalOverlay, ModalProps, ModalRoot } from '@mantine/core';
 import X from '@/assets/X';
 import IconButton from '@/components/IconButton';
 import { ExtendedVariant } from '@/components/IconButton/IconButton.types';
 import styles from '@/components/Modal/Modal.module.css';
 
-type Props = {
+type Props = ModalProps & {
   opened: boolean;
   onClose: () => void;
 };
 
 const Modal: React.FC<PropsWithChildren<Props>> = (props) => {
-  const { opened, onClose } = props;
+  const { opened, onClose, ...modalProps } = props;
   return (
-    <ModalRoot opened={opened} onClose={onClose}>
+    <ModalRoot opened={opened} onClose={onClose} {...modalProps}>
       <ModalOverlay />
       <ModalContent classNames={{ content: styles.content }}>
         <IconButton
