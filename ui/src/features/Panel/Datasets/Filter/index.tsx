@@ -9,10 +9,10 @@ import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import { Variant } from '@/components/types';
 import styles from '@/features/Panel/Datasets/Filter/Filter.module.css';
+import Modal from '@/features/Panel/Datasets/Filter/Modal';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
-import Modal from './Modal';
 
 const Filter: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {

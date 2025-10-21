@@ -10,8 +10,8 @@ import ModalComponent from '@/components/Modal';
 import { Variant } from '@/components/types';
 import styles from '@/features/Panel/Datasets/Filter/Filter.module.css';
 import { Category } from '@/features/Panel/Datasets/Filter/Modal/Category';
+import { Provider } from '@/features/Panel/Datasets/Filter/Modal/Provider';
 import useMainStore from '@/stores/main';
-import { Provider } from './Provider';
 
 type Props = {
   open: boolean;
