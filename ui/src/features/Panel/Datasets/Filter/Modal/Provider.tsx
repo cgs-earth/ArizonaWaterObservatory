@@ -22,7 +22,7 @@ export const Provider: React.FC<Props> = (props) => {
         Select a data provider to explore the categories and datasets they've published.
       </Text>
       <br />
-      <Text size="sm">This filters results based on the source of the data.</Text>
+      <Text size="sm">This filters datasets based on the source of the data.</Text>
     </>
   );
 
@@ -30,6 +30,7 @@ export const Provider: React.FC<Props> = (props) => {
     <Stack gap={0}>
       <Select
         size="sm"
+        className={styles.filterSelect}
         label={
           <>
             <Tooltip multiline label={helpText}>

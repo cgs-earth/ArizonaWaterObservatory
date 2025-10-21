@@ -116,7 +116,7 @@ export const Category: React.FC<Props> = (props) => {
         or theme (e.g., reservoir storage, atmospheric measurements, water constituents).
       </Text>
       <br />
-      <Text size="sm">This helps you focus on datsets relevant to a domain of interest.</Text>
+      <Text size="sm">This helps you focus on datasets relevant to a domain of interest.</Text>
     </>
   );
 
@@ -124,6 +124,7 @@ export const Category: React.FC<Props> = (props) => {
     <Stack gap={0}>
       <Select
         size="sm"
+        className={styles.filterSelect}
         label={
           <>
             <Tooltip multiline label={helpText}>

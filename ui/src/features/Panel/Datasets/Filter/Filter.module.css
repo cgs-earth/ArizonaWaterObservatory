@@ -23,3 +23,8 @@
   margin: 0 auto;
   margin-top: calc(var(--default-spacing) * 3);
 }
+
+.filterSelect {
+  width: 265px;
+  min-width: 265px;
+}
