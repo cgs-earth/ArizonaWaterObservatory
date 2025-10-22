@@ -64,8 +64,10 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             else None,
         )
 
-        if "storage_crs" not in provider_def:
-            self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
+        if "crs" not in provider_def:
+            self.crs = get_crs_from_dataset(self.zarr_dataset)
+        else:
+            self.crs = pyproj.CRS.from_epsg(provider_def["crs"].split("/")[-1])
 
     def get_fields(self) -> EDRFieldsMapping:
         """Get the list of all parameters (i.e. fields) that the user can filter by"""
@@ -133,7 +135,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         projected_dataset = project_dataset(
             loaded_data,
-            self.storage_crs,
+            self.crs,
             pyproj.CRS.from_epsg(4326),
             self.x_field,
             self.y_field,
@@ -177,7 +179,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         if not bbox:
             raise ValueError("bbox is required to prevent overfetching")
 
-        bbox = transform_bbox(bbox, DEFAULT_CRS, self.storage_crs)
+        assert self.crs
+        bbox = transform_bbox(bbox, DEFAULT_CRS, self.crs)
 
         if z:
             raise NotImplementedError("Elevation filtering not implemented")
@@ -196,7 +199,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         projected_dataset = project_dataset(
             loaded_data,
-            self.storage_crs,
+            self.crs,
             pyproj.CRS.from_epsg(4326),
             self.x_field,
             self.y_field,

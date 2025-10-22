@@ -5,7 +5,12 @@ __pycache__/
 
 *.openapi.yml
 
+.tmp_dagster*
 downloads/
 *.zarr/
 .tmp*/
 .DS_Store
+
+.env
+
+GWSI_ZIP_20250714/
