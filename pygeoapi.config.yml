@@ -151,6 +151,7 @@ resources:
         y_field: DD_LONG
         time_field: WATQ_DATE_MEASURED
         id_field: WATQ_SITE_WELL_SITE_ID
+        crs: http://www.opengis.net/def/crs/EPSG/0/26912
       - type: feature
         name: NationalWaterModel.FeatureProvider
         data: http://localhost:9000 
@@ -159,6 +160,8 @@ resources:
         y_field: DD_LONG
         time_field: WATQ_DATE_MEASURED
         id_field: WATQ_SITE_WELL_SITE_ID
+        crs: http://www.opengis.net/def/crs/EPSG/0/26912
+
 
   # National_Water_Model_Groundwater_Output:
   #   type: collection

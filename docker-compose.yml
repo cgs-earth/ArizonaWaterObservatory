@@ -49,6 +49,20 @@ services:
       - LOG_LEVEL=debug
     restart: on-failure
 
+
+  minio:  
+    # make the bucket public for usage 
+    # mc config host add local http://127.0.0.1:9000 minioadmin minioadmin && mc mc local/iow && mc anonymous set download local/iow    container_name: awo_minio_data
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - awo_minio_data:/data
+    profiles:
+      - dev
+
   dashboard-ui:
     build:
       context: dashboard-ui
@@ -60,3 +74,4 @@ services:
 
 volumes:
   redis_data:
+  awo_minio_data:

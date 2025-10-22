@@ -45,8 +45,10 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             if "remote_dataset" in provider_def
             else None,
         )
-        if "storage_crs" not in provider_def:
-            self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
+        if "crs" not in provider_def:
+            self.crs = get_crs_from_dataset(self.zarr_dataset)
+        else:
+            self.crs = pyproj.CRS.from_epsg(provider_def["crs"].split("/")[-1])
 
         if not self.id_field:
             raise ValueError("id_field is required")
@@ -93,7 +95,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
 
         result = project_dataset(
             result,
-            self.storage_crs,
+            self.crs,
             pyproj.CRS.from_epsg(4326),
             self.x_field,
             self.y_field,
@@ -105,7 +107,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         y_values = result[self.y_field].values
 
         for i, id in enumerate(
-            result["feature_id"].values if not itemId else [itemId]
+            result[self.id_field].values if not itemId else [itemId]
         ):
             other_properties = {}
             if result.coords:
@@ -116,8 +118,8 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
                     if (
                         prop == self.x_field
                         or prop == self.y_field
-                        or prop == "feature_id"
-                        or prop == "time"
+                        or prop == self.id_field
+                        or prop == self.time_field
                     ):
                         continue
 

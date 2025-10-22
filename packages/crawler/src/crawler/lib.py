@@ -46,15 +46,11 @@ def xlsx_to_xarray(xlsx_file: Path) -> xr.Dataset:
 
     # Determine the primary (non-datetime) and secondary (datetime) index columns
     primary_col = df.columns[0]  # first column in Excel
-    secondary_col = datetime_cols[0] if datetime_cols else None
+    # secondary_col = datetime_cols[0] if datetime_cols else None
 
-    # Set the index
-    if secondary_col:
-        df = df.set_index([primary_col, secondary_col])
-    else:
-        df = df.set_index(primary_col)
+    df = df.reset_index()
 
-    # Convert to xarray.Dataset
+    df = df.set_index(primary_col)
     ds = xr.Dataset.from_dataframe(df)
 
     return ds
@@ -118,7 +114,7 @@ def add_shapefile_info_to_dataset(
         gdf["geometry_x"] = gdf.geometry.x
         gdf["geometry_y"] = gdf.geometry.y
 
-    firstColumnName = list(dataset.variables.keys())[0]
+    firstColumnName = list(dataset.dims)[0]
     ids = dataset[firstColumnName].astype(str).values
     idToJoinAgainst = firstColumnName
 
@@ -127,7 +123,11 @@ def add_shapefile_info_to_dataset(
 
     # Merge GeoDataFrame info into this DataFrame
     merged = ds_df.merge(
-        gdf, left_on=idToJoinAgainst, right_on="SITE_ID", how="left"
+        gdf,
+        left_on=idToJoinAgainst,
+        right_on="SITE_ID",
+        how="left",
+        validate="m:1",  # Ensures merge logic consistency
     )
 
     # Add selected geospatial fields to dataset
@@ -139,6 +139,7 @@ def add_shapefile_info_to_dataset(
         "WELL_ALT",
         "WELL_TYPE",
         "WELL_DEPTH",
+        "WLWA_DEPTH_TO_WATER",
     ]:
         if col in merged.columns:
             dim_name = list(dataset.dims.keys())[0]

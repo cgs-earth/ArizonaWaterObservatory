@@ -66,7 +66,12 @@ def xlsx_to_zarr(context: dg.AssetExecutionContext):
                 if not path.is_file():
                     continue
 
-                dataset = xlsx_to_xarray(path)
+                try:
+                    dataset = xlsx_to_xarray(path)
+                except Exception as e:
+                    raise RuntimeError(
+                        f"Failed to convert xlsx file '{path}' got error: {e}"
+                    ) from e
 
                 dataset = add_shapefile_info_to_dataset(
                     Path(__file__).parent / "GWSI_ZIP_20250714" / "Shape",

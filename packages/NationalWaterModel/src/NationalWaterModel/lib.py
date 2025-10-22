@@ -190,15 +190,15 @@ def fetch_data(
     available_start: np.datetime64 = available_times.min()
     available_end: np.datetime64 = available_times.max()
 
-    if datetime_filter is None:
-        LOGGER.warning(
-            "No datetime filter provided, fetching all data would be too large; "
-            "falling back to end of available data"
-        )
-        datetime_filter = str(available_end)
+    # if datetime_filter is None:
+    #     LOGGER.warning(
+    #         "No datetime filter provided, fetching all data would be too large; "
+    #         "falling back to end of available data"
+    #     )
+    #     datetime_filter = str(available_end)
 
-    datetime_range = datetime_filter.split("/")
-
+    # datetime_range = datetime_filter.split("/")
+    datetime_range = []
     if len(datetime_range) == 1:
         datetime_np = np.datetime64(datetime_filter)
         if datetime_np in available_times:
