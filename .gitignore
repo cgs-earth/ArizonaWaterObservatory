@@ -9,3 +9,8 @@ downloads/
 *.zarr/
 .tmp*/
 .DS_Store
+
+downloads/
+GWSI_ZIP_*/
+
+.env

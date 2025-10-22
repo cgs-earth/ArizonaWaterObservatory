@@ -352,6 +352,56 @@ resources:
         id_field: REGISTRY_ID
         time_field: installed
 
+  usgs-national-map/elevation: 
+    type: collection
+    title: USGS National Map Elevation
+    description: USGS National Map Elevation Index
+    provider-name:
+      - USGS
+    keywords: [USGS]
+    links:
+      - <<: *default-link
+        href: https://tnmaccess.nationalmap.gov/api/v1/map_services
+        all_national_map_links: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
+    extents: *default-extent
+    providers:
+     -  type: map
+        name: WMSFacade
+        data: https://index.nationalmap.gov/arcgis/rest/services/3DEPElevationIndex/MapServer/WMSServer
+        options:
+          layer: 1
+          style: default
+          projection: 4326
+        format:
+          name: png
+          mimetype: image/png]
+
+  usgs-national-map/land-use: 
+    type: collection
+    title: USGS National Map Land Use
+    description: USGS National Map Land Use
+    provider-name:
+      - USGS
+    keywords: [USGS]
+    links:
+      - <<: *default-link
+        href: https://tnmaccess.nationalmap.gov/api/v1/map_services
+        all_national_map_links: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
+    extents: *default-extent
+    providers:
+     -  type: map
+        name: WMSFacade
+        data: https://gis1.usgs.gov/arcgis/services/gap/GAP_Land_Cover_NVC_Formation_Landuse/MapServer/WMSServer
+        options:
+        # layer 2 is the contiguous us
+          layer: 2
+          style: default
+          projection: 4326
+        format:
+          name: png
+          mimetype: image/png
+        
+
   config-store:
       type: process
       processor:
