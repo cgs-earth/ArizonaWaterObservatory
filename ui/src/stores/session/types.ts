@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Location } from '@/stores/main/types';
 import { LoadingSlice } from '@/stores/session/slices/loading';
 import { MeasureSlice } from '@/stores/session/slices/measure';
 import { NotificationsSlice } from '@/stores/session/slices/notifications';
@@ -26,6 +27,7 @@ export enum Tool {
 }
 
 export enum Overlay {
+  Links = 'links',
   Share = 'share',
   Draw = 'draw',
   Basemap = 'basemap',
@@ -63,6 +65,8 @@ export type SessionState = {
     [Tool.Legend]: boolean;
   };
   setOpenTools: (tool: Tool, open: boolean) => void;
+  linkLocation: Location | null;
+  setLinkLocation: (linkLocation: SessionState['linkLocation']) => void;
 } & NotificationsSlice &
   LoadingSlice &
   MeasureSlice;

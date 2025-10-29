@@ -16,6 +16,7 @@ import {
 } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
+import styles from '@/components/Charts/Charts.module.css';
 import { coverageJSONToSeries } from '@/components/Charts/utils';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
 import { isCoverageCollection } from '@/utils/isTypeObject';
@@ -85,6 +86,7 @@ const LineChart = (props: Props) => {
 
   return (
     <ReactEChartsCore
+      className={styles.smoothTransition}
       style={{
         height: '100%',
         width: '98%',

@@ -16,18 +16,26 @@ import { LoadingType, NotificationType } from '@/stores/session/types';
 import { getDatetime } from '@/utils/url';
 
 type Props = {
-  instanceId: number;
   collectionId: ICollection['id'];
   locationId: Location['id'];
   title: string;
   parameters: string[];
   from: string | null;
   to: string | null;
+  className?: string;
   onData?: () => void;
 };
 
 export const Chart: React.FC<Props> = (props) => {
-  const { collectionId, locationId, parameters, from, to, onData = () => null } = props;
+  const {
+    collectionId,
+    locationId,
+    parameters,
+    from,
+    to,
+    className = '',
+    onData = () => null,
+  } = props;
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
@@ -97,10 +105,10 @@ export const Chart: React.FC<Props> = (props) => {
         controller.current.abort('Component unmount');
       }
     };
-  }, [locationId]);
+  }, [locationId, from, to]);
 
   return (
-    <Skeleton visible={isLoading} className={styles.chartWrapper}>
+    <Skeleton visible={isLoading} className={`${className} ${styles.chartWrapper}`}>
       {data ? (
         <LineChart
           data={data}

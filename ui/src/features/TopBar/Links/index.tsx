@@ -17,17 +17,25 @@ import { Overlay } from '@/stores/session/types';
 
 const Links: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
-    onOpen: () => setOverlay(Overlay.Share),
+    onOpen: () => setOverlay(Overlay.Links),
+    onClose: () => {
+      setOverlay(null);
+      setLinkLocation(null);
+    },
   });
 
   const layers = useMainStore((store) => store.layers);
 
   const overlay = useSessionStore((store) => store.overlay);
   const setOverlay = useSessionStore((store) => store.setOverlay);
+  const linkLocation = useSessionStore((store) => store.linkLocation);
+  const setLinkLocation = useSessionStore((store) => store.setLinkLocation);
 
   useEffect(() => {
-    if (overlay !== Overlay.Share) {
+    if (overlay !== Overlay.Links) {
       close();
+    } else {
+      open();
     }
   }, [overlay]);
 
@@ -61,7 +69,11 @@ const Links: React.FC = () => {
           </Title>
           <>
             {layers.map((layer) => (
-              <Layer key={`links-entry-${layer.name}-${layer.id}`} layer={layer} />
+              <Layer
+                key={`links-entry-${layer.name}-${layer.id}`}
+                layer={layer}
+                linkLocation={linkLocation}
+              />
             ))}
           </>
         </Stack>

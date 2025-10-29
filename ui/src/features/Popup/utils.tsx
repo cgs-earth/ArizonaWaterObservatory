@@ -30,9 +30,13 @@ export const showGraphPopup = (
       if (!checkIdentifier || identifier !== currentIdentifier) {
         container.setAttribute('data-identifier', identifier);
 
+        const close = () => {
+          persistentPopup.remove();
+        };
+
         root.render(
           <MantineProvider>
-            <Popup location={location} feature={feature} />
+            <Popup close={close} location={location} feature={feature} />
           </MantineProvider>
         );
 

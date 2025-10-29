@@ -5,7 +5,7 @@
 
 .chartWrapper {
   height: 200px;
-  width: 400px;
+  width: 100%;
 }
 .chartNoData {
   width: 100%;

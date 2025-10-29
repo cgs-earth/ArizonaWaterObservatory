@@ -10,11 +10,11 @@ import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
 import { getSelectedColor } from '@/features/Map/utils';
+import { showGraphPopup } from '@/features/Popup/utils';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
-import { showGraphPopup } from '../Popup/utils';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;
@@ -120,8 +120,13 @@ const MainMap: React.FC<Props> = (props) => {
         const feature = e.features?.[0];
         if (feature) {
           hoverPopup.remove();
-
           const id = String(feature.id);
+
+          useMainStore.getState().addLocation({
+            id,
+            layerId: layer.id,
+          });
+
           showGraphPopup(
             {
               id,

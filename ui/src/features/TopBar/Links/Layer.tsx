@@ -14,16 +14,17 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
-import { Layer as LayerType } from '@/stores/main/types';
+import { Layer as LayerType, Location } from '@/stores/main/types';
 import { LoadingType } from '@/stores/session/types';
 import { getProvider } from '@/utils/provider';
 
 type Props = {
   layer: LayerType;
+  linkLocation: Location | null;
 };
 
 export const Layer: React.FC<Props> = (props) => {
-  const { layer } = props;
+  const { layer, linkLocation } = props;
 
   const locations = useMainStore((state) => state.locations);
 
@@ -113,6 +114,7 @@ export const Layer: React.FC<Props> = (props) => {
 
   return (
     <Accordion
+      defaultValue={`links-${linkLocation?.layerId}-accordion`}
       items={[
         {
           id: `links-${layer.id}-accordion`,
@@ -159,6 +161,7 @@ export const Layer: React.FC<Props> = (props) => {
                 <>
                   {selectedLocations.length > 0 && (
                     <Accordion
+                      defaultValue={`links-${linkLocation?.layerId}-selected-accordion`}
                       items={[
                         {
                           id: `links-${layer.id}-selected-accordion`,
@@ -169,10 +172,10 @@ export const Layer: React.FC<Props> = (props) => {
                           ),
                           content: (
                             <LocationBlock
+                              linkLocation={linkLocation}
                               locations={selectedLocations}
                               layer={layer}
                               collection={dataset}
-                              provider={provider}
                             />
                           ),
                         },
@@ -195,7 +198,6 @@ export const Layer: React.FC<Props> = (props) => {
                               locations={otherLocations}
                               layer={layer}
                               collection={dataset}
-                              provider={provider}
                             />
                           ),
                         },

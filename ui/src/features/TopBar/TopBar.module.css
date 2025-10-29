@@ -43,6 +43,10 @@
   padding: var(--default-spacing);
 }
 
+.linksChart {
+  width: 100%;
+}
+
 .locationBlockWrapper {
   padding: var(--default-spacing);
 }
@@ -50,6 +54,10 @@
 .locationWrapper {
   margin: var(--default-spacing);
   padding: var(--default-spacing);
+}
+
+.highlightLocation {
+  border: 4px solid var(--asu-color-selected);
 }
 
 .copyInputWrapper {

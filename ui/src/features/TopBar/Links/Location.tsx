@@ -3,37 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { Feature } from 'geojson';
-import { Anchor, Collapse, Group, Paper, Stack, Text } from '@mantine/core';
+import { Anchor, Collapse, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
 import { Variant } from '@/components/types';
+import { Chart } from '@/features/Popup/Chart';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import { Table } from '@/features/TopBar/Links/Table';
 import styles from '@/features/TopBar/TopBar.module.css';
+import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
-import { Layer } from '@/stores/main/types';
+import { Layer, Location as LocationType } from '@/stores/main/types';
 import { buildUrl } from '@/utils/url';
 
 type Props = {
   location: Feature;
   collection: ICollection;
   layer: Layer;
-  provider: string;
+  linkLocation?: LocationType | null;
 };
 
-export const Location: React.FC<Props> = (props) => {
-  const { location, layer, collection, provider } = props;
+export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
+  const { location, layer, collection, linkLocation } = props;
 
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
+  const [openedChart, { toggle: toggleChart, close: closeChart }] = useDisclosure(false);
 
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
+  const [datasetName, setDatasetName] = useState<string>('');
+  const [parameters, setParameters] = useState<string[]>([]);
 
   const [from, setFrom] = useState<string | null>(layer.from);
   const [to, setTo] = useState<string | null>(layer.to);
@@ -63,11 +68,38 @@ export const Location: React.FC<Props> = (props) => {
     setCodeUrl(codeUrl);
   }, [from, to]);
 
+  useEffect(() => {
+    if (!layer) {
+      return;
+    }
+
+    const newDataset = mainManager.getDatasource(layer.datasourceId);
+
+    if (newDataset) {
+      setDatasetName(newDataset.title ?? '');
+      const paramObjects = Object.values(newDataset?.parameter_names ?? {});
+
+      const parameters = paramObjects
+        .filter((object) => layer.parameters.includes(object.id))
+        .map((object) => object.name);
+
+      if (parameters.length === 0) {
+        closeChart();
+      }
+
+      setParameters(parameters);
+    }
+  }, [location, layer]);
+
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
 
   return (
-    <Paper shadow="xl" className={styles.locationWrapper}>
+    <Paper
+      ref={ref}
+      shadow="xl"
+      className={`${styles.locationWrapper} ${linkLocation && linkLocation?.id === location?.id ? styles.highlightLocation : ''}`}
+    >
       <Stack gap="xs">
         <Group justify="space-between">
           <Group gap="xs">
@@ -86,7 +118,7 @@ export const Location: React.FC<Props> = (props) => {
         </Group>
         <CopyInput size="xs" className={styles.copyInput} url={url} />
         <Code size="xs" code={code} />
-        <Group justify="space-between">
+        <Group justify="space-between" align="flex-end">
           <Group gap={8}>
             <Button
               size="xs"
@@ -104,6 +136,22 @@ export const Location: React.FC<Props> = (props) => {
             >
               GeoJSON
             </Button>
+            {parameters.length > 0 ? (
+              <Button
+                size="xs"
+                variant={openedChart ? Variant.Selected : Variant.Secondary}
+                className={styles.propertiesButton}
+                onClick={toggleChart}
+              >
+                Chart
+              </Button>
+            ) : (
+              <Tooltip label="Select one or more parameters in the layer controls to enable charts.">
+                <Button size="xs" variant={Variant.Secondary} disabled data-disabled>
+                  Chart
+                </Button>
+              </Tooltip>
+            )}
           </Group>
           <Group gap={16} align="flex-end">
             <DatePickerInput
@@ -128,19 +176,34 @@ export const Location: React.FC<Props> = (props) => {
             />
           </Group>
         </Group>
-        <Group align="flex-start" gap={16} grow>
-          {openedProps && (
-            <Collapse in={openedProps}>
-              <Table properties={location.properties} />
+        <Stack>
+          {openedChart && (
+            <Collapse in={openedChart}>
+              <Chart
+                className={styles.linksChart}
+                collectionId={layer.datasourceId}
+                locationId={String(location.id)}
+                title={datasetName}
+                parameters={parameters}
+                from={from}
+                to={to}
+              />
             </Collapse>
           )}
-          {openedGeo && (
-            <Collapse in={openedGeo}>
-              <GeoJSON location={location} />
-            </Collapse>
-          )}
-        </Group>
+          <Group align="flex-start" gap={16} grow>
+            {openedProps && (
+              <Collapse in={openedProps}>
+                <Table properties={location.properties} />
+              </Collapse>
+            )}
+            {openedGeo && (
+              <Collapse in={openedGeo}>
+                <GeoJSON location={location} />
+              </Collapse>
+            )}
+          </Group>
+        </Stack>
       </Stack>
     </Paper>
   );
-};
+});
