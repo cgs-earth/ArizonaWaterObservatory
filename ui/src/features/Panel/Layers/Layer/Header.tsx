@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { Group, Stack, Text, Title } from '@mantine/core';
 import { useLoading } from '@/hooks/useLoading';
@@ -63,10 +64,11 @@ export const Header: React.FC<Props> = (props) => {
         {layer.name}
       </Title>
       <Group justify="space-between">
-        <Text size="sm">{parameters.join(', ')}</Text>
+        {parameters.length > 0 && <Text size="sm">{parameters.join(', ')}</Text>}
         {(layer.from || layer.to) && (
           <Text size="sm">
-            {layer.from ?? '..'} - {layer.to ?? '..'}
+            {layer.from ? dayjs(layer.from).format('MM/DD/YYYY') : '..'} -{' '}
+            {layer.to ? dayjs(layer.to).format('MM/DD/YYYY') : '..'}
           </Text>
         )}
       </Group>

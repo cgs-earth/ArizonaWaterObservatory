@@ -153,6 +153,17 @@ export interface ICustomControl {
   position: ControlPosition;
 }
 
+export type MapEventKey =
+  | 'scrollZoom'
+  | 'boxZoom'
+  | 'dragRotate'
+  | 'dragPan'
+  | 'keyboard'
+  | 'doubleClickZoom'
+  | 'touchZoomRotate';
+
+export type MapEventHandlers = Partial<Record<MapEventKey, boolean>>;
+
 /**
  * Defines the properties for the map component.
  *
@@ -191,6 +202,7 @@ export interface MapComponentProps {
   draw?: MapboxDrawOptions & {
     position?: ControlPosition;
   };
+  eventHandlers?: MapEventHandlers;
 }
 
 /**

@@ -54,14 +54,14 @@ const Links: React.FC = () => {
           Links
         </Button>
       </Tooltip>
-      <Modal size="auto" opened={opened} onClose={close}>
+      <Modal size="1222px" opened={opened} onClose={close}>
         <Stack gap={0} className={styles.modalBody}>
           <Title order={5} size="h3">
             API Links
           </Title>
           <>
             {layers.map((layer) => (
-              <Layer layer={layer} />
+              <Layer key={`links-entry-${layer.name}-${layer.id}`} layer={layer} />
             ))}
           </>
         </Stack>

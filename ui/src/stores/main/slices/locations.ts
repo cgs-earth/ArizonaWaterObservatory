@@ -32,7 +32,7 @@ export const createLocationSlice: StateCreator<
   removeLocation: (location) =>
     set((state) => {
       state.locations = state.locations.filter(
-        (loc) => loc.layerId !== location.layerId && loc.id !== location.id
+        (loc) => loc.layerId !== location.layerId || loc.id !== location.id
       );
     }),
   hasLocation: (locationId) => get().locations.some((l) => l.id === locationId),

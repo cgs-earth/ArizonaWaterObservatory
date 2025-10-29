@@ -45,3 +45,13 @@
   height: 100%;
   flex-grow: 1;
 }
+
+div.mapboxgl-popup-content {
+  padding: var(--default-spacing);
+}
+
+button.mapboxgl-popup-close-button {
+  font-size: 30px;
+  right: 0px;
+  top: var(--default-spacing);
+}

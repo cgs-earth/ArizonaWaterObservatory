@@ -12,6 +12,10 @@
   padding: calc(var(--default-spacing) * 2);
 }
 
+.accordionBody {
+  background-color: var(--mantine-color-gray-1);
+}
+
 .toolTip {
   width: 30em;
 }
@@ -31,6 +35,10 @@
   width: fit-content;
 }
 
+.propertiesButton {
+  width: 90px;
+}
+
 .noParameterMessage {
   padding: var(--default-spacing);
 }
@@ -40,6 +48,7 @@
 }
 
 .locationWrapper {
+  margin: var(--default-spacing);
   padding: var(--default-spacing);
 }
 
@@ -50,4 +59,18 @@
 
 .copyInput {
   width: inherit;
+}
+
+.table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.propertyColumn {
+  width: fit-content;
+}
+
+.valueColumn {
+  word-break: break-word;
+  white-space: pre-wrap;
 }

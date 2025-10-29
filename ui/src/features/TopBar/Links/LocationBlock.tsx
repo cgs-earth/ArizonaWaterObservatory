@@ -10,11 +10,11 @@ import NumberInput from '@/components/NumberInput';
 import { Location } from '@/features/TopBar/Links/Location';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { ICollection } from '@/services/edr.service';
-import { Layer, Location as LocationType } from '@/stores/main/types';
+import { Layer } from '@/stores/main/types';
 import { chunk } from '@/utils/chunk';
 
 type Props = {
-  locations: (LocationType | Feature)[];
+  locations: Feature[];
   collection: ICollection | undefined;
   layer: Layer;
   provider: string;
@@ -25,8 +25,8 @@ export const LocationBlock: React.FC<Props> = (props) => {
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(locations.length > 10 ? 10 : locations.length);
-  const [chunkedLocations, setChunkedLocations] = useState<(LocationType | Feature)[][]>([]);
-  const [currentChunk, setCurrentChunk] = useState<(LocationType | Feature)[]>([]);
+  const [chunkedLocations, setChunkedLocations] = useState<Feature[][]>([]);
+  const [currentChunk, setCurrentChunk] = useState<Feature[]>([]);
 
   const handlePageSizeChange = (pageSize: number) => {
     setPageSize(pageSize);

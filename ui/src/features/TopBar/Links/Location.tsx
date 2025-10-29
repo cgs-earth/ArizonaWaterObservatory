@@ -5,16 +5,22 @@
 
 import { useEffect, useState } from 'react';
 import { Feature } from 'geojson';
-import { Anchor, Group, Paper, Stack, Text } from '@mantine/core';
+import { Anchor, Collapse, Group, Paper, Stack, Text } from '@mantine/core';
+import { DatePickerInput } from '@mantine/dates';
+import { useDisclosure } from '@mantine/hooks';
+import Button from '@/components/Button';
 import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
+import { Variant } from '@/components/types';
+import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
+import { Table } from '@/features/TopBar/Links/Table';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { ICollection } from '@/services/edr.service';
-import { Layer, Location as LocationType } from '@/stores/main/types';
+import { Layer } from '@/stores/main/types';
 import { buildUrl } from '@/utils/url';
 
 type Props = {
-  location: LocationType | Feature;
+  location: Feature;
   collection: ICollection;
   layer: Layer;
   provider: string;
@@ -23,16 +29,22 @@ type Props = {
 export const Location: React.FC<Props> = (props) => {
   const { location, layer, collection, provider } = props;
 
+  const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
+  const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
+
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
+
+  const [from, setFrom] = useState<string | null>(layer.from);
+  const [to, setTo] = useState<string | null>(layer.to);
 
   useEffect(() => {
     const url = buildUrl(
       collection.id,
       String(location.id),
       layer.parameters,
-      layer.from ?? '2025-10-12', // TODO: remove hardcoded dates
-      layer.to ?? '2025-10-20',
+      from,
+      to,
       false,
       true
     );
@@ -41,55 +53,93 @@ export const Location: React.FC<Props> = (props) => {
       collection.id,
       String(location.id),
       layer.parameters,
-      layer.from ?? '2025-10-12',
-      layer.to ?? '2025-10-20',
+      from,
+      to,
       false,
       false
     );
 
     setUrl(url);
     setCodeUrl(codeUrl);
-  }, []);
+  }, [from, to]);
 
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
 
   return (
-    <Paper shadow="lg" className={styles.locationWrapper}>
+    <Paper shadow="xl" className={styles.locationWrapper}>
       <Stack gap="xs">
         <Group justify="space-between">
-          <Stack gap={0}>
-            <Group gap="xs">
-              {provider.length > 0 && (
-                <Text size="sm" fw={700}>
-                  {provider}
-                </Text>
-              )}
-              <Text size="sm">{collection.title}</Text>
-            </Group>
-            <Group gap="xs">
-              <Text size="md" fw={700}>
-                {layer.name}
-              </Text>
-              <Text size="md">{location.id}</Text>
-            </Group>
-          </Stack>
-          {/* <Checkbox
-            size="xs"
-            label="Include Parameters"
-            checked={includeParameters}
-            onChange={(event) => setIncludeParameters(event.currentTarget.checked)}
-          /> */}
+          <Group gap="xs">
+            <Text size="md" fw={700}>
+              {layer.name}
+            </Text>
+            <Text size="md">{location.id}</Text>
+          </Group>
+          <Anchor
+            title="This location in the API"
+            href={`${collection.data_queries.locations?.link?.href}/${location.id}`}
+            target="_blank"
+          >
+            API
+          </Anchor>
         </Group>
         <CopyInput size="xs" className={styles.copyInput} url={url} />
         <Code size="xs" code={code} />
-        <Anchor
-          title="This location in the API"
-          href={`${collection.data_queries.locations?.link?.href}/${location.id}`}
-          target="_blank"
-        >
-          API
-        </Anchor>
+        <Group justify="space-between">
+          <Group gap={8}>
+            <Button
+              size="xs"
+              variant={openedProps ? Variant.Selected : Variant.Secondary}
+              className={styles.propertiesButton}
+              onClick={toggleProps}
+            >
+              Properties
+            </Button>
+            <Button
+              size="xs"
+              variant={openedGeo ? Variant.Selected : Variant.Secondary}
+              className={styles.propertiesButton}
+              onClick={toggleGeo}
+            >
+              GeoJSON
+            </Button>
+          </Group>
+          <Group gap={16} align="flex-end">
+            <DatePickerInput
+              label="From"
+              size="sm"
+              className={styles.datePicker}
+              placeholder="Pick start date"
+              value={from}
+              onChange={setFrom}
+              clearable
+              // error={isValidRange ? false : "Invalid date range"}
+            />
+            <DatePickerInput
+              label="To"
+              size="sm"
+              className={styles.datePicker}
+              placeholder="Pick end date"
+              value={to}
+              onChange={setTo}
+              clearable
+              // error={isValidRange ? false : "Invalid date range"}
+            />
+          </Group>
+        </Group>
+        <Group align="flex-start" gap={16} grow>
+          {openedProps && (
+            <Collapse in={openedProps}>
+              <Table properties={location.properties} />
+            </Collapse>
+          )}
+          {openedGeo && (
+            <Collapse in={openedGeo}>
+              <GeoJSON location={location} />
+            </Collapse>
+          )}
+        </Group>
       </Stack>
     </Paper>
   );

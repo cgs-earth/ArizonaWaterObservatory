@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dayjs from 'dayjs';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
 import { Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
@@ -327,14 +328,17 @@ class MainManager {
       name = `${provider} ${title} ${currentDatasourceCount + next++}`;
     }
 
+    const today = dayjs();
+    const oneWeekAgo = today.subtract(1, 'week');
+
     const layer: Layer = {
       id: this.createUUID(),
       datasourceId: datasource.id,
       name,
       color: this.createHexColor(),
       parameters: [],
-      from: null,
-      to: null,
+      from: oneWeekAgo.format('YYYY-MM-DD'),
+      to: today.format('YYYY-MM-DD'),
       visible: true,
       locations: [],
     };
