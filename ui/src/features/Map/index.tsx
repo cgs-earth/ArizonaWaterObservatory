@@ -13,6 +13,7 @@ import { getSelectedColor } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
+import { Location } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
 
@@ -117,27 +118,18 @@ const MainMap: React.FC<Props> = (props) => {
       );
 
       map.on('dblclick', [pointLayerId, lineLayerId, fillLayerId], (e) => {
-        const feature = e.features?.[0];
-        if (feature) {
+        const features = e.features;
+        if (features && features.length > 0) {
           hoverPopup.remove();
-          const id = String(feature.id);
 
-          useMainStore.getState().addLocation({
-            id,
+          const locations: Location[] = features.map((feature) => ({
+            id: String(feature.id),
             layerId: layer.id,
-          });
+          }));
 
-          showGraphPopup(
-            {
-              id,
-              layerId: layer.id,
-            },
-            map,
-            e,
-            root,
-            container,
-            persistentPopup
-          );
+          locations.forEach((location) => useMainStore.getState().addLocation(location));
+
+          showGraphPopup(locations, map, e, root, container, persistentPopup);
         }
       });
     });

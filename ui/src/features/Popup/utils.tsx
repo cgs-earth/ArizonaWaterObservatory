@@ -12,7 +12,7 @@ import { Mantine as MantineProvider } from '@/providers/Mantine';
 import { Location } from '@/stores/main/types';
 
 export const showGraphPopup = (
-  location: Location,
+  locations: Location[],
   map: Map,
   e: MapMouseEvent,
   root: Root,
@@ -20,37 +20,37 @@ export const showGraphPopup = (
   persistentPopup: PopupType,
   checkIdentifier = false
 ) => {
-  if (e.features && e.features.length > 0) {
-    const feature = e.features[0] as Feature;
+  if (e.features && e.features.length > 0 && locations.length > 0) {
+    const features = e.features as Feature[];
 
-    if (feature.properties) {
-      const identifier = String(location.id);
-      const currentIdentifier = container.getAttribute('data-identifier');
-      // Dont recreate the same popup for the same feature
-      if (!checkIdentifier || identifier !== currentIdentifier) {
-        container.setAttribute('data-identifier', identifier);
+    const identifier = String(locations[0].id);
+    const currentIdentifier = container.getAttribute('data-identifier');
+    // Dont recreate the same popup for the same feature
+    if (!checkIdentifier || identifier !== currentIdentifier) {
+      container.setAttribute('data-identifier', identifier);
 
-        const close = () => {
-          persistentPopup.remove();
-        };
+      const close = () => {
+        persistentPopup.remove();
+      };
 
-        root.render(
-          <MantineProvider>
-            <Popup close={close} location={location} feature={feature} />
-          </MantineProvider>
-        );
+      root.render(
+        <MantineProvider>
+          <Popup close={close} locations={locations} features={features} />
+        </MantineProvider>
+      );
 
-        const centerPoint = (
-          feature.geometry.type === 'Point'
-            ? feature.geometry.coordinates
-            : center(feature).geometry.coordinates
-        ) as [number, number];
-        persistentPopup
-          .setLngLat(centerPoint)
-          .setDOMContent(container)
-          .setMaxWidth('fit-content')
-          .addTo(map);
-      }
+      const feature = features[0];
+
+      const centerPoint = (
+        feature.geometry.type === 'Point'
+          ? feature.geometry.coordinates
+          : center(feature).geometry.coordinates
+      ) as [number, number];
+      persistentPopup
+        .setLngLat(centerPoint)
+        .setDOMContent(container)
+        .setMaxWidth('fit-content')
+        .addTo(map);
     }
   }
 };

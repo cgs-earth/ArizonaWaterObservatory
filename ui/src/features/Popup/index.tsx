@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Feature } from 'geojson';
 import { Box, Group, Stack, Text, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
+import Select from '@/components/Select';
 import { Variant } from '@/components/types';
 import { Chart } from '@/features/Popup/Chart';
 import styles from '@/features/Popup/Popup.module.css';
@@ -17,13 +18,16 @@ import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 
 type Props = {
-  location: Location;
-  feature: Feature;
+  locations: Location[];
+  features: Feature[];
   close: () => void;
 };
 
 export const Popup: React.FC<Props> = (props) => {
-  const { location, feature } = props;
+  const { locations, features } = props;
+
+  const [location, setLocation] = useState<Location>(locations[0]);
+  const [feature, setFeature] = useState<Feature>();
 
   const [layer, setLayer] = useState<Layer | null>(null);
   const [datasetName, setDatasetName] = useState<string>('');
@@ -34,9 +38,27 @@ export const Popup: React.FC<Props> = (props) => {
   const setOverlay = useSessionStore((state) => state.setOverlay);
 
   useEffect(() => {
-    const layer = mainManager.getLayer(location.layerId);
-    if (layer) {
-      setLayer(layer);
+    const location = locations[0];
+    if (location) {
+      setLocation(location);
+    }
+  }, [locations]);
+
+  useEffect(() => {
+    if (feature && feature.id === location.id) {
+      return;
+    }
+
+    const newFeature = features.find((feature) => String(feature.id) === location.id);
+    if (newFeature) {
+      setFeature(newFeature);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    const newLayer = mainManager.getLayer(location.layerId);
+    if (newLayer) {
+      setLayer(newLayer);
     }
   }, [location]);
 
@@ -68,16 +90,26 @@ export const Popup: React.FC<Props> = (props) => {
     setOverlay(Overlay.Links);
   };
 
+  const handleLocationChange = (id: string | null) => {
+    const location = locations.find((location) => location.id === id);
+    if (location) {
+      setLocation(location);
+    }
+  };
+
   if (!layer) {
     return null;
   }
 
   return (
     <Stack gap={0} className={styles.popupWrapper}>
-      <Text size="lg" fw={700}>
-        Location Id: {location.id}
-      </Text>
-      <Text size="sm">{datasetName}</Text>
+      <Box>
+        <Text size="lg" fw={700}>
+          Location Id: {location.id}
+        </Text>
+        <Text size="sm">{layer.name}</Text>
+      </Box>
+
       <Box style={{ display: tab === 'chart' ? 'block' : 'none' }}>
         {layer && datasetName.length > 0 && parameters.length > 0 && (
           <Chart
@@ -91,10 +123,19 @@ export const Popup: React.FC<Props> = (props) => {
         )}
       </Box>
       <Box style={{ display: tab === 'table' ? 'block' : 'none' }} className={styles.tableWrapper}>
-        <Table size="xs" properties={feature.properties} />
+        {feature && <Table size="xs" properties={feature.properties} />}
       </Box>
-      <Group justify="space-between" mt={8} mb={8}>
-        <Group gap={8}>
+      <Group justify="space-between" align="flex-end" mt={8} mb={8}>
+        <Group gap={8} align="flex-end">
+          <Select
+            className={styles.locationsDropdown}
+            size="xs"
+            label="Locations"
+            searchable
+            data={locations.map((location) => location.id)}
+            value={location.id}
+            onChange={(value, _option) => handleLocationChange(value)}
+          />
           {parameters.length > 0 ? (
             <Button
               size="xs"

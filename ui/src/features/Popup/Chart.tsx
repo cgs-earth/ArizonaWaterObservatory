@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useEffect, useRef, useState } from 'react';
 import { Group, Skeleton, Text, useComputedColorScheme } from '@mantine/core';
 import LineChart from '@/components/Charts/LineChart';
@@ -14,6 +16,8 @@ import awoService from '@/services/init/awo.init';
 import { Location } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { getDatetime } from '@/utils/url';
+
+dayjs.extend(isSameOrBefore);
 
 type Props = {
   collectionId: ICollection['id'];
@@ -98,7 +102,13 @@ export const Chart: React.FC<Props> = (props) => {
     isMounted.current = true;
     setData(null);
     setError(null);
-    void fetchData();
+
+    const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
+    if (isValidRange) {
+      void fetchData();
+    } else {
+      setError('Invalid date range provided');
+    }
     return () => {
       isMounted.current = false;
       if (controller.current) {
@@ -118,15 +128,19 @@ export const Chart: React.FC<Props> = (props) => {
           filename={`line-chart-${locationId}-${parameters.join('-')}`}
         />
       ) : (
-        <Group justify="center" align="center" className={styles.chartNoData}>
-          <Text>No Data found for {parameters.join(', ')}</Text>
-        </Group>
+        !error && (
+          <Group justify="center" align="center" className={styles.chartNoData}>
+            <Text>No Data found for {parameters.join(', ')}</Text>
+          </Group>
+        )
       )}
       {error && (
-        <Text c="red">
-          <strong>Error: </strong>
-          {error}
-        </Text>
+        <Group justify="center" align="center" className={styles.chartNoData}>
+          <Text c="red">
+            <strong>Error: </strong>
+            {error}
+          </Text>
+        </Group>
       )}
     </Skeleton>
   );

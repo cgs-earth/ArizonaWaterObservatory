@@ -637,6 +637,10 @@ class MainManager {
                 <span style="color:black;">
                   <strong>${layer.name}</strong><br/>
                   ${uniqueFeatures.map((locationId) => `<strong>Location Id: </strong>${locationId}`).join('<br/>')}
+                  <div style="margin-top: 16px;display:flex;flex-direction:column;justify-content:center;align-items:center">
+                    <p style="margin: 0;">Click to select the location.</p>
+                    <p style="margin: 0;">Double-click to preview.</p>
+                  </div>
                 </span>
               `;
               this.hoverPopup!.setLngLat(e.lngLat).setHTML(html).addTo(this.map!);
@@ -653,6 +657,10 @@ class MainManager {
                 <span style="color:black;">
                   <strong>${layer.name}</strong><br/>
                   ${uniqueFeatures.map((locationId) => `<strong>Location Id: </strong>${locationId}`).join('<br/>')}
+                  <div style="margin-top: 16px;display:flex;flex-direction:column;justify-content:center;align-items:center">
+                    <p style="margin: 0;">Click to select the location.</p>
+                    <p style="margin: 0;">Double-click to preview.</p>
+                  </div>
                 </span>
               `;
               this.hoverPopup!.setLngLat(e.lngLat).setHTML(html).addTo(this.map!);
@@ -751,7 +759,9 @@ class MainManager {
     layer: Layer,
     name: Layer['name'],
     color: Layer['color'],
-    parameters: Layer['parameters']
+    parameters: Layer['parameters'],
+    from: Layer['from'],
+    to: Layer['to']
   ): Promise<void> {
     if (color !== layer.color) {
       if (this.map) {
@@ -784,6 +794,8 @@ class MainManager {
       name,
       color,
       parameters,
+      from,
+      to,
     });
   }
 

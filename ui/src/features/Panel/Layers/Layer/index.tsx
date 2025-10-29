@@ -3,10 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useEffect, useState } from 'react';
 import { ComboboxData, Divider, Group, Stack, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import ColorInput from '@/components/ColorInput';
+import DateInput from '@/components/DateInput';
+import { DatePreset } from '@/components/DateInput/DateInput.types';
 import Select from '@/components/Select';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
@@ -18,6 +22,8 @@ import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 
+dayjs.extend(isSameOrBefore);
+
 type Props = {
   layer: LayerType;
 };
@@ -28,6 +34,8 @@ const Layer: React.FC<Props> = (props) => {
   const [name, setName] = useState(layer.name);
   const [color, setColor] = useState(layer.color);
   const [parameters, setParameters] = useState(layer.parameters);
+  const [from, setFrom] = useState<string | null>(layer.from);
+  const [to, setTo] = useState<string | null>(layer.to);
 
   const [data, setData] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
@@ -60,7 +68,7 @@ const Layer: React.FC<Props> = (props) => {
       LoadingType.Locations
     );
     try {
-      await mainManager.updateLayer(layer, name, color, parameters);
+      await mainManager.updateLayer(layer, name, color, parameters, from, to);
       notificationManager.show(`Updated layer: ${updateName}`, NotificationType.Success);
     } catch (error) {
       if ((error as Error)?.message) {
@@ -77,7 +85,11 @@ const Layer: React.FC<Props> = (props) => {
     setName(layer.name);
     setColor(layer.color);
     setParameters(layer.parameters);
+    setFrom(layer.from);
+    setTo(layer.to);
   };
+
+  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
 
   return (
     <Stack gap="xs" className={styles.accordionContent}>
@@ -98,6 +110,42 @@ const Layer: React.FC<Props> = (props) => {
         />
       </Group>
       <Divider />
+      <Group justify="space-between">
+        <DateInput
+          label="From"
+          size="sm"
+          className={styles.datePicker}
+          placeholder="Pick start date"
+          value={from}
+          onChange={setFrom}
+          simplePresets={[
+            DatePreset.OneYear,
+            DatePreset.FiveYears,
+            DatePreset.TenYears,
+            DatePreset.FifteenYears,
+            DatePreset.ThirtyYears,
+          ]}
+          clearable
+          error={isValidRange ? false : 'Invalid date range'}
+        />
+        <DateInput
+          label="To"
+          size="sm"
+          className={styles.datePicker}
+          placeholder="Pick end date"
+          value={to}
+          onChange={setTo}
+          simplePresets={[
+            DatePreset.OneYear,
+            DatePreset.FiveYears,
+            DatePreset.TenYears,
+            DatePreset.FifteenYears,
+            DatePreset.ThirtyYears,
+          ]}
+          clearable
+          error={isValidRange ? false : 'Invalid date range'}
+        />
+      </Group>
       <Select
         size="sm"
         label="Parameter"
@@ -111,18 +159,30 @@ const Layer: React.FC<Props> = (props) => {
         onChange={setParameters}
       />
       <Group mt="md" justify="center">
-        <Tooltip label="Please wait for layer update to finish" disabled={!isLoading}>
+        <Tooltip
+          label={
+            isLoading
+              ? 'Please wait for layer update to finish'
+              : !isValidRange
+                ? 'Please correct date range'
+                : null
+          }
+          disabled={!isLoading && isValidRange}
+        >
           <Button
             size="xs"
-            disabled={isLoading}
-            data-disabled={isLoading}
+            disabled={isLoading || !isValidRange}
+            data-disabled={isLoading || !isValidRange}
             variant={Variant.Primary}
             onClick={() => handleSave()}
           >
             Save
           </Button>
         </Tooltip>
-        <Tooltip label={isLoading ? 'Please wait for layer update to finish' : null}>
+        <Tooltip
+          label={isLoading ? 'Please wait for layer update to finish' : null}
+          disabled={!isLoading}
+        >
           <Button
             size="xs"
             disabled={isLoading}

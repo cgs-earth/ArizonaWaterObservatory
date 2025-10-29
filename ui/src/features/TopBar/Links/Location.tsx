@@ -3,14 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { forwardRef, useEffect, useState } from 'react';
 import { Feature } from 'geojson';
 import { Anchor, Collapse, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
+import DateInput from '@/components/DateInput';
+import { DatePreset } from '@/components/DateInput/DateInput.types';
 import { Variant } from '@/components/types';
 import { Chart } from '@/features/Popup/Chart';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
@@ -20,6 +23,8 @@ import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { buildUrl } from '@/utils/url';
+
+dayjs.extend(isSameOrBefore);
 
 type Props = {
   location: Feature;
@@ -94,6 +99,8 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
 
+  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
+
   return (
     <Paper
       ref={ref}
@@ -154,25 +161,39 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
             )}
           </Group>
           <Group gap={16} align="flex-end">
-            <DatePickerInput
+            <DateInput
               label="From"
               size="sm"
               className={styles.datePicker}
               placeholder="Pick start date"
               value={from}
               onChange={setFrom}
+              simplePresets={[
+                DatePreset.OneYear,
+                DatePreset.FiveYears,
+                DatePreset.TenYears,
+                DatePreset.FifteenYears,
+                DatePreset.ThirtyYears,
+              ]}
               clearable
-              // error={isValidRange ? false : "Invalid date range"}
+              error={isValidRange ? false : 'Invalid date range'}
             />
-            <DatePickerInput
+            <DateInput
               label="To"
               size="sm"
               className={styles.datePicker}
               placeholder="Pick end date"
               value={to}
               onChange={setTo}
+              simplePresets={[
+                DatePreset.OneYear,
+                DatePreset.FiveYears,
+                DatePreset.TenYears,
+                DatePreset.FifteenYears,
+                DatePreset.ThirtyYears,
+              ]}
               clearable
-              // error={isValidRange ? false : "Invalid date range"}
+              error={isValidRange ? false : 'Invalid date range'}
             />
           </Group>
         </Group>
