@@ -1089,11 +1089,19 @@ export interface CoverageJSON {
   domain: {
     type: string;
     domainType: string;
+
     axes: {
-      [key: string]: {
-        values: (number | string)[];
-      };
+      [key: string]:
+        | {
+            start: number;
+            stop: number;
+            num: number;
+          }
+        | {
+            values: (number | string)[];
+          };
     };
+
     referencing: {
       coordinates: string[];
       system: {
