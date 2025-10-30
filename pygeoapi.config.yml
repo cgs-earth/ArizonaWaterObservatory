@@ -355,7 +355,7 @@ resources:
   usgs-national-map/elevation: 
     type: collection
     title: USGS National Map Elevation
-    description: USGS National Map Elevation Index
+    description: USGS National Map 3D Elevation Program (3DEPElevation)
     provider-name:
       - USGS
     keywords: [USGS]
@@ -367,14 +367,14 @@ resources:
     providers:
      -  type: map
         name: WMSFacade
-        data: https://index.nationalmap.gov/arcgis/rest/services/3DEPElevationIndex/MapServer/WMSServer
+        data: https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer
         options:
-          layer: 1
+          layer: 3DEPElevation
           style: default
-          projection: 4326
+          projection: 3857
         format:
           name: png
-          mimetype: image/png]
+          mimetype: image/png
 
   usgs-national-map/land-use: 
     type: collection
@@ -389,14 +389,13 @@ resources:
         all_national_map_links: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
     extents: *default-extent
     providers:
-     -  type: map
+      - type: map
         name: WMSFacade
-        data: https://gis1.usgs.gov/arcgis/services/gap/GAP_Land_Cover_NVC_Formation_Landuse/MapServer/WMSServer
+        data: https://www.mrlc.gov/geoserver/NLCD_Land_Cover/wms
         options:
-        # layer 2 is the contiguous us
-          layer: 2
+          layer: CONUS_Land_Cover
           style: default
-          projection: 4326
+          projection: 3857
         format:
           name: png
           mimetype: image/png
