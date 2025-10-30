@@ -10,8 +10,10 @@ import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
 import { getSelectedColor } from '@/features/Map/utils';
+import { showGraphPopup } from '@/features/Popup/utils';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
+import { Location } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
 
@@ -42,7 +44,7 @@ const MainMap: React.FC<Props> = (props) => {
 
   const [shouldResize, setShouldResize] = useState(false);
 
-  const { map, hoverPopup, draw } = useMap(MAP_ID);
+  const { map, hoverPopup, persistentPopup, draw, root, container } = useMap(MAP_ID);
 
   const isMounted = useRef(true);
   const initialMapLoad = useRef(true);
@@ -103,6 +105,35 @@ const MainMap: React.FC<Props> = (props) => {
 
     map.resize();
   }, [shouldResize]);
+
+  useEffect(() => {
+    if (!map || !persistentPopup || !hoverPopup || !root || !container) {
+      return;
+    }
+
+    layers.forEach((layer) => {
+      const { pointLayerId, lineLayerId, fillLayerId } = mainManager.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
+
+      map.on('dblclick', [pointLayerId, lineLayerId, fillLayerId], (e) => {
+        const features = e.features;
+        if (features && features.length > 0) {
+          hoverPopup.remove();
+
+          const locations: Location[] = features.map((feature) => ({
+            id: String(feature.id),
+            layerId: layer.id,
+          }));
+
+          locations.forEach((location) => useMainStore.getState().addLocation(location));
+
+          showGraphPopup(locations, map, e, root, container, persistentPopup);
+        }
+      });
+    });
+  }, [layers]);
 
   useEffect(() => {
     if (!map) {
@@ -181,6 +212,9 @@ const MainMap: React.FC<Props> = (props) => {
           navigationControl: true,
         }}
         draw={{ clickBuffer: 5, touchEnabled: true, displayControlsDefault: false }}
+        eventHandlers={{
+          doubleClickZoom: false,
+        }}
       />
     </>
   );

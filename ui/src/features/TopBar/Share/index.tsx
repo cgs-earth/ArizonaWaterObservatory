@@ -23,6 +23,7 @@ import { LoadingType, Overlay } from '@/stores/session/types';
 const Share: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
     onOpen: () => setOverlay(Overlay.Share),
+    onClose: () => setOverlay(null),
   });
 
   const { isGeneratingShare } = useLoading();

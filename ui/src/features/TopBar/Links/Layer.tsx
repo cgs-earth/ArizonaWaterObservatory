@@ -14,20 +14,21 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
-import { Layer as LayerType, Location as LocationType } from '@/stores/main/types';
+import { Layer as LayerType, Location } from '@/stores/main/types';
 import { LoadingType } from '@/stores/session/types';
 import { getProvider } from '@/utils/provider';
 
 type Props = {
   layer: LayerType;
+  linkLocation: Location | null;
 };
 
 export const Layer: React.FC<Props> = (props) => {
-  const { layer } = props;
+  const { layer, linkLocation } = props;
 
   const locations = useMainStore((state) => state.locations);
 
-  const [selectedLocations, setSelectedLocations] = useState<LocationType[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<Feature[]>([]);
   const [otherLocations, setOtherLocations] = useState<Feature[]>([]);
   const [dataset, setDataset] = useState<ICollection>();
   const [provider, setProvider] = useState<string>('');
@@ -46,15 +47,17 @@ export const Layer: React.FC<Props> = (props) => {
 
       const allLocations = await mainManager.getData(layer, controller.current.signal);
 
+      const layerLocations = locations.filter((location) => location.layerId === layer.id);
+
+      const selectedLocations = allLocations.features.filter((feature) =>
+        layerLocations.some((location) => location.id === feature.id)
+      );
       const otherLocations = allLocations.features.filter(
-        (feature) => !selectedLocations.some((location) => location.id === feature.id)
+        (feature) => !layerLocations.some((location) => location.id === feature.id)
       );
 
       if (isMounted.current) {
-        // There are no locations on screen, dont show selected locations
-        if (allLocations.features.length === 0) {
-          setSelectedLocations([]);
-        }
+        setSelectedLocations(selectedLocations);
         setOtherLocations(otherLocations);
       }
     } catch (error) {
@@ -67,13 +70,8 @@ export const Layer: React.FC<Props> = (props) => {
   };
 
   useEffect(() => {
-    const selectedLocations = locations.filter((location) => location.layerId === layer.id);
-    setSelectedLocations(selectedLocations);
-  }, [locations]);
-
-  useEffect(() => {
     void getOtherLocations();
-  }, [selectedLocations]);
+  }, []);
 
   useEffect(() => {
     if (dataset) {
@@ -116,13 +114,21 @@ export const Layer: React.FC<Props> = (props) => {
 
   return (
     <Accordion
+      defaultValue={`links-${linkLocation?.layerId}-accordion`}
       items={[
         {
           id: `links-${layer.id}-accordion`,
 
           title: (
-            <>
-              {' '}
+            <Box className={styles.accordionHeader}>
+              <Group gap="xs">
+                {provider.length > 0 && (
+                  <Text size="sm" fw={700}>
+                    {provider}
+                  </Text>
+                )}
+                <Text size="sm">{dataset?.title}</Text>
+              </Group>
               {alternateLink ? (
                 <Anchor
                   title="This dataset in the API"
@@ -139,7 +145,7 @@ export const Layer: React.FC<Props> = (props) => {
                   {layer.name}
                 </Title>
               )}
-            </>
+            </Box>
           ),
           content: (
             <Box className={styles.accordionBody}>
@@ -155,20 +161,21 @@ export const Layer: React.FC<Props> = (props) => {
                 <>
                   {selectedLocations.length > 0 && (
                     <Accordion
+                      defaultValue={`links-${linkLocation?.layerId}-selected-accordion`}
                       items={[
                         {
                           id: `links-${layer.id}-selected-accordion`,
                           title: (
-                            <Title order={6} size="h4">
+                            <Title order={6} size="h4" className={styles.accordionHeader}>
                               {otherLocations.length > 0 && 'Selected '}Locations
                             </Title>
                           ),
                           content: (
                             <LocationBlock
+                              linkLocation={linkLocation}
                               locations={selectedLocations}
                               layer={layer}
                               collection={dataset}
-                              provider={provider}
                             />
                           ),
                         },
@@ -182,7 +189,7 @@ export const Layer: React.FC<Props> = (props) => {
                         {
                           id: `links-${layer.id}-other-accordion`,
                           title: (
-                            <Title order={6} size="h4">
+                            <Title order={6} size="h4" className={styles.accordionHeader}>
                               {selectedLocations.length > 0 && 'Other '}Locations
                             </Title>
                           ),
@@ -191,7 +198,6 @@ export const Layer: React.FC<Props> = (props) => {
                               locations={otherLocations}
                               layer={layer}
                               collection={dataset}
-                              provider={provider}
                             />
                           ),
                         },

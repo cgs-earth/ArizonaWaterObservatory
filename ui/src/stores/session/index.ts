@@ -28,6 +28,8 @@ const useSessionStore = create<SessionState>()(
           [tool]: open,
         },
       })),
+    linkLocation: null,
+    setLinkLocation: (linkLocation) => set({ linkLocation }),
     ...createLoadingSlice(set, get, store),
     ...createMeasureSlice(set, get, store),
     ...createNotificationsSlice(set, get, store),

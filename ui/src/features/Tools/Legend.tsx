@@ -38,7 +38,14 @@ export const Legend: React.FC = () => {
     const layer = mainManager.getLayer(layerId);
 
     if (layer) {
-      void mainManager.updateLayer(layer, layer.name, color, layer.parameters);
+      void mainManager.updateLayer(
+        layer,
+        layer.name,
+        color,
+        layer.parameters,
+        layer.from,
+        layer.to
+      );
       const oldEntry = legendEntries.filter((entry) => entry.layerId === layerId)[0];
       const newLegendEntries = legendEntries.filter((entry) => entry.layerId !== layerId);
 
