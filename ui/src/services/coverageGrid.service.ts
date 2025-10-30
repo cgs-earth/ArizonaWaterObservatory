@@ -4,14 +4,16 @@
  */
 
 import { bboxPolygon } from '@turf/turf';
-import { FeatureCollection, Polygon } from 'geojson';
+import { BBox, FeatureCollection, Polygon } from 'geojson';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import { isCoverageJSON } from '@/utils/isTypeObject';
-import { CoverageCollection, CoverageJSON } from './edr.service';
+import { getDatetime } from '@/utils/url';
+import { CoverageCollection, CoverageJSON, ICollection } from './edr.service';
+import awoService from './init/awo.init';
 
 type Values = Record<string, (number | null)[]>;
 
-export class CovGridService {
+export class CoverageGridService {
   private getLength({ start, stop, num }: { start: number; stop: number; num: number }): number {
     const length = Math.abs(stop - start) / num;
 
@@ -129,9 +131,28 @@ export class CovGridService {
     return featureCollection;
   }
 
-  public async createGrid(url: string): Promise<FeatureCollection<Polygon>> {
-    const results = await fetch(url);
-    const coverage = (await results.json()) as CoverageJSON | CoverageCollection;
+  public async createGrid(
+    collectionId: ICollection['id'],
+    bbox: BBox,
+    from?: string | null,
+    to?: string | null,
+    parameterNames?: string[],
+    signal?: AbortSignal
+  ): Promise<FeatureCollection<Polygon>> {
+    const datetime = getDatetime(from, to);
+
+    const coverage = await awoService.getCube<CoverageJSON | CoverageCollection>(collectionId, {
+      signal,
+      params: {
+        bbox,
+        ...(parameterNames && parameterNames.length > 0
+          ? { 'parameter-name': parameterNames.join(',') }
+          : {}),
+        ...(datetime ? { datetime } : {}),
+        // TODO: remove this when support added for content-type headers
+        f: 'json',
+      },
+    });
 
     if (isCoverageJSON(coverage)) {
       return this.createGridCollection(coverage);

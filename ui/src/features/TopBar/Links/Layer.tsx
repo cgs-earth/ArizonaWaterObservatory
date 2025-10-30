@@ -45,7 +45,7 @@ export const Layer: React.FC<Props> = (props) => {
     try {
       controller.current = new AbortController();
 
-      const allLocations = await mainManager.getData(layer, controller.current.signal);
+      const allLocations = await mainManager.getFeatures(layer, controller.current.signal);
 
       const layerLocations = locations.filter((location) => location.layerId === layer.id);
 

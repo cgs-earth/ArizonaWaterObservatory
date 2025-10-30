@@ -6,7 +6,10 @@
 import { ICollection } from '@/services/edr.service';
 import { Location } from '@/stores/main/types';
 
-export const getDatetime = (from: string | null, to: string | null): string | null => {
+export const getDatetime = (
+  from: string | null | undefined,
+  to: string | null | undefined
+): string | null => {
   if (from && to) {
     return `${from}/${to}`;
   } else if (from) {
