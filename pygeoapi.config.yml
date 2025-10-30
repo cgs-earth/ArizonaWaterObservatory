@@ -352,6 +352,55 @@ resources:
         id_field: REGISTRY_ID
         time_field: installed
 
+  usgs-national-map/elevation: 
+    type: collection
+    title: USGS National Map Elevation
+    description: USGS National Map 3D Elevation Program (3DEPElevation)
+    provider-name:
+      - USGS
+    keywords: [USGS]
+    links:
+      - <<: *default-link
+        href: https://tnmaccess.nationalmap.gov/api/v1/map_services
+        all_national_map_links: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
+    extents: *default-extent
+    providers:
+     -  type: map
+        name: WMSFacade
+        data: https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer/WMSServer
+        options:
+          layer: 3DEPElevation
+          style: default
+          projection: 3857
+        format:
+          name: png
+          mimetype: image/png
+
+  usgs-national-map/land-use: 
+    type: collection
+    title: USGS National Map Land Use
+    description: USGS National Map Land Use
+    provider-name:
+      - USGS
+    keywords: [USGS]
+    links:
+      - <<: *default-link
+        href: https://tnmaccess.nationalmap.gov/api/v1/map_services
+        all_national_map_links: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
+    extents: *default-extent
+    providers:
+      - type: map
+        name: WMSFacade
+        data: https://www.mrlc.gov/geoserver/NLCD_Land_Cover/wms
+        options:
+          layer: CONUS_Land_Cover
+          style: default
+          projection: 3857
+        format:
+          name: png
+          mimetype: image/png
+        
+
   config-store:
       type: process
       processor:
