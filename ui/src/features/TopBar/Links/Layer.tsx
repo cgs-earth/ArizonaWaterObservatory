@@ -8,7 +8,7 @@ import { Feature } from 'geojson';
 import { Anchor, Box, Group, Text, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
-import { LocationBlock } from '@/features/TopBar/Links/LocationBlock';
+import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
 import styles from '@/features/TopBar/TopBar.module.css';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
@@ -16,6 +16,7 @@ import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
 import { Layer as LayerType, Location } from '@/stores/main/types';
 import { LoadingType } from '@/stores/session/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getProvider } from '@/utils/provider';
 
 type Props = {
@@ -32,6 +33,7 @@ export const Layer: React.FC<Props> = (props) => {
   const [otherLocations, setOtherLocations] = useState<Feature[]>([]);
   const [dataset, setDataset] = useState<ICollection>();
   const [provider, setProvider] = useState<string>('');
+  const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
@@ -50,10 +52,10 @@ export const Layer: React.FC<Props> = (props) => {
       const layerLocations = locations.filter((location) => location.layerId === layer.id);
 
       const selectedLocations = allLocations.features.filter((feature) =>
-        layerLocations.some((location) => location.id === feature.id)
+        layerLocations.some((location) => location.id === String(feature.id))
       );
       const otherLocations = allLocations.features.filter(
-        (feature) => !layerLocations.some((location) => location.id === feature.id)
+        (feature) => !layerLocations.some((location) => location.id === String(feature.id))
       );
 
       if (isMounted.current) {
@@ -82,6 +84,8 @@ export const Layer: React.FC<Props> = (props) => {
 
     if (newDataset) {
       setDataset(newDataset);
+      const collectionType = getCollectionType(newDataset);
+      setCollectionType(collectionType);
     }
   }, [layer]);
 
@@ -107,6 +111,19 @@ export const Layer: React.FC<Props> = (props) => {
   const alternateLink = dataset?.links?.find(
     (link) => link.rel === 'alternate' && link.type === 'text/html'
   )?.href;
+
+  const getLabel = (collectionType: CollectionType) => {
+    switch (collectionType) {
+      case CollectionType.EDR:
+        return 'Location';
+      case CollectionType.EDRGrid:
+        return 'Grid';
+      case CollectionType.Features:
+        return 'Item';
+      default:
+        return '';
+    }
+  };
 
   const hasParametersSelected = layer.parameters.length > 0;
   const hasSelectedLocations = selectedLocations.length > 0;
@@ -167,15 +184,17 @@ export const Layer: React.FC<Props> = (props) => {
                           id: `links-${layer.id}-selected-accordion`,
                           title: (
                             <Title order={6} size="h4" className={styles.accordionHeader}>
-                              {otherLocations.length > 0 && 'Selected '}Locations
+                              {otherLocations.length > 0 && 'Selected '}
+                              {getLabel(collectionType)}s
                             </Title>
                           ),
                           content: (
-                            <LocationBlock
+                            <LayerBlock
                               linkLocation={linkLocation}
                               locations={selectedLocations}
                               layer={layer}
                               collection={dataset}
+                              collectionType={collectionType}
                             />
                           ),
                         },
@@ -194,10 +213,11 @@ export const Layer: React.FC<Props> = (props) => {
                             </Title>
                           ),
                           content: (
-                            <LocationBlock
+                            <LayerBlock
                               locations={otherLocations}
                               layer={layer}
                               collection={dataset}
+                              collectionType={collectionType}
                             />
                           ),
                         },

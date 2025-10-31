@@ -96,7 +96,7 @@ export class CoverageGridService {
         id,
         properties: {
           times,
-          gridIdentifier: `${startX}-${startY}-${endX}-${endY}`,
+          gridIdentifier: `${startX}_${startY}_${endX}_${endY}`,
           ...currentValues,
         },
       });

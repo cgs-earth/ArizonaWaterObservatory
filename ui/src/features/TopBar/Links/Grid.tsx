@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { forwardRef, useEffect, useState } from 'react';
 import { Feature } from 'geojson';
-import { Anchor, Collapse, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
+import { Anchor, Collapse, Group, Paper, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Code from '@/components/Code';
@@ -15,14 +15,13 @@ import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import { Variant } from '@/components/types';
-import { Chart } from '@/features/Popup/Chart';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import { Table } from '@/features/TopBar/Links/Table';
 import styles from '@/features/TopBar/TopBar.module.css';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
-import { buildLocationUrl } from '@/utils/url';
+import { buildCubeUrl } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
 
@@ -33,41 +32,24 @@ type Props = {
   linkLocation?: LocationType | null;
 };
 
-export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
+export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const { location, layer, collection, linkLocation } = props;
 
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
-  const [openedChart, { toggle: toggleChart, close: closeChart }] = useDisclosure(false);
 
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
-  const [datasetName, setDatasetName] = useState<string>('');
-  const [parameters, setParameters] = useState<string[]>([]);
+  const [_datasetName, setDatasetName] = useState<string>('');
+  const [_parameters, setParameters] = useState<string[]>([]);
 
   const [from, setFrom] = useState<string | null>(layer.from);
   const [to, setTo] = useState<string | null>(layer.to);
 
   useEffect(() => {
-    const url = buildLocationUrl(
-      collection.id,
-      String(location.id),
-      layer.parameters,
-      from,
-      to,
-      false,
-      true
-    );
+    const url = buildCubeUrl(collection.id, location, layer.parameters, from, to, false, true);
 
-    const codeUrl = buildLocationUrl(
-      collection.id,
-      String(location.id),
-      layer.parameters,
-      from,
-      to,
-      false,
-      false
-    );
+    const codeUrl = buildCubeUrl(collection.id, location, layer.parameters, from, to, false, false);
 
     setUrl(url);
     setCodeUrl(codeUrl);
@@ -87,10 +69,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
       const parameters = paramObjects
         .filter((object) => layer.parameters.includes(object.id))
         .map((object) => object.name);
-
-      if (parameters.length === 0) {
-        closeChart();
-      }
 
       setParameters(parameters);
     }
@@ -143,22 +121,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
             >
               GeoJSON
             </Button>
-            {parameters.length > 0 ? (
-              <Button
-                size="xs"
-                variant={openedChart ? Variant.Selected : Variant.Secondary}
-                className={styles.propertiesButton}
-                onClick={toggleChart}
-              >
-                Chart
-              </Button>
-            ) : (
-              <Tooltip label="Select one or more parameters in the layer controls to enable charts.">
-                <Button size="xs" variant={Variant.Secondary} disabled data-disabled>
-                  Chart
-                </Button>
-              </Tooltip>
-            )}
           </Group>
           <Group gap={16} align="flex-end">
             <DateInput
@@ -198,19 +160,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
           </Group>
         </Group>
         <Stack>
-          {openedChart && (
-            <Collapse in={openedChart}>
-              <Chart
-                className={styles.linksChart}
-                collectionId={layer.datasourceId}
-                locationId={String(location.id)}
-                title={datasetName}
-                parameters={parameters}
-                from={from}
-                to={to}
-              />
-            </Collapse>
-          )}
           <Group align="flex-start" gap={16} grow>
             {openedProps && (
               <Collapse in={openedProps}>

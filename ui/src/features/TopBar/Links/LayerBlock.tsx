@@ -12,16 +12,19 @@ import styles from '@/features/TopBar/TopBar.module.css';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { chunk } from '@/utils/chunk';
+import { CollectionType } from '@/utils/collection';
+import { Grid } from './Grid';
 
 type Props = {
   locations: Feature[];
   collection: ICollection | undefined;
   layer: Layer;
+  collectionType: CollectionType;
   linkLocation?: LocationType | null;
 };
 
-export const LocationBlock: React.FC<Props> = (props) => {
-  const { locations, collection, layer, linkLocation = null } = props;
+export const LayerBlock: React.FC<Props> = (props) => {
+  const { locations, collection, layer, collectionType, linkLocation = null } = props;
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(locations.length > 10 ? 10 : locations.length);
@@ -78,16 +81,37 @@ export const LocationBlock: React.FC<Props> = (props) => {
     <Stack component="section" gap="xs" mb="md" className={styles.locationBlockWrapper}>
       {collection &&
         currentChunk.map((location) => (
-          <Location
-            key={`selected-location-${layer.id}-${location.id}`}
-            ref={(el) => {
-              locationRefs.current[String(location.id)] = el;
-            }}
-            linkLocation={linkLocation}
-            location={location}
-            layer={layer}
-            collection={collection}
-          />
+          <>
+            {collectionType === CollectionType.EDR && (
+              <Location
+                key={`selected-location-${layer.id}-${location.id}`}
+                ref={(el) => {
+                  locationRefs.current[String(location.id)] = el;
+                }}
+                linkLocation={linkLocation}
+                location={location}
+                layer={layer}
+                collection={collection}
+              />
+            )}
+          </>
+        ))}
+      {collection &&
+        currentChunk.map((location) => (
+          <>
+            {collectionType === CollectionType.EDRGrid && (
+              <Grid
+                key={`selected-grid-${layer.id}-${location.id}`}
+                ref={(el) => {
+                  locationRefs.current[String(location.id)] = el;
+                }}
+                linkLocation={linkLocation}
+                location={location}
+                layer={layer}
+                collection={collection}
+              />
+            )}
+          </>
         ))}
       <Group justify="space-between" align="flex-end">
         <NumberInput
