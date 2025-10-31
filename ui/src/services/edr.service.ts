@@ -940,7 +940,7 @@ export interface ParameterName {
     };
   };
   unit: {
-    label: {
+    label?: {
       en: string;
     };
     symbol: {

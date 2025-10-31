@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Popup } from '.';
+import Popup from '.';
 import { center } from '@turf/turf';
 import { Feature } from 'geojson';
 import { Map, MapMouseEvent, Popup as PopupType } from 'mapbox-gl';

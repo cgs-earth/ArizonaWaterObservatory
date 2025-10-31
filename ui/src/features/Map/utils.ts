@@ -127,3 +127,6 @@ export const getSelectedColor = (
 ): ExpressionSpecification => {
   return ['case', ['in', ['to-string', ['id']], ['literal', locationIds]], '#FFF', originalColor];
 };
+export const getSortKey = (locationIds: Array<Location['id']>): ExpressionSpecification => {
+  return ['case', ['in', ['to-string', ['id']], ['literal', locationIds]], 1, 0];
+};

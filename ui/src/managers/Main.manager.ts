@@ -16,8 +16,8 @@ import { CoverageGridService } from '@/services/coverageGrid.service';
 import { ICollection } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { ColorValueHex, Layer, Location, MainState } from '@/stores/main/types';
+import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
 import { getRandomHexColor } from '@/utils/hexColor';
-import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/isCollectionType';
 import {
   getFillLayerDefinition,
   getLineLayerDefinition,
@@ -516,20 +516,27 @@ class MainManager {
 
   private clearInvalidLocations = (
     layerId: Layer['id'],
+    collectionId: ICollection['id'],
     featureCollection: FeatureCollection<Geometry>
   ) => {
-    const { locations, removeLocation } = this.store.getState();
+    const datasource = this.getDatasource(collectionId);
 
-    const layerLocations = locations.filter((location) => location.layerId === layerId);
+    if (datasource && isEdrGrid(datasource)) {
+      this.store.getState().setLocations([]);
+    } else {
+      const { locations, removeLocation } = this.store.getState();
 
-    const validIds = new Set(featureCollection.features.map((feature) => String(feature.id)));
-    const invalidLocations = layerLocations.filter((location) => !validIds.has(location.id));
+      const layerLocations = locations.filter((location) => location.layerId === layerId);
 
-    if (invalidLocations.length === 0) {
-      return;
+      const validIds = new Set(featureCollection.features.map((feature) => String(feature.id)));
+      const invalidLocations = layerLocations.filter((location) => !validIds.has(location.id));
+
+      if (invalidLocations.length === 0) {
+        return;
+      }
+
+      invalidLocations.forEach((location) => removeLocation(location));
     }
-
-    invalidLocations.forEach((location) => removeLocation(location));
   };
 
   private filterLocations(
@@ -586,7 +593,7 @@ class MainManager {
 
         const filteredData = this.filterLocations(data, options?.filterFeatures);
 
-        this.clearInvalidLocations(layer.id, filteredData);
+        this.clearInvalidLocations(layer.id, collectionId, filteredData);
 
         this.map.addSource(sourceId, {
           type: 'geojson',
@@ -604,7 +611,7 @@ class MainManager {
 
         const filteredData = this.filterLocations(data, options?.filterFeatures);
 
-        this.clearInvalidLocations(layer.id, filteredData);
+        this.clearInvalidLocations(layer.id, collectionId, filteredData);
 
         source.setData(filteredData);
       }
@@ -613,7 +620,7 @@ class MainManager {
     return sourceId;
   }
 
-  private getUniqueIds(features: GeoJSONFeature[]): Array<string> {
+  public getUniqueIds(features: GeoJSONFeature[]): Array<string> {
     const uniques = new Set<string>();
 
     for (const feature of features) {
@@ -814,31 +821,6 @@ class MainManager {
 
     return filteredData;
   }
-  // public async getLocations(): Promise<void> {
-  //   // Specific user collection choice
-  //   const collection = this.store.getState().collection;
-  //   // All collections for selected filters
-  //   const collections = this.store.getState().collections;
-
-  //   if (collection) {
-  //     const sourceId = await this.addLocationSource(collection);
-  //     this.addLocationLayer(collection, sourceId);
-  //   } else {
-  //     const chunkSize = 5;
-
-  //     for (let i = 0; i < collections.length; i += chunkSize) {
-  //       const chunk = collections.slice(i, i + chunkSize);
-
-  //       await Promise.all(
-  //         chunk.map(async (collection) => {
-  //           const collectionId = collection.id;
-  //           const sourceId = await this.addLocationSource(collectionId);
-  //           this.addLocationLayer(collectionId, sourceId);
-  //         })
-  //       );
-  //     }
-  //   }
-  // }
 
   public async applySpatialFilter(drawnShapes: Feature<Polygon | MultiPolygon>[]): Promise<void> {
     const layers = this.store.getState().layers;

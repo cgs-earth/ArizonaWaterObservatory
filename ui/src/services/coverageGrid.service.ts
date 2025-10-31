@@ -12,6 +12,11 @@ import { CoverageCollection, CoverageJSON, ICollection } from './edr.service';
 import awoService from './init/awo.init';
 
 type Values = Record<string, (number | null)[]>;
+type Axes = {
+  t: { values: string[] };
+  x: { start: number; stop: number; num: number };
+  y: { start: number; stop: number; num: number };
+};
 
 export class CoverageGridService {
   private getLength({ start, stop, num }: { start: number; stop: number; num: number }): number {
@@ -26,6 +31,10 @@ export class CoverageGridService {
       keys[key] = coverage.ranges[key].values;
     }
     return keys;
+  }
+
+  private getAxes(coverage: CoverageJSON): Axes {
+    return coverage.domain.axes as Axes;
   }
 
   private getCurrentValuesConstructor(
@@ -61,15 +70,19 @@ export class CoverageGridService {
     xCount: number,
     yCount: number,
     featureCollection: FeatureCollection<Polygon>,
-    count: number,
+    times: string[],
     values: Values
   ) {
+    const count = times.length;
+
     const getCurrentValues = this.getCurrentValuesConstructor(count, values, xCount, yCount);
+
+    let id = 1;
 
     return (x: number, y: number) => {
       const currentValues = getCurrentValues(x, y);
 
-      // This grid entry would have no
+      // This grid entry would have no values to display
       if (Object.values(currentValues).every((array) => array.every((value) => value === null))) {
         return;
       }
@@ -79,8 +92,16 @@ export class CoverageGridService {
       const startX = xStart + xLength * x;
       const endX = xStart + xLength * (x + 1);
 
-      const grid = bboxPolygon([startX, startY, endX, endY]);
+      const grid = bboxPolygon([startX, startY, endX, endY], {
+        id,
+        properties: {
+          times,
+          gridIdentifier: `${startX}-${startY}-${endX}-${endY}`,
+          ...currentValues,
+        },
+      });
       featureCollection.features.push(grid);
+      id += 1;
     };
   }
 
@@ -91,17 +112,7 @@ export class CoverageGridService {
       );
     }
 
-    const {
-      t,
-      x: xObj,
-      y: yObj,
-    } = coverage.domain.axes as {
-      t: { values: number[] };
-      x: { start: number; stop: number; num: number };
-      y: { start: number; stop: number; num: number };
-    };
-
-    const count = t.values.length;
+    const { t, x: xObj, y: yObj } = this.getAxes(coverage);
 
     const xLength = this.getLength(xObj);
     const yLength = this.getLength(yObj);
@@ -118,9 +129,10 @@ export class CoverageGridService {
       xObj.num,
       yObj.num,
       featureCollection as FeatureCollection<Polygon>,
-      count,
+      t.values,
       values
     );
+
     for (let y = 0; y < yObj.num; y++) {
       for (let x = 0; x < xObj.num; x++) {
         addGrid(x, y);
