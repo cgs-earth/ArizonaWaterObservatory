@@ -5,12 +5,12 @@
 
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { Parameter } from '.';
 import { Feature } from 'geojson';
 import { Box, Divider, Group, ScrollArea, Stack, Text, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
+import { Parameter } from '@/features/Popup';
 import styles from '@/features/Popup/Popup.module.css';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 

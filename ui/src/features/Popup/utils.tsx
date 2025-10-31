@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Popup from '.';
 import { center } from '@turf/turf';
 import { Feature } from 'geojson';
 import { Map, MapMouseEvent, Popup as PopupType } from 'mapbox-gl';
 import { Root } from 'react-dom/client';
+import Popup from '@/features/Popup';
 import { Mantine as MantineProvider } from '@/providers/Mantine';
 import { Location } from '@/stores/main/types';
 

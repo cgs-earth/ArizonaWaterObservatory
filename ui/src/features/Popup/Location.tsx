@@ -4,12 +4,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Parameter } from '.';
 import { Feature } from 'geojson';
 import { Box, Group, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
+import { Parameter } from '@/features/Popup';
 import { Chart } from '@/features/Popup/Chart';
 import styles from '@/features/Popup/Popup.module.css';
 import { Table } from '@/features/TopBar/Links/Table';

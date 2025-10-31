@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Feature } from 'geojson';
+import { BBox, Feature } from 'geojson';
 import { ICollection } from '@/services/edr.service';
 import { Location } from '@/stores/main/types';
 
@@ -50,6 +50,18 @@ export const buildLocationUrl = (
 
   return url.toString();
 };
+
+const normalizeBBox = (bbox: BBox) => {
+  const [x1, y1, x2, y2] = bbox;
+
+  const minX = Math.min(x1, x2);
+  const maxX = Math.max(x1, x2);
+  const minY = Math.min(y1, y2);
+  const maxY = Math.max(y1, y2);
+
+  return [minX, minY, maxX, maxY];
+};
+
 export const buildCubeUrl = (
   collectionId: ICollection['id'],
   feature: Feature,
@@ -64,7 +76,7 @@ export const buildCubeUrl = (
   }
 
   const url = new URL(`${import.meta.env.VITE_AWO_SOURCE}/collections/${collectionId}/cube`);
-  url.searchParams.set('bbox', feature.bbox.join(','));
+  url.searchParams.set('bbox', normalizeBBox(feature.bbox).join(','));
 
   if (format) {
     url.searchParams.set('f', csv ? 'csv' : 'json');

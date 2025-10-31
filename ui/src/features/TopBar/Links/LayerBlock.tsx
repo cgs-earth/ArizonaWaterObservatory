@@ -7,13 +7,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Feature } from 'geojson';
 import { Group, Pagination, Stack } from '@mantine/core';
 import NumberInput from '@/components/NumberInput';
+import { Grid } from '@/features/TopBar/Links/Grid';
 import { Location } from '@/features/TopBar/Links/Location';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { chunk } from '@/utils/chunk';
 import { CollectionType } from '@/utils/collection';
-import { Grid } from './Grid';
 
 type Props = {
   locations: Feature[];

@@ -6,6 +6,9 @@
 import { useEffect, useState } from 'react';
 import { Feature } from 'geojson';
 import { Stack } from '@mantine/core';
+import { Grid } from '@/features/Popup/Grid';
+import { Header } from '@/features/Popup/Header';
+import { Location } from '@/features/Popup/Location';
 import styles from '@/features/Popup/Popup.module.css';
 import mainManager from '@/managers/Main.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
@@ -13,9 +16,6 @@ import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getParameterUnit } from '@/utils/parameters';
-import { Grid } from './Grid';
-import { Header } from './Header';
-import { Location } from './Location';
 
 export type Parameter = {
   name: string;

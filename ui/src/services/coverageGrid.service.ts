@@ -6,10 +6,10 @@
 import { bboxPolygon } from '@turf/turf';
 import { BBox, FeatureCollection, Polygon } from 'geojson';
 import { getDefaultGeoJSON } from '@/consts/geojson';
+import { CoverageCollection, CoverageJSON, ICollection } from '@/services/edr.service';
+import awoService from '@/services/init/awo.init';
 import { isCoverageJSON } from '@/utils/isTypeObject';
 import { getDatetime } from '@/utils/url';
-import { CoverageCollection, CoverageJSON, ICollection } from './edr.service';
-import awoService from './init/awo.init';
 
 type Values = Record<string, (number | null)[]>;
 type Axes = {
