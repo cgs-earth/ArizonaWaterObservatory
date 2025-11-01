@@ -4,7 +4,7 @@
  */
 
 import { CollectionId } from '@/consts/collections';
-import { ICollection } from '@/services/edr.service';
+import { ICollection, ParameterName } from '@/services/edr.service';
 
 const getParameters = (collection: ICollection, limit: number = 5) => {
   if (limit < 0) {
@@ -39,4 +39,8 @@ export const getParameterList = (
   }
 
   return getParameters(collection, limit);
+};
+
+export const getParameterUnit = (parameterName: ParameterName) => {
+  return parameterName.unit?.label?.en ?? parameterName.unit.symbol.value;
 };

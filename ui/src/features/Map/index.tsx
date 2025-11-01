@@ -9,7 +9,7 @@ import { basemaps } from '@/components/Map/consts';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { sourceConfigs } from '@/features/Map/sources';
-import { getSelectedColor } from '@/features/Map/utils';
+import { getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
@@ -122,8 +122,9 @@ const MainMap: React.FC<Props> = (props) => {
         if (features && features.length > 0) {
           hoverPopup.remove();
 
-          const locations: Location[] = features.map((feature) => ({
-            id: String(feature.id),
+          const uniqueFeatures = mainManager.getUniqueIds(features);
+          const locations: Location[] = uniqueFeatures.map((id) => ({
+            id,
             layerId: layer.id,
           }));
 
@@ -155,6 +156,7 @@ const MainMap: React.FC<Props> = (props) => {
       }
       if (map.getLayer(lineLayerId)) {
         map.setPaintProperty(lineLayerId, 'line-color', getSelectedColor(locationIds, color));
+        map.setLayoutProperty(lineLayerId, 'line-sort-key', getSortKey(locationIds));
       }
     });
   }, [locations]);

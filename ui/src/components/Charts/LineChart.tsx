@@ -46,8 +46,8 @@ const LineChart = (props: Props) => {
 
   const option: echarts.EChartsCoreOption = useMemo(() => {
     const dates = isCoverageCollection(data)
-      ? data.coverages[0]?.domain.axes.t.values
-      : data.domain.axes.t.values;
+      ? (data.coverages[0]?.domain.axes.t as { values: string[] }).values
+      : (data.domain.axes.t as { values: string[] }).values;
 
     const series = coverageJSONToSeries(data);
 

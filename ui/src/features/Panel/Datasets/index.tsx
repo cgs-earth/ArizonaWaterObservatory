@@ -43,6 +43,7 @@ const Datasets: React.FC<Props> = (props) => {
   const accordions = useMemo(() => {
     const accordions: ReactElement[] = [
       <Accordion
+        key="datasets-filter-parent-accordion"
         items={[
           {
             id: 'datasets-filter-accordion',
@@ -57,6 +58,7 @@ const Datasets: React.FC<Props> = (props) => {
     datasets.forEach((dataset) => {
       accordions.push(
         <Accordion
+          key={`datasets-accordion-parent-${dataset.id}`}
           items={[
             {
               id: `datasets-accordion-${dataset.id}`,

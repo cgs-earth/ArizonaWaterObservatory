@@ -50,8 +50,8 @@ export const coverageJSONToSeries = (
   const ranges = isCoverageCollection(coverage) ? coverage.coverages[0]?.ranges : coverage.ranges;
 
   const dates = isCoverageCollection(coverage)
-    ? coverage.coverages[0]?.domain.axes.t.values
-    : coverage.domain.axes.t.values;
+    ? (coverage.coverages[0]?.domain.axes.t as { values: string[] }).values
+    : (coverage.domain.axes.t as { values: string[] }).values;
 
   if (!ranges || !dates) {
     notificationManager.show(
