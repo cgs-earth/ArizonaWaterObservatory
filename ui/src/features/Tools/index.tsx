@@ -9,6 +9,7 @@ import { Draw } from '@/features/Tools/Draw';
 import { Legend } from '@/features/Tools/Legend';
 import { FAQ } from './FAQ';
 import { Glossary } from './Glossary';
+import { Warning } from './Warning';
 
 const Tools: React.FC = () => {
   return (
@@ -18,6 +19,7 @@ const Tools: React.FC = () => {
       <Legend />
       <BasemapSelector />
       <Draw />
+      <Warning />
     </Group>
   );
 };

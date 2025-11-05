@@ -96,7 +96,10 @@
 }
 
 .layerInput {
-  width: 150px;
+  width: calc(50% - var(--default-spacing));
+}
+.datePicker {
+  width: calc(50% - var(--default-spacing));
 }
 
 @media screen and (max-width: 899px) {

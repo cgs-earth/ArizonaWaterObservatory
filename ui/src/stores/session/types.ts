@@ -33,6 +33,7 @@ export enum Overlay {
   Basemap = 'basemap',
   Legend = 'legend',
   Info = 'info',
+  Warning = 'warning',
 }
 
 export type Notification = {

@@ -6,7 +6,7 @@
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useEffect, useState } from 'react';
-import { ComboboxData, Divider, Group, Stack, Tooltip } from '@mantine/core';
+import { ComboboxData, Divider, Group, Stack, Text, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import ColorInput from '@/components/ColorInput';
 import DateInput from '@/components/DateInput';
@@ -95,6 +95,7 @@ const Layer: React.FC<Props> = (props) => {
   };
 
   const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
+  const isMissingParameters = collectionType === CollectionType.EDRGrid && parameters.length === 0;
 
   return (
     <Stack gap="xs" className={styles.accordionContent}>
@@ -114,6 +115,12 @@ const Layer: React.FC<Props> = (props) => {
           onChange={(value) => setColor(value)}
         />
       </Group>
+      {collectionType === CollectionType.Features && (
+        <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">
+          This is a features layer which contains no parameter values. Rendered data is a standard
+          feature collection with accessible properties and no underlying data.
+        </Text>
+      )}
       {[CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType) && (
         <>
           <Divider />
@@ -126,6 +133,7 @@ const Layer: React.FC<Props> = (props) => {
               value={from}
               onChange={setFrom}
               simplePresets={[
+                DatePreset.Today,
                 DatePreset.OneYear,
                 DatePreset.FiveYears,
                 DatePreset.TenYears,
@@ -143,6 +151,7 @@ const Layer: React.FC<Props> = (props) => {
               value={to}
               onChange={setTo}
               simplePresets={[
+                DatePreset.Today,
                 DatePreset.OneYear,
                 DatePreset.FiveYears,
                 DatePreset.TenYears,
@@ -153,6 +162,15 @@ const Layer: React.FC<Props> = (props) => {
               error={isValidRange ? false : 'Invalid date range'}
             />
           </Group>
+          {collectionType === CollectionType.EDRGrid && (
+            <>
+              <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">
+                If no data renders after the layer is finished updating, increase the date range to
+                find more data.
+              </Text>
+              <Divider />
+            </>
+          )}
           <Select
             size="sm"
             label="Parameter"
@@ -172,17 +190,19 @@ const Layer: React.FC<Props> = (props) => {
         <Tooltip
           label={
             isLoading
-              ? 'Please wait for layer update to finish'
+              ? 'Please wait for layer update to finish.'
               : !isValidRange
-                ? 'Please correct date range'
-                : null
+                ? 'Please correct date range.'
+                : isMissingParameters
+                  ? 'Grid layers require at least one parameter.'
+                  : null
           }
-          disabled={!isLoading && isValidRange}
+          disabled={!isLoading && isValidRange && !isMissingParameters}
         >
           <Button
             size="xs"
-            disabled={isLoading || !isValidRange}
-            data-disabled={isLoading || !isValidRange}
+            disabled={isLoading || !isValidRange || isMissingParameters}
+            data-disabled={isLoading || !isValidRange || isMissingParameters}
             variant={Variant.Primary}
             onClick={() => handleSave()}
           >
@@ -190,7 +210,7 @@ const Layer: React.FC<Props> = (props) => {
           </Button>
         </Tooltip>
         <Tooltip
-          label={isLoading ? 'Please wait for layer update to finish' : null}
+          label={isLoading ? 'Please wait for layer update to finish.' : null}
           disabled={!isLoading}
         >
           <Button
