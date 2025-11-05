@@ -65,7 +65,7 @@ export const Location: React.FC<Props> = (props) => {
       </Box>
       <Group justify="space-between" align="flex-end" mt={8} mb={8}>
         <Group gap={8} align="flex-end">
-          {locations.length > 0 && (
+          {locations.length > 1 && (
             <Select
               className={styles.locationsDropdown}
               size="xs"
@@ -100,19 +100,21 @@ export const Location: React.FC<Props> = (props) => {
             Properties
           </Button>
         </Group>
-        {parameters.length > 0 ? (
-          <Tooltip label="Open this location in the Links modal.">
-            <Button size="xs" onClick={handleLinkClick} variant={Variant.Primary}>
-              Link
-            </Button>
-          </Tooltip>
-        ) : (
-          <Tooltip label="Select one or more parameters in the layer controls to access links modal.">
-            <Button size="xs" variant={Variant.Primary} disabled data-disabled>
-              Link
-            </Button>
-          </Tooltip>
-        )}
+        <Box component="span" className={styles.linkButtonWrapper}>
+          {parameters.length > 0 ? (
+            <Tooltip label="Open this location in the Links modal.">
+              <Button size="xs" onClick={handleLinkClick} variant={Variant.Primary}>
+                Link
+              </Button>
+            </Tooltip>
+          ) : (
+            <Tooltip label="Select one or more parameters in the layer controls to access links modal.">
+              <Button size="xs" variant={Variant.Primary} disabled data-disabled>
+                Link
+              </Button>
+            </Tooltip>
+          )}
+        </Box>
       </Group>
     </>
   );

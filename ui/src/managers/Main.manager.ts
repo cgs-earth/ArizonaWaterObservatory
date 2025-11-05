@@ -13,9 +13,15 @@ import { StoreApi, UseBoundStore } from 'zustand';
 import { DEFAULT_BBOX } from '@/features/Map/consts';
 import { Config, GetConfigResponse, PostConfigResponse } from '@/managers/types';
 import { CoverageGridService } from '@/services/coverageGrid.service';
-import { ICollection } from '@/services/edr.service';
+import { ICollection, ParameterGroup } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
-import { ColorValueHex, Layer, Location, MainState } from '@/stores/main/types';
+import {
+  ColorValueHex,
+  Layer,
+  Location,
+  MainState,
+  ParameterGroupMembers,
+} from '@/stores/main/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
 import { getRandomHexColor } from '@/utils/hexColor';
 import {
@@ -896,26 +902,31 @@ class MainManager {
     });
   }
 
+  private createParameterGroupMembers(parameterGroups: ParameterGroup[]): void {
+    const parameterGroupMembers: ParameterGroupMembers = {};
+    parameterGroups.forEach((parameterGroup) => {
+      parameterGroupMembers[parameterGroup.label] = Object.keys(parameterGroup.members);
+    });
+
+    this.store.getState().setParameterGroupMembers(parameterGroupMembers);
+  }
+
   /**
    *
    * @function
    */
   public async getCollections(): Promise<void> {
-    const provider = this.store.getState().provider;
-    const category = this.store.getState().category;
+    const response = await awoService.getCollections();
+    const { collections, parameterGroups } = response;
 
-    const response = await awoService.getCollections({
-      params: {
-        ...(provider ? { 'provider-name': provider } : {}),
-        'parameter-name': category ? category.value : '*',
-      },
-    });
     const originalCollections = this.store.getState().originalCollections;
     if (originalCollections.length === 0) {
-      this.store.getState().setOriginalCollections(response.collections);
+      this.store.getState().setOriginalCollections(collections);
     }
 
-    this.store.getState().setCollections(response.collections);
+    this.store.getState().setCollections(collections);
+
+    this.createParameterGroupMembers(parameterGroups);
   }
 
   private clearLocationLayers(): void {

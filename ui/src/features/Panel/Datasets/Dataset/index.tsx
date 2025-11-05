@@ -66,55 +66,60 @@ const Dataset: React.FC<Props> = (props) => {
   return (
     <Stack gap="xs" className={styles.accordionContent}>
       <Text size="sm">{dataset.description}</Text>
-      <TextInput
-        size="sm"
-        label="Explore"
-        description={description}
-        // description=""
-        placeholder="Parameters"
-        value={search}
-        onChange={(event) => setSearch(event.currentTarget.value)}
-        __clearable
-        error={
-          search.length > 0 && filteredParameters.length === 0
-            ? 'No parameters matching search term'
-            : null
-        }
-      />
-      <Divider />
-      <Stack gap={0}>
-        <Text size="md" fw={500}>
-          Available Parameters:
-        </Text>
-        {filteredParameters.length === 0 ? (
-          <Text size="xs">No Parameters</Text>
-        ) : (
-          <List size="xs">
-            {filteredParameters.slice(0, show).map((parameter) => (
-              <ListItem key={`${dataset.id}-${parameter}`}>{parameter}</ListItem>
-            ))}
-          </List>
-        )}
-      </Stack>
-      {filteredParameters.length > show && (
-        <Group justify="center">
-          {showMore && (
-            <Button size="xs" variant={Variant.Primary} onClick={() => setShow(show + 5)}>
-              Show more
-            </Button>
+      {parameters.length > 0 && (
+        <>
+          <TextInput
+            size="sm"
+            label="Explore"
+            description={description}
+            // description=""
+            placeholder="Parameters"
+            value={search}
+            onChange={(event) => setSearch(event.currentTarget.value)}
+            __clearable
+            error={
+              search.length > 0 && filteredParameters.length === 0
+                ? 'No parameters matching search term'
+                : null
+            }
+          />
+          <Divider />
+          <Stack gap={0}>
+            <Text size="md" fw={500}>
+              Available Parameters:
+            </Text>
+            {filteredParameters.length === 0 ? (
+              <Text size="xs">No Parameters</Text>
+            ) : (
+              <List size="xs">
+                {filteredParameters.slice(0, show).map((parameter) => (
+                  <ListItem key={`${dataset.id}-${parameter}`}>{parameter}</ListItem>
+                ))}
+              </List>
+            )}
+          </Stack>
+          {filteredParameters.length > show && (
+            <Group justify="center">
+              {showMore && (
+                <Button size="xs" variant={Variant.Primary} onClick={() => setShow(show + 5)}>
+                  Show more
+                </Button>
+              )}
+              {showMore && showLess && <Divider orientation="vertical" />}
+              {showLess && (
+                <Button
+                  size="xs"
+                  variant={Variant.Primary}
+                  onClick={() => setShow(Math.max(show - 5, 5))}
+                >
+                  Show less
+                </Button>
+              )}
+            </Group>
           )}
-          {showMore && showLess && <Divider orientation="vertical" />}
-          {showLess && (
-            <Button
-              size="xs"
-              variant={Variant.Primary}
-              onClick={() => setShow(Math.max(show - 5, 5))}
-            >
-              Show less
-            </Button>
-          )}
-        </Group>
+        </>
       )}
+
       {link.length > 0 && (
         <Anchor target="_blank" href={link} mt="md">
           API

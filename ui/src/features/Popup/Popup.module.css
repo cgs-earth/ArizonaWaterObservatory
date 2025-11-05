@@ -38,3 +38,7 @@
   max-height: 200px;
   overflow-y: scroll;
 }
+
+.linkButtonWrapper {
+  margin-left: auto;
+}

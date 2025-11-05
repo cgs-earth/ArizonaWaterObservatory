@@ -16,6 +16,7 @@ import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getParameterUnit } from '@/utils/parameters';
+import { Item } from './Item';
 
 export type Parameter = {
   name: string;
@@ -56,6 +57,7 @@ const Popup: React.FC<Props> = (props) => {
     }
 
     const newFeature = features.find((feature) => String(feature.id) === location.id);
+
     if (newFeature) {
       setFeature(newFeature);
     }
@@ -130,6 +132,15 @@ const Popup: React.FC<Props> = (props) => {
           layer={layer}
           datasetName={datasetName}
           parameters={parameters}
+          handleLocationChange={handleLocationChange}
+          handleLinkClick={handleLinkClick}
+        />
+      )}
+      {collectionType === CollectionType.Features && feature && (
+        <Item
+          location={location}
+          locations={locations}
+          feature={feature}
           handleLocationChange={handleLocationChange}
           handleLinkClick={handleLinkClick}
         />

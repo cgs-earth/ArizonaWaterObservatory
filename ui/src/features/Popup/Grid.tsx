@@ -92,7 +92,11 @@ export const Grid: React.FC<Props> = (props) => {
       <ScrollArea scrollbars="x" type="hover" style={{ maxWidth: '100%' }}>
         <Group justify="flex-start" align="flex-start" mb={16} wrap="nowrap">
           {displayValues.map((displayValue) => (
-            <Stack gap={8} miw={120}>
+            <Stack
+              key={`${location.id}-${displayValue.label}-${displayValue.value}`}
+              gap={8}
+              miw={120}
+            >
               <Text size="sm" fw={700}>
                 {displayValue.label}
               </Text>

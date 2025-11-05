@@ -21,6 +21,7 @@ import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
 
 dayjs.extend(isSameOrBefore);
 
@@ -36,6 +37,7 @@ const Layer: React.FC<Props> = (props) => {
   const [parameters, setParameters] = useState(layer.parameters);
   const [from, setFrom] = useState<string | null>(layer.from);
   const [to, setTo] = useState<string | null>(layer.to);
+  const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
   const [data, setData] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
@@ -50,6 +52,9 @@ const Layer: React.FC<Props> = (props) => {
     const collection = mainManager.getDatasource(layer.datasourceId);
 
     if (collection) {
+      const collectionType = getCollectionType(collection);
+      setCollectionType(collectionType);
+
       const paramObjects = Object.values(collection?.parameter_names ?? {});
 
       const data = paramObjects.map((object) => ({
@@ -109,55 +114,60 @@ const Layer: React.FC<Props> = (props) => {
           onChange={(value) => setColor(value)}
         />
       </Group>
-      <Divider />
-      <Group justify="space-between">
-        <DateInput
-          label="From"
-          size="sm"
-          className={styles.datePicker}
-          placeholder="Pick start date"
-          value={from}
-          onChange={setFrom}
-          simplePresets={[
-            DatePreset.OneYear,
-            DatePreset.FiveYears,
-            DatePreset.TenYears,
-            DatePreset.FifteenYears,
-            DatePreset.ThirtyYears,
-          ]}
-          clearable
-          error={isValidRange ? false : 'Invalid date range'}
-        />
-        <DateInput
-          label="To"
-          size="sm"
-          className={styles.datePicker}
-          placeholder="Pick end date"
-          value={to}
-          onChange={setTo}
-          simplePresets={[
-            DatePreset.OneYear,
-            DatePreset.FiveYears,
-            DatePreset.TenYears,
-            DatePreset.FifteenYears,
-            DatePreset.ThirtyYears,
-          ]}
-          clearable
-          error={isValidRange ? false : 'Invalid date range'}
-        />
-      </Group>
-      <Select
-        size="sm"
-        label="Parameter"
-        description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters"
-        placeholder="Select a Parameter"
-        multiple
-        clearable
-        searchable
-        data={data}
-        value={parameters}
-        onChange={setParameters}
-      />
+      {[CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType) && (
+        <>
+          <Divider />
+          <Group justify="space-between">
+            <DateInput
+              label="From"
+              size="sm"
+              className={styles.datePicker}
+              placeholder="Pick start date"
+              value={from}
+              onChange={setFrom}
+              simplePresets={[
+                DatePreset.OneYear,
+                DatePreset.FiveYears,
+                DatePreset.TenYears,
+                DatePreset.FifteenYears,
+                DatePreset.ThirtyYears,
+              ]}
+              clearable
+              error={isValidRange ? false : 'Invalid date range'}
+            />
+            <DateInput
+              label="To"
+              size="sm"
+              className={styles.datePicker}
+              placeholder="Pick end date"
+              value={to}
+              onChange={setTo}
+              simplePresets={[
+                DatePreset.OneYear,
+                DatePreset.FiveYears,
+                DatePreset.TenYears,
+                DatePreset.FifteenYears,
+                DatePreset.ThirtyYears,
+              ]}
+              clearable
+              error={isValidRange ? false : 'Invalid date range'}
+            />
+          </Group>
+          <Select
+            size="sm"
+            label="Parameter"
+            description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters"
+            placeholder="Select a Parameter"
+            multiple
+            clearable
+            searchable
+            data={data}
+            value={parameters}
+            onChange={setParameters}
+          />
+        </>
+      )}
+
       <Group mt="md" justify="center">
         <Tooltip
           label={

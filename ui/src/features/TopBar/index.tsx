@@ -10,15 +10,17 @@ import Tools from '@/features/Tools';
 import Links from '@/features/TopBar/Links';
 import Share from '@/features/TopBar/Share';
 import styles from '@/features/TopBar/TopBar.module.css';
+import Info from './Info';
 
 const TopBar: React.FC = () => {
   return (
     <Group justify="space-between" className={styles.topBarWrapper}>
       <Group>
+        <Info />
         <Share />
         <Links />
         <Tooltip label="Feature in development">
-          <Button disabled data-disabled size="sm" w="fit-content" variant={Variant.Primary}>
+          <Button disabled data-disabled size="sm" w="fit-content" variant={Variant.Secondary}>
             Download
           </Button>
         </Tooltip>
