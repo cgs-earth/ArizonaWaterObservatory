@@ -98,6 +98,7 @@
 .layerInput {
   width: calc(50% - var(--default-spacing));
 }
+
 .datePicker {
   width: calc(50% - var(--default-spacing));
 }

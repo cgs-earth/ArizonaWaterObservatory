@@ -8,6 +8,7 @@ import { Feature } from 'geojson';
 import { Stack } from '@mantine/core';
 import { Grid } from '@/features/Popup/Grid';
 import { Header } from '@/features/Popup/Header';
+import { Item } from '@/features/Popup/Item';
 import { Location } from '@/features/Popup/Location';
 import styles from '@/features/Popup/Popup.module.css';
 import mainManager from '@/managers/Main.init';
@@ -16,7 +17,6 @@ import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getParameterUnit } from '@/utils/parameters';
-import { Item } from './Item';
 
 export type Parameter = {
   name: string;

@@ -4,19 +4,18 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Box, Stack, Tabs, Tooltip } from '@mantine/core';
+import { Stack, Tabs, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import InfoSimple from '@/assets/InfoSimple';
-import Button from '@/components/Button';
 import IconButton from '@/components/IconButton';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
+import { About } from '@/features/TopBar/Info/About';
+import { FAQ } from '@/features/TopBar/Info/FAQ';
+import { Glossary } from '@/features/TopBar/Info/Glossary';
 import styles from '@/features/TopBar/TopBar.module.css';
 import useSessionStore from '@/stores/session';
 import { HelpTab, Overlay } from '@/stores/session/types';
-import { About } from './About';
-import { FAQ } from './FAQ';
-import { Glossary } from './Glossary';
 
 export const INFO_LOCAL_KEY = 'awo-show-info';
 

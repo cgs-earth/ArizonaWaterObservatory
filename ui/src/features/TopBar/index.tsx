@@ -7,10 +7,10 @@ import { Group, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import { Variant } from '@/components/types';
 import Tools from '@/features/Tools';
+import Info from '@/features/TopBar/Info';
 import Links from '@/features/TopBar/Links';
 import Share from '@/features/TopBar/Share';
 import styles from '@/features/TopBar/TopBar.module.css';
-import Info from './Info';
 
 const TopBar: React.FC = () => {
   return (

@@ -6,10 +6,10 @@
 import { Group } from '@mantine/core';
 import BasemapSelector from '@/features/Tools/Basemap';
 import { Draw } from '@/features/Tools/Draw';
+import { FAQ } from '@/features/Tools/FAQ';
+import { Glossary } from '@/features/Tools/Glossary';
 import { Legend } from '@/features/Tools/Legend';
-import { FAQ } from './FAQ';
-import { Glossary } from './Glossary';
-import { Warning } from './Warning';
+import { Warning } from '@/features/Tools/Warning';
 
 const Tools: React.FC = () => {
   return (

@@ -5,7 +5,7 @@
 
 import { ICollection } from '@/services/edr.service';
 import { MainState } from '@/stores/main/types';
-import { getProvider } from './provider';
+import { getProvider } from '@/utils/provider';
 
 export const filterCollections = (
   collections: MainState['collections'],
