@@ -26,8 +26,7 @@ export const Legend: React.FC = () => {
   const legendEntries = useSessionStore((state) => state.legendEntries);
   const setLegendEntries = useSessionStore((state) => state.setLegendEntries);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _layers = useMainStore((state) => state.layers);
+  const layers = useMainStore((state) => state.layers);
 
   const overlay = useSessionStore((state) => state.overlay);
   const setOverlay = useSessionStore((state) => state.setOverlay);
@@ -138,6 +137,12 @@ export const Legend: React.FC = () => {
       setShow(false);
     }
   }, [overlay]);
+
+  useEffect(() => {
+    if (overlay === Overlay.Legend && layers.length === 0) {
+      setOverlay(null);
+    }
+  });
 
   return (
     <Popover

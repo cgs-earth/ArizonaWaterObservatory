@@ -7,10 +7,12 @@ import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useEffect, useState } from 'react';
 import { ComboboxData, Divider, Group, Stack, Text, Tooltip } from '@mantine/core';
+import Delete from '@/assets/Delete';
 import Button from '@/components/Button';
 import ColorInput from '@/components/ColorInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
+import IconButton from '@/components/IconButton';
 import Select from '@/components/Select';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
@@ -65,6 +67,11 @@ const Layer: React.FC<Props> = (props) => {
     }
   }, [isFetchingCollections]);
 
+  // If user updates color through the legend, update it here
+  useEffect(() => {
+    setColor(layer.color);
+  }, [layer.color]);
+
   const handleSave = async () => {
     setIsLoading(true);
     const updateName = name !== layer.name ? `${layer.name} -> ${name}` : layer.name;
@@ -92,6 +99,11 @@ const Layer: React.FC<Props> = (props) => {
     setParameters(layer.parameters);
     setFrom(layer.from);
     setTo(layer.to);
+  };
+
+  const handleDelete = () => {
+    mainManager.deleteLayer(layer);
+    notificationManager.show(`Deleted layer: ${layer.name}`, NotificationType.Success);
   };
 
   const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
@@ -185,43 +197,54 @@ const Layer: React.FC<Props> = (props) => {
           />
         </>
       )}
-
-      <Group mt="md" justify="center">
-        <Tooltip
-          label={
-            isLoading
-              ? 'Please wait for layer update to finish.'
-              : !isValidRange
-                ? 'Please correct date range.'
-                : isMissingParameters
-                  ? 'Grid layers require at least one parameter.'
-                  : null
-          }
-          disabled={!isLoading && isValidRange && !isMissingParameters}
-        >
-          <Button
-            size="xs"
-            disabled={isLoading || !isValidRange || isMissingParameters}
-            data-disabled={isLoading || !isValidRange || isMissingParameters}
+      <Group justify="space-between" align="flex-end">
+        <Group mt="md">
+          <Tooltip
+            label={
+              isLoading
+                ? 'Please wait for layer update to finish.'
+                : !isValidRange
+                  ? 'Please correct date range.'
+                  : isMissingParameters
+                    ? 'Grid layers require at least one parameter.'
+                    : null
+            }
+            disabled={!isLoading && isValidRange && !isMissingParameters}
+          >
+            <Button
+              size="xs"
+              disabled={isLoading || !isValidRange || isMissingParameters}
+              data-disabled={isLoading || !isValidRange || isMissingParameters}
+              variant={Variant.Primary}
+              onClick={() => handleSave()}
+            >
+              Save
+            </Button>
+          </Tooltip>
+          <Tooltip
+            label={isLoading ? 'Please wait for layer update to finish.' : null}
+            disabled={!isLoading}
+          >
+            <Button
+              size="xs"
+              disabled={isLoading}
+              data-disabled={isLoading}
+              variant={Variant.Tertiary}
+              onClick={() => handleCancel()}
+            >
+              Cancel
+            </Button>
+          </Tooltip>
+        </Group>
+        <Tooltip label="Delete this layer instance" openDelay={500}>
+          <IconButton
             variant={Variant.Primary}
-            onClick={() => handleSave()}
+            title="Remove layer"
+            className={styles.actionIcon}
+            onClick={() => handleDelete()}
           >
-            Save
-          </Button>
-        </Tooltip>
-        <Tooltip
-          label={isLoading ? 'Please wait for layer update to finish.' : null}
-          disabled={!isLoading}
-        >
-          <Button
-            size="xs"
-            disabled={isLoading}
-            data-disabled={isLoading}
-            variant={Variant.Tertiary}
-            onClick={() => handleCancel()}
-          >
-            Cancel
-          </Button>
+            <Delete />
+          </IconButton>
         </Tooltip>
       </Group>
     </Stack>
