@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { Marker } from 'mapbox-gl';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
 import { useMap } from '@/contexts/MapContexts';
@@ -16,6 +17,7 @@ import useMainStore from '@/stores/main';
 import { Location } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
+import { DEFAULT_BBOX } from './consts';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;
@@ -44,7 +46,7 @@ const MainMap: React.FC<Props> = (props) => {
 
   const [shouldResize, setShouldResize] = useState(false);
 
-  const { map, hoverPopup, persistentPopup, draw, root, container } = useMap(MAP_ID);
+  const { map, geocoder, hoverPopup, persistentPopup, draw, root, container } = useMap(MAP_ID);
 
   const isMounted = useRef(true);
   const initialMapLoad = useRef(true);
@@ -162,6 +164,41 @@ const MainMap: React.FC<Props> = (props) => {
   }, [locations]);
 
   useEffect(() => {
+    if (!geocoder || !map) {
+      return;
+    }
+
+    let marker: Marker;
+    geocoder.on('result', async (e) => {
+      if (marker) {
+        marker.remove();
+      }
+
+      const result: MapboxGeocoder.Result = e.result;
+      const center = result.center as [number, number];
+
+      marker = new Marker().setLngLat(center).addTo(map);
+
+      map.flyTo({
+        center,
+        zoom: 10,
+      });
+    });
+
+    geocoder.on('clear', () => {
+      if (marker) {
+        marker.remove();
+      }
+    });
+
+    return () => {
+      if (marker) {
+        marker.remove();
+      }
+    };
+  }, [map, geocoder]);
+
+  useEffect(() => {
     if (!map) {
       return;
     }
@@ -214,6 +251,16 @@ const MainMap: React.FC<Props> = (props) => {
           navigationControl: true,
         }}
         draw={{ clickBuffer: 5, touchEnabled: true, displayControlsDefault: false }}
+        geocoder={{
+          bbox: DEFAULT_BBOX, // limit to Arizona
+          countries: 'us', // exclude non-US cities in bbox
+          placeholder: 'Search for a location',
+          flyTo: false,
+          trackProximity: false,
+          filter: (item) => {
+            return item.place_name.toLowerCase().includes('arizona');
+          },
+        }}
         eventHandlers={{
           doubleClickZoom: false,
         }}
