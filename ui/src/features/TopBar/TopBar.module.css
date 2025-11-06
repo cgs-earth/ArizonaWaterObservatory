@@ -9,7 +9,12 @@
 }
 
 .modalBody {
+  width: 100%;
   padding: calc(var(--default-spacing) * 2);
+}
+
+.tabs {
+  width: 100%;
 }
 
 .accordionBody {

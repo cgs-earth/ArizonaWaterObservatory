@@ -14,23 +14,25 @@ export enum CollectionType {
 }
 
 export const isEdr = (collection: ICollection): boolean => {
-  return Object.keys(collection.data_queries).some((query) => query === 'locations');
+  return (
+    collection.data_queries &&
+    Object.keys(collection.data_queries).some((query) => query === 'locations')
+  );
 };
 
 export const isEdrGrid = (collection: ICollection): boolean => {
+  if (!collection.data_queries) {
+    return false;
+  }
+
   const queries = Object.keys(collection.data_queries);
   return (
-    queries.every((query) => query !== 'locations') &&
-    queries.some((query) => query === 'position') &&
-    queries.some((query) => query === 'cube')
+    queries.every((query) => query !== 'locations') && queries.some((query) => query === 'cube')
   );
 };
 
 export const isFeatures = (collection: ICollection): boolean => {
-  const queries = Object.keys(collection.data_queries);
-  return (
-    queries.every((query) => query !== 'locations') && queries.some((query) => query === 'items')
-  );
+  return Boolean(collection?.itemType) && collection.itemType === 'feature';
 };
 
 export const getCollectionType = (collection: ICollection): CollectionType => {
@@ -43,7 +45,7 @@ export const getCollectionType = (collection: ICollection): CollectionType => {
   }
 
   if (isFeatures(collection)) {
-    return CollectionType.EDRGrid;
+    return CollectionType.Features;
   }
 
   return CollectionType.Unknown;

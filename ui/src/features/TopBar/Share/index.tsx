@@ -110,7 +110,7 @@ const Share: React.FC = () => {
         <Button
           size="sm"
           w="fit-content"
-          variant={opened ? Variant.Selected : Variant.Primary}
+          variant={opened ? Variant.Selected : Variant.Secondary}
           onClick={open}
         >
           Share

@@ -51,6 +51,22 @@ export const buildLocationUrl = (
   return url.toString();
 };
 
+export const buildItemUrl = (
+  collectionId: ICollection['id'],
+  locationId: Location['id'],
+  csv: boolean = false,
+  format: boolean = true
+): string => {
+  const url = new URL(
+    `${import.meta.env.VITE_AWO_SOURCE}/collections/${collectionId}/items/${locationId}`
+  );
+
+  if (format) {
+    url.searchParams.set('f', csv ? 'csv' : 'json');
+  }
+  return url.toString();
+};
+
 const normalizeBBox = (bbox: BBox) => {
   const [x1, y1, x2, y2] = bbox;
 

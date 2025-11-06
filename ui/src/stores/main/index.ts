@@ -30,7 +30,8 @@ const useMainStore = create<MainState>()(
     geographyFilter: null,
     setGeographyFilter: (geographyFilter) => set({ geographyFilter, configGenerated: false }),
     hasGeographyFilter: () => Boolean(get().geographyFilter),
-
+    parameterGroupMembers: {},
+    setParameterGroupMembers: (parameterGroupMembers) => set({ parameterGroupMembers }),
     ...createCollectionSlice(set, get, store),
     ...createDrawingSlice(set, get, store),
     ...createLayerSlice(set, get, store),

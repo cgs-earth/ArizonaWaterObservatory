@@ -14,13 +14,9 @@ import { Toggle } from '@/features/Panel/Toggle';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
-import useMainStore from '@/stores/main';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 
 const Panel: React.FC = () => {
-  const provider = useMainStore((state) => state.provider);
-  const category = useMainStore((state) => state.category);
-
   const [opened, { toggle, open }] = useDisclosure(true);
 
   const [datasetsOpen, setDatasetsOpen] = useState(false);
@@ -44,7 +40,7 @@ const Panel: React.FC = () => {
 
   useEffect(() => {
     void getCollections();
-  }, [provider, category]);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {

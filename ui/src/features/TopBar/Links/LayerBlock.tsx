@@ -8,6 +8,7 @@ import { Feature } from 'geojson';
 import { Group, Pagination, Stack } from '@mantine/core';
 import NumberInput from '@/components/NumberInput';
 import { Grid } from '@/features/TopBar/Links/Grid';
+import { Item } from '@/features/TopBar/Links/Item';
 import { Location } from '@/features/TopBar/Links/Location';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { ICollection } from '@/services/edr.service';
@@ -50,7 +51,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
 
     for (let i = 0; i < chunkedLocations.length; i++) {
       const linkLocationInChunk = chunkedLocations[i].some(
-        (location) => location.id === linkLocation.id
+        (location) => String(location.id) === linkLocation.id
       );
       if (linkLocationInChunk) {
         setPage(i + 1);
@@ -80,38 +81,46 @@ export const LayerBlock: React.FC<Props> = (props) => {
   return (
     <Stack component="section" gap="xs" mb="md" className={styles.locationBlockWrapper}>
       {collection &&
+        collectionType === CollectionType.EDR &&
         currentChunk.map((location) => (
-          <>
-            {collectionType === CollectionType.EDR && (
-              <Location
-                key={`selected-location-${layer.id}-${location.id}`}
-                ref={(el) => {
-                  locationRefs.current[String(location.id)] = el;
-                }}
-                linkLocation={linkLocation}
-                location={location}
-                layer={layer}
-                collection={collection}
-              />
-            )}
-          </>
+          <Location
+            key={`selected-location-${layer.id}-${location.id}`}
+            ref={(el) => {
+              locationRefs.current[String(location.id)] = el;
+            }}
+            linkLocation={linkLocation}
+            location={location}
+            layer={layer}
+            collection={collection}
+          />
         ))}
       {collection &&
+        collectionType === CollectionType.EDRGrid &&
         currentChunk.map((location) => (
-          <>
-            {collectionType === CollectionType.EDRGrid && (
-              <Grid
-                key={`selected-grid-${layer.id}-${location.id}`}
-                ref={(el) => {
-                  locationRefs.current[String(location.id)] = el;
-                }}
-                linkLocation={linkLocation}
-                location={location}
-                layer={layer}
-                collection={collection}
-              />
-            )}
-          </>
+          <Grid
+            key={`selected-grid-${layer.id}-${location.id}`}
+            ref={(el) => {
+              locationRefs.current[String(location.id)] = el;
+            }}
+            linkLocation={linkLocation}
+            location={location}
+            layer={layer}
+            collection={collection}
+          />
+        ))}
+      {collection &&
+        collectionType === CollectionType.Features &&
+        currentChunk.map((location) => (
+          <Item
+            key={`selected-item-${layer.id}-${location.id}`}
+            ref={(el) => {
+              locationRefs.current[String(location.id)] = el;
+            }}
+            linkLocation={linkLocation}
+            location={location}
+            layer={layer}
+            collection={collection}
+          />
         ))}
       <Group justify="space-between" align="flex-end">
         <NumberInput

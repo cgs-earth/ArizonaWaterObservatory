@@ -35,6 +35,8 @@ export const Layer: React.FC<Props> = (props) => {
   const [provider, setProvider] = useState<string>('');
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
+  const [isEnabled, setIsEnabled] = useState(false);
+
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
 
@@ -99,6 +101,19 @@ export const Layer: React.FC<Props> = (props) => {
   }, [dataset]);
 
   useEffect(() => {
+    const datasource = mainManager.getDatasource(layer.datasourceId);
+    if (datasource) {
+      const collectionType = getCollectionType(datasource);
+      if (collectionType === CollectionType.Features) {
+        return setIsEnabled(true);
+      } else if ([CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType)) {
+        return setIsEnabled(layer.parameters.length > 0);
+      }
+    }
+    setIsEnabled(false);
+  }, [layer]);
+
+  useEffect(() => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
@@ -125,7 +140,6 @@ export const Layer: React.FC<Props> = (props) => {
     }
   };
 
-  const hasParametersSelected = layer.parameters.length > 0;
   const hasSelectedLocations = selectedLocations.length > 0;
   const hasOtherLocations = otherLocations.length > 0;
 
@@ -166,10 +180,10 @@ export const Layer: React.FC<Props> = (props) => {
           ),
           content: (
             <Box className={styles.accordionBody}>
-              {!hasParametersSelected || (!hasSelectedLocations && !hasOtherLocations) ? (
+              {!isEnabled || (!hasSelectedLocations && !hasOtherLocations) ? (
                 <Group justify="center" align="center" className={styles.noParameterMessage}>
                   <Text size="md">
-                    {!hasParametersSelected
+                    {!isEnabled
                       ? 'Select at least one parameter for this layer to access links.'
                       : 'No locations found.'}
                   </Text>
@@ -209,7 +223,8 @@ export const Layer: React.FC<Props> = (props) => {
                           id: `links-${layer.id}-other-accordion`,
                           title: (
                             <Title order={6} size="h4" className={styles.accordionHeader}>
-                              {selectedLocations.length > 0 && 'Other '}Locations
+                              {selectedLocations.length > 0 && 'Other '}
+                              {getLabel(collectionType)}s
                             </Title>
                           ),
                           content: (

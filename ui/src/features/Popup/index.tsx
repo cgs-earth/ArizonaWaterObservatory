@@ -8,6 +8,7 @@ import { Feature } from 'geojson';
 import { Stack } from '@mantine/core';
 import { Grid } from '@/features/Popup/Grid';
 import { Header } from '@/features/Popup/Header';
+import { Item } from '@/features/Popup/Item';
 import { Location } from '@/features/Popup/Location';
 import styles from '@/features/Popup/Popup.module.css';
 import mainManager from '@/managers/Main.init';
@@ -56,6 +57,7 @@ const Popup: React.FC<Props> = (props) => {
     }
 
     const newFeature = features.find((feature) => String(feature.id) === location.id);
+
     if (newFeature) {
       setFeature(newFeature);
     }
@@ -130,6 +132,15 @@ const Popup: React.FC<Props> = (props) => {
           layer={layer}
           datasetName={datasetName}
           parameters={parameters}
+          handleLocationChange={handleLocationChange}
+          handleLinkClick={handleLinkClick}
+        />
+      )}
+      {collectionType === CollectionType.Features && feature && (
+        <Item
+          location={location}
+          locations={locations}
+          feature={feature}
           handleLocationChange={handleLocationChange}
           handleLinkClick={handleLinkClick}
         />

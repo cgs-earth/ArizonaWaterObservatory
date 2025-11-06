@@ -37,3 +37,8 @@
   padding: 4px;
   background: var(--mantine-color-gray-4);
 }
+
+.warningBody {
+  width: 100%;
+  padding: calc(var(--default-spacing) * 2);
+}

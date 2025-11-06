@@ -9,6 +9,8 @@ import { DatePreset } from '@/components/DateInput/DateInput.types';
 
 const getSimplePresetDate = (simplePreset: DatePreset): DatePickerPreset<'default'> => {
   switch (simplePreset) {
+    case DatePreset.Today:
+      return { value: dayjs().format('YYYY-MM-DD'), label: 'Today' };
     case DatePreset.OneYear:
       return { value: dayjs().subtract(1, 'year').format('YYYY-MM-DD'), label: 'One year' };
     case DatePreset.FiveYears:

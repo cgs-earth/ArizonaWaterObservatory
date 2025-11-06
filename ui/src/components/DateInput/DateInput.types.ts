@@ -4,6 +4,7 @@
  */
 
 export enum DatePreset {
+  Today = 'today',
   OneYear = 'one-year',
   FiveYears = 'five-years',
   TenYears = 'ten-years',

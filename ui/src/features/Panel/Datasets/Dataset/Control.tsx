@@ -11,7 +11,9 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { ICollection } from '@/services/edr.service';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import useSessionStore from '@/stores/session';
+import { LoadingType, NotificationType, Overlay } from '@/stores/session/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
 
 type Props = {
   dataset: ICollection;
@@ -22,6 +24,8 @@ export const Control: React.FC<Props> = (props) => {
 
   const controller = useRef<AbortController | null>(null);
 
+  const setOverlay = useSessionStore((state) => state.setOverlay);
+
   const handleClick = async (name: string, id: ICollection['id']) => {
     const loadingInstance = loadingManager.add(`Creating layer for: ${name}`, LoadingType.Data);
 
@@ -30,6 +34,12 @@ export const Control: React.FC<Props> = (props) => {
 
       await mainManager.createLayer(id, controller.current.signal);
       notificationManager.show(`Added layer for: ${name}`, NotificationType.Success);
+
+      const collectionType = getCollectionType(dataset);
+
+      if (collectionType === CollectionType.EDRGrid) {
+        setOverlay(Overlay.Warning);
+      }
     } catch (error) {
       if ((error as Error)?.name !== 'AbortError') {
         console.error(error);

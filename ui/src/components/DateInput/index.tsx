@@ -22,6 +22,7 @@ const DateInput: React.FC<Props> = (props) => {
       classNames={{ input: styles.input }}
       size="md"
       radius={0}
+      valueFormat="MM/DD/YYYY"
       presets={[...(presets ?? []), ...simplePresetDates]}
       {...datePickerProps}
     />

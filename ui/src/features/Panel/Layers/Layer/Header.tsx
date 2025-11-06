@@ -10,6 +10,7 @@ import { useLoading } from '@/hooks/useLoading';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
 import { Layer } from '@/stores/main/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getProvider } from '@/utils/provider';
 
 type Props = {
@@ -22,6 +23,7 @@ export const Header: React.FC<Props> = (props) => {
   const [dataset, setDataset] = useState<ICollection>();
   const [parameters, setParameters] = useState<string[]>([]);
   const [provider, setProvider] = useState<string>('');
+  const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
   const { isFetchingCollections } = useLoading();
 
@@ -34,6 +36,10 @@ export const Header: React.FC<Props> = (props) => {
 
     if (newDataset) {
       setDataset(newDataset);
+
+      const collectionType = getCollectionType(newDataset);
+      setCollectionType(collectionType);
+
       const paramObjects = Object.values(newDataset?.parameter_names ?? {});
 
       const parameters = paramObjects
@@ -63,15 +69,17 @@ export const Header: React.FC<Props> = (props) => {
       <Title order={3} size="sm" lineClamp={2} title={layer.name}>
         {layer.name}
       </Title>
-      <Group justify="space-between" gap={8}>
-        {parameters.length > 0 && <Text size="xs">{parameters.join(', ')}</Text>}
-        {(layer.from || layer.to) && (
-          <Text size="xs">
-            {layer.from ? dayjs(layer.from).format('MM/DD/YYYY') : '..'} -{' '}
-            {layer.to ? dayjs(layer.to).format('MM/DD/YYYY') : '..'}
-          </Text>
-        )}
-      </Group>
+      {[CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType) && (
+        <Group justify="space-between" gap={8}>
+          {parameters.length > 0 && <Text size="xs">{parameters.join(', ')}</Text>}
+          {(layer.from || layer.to) && (
+            <Text size="xs">
+              {layer.from ? dayjs(layer.from).format('MM/DD/YYYY') : '..'} -{' '}
+              {layer.to ? dayjs(layer.to).format('MM/DD/YYYY') : '..'}
+            </Text>
+          )}
+        </Group>
+      )}
     </Stack>
   );
 };

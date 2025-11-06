@@ -214,7 +214,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
           <Group align="flex-start" gap={16} grow>
             {openedProps && (
               <Collapse in={openedProps}>
-                <Table properties={location.properties} />
+                <Table properties={location.properties} search />
               </Collapse>
             )}
             {openedGeo && (

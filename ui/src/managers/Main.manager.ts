@@ -10,12 +10,19 @@ import { BBox, Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygo
 import { GeoJSONFeature, GeoJSONSource, Map, Popup } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
+import { getDefaultGeoJSON } from '@/consts/geojson';
 import { DEFAULT_BBOX } from '@/features/Map/consts';
 import { Config, GetConfigResponse, PostConfigResponse } from '@/managers/types';
 import { CoverageGridService } from '@/services/coverageGrid.service';
-import { ICollection } from '@/services/edr.service';
+import { ICollection, ParameterGroup } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
-import { ColorValueHex, Layer, Location, MainState } from '@/stores/main/types';
+import {
+  ColorValueHex,
+  Layer,
+  Location,
+  MainState,
+  ParameterGroupMembers,
+} from '@/stores/main/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
 import { getRandomHexColor } from '@/utils/hexColor';
 import {
@@ -394,6 +401,7 @@ class MainManager {
 
     const provider = getProvider(datasource.id);
 
+    const collectionType = getCollectionType(datasource);
     const title = datasource.title ?? datasource.id;
 
     let next = 1;
@@ -402,8 +410,9 @@ class MainManager {
       name = `${provider} ${title} ${currentDatasourceCount + next++}`;
     }
 
-    const today = dayjs();
-    const oneWeekAgo = today.subtract(1, 'week');
+    const to = dayjs();
+    const from =
+      collectionType === CollectionType.EDRGrid ? to.subtract(1, 'year') : to.subtract(1, 'week');
 
     const layer: Layer = {
       id: this.createUUID(),
@@ -411,8 +420,8 @@ class MainManager {
       name,
       color: this.createHexColor(),
       parameters: [],
-      from: oneWeekAgo.format('YYYY-MM-DD'),
-      to: today.format('YYYY-MM-DD'),
+      from: from.format('YYYY-MM-DD'),
+      to: to.format('YYYY-MM-DD'),
       visible: true,
       locations: [],
     };
@@ -422,6 +431,7 @@ class MainManager {
     const sourceId = await this.addLocationSource(datasource.id, layer, {
       filterFeatures: drawnShapes,
       signal,
+      noFetch: collectionType === CollectionType.EDRGrid,
     });
     this.addLocationLayer(layer, sourceId);
 
@@ -575,6 +585,7 @@ class MainManager {
       parameterNames?: string[];
       from?: string | null;
       to?: string | null;
+      noFetch?: boolean;
     }
   ): Promise<string> {
     const sourceId = this.getSourceId(collectionId);
@@ -582,6 +593,15 @@ class MainManager {
       const source = this.map.getSource(sourceId) as GeoJSONSource;
       const bbox = this.getBBox();
       if (!source) {
+        if (options?.noFetch) {
+          this.map.addSource(sourceId, {
+            type: 'geojson',
+            data: getDefaultGeoJSON(),
+          });
+
+          return sourceId;
+        }
+
         const data = await this.fetchData(
           collectionId,
           bbox,
@@ -599,7 +619,7 @@ class MainManager {
           type: 'geojson',
           data: filteredData,
         });
-      } else if (source) {
+      } else if (source && !options?.noFetch) {
         const data = await this.fetchData(
           collectionId,
           bbox,
@@ -896,26 +916,31 @@ class MainManager {
     });
   }
 
+  private createParameterGroupMembers(parameterGroups: ParameterGroup[]): void {
+    const parameterGroupMembers: ParameterGroupMembers = {};
+    parameterGroups.forEach((parameterGroup) => {
+      parameterGroupMembers[parameterGroup.label] = Object.keys(parameterGroup.members);
+    });
+
+    this.store.getState().setParameterGroupMembers(parameterGroupMembers);
+  }
+
   /**
    *
    * @function
    */
   public async getCollections(): Promise<void> {
-    const provider = this.store.getState().provider;
-    const category = this.store.getState().category;
+    const response = await awoService.getCollections();
+    const { collections, parameterGroups } = response;
 
-    const response = await awoService.getCollections({
-      params: {
-        ...(provider ? { 'provider-name': provider } : {}),
-        'parameter-name': category ? category.value : '*',
-      },
-    });
     const originalCollections = this.store.getState().originalCollections;
     if (originalCollections.length === 0) {
-      this.store.getState().setOriginalCollections(response.collections);
+      this.store.getState().setOriginalCollections(collections);
     }
 
-    this.store.getState().setCollections(response.collections);
+    this.store.getState().setCollections(collections);
+
+    this.createParameterGroupMembers(parameterGroups);
   }
 
   private clearLocationLayers(): void {
