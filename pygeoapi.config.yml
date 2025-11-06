@@ -400,8 +400,65 @@ resources:
           name: png
           mimetype: image/png
         
+  ArizonaWaterWells:
+    type: collection
+    title:
+      en: Arizona Groundwater 
+    description:
+      en: Arizona Groundwater Wells data from the ADWR Tabular Data Download joined with info frm the Wells 55 Registry
+    keywords:
+      en:
+        - example
+        - quickstart
+    extents:
+      spatial:
+        bbox: [-180, -90, 180, 90]
+        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+    providers:
+      - type: feature
+        name: PostgreSQL
+        data:
+          host: ${TF_VAR_POSTGRES_HOST}
+          dbname: ${TF_VAR_POSTGRES_DB}
+          user: ${TF_VAR_POSTGRES_USER}
+          password: ${TF_VAR_POSTGRES_PASSWORD}
+          search_path: [edr_quickstart]
+        table: locations
+        id_field: location_id
+        geom_field: geometry
+
+      - type: edr
+        name: pgedr.PostgresEDRProvider
+        data:
+          host: ${TF_VAR_POSTGRES_HOST}
+          dbname: ${TF_VAR_POSTGRES_DB}
+          user: ${TF_VAR_POSTGRES_USER}
+          password: ${TF_VAR_POSTGRES_PASSWORD}
+          search_path: [edr_quickstart]
+        table: observations
+    
+        edr_fields: # Required EDR Fields
+          id_field: observation_id
+          location_field: locations.location_id
+          geom_field: locations.geometry # Result geometry field
+          time_field: observation_time
+          result_field: observation_value
+          parameter_id: parameters.parameter_id
+          parameter_name: parameters.parameter_name
+          parameter_unit: parameters.parameter_unit_symbol
+
+        external_tables: # Additional table joins
+          locations:
+            remote: location_id
+            foreign: location_id
+          parameters:
+            remote: parameter_id
+            foreign: parameter_id
 
   config-store:
       type: process
       processor:
           name: config_store.ConfigStoreProcessor
+
+
+    
