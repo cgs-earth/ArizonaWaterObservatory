@@ -51,6 +51,7 @@ members = ["packages/*"]
 
 [tool.uv.sources]
 pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="2021551eb8175d88103444815e5e9b2a1d1b75f4" }
+pgedr = {git = "https://github.com/internetofwater/pgedr.git", rev="main"}
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
