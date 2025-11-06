@@ -11,7 +11,7 @@ from com.geojson.helpers import (
 )
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
-from pygeoapi.api import DEFAULT_CRS
+from pygeoapi.crs import DEFAULT_CRS
 from pygeoapi.provider.base import ProviderQueryError
 from pygeoapi.provider.base_edr import BaseEDRProvider
 from pygeoapi.util import transform_bbox
