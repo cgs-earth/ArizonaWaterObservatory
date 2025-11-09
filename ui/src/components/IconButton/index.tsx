@@ -4,12 +4,12 @@
  */
 
 import { MouseEvent, MouseEventHandler } from 'react';
-import { ActionIcon, ActionIconProps } from '@mantine/core';
+import { ActionIcon, ActionIconProps, PolymorphicComponentProps } from '@mantine/core';
 import styles from '@/components/IconButton/IconButton.module.css';
 import { ExtendedVariant } from '@/components/IconButton/IconButton.types';
 import { Variant } from '@/components/types';
 
-type Props = ActionIconProps & {
+type Props = PolymorphicComponentProps<'button', ActionIconProps> & {
   variant?: Variant | ExtendedVariant;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 };

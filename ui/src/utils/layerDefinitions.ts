@@ -3,15 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExpressionSpecification, LayerSpecification } from 'mapbox-gl';
+import {
+  CircleLayerSpecification,
+  ExpressionSpecification,
+  FillLayerSpecification,
+  LineLayerSpecification,
+  RasterLayerSpecification,
+} from 'mapbox-gl';
 import { LayerType } from '@/components/Map/types';
+import { DEFAULT_OPACITY } from '@/features/Map/consts';
 import { Location } from '@/stores/main/types';
 
 export const getPointLayerDefinition = (
   layerId: string,
   sourceId: string,
   color: string
-): LayerSpecification => {
+): CircleLayerSpecification => {
   return {
     id: layerId,
     type: LayerType.Circle,
@@ -29,7 +36,7 @@ export const getLineLayerDefinition = (
   layerId: string,
   sourceId: string,
   color: string = '#000'
-): LayerSpecification => {
+): LineLayerSpecification => {
   return {
     id: layerId,
     type: LayerType.Line,
@@ -51,7 +58,7 @@ export const getFillLayerDefinition = (
   layerId: string,
   sourceId: string,
   color: string = '#000'
-): LayerSpecification => {
+): FillLayerSpecification => {
   return {
     id: layerId,
     type: LayerType.Fill,
@@ -60,6 +67,19 @@ export const getFillLayerDefinition = (
     paint: {
       'fill-opacity': 0.7,
       'fill-color': color,
+    },
+  };
+};
+export const getRasterLayerSpecification = (
+  layerId: string,
+  sourceId: string
+): RasterLayerSpecification => {
+  return {
+    id: layerId,
+    type: LayerType.Raster,
+    source: sourceId,
+    paint: {
+      'raster-opacity': DEFAULT_OPACITY,
     },
   };
 };

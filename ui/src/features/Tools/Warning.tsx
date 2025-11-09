@@ -50,7 +50,7 @@ export const Warning: React.FC = () => {
   };
 
   return (
-    <Modal size="sm" opened={opened} onClose={close} centered>
+    <Modal size="md" opened={opened} onClose={close} centered>
       <Stack className={styles.warningBody} align="center">
         <Text size="lg" mr="auto" fw={700}>
           Notice

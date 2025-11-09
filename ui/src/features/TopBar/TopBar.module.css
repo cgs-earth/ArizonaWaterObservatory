@@ -21,6 +21,10 @@
   background-color: var(--mantine-color-gray-1);
 }
 
+.glossaryWrapper {
+  width: calc(100% - 50px);
+}
+
 .toolTip {
   width: 30em;
 }
