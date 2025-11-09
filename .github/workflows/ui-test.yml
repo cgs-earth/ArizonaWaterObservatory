@@ -4,8 +4,8 @@
 name: UI Tests
 
 on:
-  push:
   workflow_dispatch: # Allows manual triggering of the workflow
+  push:
     paths:
       - 'ui/**'
 
