@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Stack, Tabs, Tooltip } from '@mantine/core';
+import { Stack, Tabs, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import InfoSimple from '@/assets/InfoSimple';
 import IconButton from '@/components/IconButton';
@@ -68,7 +68,7 @@ const Info: React.FC = () => {
           <InfoSimple />
         </IconButton>
       </Tooltip>
-      <Modal size="lg" opened={opened} onClose={close}>
+      <Modal size="xl" opened={opened} onClose={close}>
         <Stack className={styles.modalBody} align="center">
           <Tabs
             value={helpTab}
@@ -76,9 +76,21 @@ const Info: React.FC = () => {
             onChange={(tab) => setHelpTab(tab as HelpTab)}
           >
             <Tabs.List grow className={styles.tabList}>
-              <Tabs.Tab value={HelpTab.About}>About</Tabs.Tab>
-              <Tabs.Tab value={HelpTab.Glossary}>Glossary</Tabs.Tab>
-              <Tabs.Tab value={HelpTab.FAQ}>Frequently Asked Questions</Tabs.Tab>
+              <Tabs.Tab value={HelpTab.About}>
+                <Text size="lg" fw={700}>
+                  About
+                </Text>
+              </Tabs.Tab>
+              <Tabs.Tab value={HelpTab.Glossary}>
+                <Text size="lg" fw={700}>
+                  Glossary
+                </Text>
+              </Tabs.Tab>
+              <Tabs.Tab value={HelpTab.FAQ}>
+                <Text size="lg" fw={700}>
+                  Frequently Asked Questions
+                </Text>
+              </Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value={HelpTab.About}>

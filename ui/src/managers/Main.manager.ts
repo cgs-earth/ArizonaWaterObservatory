@@ -7,12 +7,12 @@ import dayjs from 'dayjs';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
 import { BBox, Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
-import { GeoJSONFeature, GeoJSONSource, Map, Popup } from 'mapbox-gl';
+import { GeoJSONFeature, GeoJSONSource, Map, Popup, RasterTileSource } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import { DEFAULT_BBOX } from '@/features/Map/consts';
-import { Config, GetConfigResponse, PostConfigResponse } from '@/managers/types';
+import { Config, GetConfigResponse, PostConfigResponse, SourceOptions } from '@/managers/types';
 import { CoverageGridService } from '@/services/coverageGrid.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
@@ -29,6 +29,7 @@ import {
   getFillLayerDefinition,
   getLineLayerDefinition,
   getPointLayerDefinition,
+  getRasterLayerSpecification,
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
 
@@ -176,9 +177,6 @@ class MainManager {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ inputs: config }),
       signal,
     });
@@ -255,13 +253,25 @@ class MainManager {
     await this.applySpatialFilter(config.drawnShapes);
     for (const layer of config.layers) {
       const sourceId = this.getSourceId(layer.datasourceId);
-      this.addLocationLayer(layer, sourceId);
+      this.addLayer(layer, sourceId);
     }
 
     // Set locations after loading layer to reflect selected state in map
     this.store.getState().setLocations(config.locations);
 
     return true;
+  }
+
+  public getUniqueIds(features: GeoJSONFeature[]): Array<string> {
+    const uniques = new Set<string>();
+
+    for (const feature of features) {
+      if (feature.id) {
+        uniques.add(String(feature.id));
+      }
+    }
+
+    return Array.from(uniques).sort();
   }
 
   /**
@@ -428,12 +438,12 @@ class MainManager {
 
     const drawnShapes = this.store.getState().drawnShapes;
 
-    const sourceId = await this.addLocationSource(datasource.id, layer, {
+    const sourceId = await this.addSource(datasource.id, layer, {
       filterFeatures: drawnShapes,
       signal,
       noFetch: collectionType === CollectionType.EDRGrid,
     });
-    this.addLocationLayer(layer, sourceId);
+    this.addLayer(layer, sourceId);
 
     this.store.getState().addLayer(layer);
   }
@@ -443,19 +453,11 @@ class MainManager {
     const layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
 
     if (this.map) {
-      const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
-        layer.datasourceId,
-        layer.id
-      );
-
-      if (this.map.getLayer(pointLayerId)) {
-        this.map.removeLayer(pointLayerId);
-      }
-      if (this.map.getLayer(fillLayerId)) {
-        this.map.removeLayer(fillLayerId);
-      }
-      if (this.map.getLayer(lineLayerId)) {
-        this.map.removeLayer(lineLayerId);
+      const layerIds = Object.values(this.getLocationsLayerIds(layer.datasourceId, layer.id));
+      for (const layerId of layerIds) {
+        if (this.map.getLayer(layerId)) {
+          this.map.removeLayer(layerId);
+        }
       }
     }
 
@@ -482,11 +484,13 @@ class MainManager {
     pointLayerId: string;
     fillLayerId: string;
     lineLayerId: string;
+    rasterLayerId: string;
   } {
     return {
       pointLayerId: `user-${collectionId}-${layerId}-point`,
       fillLayerId: `user-${collectionId}-${layerId}-fill`,
       lineLayerId: `user-${collectionId}-${layerId}-line`,
+      rasterLayerId: `user-${collectionId}-${layerId}-raster`,
     };
   }
 
@@ -572,21 +576,35 @@ class MainManager {
     return turf.bbox(featureCollection);
   }
 
+  private async addSource(collectionId: ICollection['id'], layer: Layer, options?: SourceOptions) {
+    const datasource = this.getDatasource(collectionId);
+    const sourceId = this.getSourceId(collectionId);
+
+    if (datasource) {
+      const collectionType = getCollectionType(datasource);
+
+      if (
+        [CollectionType.EDR, CollectionType.Features, CollectionType.EDRGrid].includes(
+          collectionType
+        )
+      ) {
+        await this.addGeoJsonSource(collectionId, layer, options);
+      } else if (collectionType === CollectionType.Map) {
+        this.addRasterSource(datasource);
+      }
+    }
+
+    return sourceId;
+  }
+
   /**
    *
    * @function
    */
-  private async addLocationSource(
+  private async addGeoJsonSource(
     collectionId: ICollection['id'],
     layer: Layer,
-    options?: {
-      filterFeatures?: Feature<Polygon | MultiPolygon>[];
-      signal?: AbortSignal;
-      parameterNames?: string[];
-      from?: string | null;
-      to?: string | null;
-      noFetch?: boolean;
-    }
+    options?: SourceOptions
   ): Promise<string> {
     const sourceId = this.getSourceId(collectionId);
     if (this.map) {
@@ -640,23 +658,58 @@ class MainManager {
     return sourceId;
   }
 
-  public getUniqueIds(features: GeoJSONFeature[]): Array<string> {
-    const uniques = new Set<string>();
+  private addRasterSource(collection: ICollection) {
+    const link = collection.links.find(
+      (link) => link.rel.includes('map') && link.type === 'image/png'
+    );
+    const sourceId = this.getSourceId(collection.id);
+    if (link && this.map) {
+      const source = this.map.getSource(sourceId) as RasterTileSource;
 
-    for (const feature of features) {
-      if (feature.id) {
-        uniques.add(String(feature.id));
+      if (!source) {
+        this.map.addSource(sourceId, {
+          type: 'raster',
+          bounds: DEFAULT_BBOX,
+          tiles: [
+            `${link.href}&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/3857&bbox={bbox-epsg-3857}`,
+          ],
+          tileSize: 256,
+          minzoom: 4,
+        });
       }
     }
+  }
+  private addLayer(layer: Layer, sourceId: string): void {
+    const datasource = this.getDatasource(layer.datasourceId);
 
-    return Array.from(uniques).sort();
+    if (datasource) {
+      const collectionType = getCollectionType(datasource);
+
+      if (
+        [CollectionType.EDR, CollectionType.Features, CollectionType.EDRGrid].includes(
+          collectionType
+        )
+      ) {
+        this.addStandardLayer(layer, sourceId);
+      } else if (collectionType === CollectionType.Map) {
+        this.addRasterLayer(layer, sourceId);
+      }
+    }
+  }
+
+  private addRasterLayer(layer: Layer, sourceId: string): void {
+    const { rasterLayerId } = this.getLocationsLayerIds(layer.datasourceId, layer.id);
+
+    if (this.map && !this.map.getLayer(rasterLayerId)) {
+      this.map.addLayer(getRasterLayerSpecification(rasterLayerId, sourceId));
+    }
   }
 
   /**
    *
    * @function
    */
-  private async addLocationLayer(layer: Layer, sourceId: string): Promise<void> {
+  private addStandardLayer(layer: Layer, sourceId: string): void {
     const geographyFilter = this.store.getState().geographyFilter;
 
     const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
@@ -852,7 +905,7 @@ class MainManager {
       await Promise.all(
         chunk.map(async (layer) => {
           const collectionId = layer.datasourceId;
-          return await this.addLocationSource(collectionId, layer, {
+          return await this.addSource(collectionId, layer, {
             filterFeatures: drawnShapes,
           });
         })
@@ -888,7 +941,7 @@ class MainManager {
 
     if (!this.compareArrays(layer.parameters, parameters)) {
       const drawnShapes = this.store.getState().drawnShapes;
-      await this.addLocationSource(layer.datasourceId, layer, {
+      await this.addSource(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
       });
@@ -898,7 +951,7 @@ class MainManager {
     const drawnShapes = this.store.getState().drawnShapes;
 
     if (datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to)) {
-      await this.addLocationSource(layer.datasourceId, layer, {
+      await this.addSource(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
         from,
@@ -943,7 +996,7 @@ class MainManager {
     this.createParameterGroupMembers(parameterGroups);
   }
 
-  private clearLocationLayers(): void {
+  private clearLayers(): void {
     if (!this.map) {
       return;
     }
@@ -960,7 +1013,7 @@ class MainManager {
     }
   }
 
-  private clearLocationSources(): void {
+  private clearSources(): void {
     if (!this.map) {
       return;
     }
@@ -978,8 +1031,8 @@ class MainManager {
   public clearAllData(): void {
     this.store.getState().setLocations([]);
 
-    this.clearLocationLayers();
-    this.clearLocationSources();
+    this.clearLayers();
+    this.clearSources();
 
     this.store.getState().setProvider(null);
     this.store.getState().setCategory(null);

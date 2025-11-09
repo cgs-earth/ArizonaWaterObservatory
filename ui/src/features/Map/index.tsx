@@ -9,6 +9,7 @@ import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
+import { DEFAULT_BBOX } from '@/features/Map/consts';
 import { sourceConfigs } from '@/features/Map/sources';
 import { getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
@@ -17,7 +18,6 @@ import useMainStore from '@/stores/main';
 import { Location } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
-import { DEFAULT_BBOX } from './consts';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;

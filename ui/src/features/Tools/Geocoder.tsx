@@ -5,8 +5,8 @@
 
 import { useEffect, useRef } from 'react';
 import { useMap } from '@/contexts/MapContexts';
+import { MAP_ID } from '@/features/Map/config';
 import styles from '@/features/Tools/Tools.module.css';
-import { MAP_ID } from '../Map/config';
 
 export const Geocoder: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);

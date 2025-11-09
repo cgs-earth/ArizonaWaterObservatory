@@ -11,6 +11,7 @@ export enum CollectionType {
   EDRGrid = 'edr-grid',
   Features = 'features',
   Unknown = 'unknown',
+  Map = 'map',
 }
 
 export const isEdr = (collection: ICollection): boolean => {
@@ -31,6 +32,10 @@ export const isEdrGrid = (collection: ICollection): boolean => {
   );
 };
 
+export const isMap = (collection: ICollection): boolean => {
+  return collection.links.some((link) => link.rel.includes('map') && link.type === 'image/png');
+};
+
 export const isFeatures = (collection: ICollection): boolean => {
   return Boolean(collection?.itemType) && collection.itemType === 'feature';
 };
@@ -46,6 +51,10 @@ export const getCollectionType = (collection: ICollection): CollectionType => {
 
   if (isFeatures(collection)) {
     return CollectionType.Features;
+  }
+
+  if (isMap(collection)) {
+    return CollectionType.Map;
   }
 
   return CollectionType.Unknown;

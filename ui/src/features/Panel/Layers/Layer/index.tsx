@@ -116,16 +116,19 @@ const Layer: React.FC<Props> = (props) => {
           size="xs"
           label="Layer Name"
           className={styles.layerInput}
+          mr="auto"
           value={name}
           onChange={(event) => setName(event.currentTarget.value)}
         />
-        <ColorInput
-          size="xs"
-          label="Symbol Color"
-          className={styles.layerInput}
-          value={color}
-          onChange={(value) => setColor(value)}
-        />
+        {collectionType !== CollectionType.Map && (
+          <ColorInput
+            size="xs"
+            label="Symbol Color"
+            className={styles.layerInput}
+            value={color}
+            onChange={(value) => setColor(value)}
+          />
+        )}
       </Group>
       {collectionType === CollectionType.Features && (
         <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">

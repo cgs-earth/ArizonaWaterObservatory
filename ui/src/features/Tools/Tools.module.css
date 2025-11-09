@@ -38,6 +38,11 @@
   background: var(--mantine-color-gray-4);
 }
 
+.legendContainer {
+  max-height: calc(100vh - 155px);
+  overflow-y: auto;
+}
+
 .warningBody {
   width: 100%;
   padding: calc(var(--default-spacing) * 2);
