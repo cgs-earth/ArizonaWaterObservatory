@@ -59,11 +59,21 @@ attrs==25.3.0 \
     --hash=sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b
     # via
     #   aiohttp
+    #   jsonschema
     #   rasterio
+    #   referencing
 awdb-com @ git+https://github.com/internetofwater/Western-Water-Datahub.git@c2fe95a347af6b51f5760d34130cb0fb148f6203#subdirectory=packages/awdb_com
     # via arizonawaterobservatory
 awdb-forecasts @ git+https://github.com/internetofwater/Western-Water-Datahub.git@c2fe95a347af6b51f5760d34130cb0fb148f6203#subdirectory=packages/awdb_forecasts
     # via arizonawaterobservatory
+babel==2.17.0 \
+    --hash=sha256:0c54cffb19f690cdcc52a3b50bcbf71e07a808d1c80d549f2459b9d2cf0afb9d \
+    --hash=sha256:4d0b53093fdfb4b21c92b5213dba5a1b23885afa8383709427046b21c366e5f2
+    # via pygeoapi
+blinker==1.9.0 \
+    --hash=sha256:b4ce2265a7abece45e7cc896e98dbebe6cead56bcf805a3d23136d145f5445bf \
+    --hash=sha256:ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc
+    # via flask
 botocore==1.40.18 \
     --hash=sha256:57025c46ca00cf8cec25de07a759521bfbfb3036a0f69b272654a354615dc45f \
     --hash=sha256:afd69bdadd8c55cc89d69de0799829e555193a352d87867f746e19020271cc0f
@@ -73,9 +83,24 @@ certifi==2025.4.26 \
     --hash=sha256:30350364dfe371162649852c63336a15c70c6510c2ad5015b21c2345311805f3
     # via
     #   netcdf4
+    #   pyogrio
     #   pyproj
     #   rasterio
     #   requests
+cffi==1.17.1 ; platform_python_implementation != 'PyPy' \
+    --hash=sha256:1257bdabf294dceb59f5e70c64a3e2f462c30c7ad68092d01bbbfb1c16b1ba36 \
+    --hash=sha256:1c39c6016c32bc48dd54561950ebd6836e1670f2ae46128f67cf49e789c52824 \
+    --hash=sha256:386c8bf53c502fff58903061338ce4f4950cbdcb23e2902d86c0f722b786bbe3 \
+    --hash=sha256:4ceb10419a9adf4460ea14cfd6bc43d08701f0835e979bf821052f1805850fe8 \
+    --hash=sha256:51392eae71afec0d0c8fb1a53b204dbb3bcabcb3c9b807eedf3e1e6ccf2de903 \
+    --hash=sha256:733e99bc2df47476e3848417c5a4540522f234dfd4ef3ab7fafdf555b082ec0c \
+    --hash=sha256:805b4371bf7197c329fcb3ead37e710d1bca9da5d583f5073b799d5c5bd1eee4 \
+    --hash=sha256:a08d7e755f8ed21095a310a693525137cfe756ce62d066e53f502a83dc550f65 \
+    --hash=sha256:b62ce867176a75d03a665bad002af8e6d54644fad99a3c70905c543130e39d93 \
+    --hash=sha256:d63afe322132c194cf832bfec0dc69a99fb9bb6bbd550f161a49e9e855cc78ff \
+    --hash=sha256:da95af8214998d77a98cc14e3a3bd00aa191526343078b530ceb0bd710fb48a5 \
+    --hash=sha256:f79fc4fc25f1c8698ff97788206bb3c2598949bfe0fef03d299eb1b5356ada99
+    # via cryptography
 cftime==1.6.4.post1 \
     --hash=sha256:50ac76cc9f10ab7bd46e44a71c51a6927051b499b4407df4f29ab13d741b942f \
     --hash=sha256:5835b9d622f9304d1c23a35603a0f068739f428d902860f25e6e7e5a1b7cd8ea \
@@ -108,6 +133,8 @@ click==8.1.8 \
     # via
     #   click-plugins
     #   cligj
+    #   flask
+    #   pygeoapi
     #   rasterio
 click-plugins==1.1.1.2 \
     --hash=sha256:008d65743833ffc1f5417bf0e78e8d2c23aab04d9745ba817bd3e71b0feb6aa6 \
@@ -130,6 +157,37 @@ covjson-pydantic==0.7.0 \
     --hash=sha256:9642672ce6c566a1a6dc6c1923c8dce13226cca43cc82b3c871421b521aaa5e2 \
     --hash=sha256:af47bff748174d08c426e208e6ae829bfa2f8c4b6a5343ac82c1209f83bfccd1
     # via arizonawaterobservatory
+cryptography==45.0.4 \
+    --hash=sha256:06509dc70dd71fa56eaa138336244e2fbaf2ac164fc9b5e66828fccfd2b680d6 \
+    --hash=sha256:23b9c3ea30c3ed4db59e7b9619272e94891f8a3a5591d0b656a7582631ccf750 \
+    --hash=sha256:25eb4d4d3e54595dc8adebc6bbd5623588991d86591a78c2548ffb64797341e2 \
+    --hash=sha256:2882338b2a6e0bd337052e8b9007ced85c637da19ef9ecaf437744495c8c2999 \
+    --hash=sha256:425a9a6ac2823ee6e46a76a21a4e8342d8fa5c01e08b823c1f19a8b74f096069 \
+    --hash=sha256:46cf7088bf91bdc9b26f9c55636492c1cce3e7aaf8041bbf0243f5e5325cfb2d \
+    --hash=sha256:49fe9155ab32721b9122975e168a6760d8ce4cffe423bcd7ca269ba41b5dfac1 \
+    --hash=sha256:4ca0f52170e821bc8da6fc0cc565b7bb8ff8d90d36b5e9fdd68e8a86bdf72036 \
+    --hash=sha256:5f31e6b0a5a253f6aa49be67279be4a7e5a4ef259a9f33c69f7d1b1191939872 \
+    --hash=sha256:627ba1bc94f6adf0b0a2e35d87020285ead22d9f648c7e75bb64f367375f3b22 \
+    --hash=sha256:680806cf63baa0039b920f4976f5f31b10e772de42f16310a6839d9f21a26b0d \
+    --hash=sha256:6a3511ae33f09094185d111160fd192c67aa0a2a8d19b54d36e4c78f651dc5ad \
+    --hash=sha256:6a5bf57554e80f75a7db3d4b1dacaa2764611ae166ab42ea9a72bcdb5d577637 \
+    --hash=sha256:7405ade85c83c37682c8fe65554759800a4a8c54b2d96e0f8ad114d31b808d57 \
+    --hash=sha256:7bedbe4cc930fa4b100fc845ea1ea5788fcd7ae9562e669989c11618ae8d76ee \
+    --hash=sha256:7ef2dde4fa9408475038fc9aadfc1fb2676b174e68356359632e980c661ec8f6 \
+    --hash=sha256:817ee05c6c9f7a69a16200f0c90ab26d23a87701e2a284bd15156783e46dbcc8 \
+    --hash=sha256:944e9ccf67a9594137f942d5b52c8d238b1b4e46c7a0c2891b7ae6e01e7c80a4 \
+    --hash=sha256:964bcc28d867e0f5491a564b7debb3ffdd8717928d315d12e0d7defa9e43b723 \
+    --hash=sha256:b0a97c927497e3bc36b33987abb99bf17a9a175a19af38a892dc4bbb844d7ee2 \
+    --hash=sha256:c22fe01e53dc65edd1945a2e6f0015e887f84ced233acecb64b4daadb32f5c97 \
+    --hash=sha256:ce1678a2ccbe696cf3af15a75bb72ee008d7ff183c9228592ede9db467e64f1b \
+    --hash=sha256:e00a6c10a5c53979d6242f123c0a97cff9f3abed7f064fc412c36dc521b5f257 \
+    --hash=sha256:eaa3e28ea2235b33220b949c5a0d6cf79baa80eab2eb5607ca8ab7525331b9ff \
+    --hash=sha256:f3fe7a5ae34d5a414957cc7f457e2b92076e72938423ac64d215722f6cf49a9e
+    # via pgedr
+dateparser==1.2.2 \
+    --hash=sha256:5a5d7211a09013499867547023a2a0c91d5a27d15dd4dbcea676ea9fe66f2482 \
+    --hash=sha256:986316f17cb8cdc23ea8ce563027c5ef12fc725b6fb1d137c14ca08777c5ecf7
+    # via pygeofilter
 deprecated==1.2.18 \
     --hash=sha256:422b6f6d859da6f2ef57857761bfb392480502a64c3028ca9bbe86085d72115d \
     --hash=sha256:bd5011788200372a32418f888e326a09ff80d0214bd961147cfed01b5c018eec
@@ -142,6 +200,14 @@ fasteners==0.19 ; sys_platform != 'emscripten' \
     --hash=sha256:758819cb5d94cdedf4e836988b74de396ceacb8e2794d21f82d131fd9ee77237 \
     --hash=sha256:b4f37c3ac52d8a445af3a66bce57b33b5e90b97c696b7b984f530cf8f0ded09c
     # via zarr
+filelock==3.18.0 \
+    --hash=sha256:adbc88eabb99d2fec8c9c1b229b171f18afa655400173ddc653d5d01501fb9f2 \
+    --hash=sha256:c401f4f8377c4464e6db25fff06205fd89bdd83b65eb0488ed1b160f780e21de
+    # via pygeoapi
+flask==3.1.2 \
+    --hash=sha256:bf656c15c80190ed628ad08cdfd3aaa35beb087855e2f494910aa3774cc4fd87 \
+    --hash=sha256:ca1d8112ec8a6158cc29ea4858963350011b5c846a414cdb7a954aa9e967d03c
+    # via pygeoapi
 frozenlist==1.7.0 \
     --hash=sha256:15a7eaba63983d22c54d255b854e8108e7e5f3e89f647fc854bd77a237e767df \
     --hash=sha256:1eaa7e9c6d15df825bf255649e05bd8a74b04a4d2baa1ae46d9c2d00b2ca2cb5 \
@@ -169,9 +235,17 @@ fsspec==2025.9.0 \
     --hash=sha256:19fd429483d25d28b65ec68f9f4adc16c17ea2c7c7bf54ec61360d478fb19c19 \
     --hash=sha256:530dc2a2af60a414a832059574df4a6e10cce927f6f4a78209390fe38955cfb7
     # via s3fs
+geoalchemy2==0.18.0 \
+    --hash=sha256:9a04690cc33fbc580d15c7c028d9b1b1ea08271489730096c7092e1d486c2b7a \
+    --hash=sha256:ff0fe7339ba535c50845a2c7e8817a20c164364128991d795733b3c5904b1ee1
+    # via pgedr
 geojson-pydantic==2.0.0 \
     --hash=sha256:b62e8b44502dd1ad518b5f739035a81924a76f980cbdb3a4e8916ef913be242e \
     --hash=sha256:fd75876768a1dcab30dd04c478773191e0c19d678ef74580a9bad7c4576bfe98
+    # via arizonawaterobservatory
+geopandas==1.1.1 \
+    --hash=sha256:1745713f64d095c43e72e08e753dbd271678254b24f2e01db8cdb8debe1d293d \
+    --hash=sha256:589e61aaf39b19828843df16cb90234e72897e2579be236f10eee0d052ad98e8
     # via arizonawaterobservatory
 googleapis-common-protos==1.70.0 \
     --hash=sha256:0e1b44e0ea153e6594f9f394fef15193a68aaaea2d843f83e2742717ca753257 \
@@ -179,6 +253,18 @@ googleapis-common-protos==1.70.0 \
     # via
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
+greenlet==3.2.3 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64' \
+    --hash=sha256:0cc73378150b8b78b0c9fe2ce56e166695e67478550769536a6742dca3651688 \
+    --hash=sha256:25ad29caed5783d4bd7a85c9251c651696164622494c00802a139c00d639242d \
+    --hash=sha256:419e60f80709510c343c57b4bb5a339d8767bf9aef9b8ce43f4f143240f88b7c \
+    --hash=sha256:706d016a03e78df129f68c4c9b4c4f963f7d73534e48a24f5f5a7101ed13dbbb \
+    --hash=sha256:7454d37c740bb27bdeddfc3f358f26956a07d5220818ceb467a483197d84f849 \
+    --hash=sha256:88cd97bf37fe24a6710ec6a3a7799f3f81d9cd33317dcf565ff9950c83f55e0b \
+    --hash=sha256:8b0dd8ae4c0d6f5e54ee55ba935eeb3d735a9b58a8a1e5b5cbab64e01a39f365 \
+    --hash=sha256:93d48533fade144203816783373f27a97e4193177ebaaf0fc396db19e5d61163 \
+    --hash=sha256:baeedccca94880d2f5666b4fa16fc20ef50ba1ee353ee2d7092b383a243b0b0d \
+    --hash=sha256:be52af4b6292baecfa0f397f3edb3c6092ce071b499dd6fe292c9ac9f2c8f264
+    # via sqlalchemy
 grpcio==1.73.0 \
     --hash=sha256:068ecc415f79408d57a7f146f54cdf9f0acb4b301a52a9e563973dc981e82f3d \
     --hash=sha256:085ebe876373ca095e24ced95c8f440495ed0b574c491f7f4f714ff794bbcd10 \
@@ -206,16 +292,54 @@ iniconfig==2.1.0 \
     --hash=sha256:3abbd2e30b36733fee78f9c7f7308f2d0050e88f0087fd25c2645f63c773e1c7 \
     --hash=sha256:9deba5723312380e77435581c6bf4935c94cbfab9b1ed33ef8d238ea168eb760
     # via pytest
+itsdangerous==2.2.0 \
+    --hash=sha256:c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef \
+    --hash=sha256:e0050c0b7da1eea53ffaf149c0cfbb5c6e2e2b69c4bef22c81fa6eb73e5f6173
+    # via flask
+jinja2==3.1.6 \
+    --hash=sha256:0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d \
+    --hash=sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67
+    # via
+    #   flask
+    #   pygeoapi
 jmespath==1.0.1 \
     --hash=sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980 \
     --hash=sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe
     # via
     #   aiobotocore
     #   botocore
+jsonschema==4.24.0 \
+    --hash=sha256:0b4e8069eb12aedfa881333004bccaec24ecef5a8a6a4b6df142b2cc9599d196 \
+    --hash=sha256:a462455f19f5faf404a7902952b6f0e3ce868f3ee09a359b05eca6673bd8412d
+    # via pygeoapi
+jsonschema-specifications==2025.4.1 \
+    --hash=sha256:4653bffbd6584f7de83a67e0d620ef16900b390ddc7939d56684d6c81e33f1af \
+    --hash=sha256:630159c9f4dbea161a6a2205c3011cc4f18ff381b189fff48bb39b9bf26ae608
+    # via jsonschema
+lark==1.3.0 \
+    --hash=sha256:80661f261fb2584a9828a097a2432efd575af27d20be0fd35d17f0fe37253831 \
+    --hash=sha256:9a3839d0ca5e1faf7cfa3460e420e859b66bcbde05b634e73c369c8244c5fa48
+    # via pygeofilter
 mando==0.7.1 \
     --hash=sha256:18baa999b4b613faefb00eac4efadcf14f510b59b924b66e08289aa1de8c3500 \
     --hash=sha256:26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a
     # via radon
+markupsafe==3.0.2 \
+    --hash=sha256:0f4ca02bea9a23221c0182836703cbf8930c5e9454bacce27e767509fa286a30 \
+    --hash=sha256:1c99d261bd2d5f6b59325c92c73df481e05e57f19837bdca8413b9eac4bd8028 \
+    --hash=sha256:2181e67807fc2fa785d0592dc2d6206c019b9502410671cc905d132a92866557 \
+    --hash=sha256:52305740fe773d09cffb16f8ed0427942901f00adedac82ec8b67752f58a1b22 \
+    --hash=sha256:846ade7b71e3536c4e56b386c2a47adf5741d2d8b94ec9dc3e92e5e1ee1e2225 \
+    --hash=sha256:88416bd1e65dcea10bc7569faacb2c20ce071dd1f87539ca2ab364bf6231393c \
+    --hash=sha256:8e06879fc22a25ca47312fbe7c8264eb0b662f6db27cb2d3bbbc74b1df4b9b87 \
+    --hash=sha256:9778bd8ab0a994ebf6f84c2b949e65736d5575320a17ae8984a77fab08db94cf \
+    --hash=sha256:ad10d3ded218f1039f11a75f8091880239651b52e9bb592ca27de44eed242a48 \
+    --hash=sha256:e17c96c14e19278594aa4841ec148115f9c7615a47382ecb6b82bd8fea3ab0c8 \
+    --hash=sha256:ee55d3edf80167e48ea11a923c7386f4669df67d7994554387f84e7d8b0a2bf0
+    # via
+    #   flask
+    #   jinja2
+    #   werkzeug
 multidict==6.4.4 \
     --hash=sha256:169c4ba7858176b797fe551d6e99040c531c775d2d57b31bcf4de6d7a669847f \
     --hash=sha256:530d86827a2df6504526106b4c104ba19044594f8722d3e87714e847c74a0275 \
@@ -241,9 +365,14 @@ multidict==6.4.4 \
     #   aiohttp
     #   yarl
 netcdf4==1.7.2 \
+    --hash=sha256:1ccc05328a8ff31921b539821791aeb20b054879f3fdf6d1d505bf6422824fec \
     --hash=sha256:568ea369e00b581302d77fc5fd0b8f78e520c7e08d0b5af5219ba51f3f1cd694 \
+    --hash=sha256:7e81c3c47f2772eab0b93fba8bb05b17b58dce17720e1bed25e9d76551deecd0 \
+    --hash=sha256:999bfc4acebf400ed724d5e7329e2e768accc7ee1fa1d82d505da782f730301b \
     --hash=sha256:a4c6375540b19989896136943abb6d44850ff6f1fa7d3f063253b1ad3f8b7fce \
     --hash=sha256:a51da09258b31776f474c1d47e484fc7214914cdc59edf4cee789ba632184591 \
+    --hash=sha256:bf11480f6b8a5b246818ffff6b4d90481e51f8b9555b41af0c372eb0aaf8b65f \
+    --hash=sha256:cb2791dba37fc98fd1ac4e236c97822909f54efbcdf7f1415c9777810e0a28f4 \
     --hash=sha256:cb95b11804fe051897d1f2044b05d82a1847bc2549631cdd2f655dde7de77a9c \
     --hash=sha256:e73e3baa0b74afc414e53ff5095748fdbec7fb346eda351e567c23f2f0d247f1 \
     --hash=sha256:f9d8a848373723f41ef662590b4f5e1832227501c9fd4513e8ad8da58c269977
@@ -276,11 +405,14 @@ numpy==2.3.0 \
     --hash=sha256:e6648078bdd974ef5d15cecc31b0c410e2e24178a6e10bf511e0557eed0f2570
     # via
     #   cftime
+    #   geopandas
     #   netcdf4
     #   numcodecs
     #   pandas
+    #   pyogrio
     #   rasterio
     #   rioxarray
+    #   shapely
     #   xarray
     #   zarr
 opentelemetry-api==1.35.0 \
@@ -365,7 +497,10 @@ packaging==25.0 \
     --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \
     --hash=sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f
     # via
+    #   geoalchemy2
+    #   geopandas
     #   opentelemetry-instrumentation
+    #   pyogrio
     #   pytest
     #   rioxarray
     #   xarray
@@ -378,7 +513,11 @@ pandas==2.3.0 \
     --hash=sha256:9ff730713d4c4f2f1c860e36c005c7cefc1c7c80c21c0688fd605aa43c9fcf09 \
     --hash=sha256:b9d8c3187be7479ea5c3d30c32a5d73d62a621166675063b2edd21bc47614027 \
     --hash=sha256:ba24af48643b12ffe49b27065d3babd52702d95ab70f50e1b34f71ca703e2c0d
-    # via xarray
+    # via
+    #   geopandas
+    #   xarray
+pgedr @ git+https://github.com/internetofwater/pgedr.git@c77a2384b9db2482d0b8ffefb09296a9609cf298
+    # via arizonawaterobservatory
 pluggy==1.6.0 \
     --hash=sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3 \
     --hash=sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746
@@ -416,12 +555,22 @@ protobuf==5.29.5 \
     # via
     #   googleapis-common-protos
     #   opentelemetry-proto
+psycopg2==2.9.11 \
+    --hash=sha256:964d31caf728e217c697ff77ea69c2ba0865fa41ec20bb00f0977e62fdcc52e3 \
+    --hash=sha256:e03e4a6dbe87ff81540b434f2e5dc2bddad10296db5eea7bdc995bf5f4162938
+    # via pgedr
+pycparser==2.22 ; platform_python_implementation != 'PyPy' \
+    --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \
+    --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
+    # via cffi
 pydantic==2.11.5 \
     --hash=sha256:7f853db3d0ce78ce8bbb148c401c2cdd6431b3473c0cdff2755c7690952a7b7a \
     --hash=sha256:f9c26ba06f9747749ca1e5c94d6a85cb84254577553c8785576fd38fa64dc0f7
     # via
     #   covjson-pydantic
     #   geojson-pydantic
+    #   pgedr
+    #   pygeoapi
 pydantic-core==2.33.2 \
     --hash=sha256:3c6db6e52c6d70aa0d00d45cdb9b40f0433b96380071ea80b09277dba021ddf7 \
     --hash=sha256:4e61206137cbc65e6d5256e1166f88331d3b6238e082d9f74613b9b765fb9025 \
@@ -439,14 +588,41 @@ pydantic-core==2.33.2 \
     --hash=sha256:f941635f2a3d96b2973e867144fde513665c87f13fe0e193c158ac51bfaaa7b2 \
     --hash=sha256:fa854f5cf7e33842a892e5c73f45327760bc7bc516339fda888c75ae60edaeb6
     # via pydantic
+pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@2021551eb8175d88103444815e5e9b2a1d1b75f4
+    # via pgedr
+pygeofilter==0.3.1 \
+    --hash=sha256:f13dcdd685bdca32cf9e6665bf2938522276bee140abff321ab04abb12f5761d \
+    --hash=sha256:f92bc0622099f87fe8b36de7abdd86059d615a89ed60822737082223a578e150
+    # via pygeoapi
+pygeoif==1.5.1 \
+    --hash=sha256:2210cca8707c2858885525330db2164321218bb676fe0900123eed94624aab34 \
+    --hash=sha256:f27a6b6a1ecb87aeacc2b51bcc59ca79be70ed12a0104de8601478b213dd5d81
+    # via
+    #   pygeoapi
+    #   pygeofilter
 pygments==2.19.1 \
     --hash=sha256:61c16d2a8576dc0649d9f39e089b5f02bcd27fba10d8fb4dcc28173f7a45151f \
     --hash=sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c
     # via pytest
+pymysql==1.1.2 \
+    --hash=sha256:4961d3e165614ae65014e361811a724e2044ad3ea3739de9903ae7c21f539f03 \
+    --hash=sha256:e6b1d89711dd51f8f74b1631fe08f039e7d76cf67a42a323d3178f0f25762ed9
+    # via pgedr
+pyogrio==0.11.1 \
+    --hash=sha256:0cfd79caf0b8cb7bbf30b419dff7f21509169efcf4d431172c61b44fe1029dba \
+    --hash=sha256:ab3aa6dbf2441d2407ce052233f2966324a3cff752bd43d99e4c779ea54e0a16 \
+    --hash=sha256:afce80b4b32f043fcf76a50e8572e3ad8d9d3e6abbbfa6137f0975ba55c4eeb8 \
+    --hash=sha256:b8a199bc0e421eac444af96942b7553268e43d0cadf30d0d6d41017de05b7e9e \
+    --hash=sha256:cd10035eb3b5e5a43bdafbd777339d2274e9b75972658364f0ce31c4d3400d1e \
+    --hash=sha256:e1441dc9c866f10d8e6ae7ea9249a10c1f57ea921b1f19a5b0977ab91ef8082c \
+    --hash=sha256:f186456ebe5d5f61e7bd883bad25a59d43d6304178d4f0d3e03273f42b40a4cc
+    # via geopandas
 pyparsing==3.2.5 \
     --hash=sha256:2df8d5b7b2802ef88e8d016a2eb9c7aeaa923529cd251ed0fe4608275d4105b6 \
     --hash=sha256:e38a4f02064cf41fe6593d328d0512495ad1f3d8a91c4f73fc401b3079a59a5e
-    # via rasterio
+    # via
+    #   rasterio
+    #   rdflib
 pyproj==3.7.2 \
     --hash=sha256:0a9bb26a6356fb5b033433a6d1b4542158fb71e3c51de49b4c318a1dff3aeaab \
     --hash=sha256:11614a054cd86a2ed968a657d00987a86eeb91fdcbd9ad3310478685dc14a128 \
@@ -458,7 +634,10 @@ pyproj==3.7.2 \
     --hash=sha256:b3d99ed57d319da042f175f4554fc7038aa4bcecc4ac89e217e350346b742c9d \
     --hash=sha256:c203101d1dc3c038a56cff0447acc515dd29d6e14811406ac539c21eed422b2a \
     --hash=sha256:f9428b318530625cb389b9ddc9c51251e172808a4af79b82809376daaeabe5e9
-    # via rioxarray
+    # via
+    #   geopandas
+    #   pygeoapi
+    #   rioxarray
 pyright==1.1.401 \
     --hash=sha256:6fde30492ba5b0d7667c16ecaf6c699fab8d7a1263f6a18549e0b00bf7724c06 \
     --hash=sha256:788a82b6611fa5e34a326a921d86d898768cddf59edde8e93e56087d277cc6f1
@@ -475,11 +654,28 @@ python-dateutil==2.9.0.post0 \
     # via
     #   aiobotocore
     #   botocore
+    #   dateparser
     #   pandas
+    #   pygeoapi
 pytz==2025.2 \
     --hash=sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3 \
     --hash=sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00
-    # via pandas
+    # via
+    #   dateparser
+    #   pandas
+    #   pygeoapi
+pyyaml==6.0.2 \
+    --hash=sha256:0833f8694549e586547b576dcfaba4a6b55b9e96098b36cdc7ebefe667dfed48 \
+    --hash=sha256:1f71ea527786de97d1a0cc0eacd1defc0985dcf6b3f17bb77dcfc8c34bec4dc5 \
+    --hash=sha256:7e7401d0de89a9a855c839bc697c079a4af81cf878373abd7dc625847d25cbd8 \
+    --hash=sha256:80bab7bfc629882493af4aa31a4cfa43a4c57c83813253626916b8c7ada83476 \
+    --hash=sha256:8b9c7197f7cb2738065c481a0461e50ad02f18c78cd75775628afb4d7137fb3b \
+    --hash=sha256:9b22676e8097e9e22e36d6b7bda33190d0d400f345f23d4065d48f4ca7ae0425 \
+    --hash=sha256:c70c95198c015b85feafc136515252a261a84561b7b1d51e3384e0655ddf25ab \
+    --hash=sha256:ce826d6ef20b1bc864f0a68340c8b3287705cae2f8b4b1d932177dcc76721725 \
+    --hash=sha256:d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e \
+    --hash=sha256:ef6107725bd54b262d6dedcc2af448a266975032bc85ef0172c5f059da6325b4
+    # via pygeoapi
 radon==6.0.1 \
     --hash=sha256:632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859 \
     --hash=sha256:d1ac0053943a893878940fedc8b19ace70386fc9c9bf0a09229a44125ebf45b5
@@ -489,27 +685,90 @@ rasterio==1.4.3 \
     --hash=sha256:8e90c2c300294265c16becc9822337ded0f01fb8664500b4d77890d633d8cd0e \
     --hash=sha256:a962ad4c29feaf38b1d7a94389313127de3646a5b9b734fbf9a04e16051a27ff \
     --hash=sha256:e703e4b2c74c678786d5d110a3f30e26f3acfd65f09ccf35f69683a532f7a772
-    # via rioxarray
+    # via
+    #   pygeoapi
+    #   rioxarray
+rdflib==7.2.1 \
+    --hash=sha256:1a175bc1386a167a42fbfaba003bfa05c164a2a3ca3cb9c0c97f9c9638ca6ac2 \
+    --hash=sha256:cf9b7fa25234e8925da8b1fb09700f8349b5f0f100e785fb4260e737308292ac
+    # via pygeoapi
 redis==6.2.0 \
     --hash=sha256:c8ddf316ee0aab65f04a11229e94a64b2618451dab7a67cb2f77eb799d872d5e \
     --hash=sha256:e821f129b75dde6cb99dd35e5c76e8c49512a5a0d8dfdc560b2fbd44b85ca977
     # via arizonawaterobservatory
+referencing==0.36.2 \
+    --hash=sha256:df2e89862cd09deabbdba16944cc3f10feb6b3e6f18e902f7cc25609a34775aa \
+    --hash=sha256:e8699adbbf8b5c7de96d8ffa0eb5c158b3beafce084968e2ea8bb08c6794dcd0
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
+regex==2025.9.18 \
+    --hash=sha256:032720248cbeeae6444c269b78cb15664458b7bb9ed02401d3da59fe4d68c3a5 \
+    --hash=sha256:039f11b618ce8d71a1c364fdee37da1012f5a3e79b1b2819a9f389cd82fd6282 \
+    --hash=sha256:0f0d676522d68c207828dcd01fb6f214f63f238c283d9f01d85fc664c7c85b56 \
+    --hash=sha256:300e25dbbf8299d87205e821a201057f2ef9aa3deb29caa01cd2cac669e508d5 \
+    --hash=sha256:3d86b5247bf25fa3715e385aa9ff272c307e0636ce0c9595f64568b41f0a9c77 \
+    --hash=sha256:40532bff8a1a0621e7903ae57fce88feb2e8a9a9116d341701302c9302aef06e \
+    --hash=sha256:436e1b31d7efd4dcd52091d076482031c611dde58bf9c46ca6d0a26e33053a7e \
+    --hash=sha256:4f130c3a7845ba42de42f380fff3c8aebe89a810747d91bcf56d40a069f15352 \
+    --hash=sha256:57a161bd3acaa4b513220b49949b07e252165e6b6dc910ee7617a37ff4f5b425 \
+    --hash=sha256:5f96fa342b6f54dcba928dd452e8d8cb9f0d63e711d1721cd765bb9f73bb048d \
+    --hash=sha256:7b47fcf9f5316c0bdaf449e879407e1b9937a23c3b369135ca94ebc8d74b1742 \
+    --hash=sha256:c190af81e5576b9c5fdc708f781a52ff20f8b96386c6e2e0557a78402b029f4a \
+    --hash=sha256:c5ba23274c61c6fef447ba6a39333297d0c247f53059dba0bca415cac511edc4 \
+    --hash=sha256:e1dd06f981eb226edf87c55d523131ade7285137fbde837c34dc9d1bf309f459 \
+    --hash=sha256:e4121f1ce2b2b5eec4b397cc1b277686e577e658d8f5870b7eb2d726bd2300ab
+    # via dateparser
 requests==2.32.4 \
     --hash=sha256:27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c \
     --hash=sha256:27d0316682c8a29834d3264820024b62a36942083d52caf2f14c0591336d3422
-    # via opentelemetry-exporter-otlp-proto-http
+    # via
+    #   opentelemetry-exporter-otlp-proto-http
+    #   pygeoapi
 rioxarray==0.19.0 \
     --hash=sha256:494ee4fff1781072d55ee5276f5d07b63d93b05093cb33b926a12186ba5bb8ef \
     --hash=sha256:7819a0036fd874c8c8e280447cbbe43d8dc72fc4a14ac7852a665b1bdb7d4b04
     # via arizonawaterobservatory
 rise @ git+https://github.com/internetofwater/Western-Water-Datahub.git@c2fe95a347af6b51f5760d34130cb0fb148f6203#subdirectory=packages/rise
     # via arizonawaterobservatory
+rpds-py==0.25.1 \
+    --hash=sha256:115874ae5e2fdcfc16b2aedc95b5eef4aebe91b28e7e21951eda8a5dc0d3461b \
+    --hash=sha256:1de336a4b164c9188cb23f3703adb74a7623ab32d20090d0e9bf499a2203ad65 \
+    --hash=sha256:2c2cd1a4b0c2b8c5e31ffff50d09f39906fe351389ba143c195566056c13a7ea \
+    --hash=sha256:35634369325906bcd01577da4c19e3b9541a15e99f31e91a02d010816b49bfda \
+    --hash=sha256:6d50841c425d16faf3206ddbba44c21aa3310a0cebc3c1cdfc3e3f4f9f6f5728 \
+    --hash=sha256:88ec04afe0c59fa64e2f6ea0dd9657e04fc83e38de90f6de201954b4d4eb59bd \
+    --hash=sha256:8960b6dac09b62dac26e75d7e2c4a22efb835d827a7278c34f72b2b84fa160e3 \
+    --hash=sha256:9ceca1cf097ed77e1a51f1dbc8d174d10cb5931c188a4505ff9f3e119dfe519b \
+    --hash=sha256:9fca84a15333e925dd59ce01da0ffe2ffe0d6e5d29a9eeba2148916d1824948c \
+    --hash=sha256:a714bf6e5e81b0e570d01f56e0c89c6375101b8463999ead3a93a5d2a4af91fa \
+    --hash=sha256:a8bd2f19e312ce3e1d2c635618e8a8d8132892bb746a7cf74780a489f0f6cdcb \
+    --hash=sha256:b5ffe453cde61f73fea9430223c81d29e2fbf412a6073951102146c84e19e34c \
+    --hash=sha256:d4cb2b3ddc16710548801c6fcc0cfcdeeff9dafbc983f77265877793f2660309 \
+    --hash=sha256:db58483f71c5db67d643857404da360dce3573031586034b7d59f245144cc192 \
+    --hash=sha256:e5e2f7280d8d0d3ef06f3ec1b4fd598d386cc6f0721e54f09109a8132182fbfe
+    # via
+    #   jsonschema
+    #   referencing
 s3fs==2025.9.0 \
     --hash=sha256:6d44257ef19ea64968d0720744c4af7a063a05f5c1be0e17ce943bef7302bc30 \
     --hash=sha256:c33c93d48f66ed440dbaf6600be149cdf8beae4b6f8f0201a209c5801aeb7e30
     # via
     #   arizonawaterobservatory
     #   nationalwatermodel
+shapely==2.1.2 \
+    --hash=sha256:0bd308103340030feef6c111d3eb98d50dc13feea33affc8a6f9fa549e9458a3 \
+    --hash=sha256:1e7d4d7ad262a48bb44277ca12c7c78cb1b0f56b32c10734ec9a1d30c0b0c54b \
+    --hash=sha256:2ed4ecb28320a433db18a5bf029986aa8afcfd740745e78847e330d5d94922a9 \
+    --hash=sha256:743044b4cfb34f9a67205cee9279feaf60ba7d02e69febc2afc609047cb49179 \
+    --hash=sha256:9111274b88e4d7b54a95218e243282709b330ef52b7b86bc6aaf4f805306f454 \
+    --hash=sha256:980c777c612514c0cf99bc8a9de6d286f5e186dcaf9091252fcd444e5638193d \
+    --hash=sha256:ba4d1333cc0bc94381d6d4308d2e4e008e0bd128bdcff5573199742ee3634359 \
+    --hash=sha256:e9eddfe513096a71896441a7c37db72da0687b34752c4e193577a145c71736fc \
+    --hash=sha256:fe2533caae6a91a543dec62e8360fe86ffcdc42a7c55f9dfd0128a977a896b94
+    # via
+    #   geopandas
+    #   pygeoapi
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
     --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81
@@ -518,6 +777,24 @@ six==1.17.0 \
     #   python-dateutil
 snotel @ git+https://github.com/internetofwater/Western-Water-Datahub.git@c2fe95a347af6b51f5760d34130cb0fb148f6203#subdirectory=packages/snotel
     # via arizonawaterobservatory
+sqlalchemy==2.0.41 \
+    --hash=sha256:41836fe661cc98abfae476e14ba1906220f92c4e528771a8a3ae6a151242d2ae \
+    --hash=sha256:57df5dc6fdb5ed1a88a1ed2195fd31927e705cad62dedd86b46972752a80f576 \
+    --hash=sha256:598d9ebc1e796431bbd068e41e4de4dc34312b7aa3292571bb3674a0cb415dd1 \
+    --hash=sha256:5b14e97886199c1f52c14629c11d90c11fbb09e9334fa7bb5f6d068d9ced0ce0 \
+    --hash=sha256:6145afea51ff0af7f2564a05fa95eb46f542919e6523729663a5d285ecb3cf5e \
+    --hash=sha256:81f413674d85cfd0dfcd6512e10e0f33c19c21860342a4890c3a2b59479929f9 \
+    --hash=sha256:a104c5694dfd2d864a6f91b0956eb5d5883234119cb40010115fd45a16da5e70 \
+    --hash=sha256:a8808d5cf866c781150d36a3c8eb3adccfa41a8105d031bf27e92c251e3969d6 \
+    --hash=sha256:b46fa6eae1cd1c20e6e6f44e19984d438b6b2d8616d21d783d150df714f44078 \
+    --hash=sha256:edba70118c4be3c2b1f90754d308d0b79c6fe2c0fdc52d8ddf603916f83f4db9
+    # via
+    #   geoalchemy2
+    #   pygeoapi
+tinydb==4.8.2 \
+    --hash=sha256:f7dfc39b8d7fda7a1ca62a8dbb449ffd340a117c1206b68c50b1a481fb95181d \
+    --hash=sha256:f97030ee5cbc91eeadd1d7af07ab0e48ceb04aa63d4a983adbaca4cba16e86c3
+    # via pygeoapi
 typing-extensions==4.14.0 \
     --hash=sha256:8676b788e32f02ab42d9e7c61324048ae4c6d844a399eebace3d4979d75ceef4 \
     --hash=sha256:a1514509136dd0b477638fc68d6a91497af5076466ad0fa6c338e44e359944af
@@ -529,7 +806,10 @@ typing-extensions==4.14.0 \
     #   opentelemetry-semantic-conventions
     #   pydantic
     #   pydantic-core
+    #   pygeoif
     #   pyright
+    #   referencing
+    #   sqlalchemy
     #   typing-inspection
 typing-inspection==0.4.1 \
     --hash=sha256:389055682238f53b04f7badcb49b989835495a96700ced5dab2d8feae4b26f51 \
@@ -538,7 +818,13 @@ typing-inspection==0.4.1 \
 tzdata==2025.2 \
     --hash=sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8 \
     --hash=sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9
-    # via pandas
+    # via
+    #   pandas
+    #   tzlocal
+tzlocal==5.3.1 \
+    --hash=sha256:cceffc7edecefea1f595541dbd6e990cb1ea3d19bf01b2809f362a03dd7921fd \
+    --hash=sha256:eb1a66c3ef5847adf7a834f1be0800581b683b5608e74f86ecbcef8ab91bb85d
+    # via dateparser
 urllib3==1.26.20 \
     --hash=sha256:0ed14ccfbf1c30a9072c7ca157e4319b70d65f623e91e7b32fadb2853431016e \
     --hash=sha256:40c2dc0c681e47eb8f90e7e27bf6ff7df2e677421fd46756da1161c39ca70d32
@@ -547,6 +833,10 @@ urllib3==1.26.20 \
     #   requests
 usace @ git+https://github.com/internetofwater/Western-Water-Datahub.git@c2fe95a347af6b51f5760d34130cb0fb148f6203#subdirectory=packages/usace
     # via arizonawaterobservatory
+werkzeug==3.1.3 \
+    --hash=sha256:54b78bf3716d19a65be4fceccc0d1d7b89e608834989dfae50ea87564639213e \
+    --hash=sha256:60723ce945c19328679790e3282cc758aa4a6040e4bb330f53d30fa546d44746
+    # via flask
 wrapt==1.17.2 \
     --hash=sha256:3fc7cb4c1c744f8c05cd5f9438a3caa6ab94ce8344e952d7c45a8ed59dd88392 \
     --hash=sha256:41388e9d4d1522446fe79d3213196bd9e3b301a336965b9e27ca2788ebd122f3 \

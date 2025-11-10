@@ -1,3 +1,5 @@
+include .env
+
 precommit:
 	pre-commit install
 	pre-commit run 
