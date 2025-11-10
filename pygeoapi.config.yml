@@ -168,7 +168,7 @@ resources:
   usace-edr:
     type: collection
     title: US Army Corps of Engineers Access2Water API
-    description: The Access2Water API provides X 
+    description: US Army Corps of Engineers Access2Water API
     extents: 
       spatial:
         bbox: [-170, 15, -51, 72]
