@@ -11,7 +11,8 @@ resource "google_sql_database_instance" "postgis" {
   name             = var.instance_name
   database_version = var.POSTGRES_VERSION
   region           = var.region
-
+  root_password = var.POSTGRES_PASSWORD
+  
   settings {
 
     tier = "db-f1-micro"
