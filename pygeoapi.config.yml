@@ -24,11 +24,11 @@ server:
   manager:
     name: PostgreSQL
     connection:
-      host: ${POSTGRESQL_HOST}
+      host: ${TF_VAR_POSTGRES_HOST:-localhost}
       port: 5432
       database: edr
       user: postgres
-      password: ${POSTGRESQL_PASSWORD}
+      password: ${TF_VAR_POSTGRES_PASSWORD:-password}
       
 logging:
   level: ${PYGEOAPI_LOGLEVEL:-WARNING}
@@ -167,8 +167,8 @@ resources:
 
   usace-edr:
     type: collection
-    title: US Army Corps of Engineers
-    description: USACE Access2Water API
+    title: US Army Corps of Engineers Access2Water API
+    description: The Access2Water API provides X 
     extents: 
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -424,10 +424,10 @@ resources:
       - type: feature
         name: PostgreSQL
         data:
-          host: ${TF_VAR_POSTGRES_HOST}
-          dbname: ${TF_VAR_POSTGRES_DB}
-          user: ${TF_VAR_POSTGRES_USER}
-          password: ${TF_VAR_POSTGRES_PASSWORD}
+          host: ${TF_VAR_POSTGRES_HOST:-localhost}
+          dbname: ${TF_VAR_POSTGRES_DB:-edr}
+          user: ${TF_VAR_POSTGRES_USER:-postgres}
+          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
           search_path: [edr_quickstart]
         table: locations
         id_field: location_id
@@ -436,10 +436,10 @@ resources:
       - type: edr
         name: pgedr.PostgresEDRProvider
         data:
-          host: ${TF_VAR_POSTGRES_HOST}
-          dbname: ${TF_VAR_POSTGRES_DB}
-          user: ${TF_VAR_POSTGRES_USER}
-          password: ${TF_VAR_POSTGRES_PASSWORD}
+          host: ${TF_VAR_POSTGRES_HOST:-localhost}
+          dbname: ${TF_VAR_POSTGRES_DB:-edr}
+          user: ${TF_VAR_POSTGRES_USER:-postgres}
+          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
           search_path: [edr_quickstart]
         table: observations
     
