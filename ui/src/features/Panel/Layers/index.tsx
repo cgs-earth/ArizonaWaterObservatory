@@ -25,11 +25,11 @@ const Layers: React.FC<Props> = (props) => {
   const layers = useMainStore((state) => state.layers);
   const loadingInstances = useSessionStore((state) => state.loadingInstances);
 
-  const [maxHeight, setMaxHeight] = useState(datasetsOpen ? 605 : 215);
+  const [maxHeight, setMaxHeight] = useState(datasetsOpen ? 605 : 248);
   const [value, setValue] = useState<string | null>();
 
   useEffect(() => {
-    const datasetOffset = datasetsOpen ? 605 : 215;
+    const datasetOffset = datasetsOpen ? 605 : 248;
     const loadingBarOffset = loadingInstances.length > 0 ? 12 : 0;
 
     setMaxHeight(datasetOffset + loadingBarOffset);
