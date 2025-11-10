@@ -19,10 +19,14 @@ server:
     url: https://tile.openstreetmap.org/{z}/{x}/{y}.png
     attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'
 
-  manager:  # optional OGC API - Processes asynchronous job management
-      name: TinyDB  # plugin name (see pygeoapi.plugin for supported process_manager's)
-      connection: ${JOB_MANAGER_CONNECTION:-/tmp/pygeoapi-process-manager.db}  # connection info to store jobs (e.g. filepath)
-      output_dir: ${JOB_MANAGER_DIRECTORY:-/tmp/}  # directory to store process outputs (e.g. files)
+  manager:
+    name: PostgreSQL
+    connection:
+      host: ${POSTGRESQL_HOST}
+      port: 5432
+      database: edr
+      user: postgres
+      password: ${POSTGRESQL_PASSWORD}
       
 logging:
   level: ${PYGEOAPI_LOGLEVEL:-WARNING}
