@@ -51,11 +51,6 @@
   border-bottom: 0.5rem solid var(--asu-color-secondary);
 }
 
-.filterBody {
-  padding: calc(var(--default-spacing) * 2);
-  border-bottom: 0.5rem solid var(--asu-color-tertiary);
-}
-
 .accordionBody {
   overflow-y: auto;
 }
@@ -101,7 +96,11 @@
 }
 
 .layerInput {
-  width: 150px;
+  width: calc(50% - var(--default-spacing));
+}
+
+.datePicker {
+  width: calc(50% - var(--default-spacing));
 }
 
 @media screen and (max-width: 899px) {

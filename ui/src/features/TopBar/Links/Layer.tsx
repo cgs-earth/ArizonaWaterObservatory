@@ -8,29 +8,34 @@ import { Feature } from 'geojson';
 import { Anchor, Box, Group, Text, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
-import { LocationBlock } from '@/features/TopBar/Links/LocationBlock';
+import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
 import styles from '@/features/TopBar/TopBar.module.css';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
-import { Layer as LayerType, Location as LocationType } from '@/stores/main/types';
+import { Layer as LayerType, Location } from '@/stores/main/types';
 import { LoadingType } from '@/stores/session/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getProvider } from '@/utils/provider';
 
 type Props = {
   layer: LayerType;
+  linkLocation: Location | null;
 };
 
 export const Layer: React.FC<Props> = (props) => {
-  const { layer } = props;
+  const { layer, linkLocation } = props;
 
   const locations = useMainStore((state) => state.locations);
 
-  const [selectedLocations, setSelectedLocations] = useState<LocationType[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<Feature[]>([]);
   const [otherLocations, setOtherLocations] = useState<Feature[]>([]);
   const [dataset, setDataset] = useState<ICollection>();
   const [provider, setProvider] = useState<string>('');
+  const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
+
+  const [isEnabled, setIsEnabled] = useState(false);
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
@@ -44,17 +49,19 @@ export const Layer: React.FC<Props> = (props) => {
     try {
       controller.current = new AbortController();
 
-      const allLocations = await mainManager.getData(layer, controller.current.signal);
+      const allLocations = await mainManager.getFeatures(layer, controller.current.signal);
 
+      const layerLocations = locations.filter((location) => location.layerId === layer.id);
+
+      const selectedLocations = allLocations.features.filter((feature) =>
+        layerLocations.some((location) => location.id === String(feature.id))
+      );
       const otherLocations = allLocations.features.filter(
-        (feature) => !selectedLocations.some((location) => location.id === feature.id)
+        (feature) => !layerLocations.some((location) => location.id === String(feature.id))
       );
 
       if (isMounted.current) {
-        // There are no locations on screen, dont show selected locations
-        if (allLocations.features.length === 0) {
-          setSelectedLocations([]);
-        }
+        setSelectedLocations(selectedLocations);
         setOtherLocations(otherLocations);
       }
     } catch (error) {
@@ -67,13 +74,8 @@ export const Layer: React.FC<Props> = (props) => {
   };
 
   useEffect(() => {
-    const selectedLocations = locations.filter((location) => location.layerId === layer.id);
-    setSelectedLocations(selectedLocations);
-  }, [locations]);
-
-  useEffect(() => {
     void getOtherLocations();
-  }, [selectedLocations]);
+  }, []);
 
   useEffect(() => {
     if (dataset) {
@@ -84,6 +86,8 @@ export const Layer: React.FC<Props> = (props) => {
 
     if (newDataset) {
       setDataset(newDataset);
+      const collectionType = getCollectionType(newDataset);
+      setCollectionType(collectionType);
     }
   }, [layer]);
 
@@ -95,6 +99,19 @@ export const Layer: React.FC<Props> = (props) => {
     const newProvider = getProvider(dataset.id);
     setProvider(newProvider);
   }, [dataset]);
+
+  useEffect(() => {
+    const datasource = mainManager.getDatasource(layer.datasourceId);
+    if (datasource) {
+      const collectionType = getCollectionType(datasource);
+      if (collectionType === CollectionType.Features) {
+        return setIsEnabled(true);
+      } else if ([CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType)) {
+        return setIsEnabled(layer.parameters.length > 0);
+      }
+    }
+    setIsEnabled(false);
+  }, [layer]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -110,19 +127,39 @@ export const Layer: React.FC<Props> = (props) => {
     (link) => link.rel === 'alternate' && link.type === 'text/html'
   )?.href;
 
-  const hasParametersSelected = layer.parameters.length > 0;
+  const getLabel = (collectionType: CollectionType) => {
+    switch (collectionType) {
+      case CollectionType.EDR:
+        return 'Location';
+      case CollectionType.EDRGrid:
+        return 'Grid';
+      case CollectionType.Features:
+        return 'Item';
+      default:
+        return '';
+    }
+  };
+
   const hasSelectedLocations = selectedLocations.length > 0;
   const hasOtherLocations = otherLocations.length > 0;
 
   return (
     <Accordion
+      defaultValue={`links-${linkLocation?.layerId}-accordion`}
       items={[
         {
           id: `links-${layer.id}-accordion`,
 
           title: (
-            <>
-              {' '}
+            <Box className={styles.accordionHeader}>
+              <Group gap="xs">
+                {provider.length > 0 && (
+                  <Text size="sm" fw={700}>
+                    {provider}
+                  </Text>
+                )}
+                <Text size="sm">{dataset?.title}</Text>
+              </Group>
               {alternateLink ? (
                 <Anchor
                   title="This dataset in the API"
@@ -139,14 +176,14 @@ export const Layer: React.FC<Props> = (props) => {
                   {layer.name}
                 </Title>
               )}
-            </>
+            </Box>
           ),
           content: (
             <Box className={styles.accordionBody}>
-              {!hasParametersSelected || (!hasSelectedLocations && !hasOtherLocations) ? (
+              {!isEnabled || (!hasSelectedLocations && !hasOtherLocations) ? (
                 <Group justify="center" align="center" className={styles.noParameterMessage}>
                   <Text size="md">
-                    {!hasParametersSelected
+                    {!isEnabled
                       ? 'Select at least one parameter for this layer to access links.'
                       : 'No locations found.'}
                   </Text>
@@ -155,20 +192,23 @@ export const Layer: React.FC<Props> = (props) => {
                 <>
                   {selectedLocations.length > 0 && (
                     <Accordion
+                      defaultValue={`links-${linkLocation?.layerId}-selected-accordion`}
                       items={[
                         {
                           id: `links-${layer.id}-selected-accordion`,
                           title: (
-                            <Title order={6} size="h4">
-                              {otherLocations.length > 0 && 'Selected '}Locations
+                            <Title order={6} size="h4" className={styles.accordionHeader}>
+                              {otherLocations.length > 0 && 'Selected '}
+                              {getLabel(collectionType)}s
                             </Title>
                           ),
                           content: (
-                            <LocationBlock
+                            <LayerBlock
+                              linkLocation={linkLocation}
                               locations={selectedLocations}
                               layer={layer}
                               collection={dataset}
-                              provider={provider}
+                              collectionType={collectionType}
                             />
                           ),
                         },
@@ -182,16 +222,17 @@ export const Layer: React.FC<Props> = (props) => {
                         {
                           id: `links-${layer.id}-other-accordion`,
                           title: (
-                            <Title order={6} size="h4">
-                              {selectedLocations.length > 0 && 'Other '}Locations
+                            <Title order={6} size="h4" className={styles.accordionHeader}>
+                              {selectedLocations.length > 0 && 'Other '}
+                              {getLabel(collectionType)}s
                             </Title>
                           ),
                           content: (
-                            <LocationBlock
+                            <LayerBlock
                               locations={otherLocations}
                               layer={layer}
                               collection={dataset}
-                              provider={provider}
+                              collectionType={collectionType}
                             />
                           ),
                         },

@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { RefObject, useEffect, useMemo, useState } from 'react';
+import { RefObject, useEffect, useState } from 'react';
 import { Box, Text, Title, Tooltip } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import Layer from '@/features/Panel/Layers/Layer';
-import { Control } from '@/features/Panel/Layers/Layer/Control';
 import { Fallback } from '@/features/Panel/Layers/Layer/Fallback';
 import { Header } from '@/features/Panel/Layers/Layer/Header';
 import styles from '@/features/Panel/Panel.module.css';
@@ -28,25 +27,6 @@ const Layers: React.FC<Props> = (props) => {
 
   const [maxHeight, setMaxHeight] = useState(datasetsOpen ? 605 : 215);
   const [value, setValue] = useState<string | null>();
-
-  const accordions = useMemo(
-    () =>
-      layers.map((layer) => (
-        <Accordion
-          key={`layers-accordion-${layer.id}`}
-          items={[
-            {
-              id: `layers-accordion-${layer.id}`,
-              title: <Header layer={layer} />,
-              content: <Layer layer={layer} />,
-              control: <Control layer={layer} />,
-            },
-          ]}
-          variant={Variant.Secondary}
-        />
-      )),
-    [layers]
-  );
 
   useEffect(() => {
     const datasetOffset = datasetsOpen ? 605 : 215;
@@ -86,7 +66,23 @@ const Layers: React.FC<Props> = (props) => {
           ),
           content: (
             <Box mah={`calc(100vh - ${maxHeight}px)`} className={styles.accordionBody}>
-              {accordions.length > 0 ? accordions : <Fallback />}
+              {layers.length > 0 ? (
+                layers.map((layer) => (
+                  <Accordion
+                    key={`layers-accordion-${layer.id}`}
+                    items={[
+                      {
+                        id: `layers-accordion-${layer.id}`,
+                        title: <Header layer={layer} />,
+                        content: <Layer layer={layer} />,
+                      },
+                    ]}
+                    variant={Variant.Secondary}
+                  />
+                ))
+              ) : (
+                <Fallback />
+              )}
             </Box>
           ),
         },

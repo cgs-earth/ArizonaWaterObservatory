@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Location } from '@/stores/main/types';
 import { LoadingSlice } from '@/stores/session/slices/loading';
 import { MeasureSlice } from '@/stores/session/slices/measure';
 import { NotificationsSlice } from '@/stores/session/slices/notifications';
@@ -26,10 +27,13 @@ export enum Tool {
 }
 
 export enum Overlay {
+  Links = 'links',
   Share = 'share',
   Draw = 'draw',
   Basemap = 'basemap',
   Legend = 'legend',
+  Info = 'info',
+  Warning = 'warning',
 }
 
 export type Notification = {
@@ -51,18 +55,25 @@ export type LegendEntry = {
   color: string;
   visible: boolean;
 };
+export enum HelpTab {
+  About = 'about',
+  FAQ = 'FAQ',
+  Glossary = 'glossary',
+}
 
 export type SessionState = {
   legendEntries: LegendEntry[];
   setLegendEntries: (legendEntries: SessionState['legendEntries']) => void;
   overlay: Overlay | null;
   setOverlay: (overlay: SessionState['overlay']) => void;
-  downloadModalOpen: boolean;
-  setDownloadModalOpen: (downloadModalOpen: SessionState['downloadModalOpen']) => void;
   tools: {
     [Tool.Legend]: boolean;
   };
   setOpenTools: (tool: Tool, open: boolean) => void;
+  linkLocation: Location | null;
+  setLinkLocation: (linkLocation: SessionState['linkLocation']) => void;
+  helpTab: HelpTab;
+  setHelpTab: (helpTab: SessionState['helpTab']) => void;
 } & NotificationsSlice &
   LoadingSlice &
   MeasureSlice;

@@ -346,7 +346,7 @@ export class EDRService extends Service {
    * - `crs`: Identifier (id) of the coordinate system to return data in list of valid crs identifiers for the chosen collection are defined in the metadata responses. If not supplied the coordinate reference system will default to WGS84.
    * - `f`: Format of the response.
    */
-  async getCube<T extends CoverageJSON | GeoJSON | string = CoverageJSON>(
+  async getCube<T extends CoverageJSON | CoverageCollection | GeoJSON | string = CoverageJSON>(
     collectionId: string,
     options: IServiceRequestOptions<IGetCubeParams> = {}
   ): Promise<T> {
@@ -940,7 +940,7 @@ export interface ParameterName {
     };
   };
   unit: {
-    label: {
+    label?: {
       en: string;
     };
     symbol: {
@@ -1089,11 +1089,19 @@ export interface CoverageJSON {
   domain: {
     type: string;
     domainType: string;
+
     axes: {
-      [key: string]: {
-        values: (number | string)[];
-      };
+      [key: string]:
+        | {
+            start: number;
+            stop: number;
+            num: number;
+          }
+        | {
+            values: (number | string)[];
+          };
     };
+
     referencing: {
       coordinates: string[];
       system: {

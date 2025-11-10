@@ -5,9 +5,9 @@
 
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { StoreApi, UseBoundStore } from 'zustand';
+import LoadingManager from '@/managers/Loading.manager';
 import useSessionStore from '@/stores/session';
 import { LoadingType, SessionState } from '@/stores/session/types';
-import LoadingManager from '../Loading.manager';
 
 describe('LoadingManager', () => {
   let loadingManager: LoadingManager;

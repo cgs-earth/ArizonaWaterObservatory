@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Popover from '.';
 import { Box, Stack, Text } from '@mantine/core';
 import Button from '@/components/Button';
+import Popover from '@/components/Popover';
 
 export default {
   title: 'Popover',

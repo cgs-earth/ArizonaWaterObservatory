@@ -22,8 +22,10 @@ import { Header } from '@/features/Panel/Datasets/Dataset/Header';
 import Filter from '@/features/Panel/Datasets/Filter';
 import { FilterTitle } from '@/features/Panel/Datasets/Filter/Header';
 import styles from '@/features/Panel/Panel.module.css';
+import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
+import { filterCollections } from '@/utils/filterCollections';
 
 type Props = {
   layersRef: RefObject<HTMLDivElement | null>;
@@ -33,16 +35,21 @@ type Props = {
 const Datasets: React.FC<Props> = (props) => {
   const { layersRef, setDatasetsOpen } = props;
 
+  const provider = useMainStore((state) => state.provider);
+  const category = useMainStore((state) => state.category);
+  const parameterGroupMembers = useMainStore((state) => state.parameterGroupMembers);
   const datasets = useMainStore((state) => state.collections);
   const loadingInstances = useSessionStore((state) => state.loadingInstances);
 
   const [maxHeight, setMaxHeight] = useState(555);
 
   const [value, setValue] = useState<string | null>();
+  const [filteredDatasets, setFilteredDatasets] = useState<ICollection[]>(datasets);
 
   const accordions = useMemo(() => {
     const accordions: ReactElement[] = [
       <Accordion
+        key="datasets-filter-parent-accordion"
         items={[
           {
             id: 'datasets-filter-accordion',
@@ -54,9 +61,10 @@ const Datasets: React.FC<Props> = (props) => {
       />,
     ];
 
-    datasets.forEach((dataset) => {
+    filteredDatasets.forEach((dataset) => {
       accordions.push(
         <Accordion
+          key={`datasets-accordion-parent-${dataset.id}`}
           items={[
             {
               id: `datasets-accordion-${dataset.id}`,
@@ -70,7 +78,7 @@ const Datasets: React.FC<Props> = (props) => {
       );
     });
     return accordions;
-  }, [datasets]);
+  }, [filteredDatasets]);
 
   useEffect(() => {
     if (!layersRef.current) {
@@ -95,6 +103,15 @@ const Datasets: React.FC<Props> = (props) => {
     observer.observe(layersRef.current);
     return () => observer.disconnect();
   }, [layersRef.current]);
+
+  useEffect(() => {
+    if (datasets.length === 0) {
+      return;
+    }
+
+    const filteredDatasets = filterCollections(datasets, provider, category, parameterGroupMembers);
+    setFilteredDatasets(filteredDatasets);
+  }, [datasets, provider, category, parameterGroupMembers]);
 
   const handleChange = (value: string | null) => {
     setDatasetsOpen(Boolean(value) && value === 'datasets-accordion');

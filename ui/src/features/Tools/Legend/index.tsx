@@ -4,7 +4,17 @@
  */
 
 import { Fragment, useEffect, useState } from 'react';
-import { ColorInput, Divider, Group, Stack, Switch, Text, Title, Tooltip } from '@mantine/core';
+import {
+  Box,
+  ColorInput,
+  Divider,
+  Group,
+  Stack,
+  Switch,
+  Text,
+  Title,
+  Tooltip,
+} from '@mantine/core';
 import Circle from '@/assets/Circle';
 import LegendIcon from '@/assets/Legend';
 import Line from '@/assets/Line';
@@ -20,14 +30,13 @@ import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay, SessionState } from '@/stores/session/types';
 
-export const Legend: React.FC = () => {
+const Legend: React.FC = () => {
   const { map } = useMap(MAP_ID);
 
   const legendEntries = useSessionStore((state) => state.legendEntries);
   const setLegendEntries = useSessionStore((state) => state.setLegendEntries);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _layers = useMainStore((state) => state.layers);
+  const layers = useMainStore((state) => state.layers);
 
   const overlay = useSessionStore((state) => state.overlay);
   const setOverlay = useSessionStore((state) => state.setOverlay);
@@ -38,7 +47,14 @@ export const Legend: React.FC = () => {
     const layer = mainManager.getLayer(layerId);
 
     if (layer) {
-      void mainManager.updateLayer(layer, layer.name, color, layer.parameters);
+      void mainManager.updateLayer(
+        layer,
+        layer.name,
+        color,
+        layer.parameters,
+        layer.from,
+        layer.to
+      );
       const oldEntry = legendEntries.filter((entry) => entry.layerId === layerId)[0];
       const newLegendEntries = legendEntries.filter((entry) => entry.layerId !== layerId);
 
@@ -97,7 +113,6 @@ export const Legend: React.FC = () => {
 
       mapLayers.forEach((mapLayer) => {
         if (
-          mapLayer.type === 'circle' &&
           layers.some((layer) =>
             Object.values(mainManager.getLocationsLayerIds(layer.datasourceId, layer.id)).includes(
               mapLayer.id
@@ -110,12 +125,11 @@ export const Legend: React.FC = () => {
               mapLayer.id
             )
           );
-          const color = mapLayer.paint['circle-color'];
-          if (layer && typeof color === 'string') {
+          if (layer && !newLegendEntries.some((entry) => entry.layerId === layer.id)) {
             newLegendEntries.push({
               layerId: layer.id,
               collectionId: layer.datasourceId,
-              color: color ?? '#000',
+              color: layer.color,
               visible: legendEntries.find((entry) => entry.layerId === layer.id)?.visible ?? true,
             });
           }
@@ -131,6 +145,12 @@ export const Legend: React.FC = () => {
       setShow(false);
     }
   }, [overlay]);
+
+  useEffect(() => {
+    if (overlay === Overlay.Legend && layers.length === 0) {
+      setOverlay(null);
+    }
+  });
 
   return (
     <Popover
@@ -158,74 +178,77 @@ export const Legend: React.FC = () => {
           <Title order={5} size="h3">
             Legend
           </Title>
+          <Box className={styles.legendContainer}>
+            {legendEntries
+              .sort((a, b) => a.collectionId.localeCompare(b.collectionId))
+              .map((entry, index) => (
+                <Fragment key={`legend-entry-${entry.collectionId}`}>
+                  <Stack w="100%" gap="xs" mt={4}>
+                    <Text size="lg" fw={700}>
+                      {mainManager.getLayer(entry.layerId)?.name}
+                    </Text>
 
-          {legendEntries
-            .sort((a, b) => a.collectionId.localeCompare(b.collectionId))
-            .map((entry, index) => (
-              <Fragment key={`legend-entry-${entry.collectionId}`}>
-                <Stack w="100%" gap="xs">
-                  <Text size="lg" fw={700}>
-                    {mainManager.getLayer(entry.layerId)?.name}
-                  </Text>
-
-                  <Group w="100%" justify="space-between" align="flex-start">
-                    <Stack justify="flex-start">
-                      <ColorInput
-                        label={
-                          <Text size="xs" mt={0}>
-                            Symbol Color
-                          </Text>
-                        }
-                        value={entry.color}
-                        onChange={(color) =>
-                          handleColorChange(color, entry.layerId, entry.collectionId)
-                        }
-                        className={styles.colorPicker}
-                      />
-                      <Switch
-                        size="lg"
-                        mb={4}
-                        //   label={
-                        //     <Text size="xs" my="5">
-                        //       Visible
-                        //     </Text>
-                        //   }
-                        onLabel="VISIBLE"
-                        offLabel="HIDDEN"
-                        checked={entry.visible}
-                        onChange={(event) =>
-                          handleVisibilityChange(
-                            event.target.checked,
-                            entry.layerId,
-                            entry.collectionId
-                          )
-                        }
-                      />
-                    </Stack>
-                    <Group gap="xs" justify="flex-start" align="flex-start">
-                      <Stack className={styles.legendContrast} gap="xs">
-                        <Circle fill={entry.color} />
-                        <Line color={entry.color} />
-                        <Square fill={entry.color} />
-                        <Circle fill={entry.color} stroke="#fff" />
+                    <Group w="100%" justify="space-between" align="flex-start">
+                      <Stack justify="flex-start">
+                        <ColorInput
+                          label={
+                            <Text size="xs" mt={0}>
+                              Symbol Color
+                            </Text>
+                          }
+                          value={entry.color}
+                          onChange={(color) =>
+                            handleColorChange(color, entry.layerId, entry.collectionId)
+                          }
+                          className={styles.colorPicker}
+                        />
+                        <Switch
+                          size="lg"
+                          mb={4}
+                          //   label={
+                          //     <Text size="xs" my="5">
+                          //       Visible
+                          //     </Text>
+                          //   }
+                          onLabel="VISIBLE"
+                          offLabel="HIDDEN"
+                          checked={entry.visible}
+                          onChange={(event) =>
+                            handleVisibilityChange(
+                              event.target.checked,
+                              entry.layerId,
+                              entry.collectionId
+                            )
+                          }
+                        />
                       </Stack>
-                      <Stack gap={10} pt={8} mt={0} align="flex-start">
-                        <Text size="xs">Point Locations</Text>
-                        <Text size="xs">Line Locations</Text>
-                        <Text size="xs">Polygon Locations</Text>
-                        <Stack gap={0}>
-                          <Text size="xs">Selected Locations</Text>
-                          <Text size="xs">(all shapes)</Text>
+                      <Group gap="xs" justify="flex-start" align="flex-start">
+                        <Stack className={styles.legendContrast} gap="xs">
+                          <Circle fill={entry.color} />
+                          <Line color={entry.color} />
+                          <Square fill={entry.color} />
+                          <Circle fill={entry.color} stroke="#fff" />
                         </Stack>
-                      </Stack>
+                        <Stack gap={10} pt={8} mt={0} align="flex-start">
+                          <Text size="xs">Point Locations</Text>
+                          <Text size="xs">Line Locations</Text>
+                          <Text size="xs">Polygon Locations</Text>
+                          <Stack gap={0}>
+                            <Text size="xs">Selected Locations</Text>
+                            <Text size="xs">(all shapes)</Text>
+                          </Stack>
+                        </Stack>
+                      </Group>
                     </Group>
-                  </Group>
-                </Stack>
-                {index < legendEntries.length - 1 && <Divider />}
-              </Fragment>
-            ))}
+                  </Stack>
+                  {index < legendEntries.length - 1 && <Divider />}
+                </Fragment>
+              ))}
+          </Box>
         </Stack>
       }
     />
   );
 };
+
+export default Legend;

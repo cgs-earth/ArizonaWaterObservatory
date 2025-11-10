@@ -3,21 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dayjs from 'dayjs';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
-import { Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
-import { GeoJSONFeature, GeoJSONSource, Map, Popup } from 'mapbox-gl';
+import { BBox, Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
+import { GeoJSONFeature, GeoJSONSource, Map, Popup, RasterTileSource } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
-import { Config, GetConfigResponse, PostConfigResponse } from '@/managers/types';
-import { ICollection } from '@/services/edr.service';
+import { getDefaultGeoJSON } from '@/consts/geojson';
+import { DEFAULT_BBOX } from '@/features/Map/consts';
+import { Config, GetConfigResponse, PostConfigResponse, SourceOptions } from '@/managers/types';
+import { CoverageGridService } from '@/services/coverageGrid.service';
+import { ICollection, ParameterGroup } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
-import { ColorValueHex, Layer, Location, MainState } from '@/stores/main/types';
+import {
+  ColorValueHex,
+  Layer,
+  Location,
+  MainState,
+  ParameterGroupMembers,
+} from '@/stores/main/types';
+import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
 import { getRandomHexColor } from '@/utils/hexColor';
 import {
   getFillLayerDefinition,
   getLineLayerDefinition,
   getPointLayerDefinition,
+  getRasterLayerSpecification,
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
 
@@ -165,9 +177,6 @@ class MainManager {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ inputs: config }),
       signal,
     });
@@ -244,13 +253,25 @@ class MainManager {
     await this.applySpatialFilter(config.drawnShapes);
     for (const layer of config.layers) {
       const sourceId = this.getSourceId(layer.datasourceId);
-      this.addLocationLayer(layer, sourceId);
+      this.addLayer(layer, sourceId);
     }
 
     // Set locations after loading layer to reflect selected state in map
     this.store.getState().setLocations(config.locations);
 
     return true;
+  }
+
+  public getUniqueIds(features: GeoJSONFeature[]): Array<string> {
+    const uniques = new Set<string>();
+
+    for (const feature of features) {
+      if (feature.id) {
+        uniques.add(String(feature.id));
+      }
+    }
+
+    return Array.from(uniques).sort();
   }
 
   /**
@@ -269,16 +290,46 @@ class MainManager {
     return this.store.getState().hasLocation(locationId);
   }
 
+  private async fetchData(
+    collectionId: ICollection['id'],
+    bbox?: BBox,
+    from?: string | null,
+    to?: string | null,
+    parameterNames?: string[],
+    signal?: AbortSignal
+  ): Promise<FeatureCollection> {
+    const collection = this.getDatasource(collectionId);
+
+    if (!collection) {
+      throw new Error('Datasource not found');
+    }
+
+    const collectionType = getCollectionType(collection);
+
+    switch (collectionType) {
+      case CollectionType.EDR:
+        return await this.fetchLocations(collectionId, parameterNames, signal);
+      case CollectionType.Features:
+        return await this.fetchItems(collectionId, parameterNames, signal);
+      case CollectionType.EDRGrid:
+        if (!bbox) {
+          throw new Error('No BBox provided for Grid layer');
+        }
+        return await this.fetchGrid(collectionId, bbox, from, to, parameterNames, signal);
+    }
+
+    throw new Error('Unsupported collection type');
+  }
   /**
    *
    * @function
    */
   private async fetchLocations(
     collectionId: ICollection['id'],
-    signal?: AbortSignal,
-    parameterNames?: string[]
-  ): Promise<FeatureCollection<Point>> {
-    return awoService.getLocations<FeatureCollection<Point>>(collectionId, {
+    parameterNames?: string[],
+    signal?: AbortSignal
+  ): Promise<FeatureCollection> {
+    return await awoService.getLocations<FeatureCollection>(collectionId, {
       signal,
       params: {
         ...(parameterNames && parameterNames.length > 0
@@ -286,6 +337,47 @@ class MainManager {
           : {}),
       },
     });
+  }
+
+  /**
+   *
+   * @function
+   */
+  private async fetchItems(
+    collectionId: ICollection['id'],
+    parameterNames?: string[],
+    signal?: AbortSignal
+  ): Promise<FeatureCollection> {
+    return await awoService.getItems<FeatureCollection>(collectionId, {
+      signal,
+      params: {
+        ...(parameterNames && parameterNames.length > 0
+          ? { 'parameter-name': parameterNames.join(',') }
+          : {}),
+      },
+    });
+  }
+
+  /**
+   *
+   * @function
+   */
+  private async fetchGrid(
+    collectionId: ICollection['id'],
+    bbox: BBox,
+    from?: string | null,
+    to?: string | null,
+    parameterNames?: string[],
+    signal?: AbortSignal
+  ): Promise<FeatureCollection> {
+    return await new CoverageGridService().createGrid(
+      collectionId,
+      bbox,
+      from,
+      to,
+      parameterNames,
+      signal
+    );
   }
 
   /**
@@ -319,6 +411,7 @@ class MainManager {
 
     const provider = getProvider(datasource.id);
 
+    const collectionType = getCollectionType(datasource);
     const title = datasource.title ?? datasource.id;
 
     let next = 1;
@@ -327,25 +420,30 @@ class MainManager {
       name = `${provider} ${title} ${currentDatasourceCount + next++}`;
     }
 
+    const to = dayjs();
+    const from =
+      collectionType === CollectionType.EDRGrid ? to.subtract(1, 'year') : to.subtract(1, 'week');
+
     const layer: Layer = {
       id: this.createUUID(),
       datasourceId: datasource.id,
       name,
       color: this.createHexColor(),
       parameters: [],
-      from: null,
-      to: null,
+      from: from.format('YYYY-MM-DD'),
+      to: to.format('YYYY-MM-DD'),
       visible: true,
       locations: [],
     };
 
     const drawnShapes = this.store.getState().drawnShapes;
 
-    const sourceId = await this.addLocationSource(datasource.id, layer.id, {
+    const sourceId = await this.addSource(datasource.id, layer, {
       filterFeatures: drawnShapes,
       signal,
+      noFetch: collectionType === CollectionType.EDRGrid,
     });
-    this.addLocationLayer(layer, sourceId);
+    this.addLayer(layer, sourceId);
 
     this.store.getState().addLayer(layer);
   }
@@ -355,19 +453,11 @@ class MainManager {
     const layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
 
     if (this.map) {
-      const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
-        layer.datasourceId,
-        layer.id
-      );
-
-      if (this.map.getLayer(pointLayerId)) {
-        this.map.removeLayer(pointLayerId);
-      }
-      if (this.map.getLayer(fillLayerId)) {
-        this.map.removeLayer(fillLayerId);
-      }
-      if (this.map.getLayer(lineLayerId)) {
-        this.map.removeLayer(lineLayerId);
+      const layerIds = Object.values(this.getLocationsLayerIds(layer.datasourceId, layer.id));
+      for (const layerId of layerIds) {
+        if (this.map.getLayer(layerId)) {
+          this.map.removeLayer(layerId);
+        }
       }
     }
 
@@ -394,11 +484,13 @@ class MainManager {
     pointLayerId: string;
     fillLayerId: string;
     lineLayerId: string;
+    rasterLayerId: string;
   } {
     return {
-      pointLayerId: `user-${collectionId}-${layerId}-edr-locations-point`,
-      fillLayerId: `user-${collectionId}-${layerId}-edr-locations-fill`,
-      lineLayerId: `user-${collectionId}-${layerId}-edr-locations-line`,
+      pointLayerId: `user-${collectionId}-${layerId}-point`,
+      fillLayerId: `user-${collectionId}-${layerId}-fill`,
+      lineLayerId: `user-${collectionId}-${layerId}-line`,
+      rasterLayerId: `user-${collectionId}-${layerId}-raster`,
     };
   }
 
@@ -438,20 +530,27 @@ class MainManager {
 
   private clearInvalidLocations = (
     layerId: Layer['id'],
+    collectionId: ICollection['id'],
     featureCollection: FeatureCollection<Geometry>
   ) => {
-    const { locations, removeLocation } = this.store.getState();
+    const datasource = this.getDatasource(collectionId);
 
-    const layerLocations = locations.filter((location) => location.layerId === layerId);
+    if (datasource && isEdrGrid(datasource)) {
+      this.store.getState().setLocations([]);
+    } else {
+      const { locations, removeLocation } = this.store.getState();
 
-    const validIds = new Set(featureCollection.features.map((feature) => String(feature.id)));
-    const invalidLocations = layerLocations.filter((location) => !validIds.has(location.id));
+      const layerLocations = locations.filter((location) => location.layerId === layerId);
 
-    if (invalidLocations.length === 0) {
-      return;
+      const validIds = new Set(featureCollection.features.map((feature) => String(feature.id)));
+      const invalidLocations = layerLocations.filter((location) => !validIds.has(location.id));
+
+      if (invalidLocations.length === 0) {
+        return;
+      }
+
+      invalidLocations.forEach((location) => removeLocation(location));
     }
-
-    invalidLocations.forEach((location) => removeLocation(location));
   };
 
   private filterLocations(
@@ -465,47 +564,92 @@ class MainManager {
     return featureCollection;
   }
 
+  private getBBox(): BBox {
+    const drawnShapes = this.store.getState().drawnShapes;
+
+    if (drawnShapes.length === 0) {
+      return DEFAULT_BBOX;
+    }
+
+    const featureCollection = turf.featureCollection(drawnShapes);
+
+    return turf.bbox(featureCollection);
+  }
+
+  private async addSource(collectionId: ICollection['id'], layer: Layer, options?: SourceOptions) {
+    const datasource = this.getDatasource(collectionId);
+    const sourceId = this.getSourceId(collectionId);
+
+    if (datasource) {
+      const collectionType = getCollectionType(datasource);
+
+      if (
+        [CollectionType.EDR, CollectionType.Features, CollectionType.EDRGrid].includes(
+          collectionType
+        )
+      ) {
+        await this.addGeoJsonSource(collectionId, layer, options);
+      } else if (collectionType === CollectionType.Map) {
+        this.addRasterSource(datasource);
+      }
+    }
+
+    return sourceId;
+  }
+
   /**
    *
    * @function
    */
-  private async addLocationSource(
+  private async addGeoJsonSource(
     collectionId: ICollection['id'],
-    layerId: Layer['id'],
-    options?: {
-      filterFeatures?: Feature<Polygon | MultiPolygon>[];
-      signal?: AbortSignal;
-      parameterNames?: string[];
-    }
+    layer: Layer,
+    options?: SourceOptions
   ): Promise<string> {
     const sourceId = this.getSourceId(collectionId);
     if (this.map) {
       const source = this.map.getSource(sourceId) as GeoJSONSource;
+      const bbox = this.getBBox();
       if (!source) {
-        const data = await this.fetchLocations(
+        if (options?.noFetch) {
+          this.map.addSource(sourceId, {
+            type: 'geojson',
+            data: getDefaultGeoJSON(),
+          });
+
+          return sourceId;
+        }
+
+        const data = await this.fetchData(
           collectionId,
-          options?.signal,
-          options?.parameterNames
+          bbox,
+          options?.from ?? layer.from,
+          options?.to ?? layer.to,
+          options?.parameterNames,
+          options?.signal
         );
 
         const filteredData = this.filterLocations(data, options?.filterFeatures);
 
-        this.clearInvalidLocations(layerId, filteredData);
+        this.clearInvalidLocations(layer.id, collectionId, filteredData);
 
         this.map.addSource(sourceId, {
           type: 'geojson',
           data: filteredData,
         });
-      } else if (source) {
-        const data = await this.fetchLocations(
+      } else if (source && !options?.noFetch) {
+        const data = await this.fetchData(
           collectionId,
-          options?.signal,
-          options?.parameterNames
+          bbox,
+          options?.from ?? layer.from,
+          options?.to ?? layer.to,
+          options?.parameterNames,
+          options?.signal
         );
 
         const filteredData = this.filterLocations(data, options?.filterFeatures);
 
-        this.clearInvalidLocations(layerId, filteredData);
+        this.clearInvalidLocations(layer.id, collectionId, filteredData);
 
         source.setData(filteredData);
       }
@@ -514,23 +658,58 @@ class MainManager {
     return sourceId;
   }
 
-  private getUniqueIds(features: GeoJSONFeature[]): Array<string> {
-    const uniques = new Set<string>();
+  private addRasterSource(collection: ICollection) {
+    const link = collection.links.find(
+      (link) => link.rel.includes('map') && link.type === 'image/png'
+    );
+    const sourceId = this.getSourceId(collection.id);
+    if (link && this.map) {
+      const source = this.map.getSource(sourceId) as RasterTileSource;
 
-    for (const feature of features) {
-      if (feature.id) {
-        uniques.add(String(feature.id));
+      if (!source) {
+        this.map.addSource(sourceId, {
+          type: 'raster',
+          bounds: DEFAULT_BBOX,
+          tiles: [
+            `${link.href}&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/3857&bbox={bbox-epsg-3857}`,
+          ],
+          tileSize: 256,
+          minzoom: 4,
+        });
       }
     }
+  }
+  private addLayer(layer: Layer, sourceId: string): void {
+    const datasource = this.getDatasource(layer.datasourceId);
 
-    return Array.from(uniques).sort();
+    if (datasource) {
+      const collectionType = getCollectionType(datasource);
+
+      if (
+        [CollectionType.EDR, CollectionType.Features, CollectionType.EDRGrid].includes(
+          collectionType
+        )
+      ) {
+        this.addStandardLayer(layer, sourceId);
+      } else if (collectionType === CollectionType.Map) {
+        this.addRasterLayer(layer, sourceId);
+      }
+    }
+  }
+
+  private addRasterLayer(layer: Layer, sourceId: string): void {
+    const { rasterLayerId } = this.getLocationsLayerIds(layer.datasourceId, layer.id);
+
+    if (this.map && !this.map.getLayer(rasterLayerId)) {
+      this.map.addLayer(getRasterLayerSpecification(rasterLayerId, sourceId));
+    }
   }
 
   /**
    *
    * @function
    */
-  private async addLocationLayer(layer: Layer, sourceId: string): Promise<void> {
+  private addStandardLayer(layer: Layer, sourceId: string): void {
     const geographyFilter = this.store.getState().geographyFilter;
 
     const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
@@ -633,6 +812,10 @@ class MainManager {
                 <span style="color:black;">
                   <strong>${layer.name}</strong><br/>
                   ${uniqueFeatures.map((locationId) => `<strong>Location Id: </strong>${locationId}`).join('<br/>')}
+                  <div style="margin-top: 16px;display:flex;flex-direction:column;justify-content:center;align-items:center">
+                    <p style="margin: 0;">Click to select the location.</p>
+                    <p style="margin: 0;">Double-click to preview.</p>
+                  </div>
                 </span>
               `;
               this.hoverPopup!.setLngLat(e.lngLat).setHTML(html).addTo(this.map!);
@@ -649,6 +832,10 @@ class MainManager {
                 <span style="color:black;">
                   <strong>${layer.name}</strong><br/>
                   ${uniqueFeatures.map((locationId) => `<strong>Location Id: </strong>${locationId}`).join('<br/>')}
+                  <div style="margin-top: 16px;display:flex;flex-direction:column;justify-content:center;align-items:center">
+                    <p style="margin: 0;">Click to select the location.</p>
+                    <p style="margin: 0;">Double-click to preview.</p>
+                  </div>
                 </span>
               `;
               this.hoverPopup!.setLngLat(e.lngLat).setHTML(html).addTo(this.map!);
@@ -673,7 +860,7 @@ class MainManager {
    *
    * @function
    */
-  public async getData(layer: Layer, signal: AbortSignal): Promise<FeatureCollection> {
+  public async getFeatures(layer: Layer, signal: AbortSignal): Promise<FeatureCollection> {
     try {
       const sourceId = this.getSourceId(layer.datasourceId);
 
@@ -691,39 +878,22 @@ class MainManager {
       console.error(error);
     }
 
+    const bbox = this.getBBox();
+
+    const data = await this.fetchData(
+      layer.datasourceId,
+      bbox,
+      layer.from,
+      layer.to,
+      layer.parameters,
+      signal
+    );
+
     const drawnShapes = this.store.getState().drawnShapes;
-
-    const data = await this.fetchLocations(layer.datasourceId, signal, layer.parameters);
-
     const filteredData = this.filterLocations(data, drawnShapes);
 
     return filteredData;
   }
-  // public async getLocations(): Promise<void> {
-  //   // Specific user collection choice
-  //   const collection = this.store.getState().collection;
-  //   // All collections for selected filters
-  //   const collections = this.store.getState().collections;
-
-  //   if (collection) {
-  //     const sourceId = await this.addLocationSource(collection);
-  //     this.addLocationLayer(collection, sourceId);
-  //   } else {
-  //     const chunkSize = 5;
-
-  //     for (let i = 0; i < collections.length; i += chunkSize) {
-  //       const chunk = collections.slice(i, i + chunkSize);
-
-  //       await Promise.all(
-  //         chunk.map(async (collection) => {
-  //           const collectionId = collection.id;
-  //           const sourceId = await this.addLocationSource(collectionId);
-  //           this.addLocationLayer(collectionId, sourceId);
-  //         })
-  //       );
-  //     }
-  //   }
-  // }
 
   public async applySpatialFilter(drawnShapes: Feature<Polygon | MultiPolygon>[]): Promise<void> {
     const layers = this.store.getState().layers;
@@ -735,7 +905,7 @@ class MainManager {
       await Promise.all(
         chunk.map(async (layer) => {
           const collectionId = layer.datasourceId;
-          return await this.addLocationSource(collectionId, layer.id, {
+          return await this.addSource(collectionId, layer, {
             filterFeatures: drawnShapes,
           });
         })
@@ -747,7 +917,9 @@ class MainManager {
     layer: Layer,
     name: Layer['name'],
     color: Layer['color'],
-    parameters: Layer['parameters']
+    parameters: Layer['parameters'],
+    from: Layer['from'],
+    to: Layer['to']
   ): Promise<void> {
     if (color !== layer.color) {
       if (this.map) {
@@ -769,9 +941,21 @@ class MainManager {
 
     if (!this.compareArrays(layer.parameters, parameters)) {
       const drawnShapes = this.store.getState().drawnShapes;
-      await this.addLocationSource(layer.datasourceId, layer.id, {
+      await this.addSource(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
+      });
+    }
+
+    const datasource = this.getDatasource(layer.datasourceId);
+    const drawnShapes = this.store.getState().drawnShapes;
+
+    if (datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to)) {
+      await this.addSource(layer.datasourceId, layer, {
+        parameterNames: parameters,
+        filterFeatures: drawnShapes,
+        from,
+        to,
       });
     }
 
@@ -780,7 +964,18 @@ class MainManager {
       name,
       color,
       parameters,
+      from,
+      to,
     });
+  }
+
+  private createParameterGroupMembers(parameterGroups: ParameterGroup[]): void {
+    const parameterGroupMembers: ParameterGroupMembers = {};
+    parameterGroups.forEach((parameterGroup) => {
+      parameterGroupMembers[parameterGroup.label] = Object.keys(parameterGroup.members);
+    });
+
+    this.store.getState().setParameterGroupMembers(parameterGroupMembers);
   }
 
   /**
@@ -788,24 +983,20 @@ class MainManager {
    * @function
    */
   public async getCollections(): Promise<void> {
-    const provider = this.store.getState().provider;
-    const category = this.store.getState().category;
+    const response = await awoService.getCollections();
+    const { collections, parameterGroups } = response;
 
-    const response = await awoService.getCollections({
-      params: {
-        ...(provider ? { 'provider-name': provider } : {}),
-        'parameter-name': category ? category.value : '*',
-      },
-    });
     const originalCollections = this.store.getState().originalCollections;
     if (originalCollections.length === 0) {
-      this.store.getState().setOriginalCollections(response.collections);
+      this.store.getState().setOriginalCollections(collections);
     }
 
-    this.store.getState().setCollections(response.collections);
+    this.store.getState().setCollections(collections);
+
+    this.createParameterGroupMembers(parameterGroups);
   }
 
-  private clearLocationLayers(): void {
+  private clearLayers(): void {
     if (!this.map) {
       return;
     }
@@ -822,7 +1013,7 @@ class MainManager {
     }
   }
 
-  private clearLocationSources(): void {
+  private clearSources(): void {
     if (!this.map) {
       return;
     }
@@ -840,8 +1031,8 @@ class MainManager {
   public clearAllData(): void {
     this.store.getState().setLocations([]);
 
-    this.clearLocationLayers();
-    this.clearLocationSources();
+    this.clearLayers();
+    this.clearSources();
 
     this.store.getState().setProvider(null);
     this.store.getState().setCategory(null);

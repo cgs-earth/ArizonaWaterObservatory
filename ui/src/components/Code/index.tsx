@@ -10,16 +10,17 @@ import styles from '@/components/Code/Code.module.css';
 
 type Props = {
   code: string;
+  display?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 };
 
 const Code: React.FC<Props> = (props) => {
-  const { code, size = 'md' } = props;
+  const { code, display = null, size = 'md' } = props;
   return (
     <Box component="div" data-testid="code-copy" className={`${styles.input} ${styles[size]}`}>
       <Group justify="center" align="center" p={0} h="100%">
         <Box component="pre" className={styles.code} data-testid="code-block">
-          {code}
+          {display ?? code}
         </Box>
         <Box component="div" className={styles.buttonWrapper}>
           <CopyButton value={code}>

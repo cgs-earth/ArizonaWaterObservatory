@@ -12,6 +12,7 @@ import { MAP_ID } from '@/features/Map/config';
 import Notifications from '@/features/Notifications';
 import Panel from '@/features/Panel';
 import TopBar from '@/features/TopBar';
+import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
@@ -22,9 +23,12 @@ import { LoadingType, NotificationType } from '@/stores/session/types';
 export const LayoutPage: React.FC = () => {
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
+  const configLoaded = useRef(false);
 
   const setShareId = useMainStore((state) => state.setShareId);
   const setConfigGenerated = useMainStore((state) => state.setConfigGenerated);
+
+  const { isFetchingCollections } = useLoading();
 
   const { map } = useMap(MAP_ID);
 
@@ -71,16 +75,18 @@ export const LayoutPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!map) {
+    if (!map || isFetchingCollections || configLoaded.current) {
       return;
     }
+    configLoaded.current = true;
+
     const queryParams = new URLSearchParams(window.location.search);
     const shareId = queryParams.get('shareId');
 
     if (shareId) {
       void loadConfig(shareId);
     }
-  }, [map]);
+  }, [map, isFetchingCollections]);
 
   return (
     <Box className={styles.root}>

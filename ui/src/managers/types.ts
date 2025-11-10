@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Feature, MultiPolygon, Polygon } from 'geojson';
 import { LngLat, LngLatBoundsLike } from 'mapbox-gl';
 import { MainState } from '@/stores/main/types';
 
@@ -32,4 +33,13 @@ export type Config = {
   center: LngLat;
   bearing: number;
   pitch: number;
+};
+
+export type SourceOptions = {
+  filterFeatures?: Feature<Polygon | MultiPolygon>[];
+  signal?: AbortSignal;
+  parameterNames?: string[];
+  from?: string | null;
+  to?: string | null;
+  noFetch?: boolean;
 };

@@ -9,7 +9,20 @@
 }
 
 .modalBody {
+  width: 100%;
   padding: calc(var(--default-spacing) * 2);
+}
+
+.tabs {
+  width: 100%;
+}
+
+.accordionBody {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.glossaryWrapper {
+  width: calc(100% - 50px);
 }
 
 .toolTip {
@@ -31,8 +44,16 @@
   width: fit-content;
 }
 
+.propertiesButton {
+  width: 90px;
+}
+
 .noParameterMessage {
   padding: var(--default-spacing);
+}
+
+.linksChart {
+  width: 100%;
 }
 
 .locationBlockWrapper {
@@ -40,7 +61,12 @@
 }
 
 .locationWrapper {
+  margin: var(--default-spacing);
   padding: var(--default-spacing);
+}
+
+.highlightLocation {
+  border: 4px solid var(--asu-color-selected);
 }
 
 .copyInputWrapper {
@@ -50,4 +76,18 @@
 
 .copyInput {
   width: inherit;
+}
+
+.table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.propertyColumn {
+  width: fit-content;
+}
+
+.valueColumn {
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }

@@ -10,6 +10,7 @@
 }
 
 .control {
+  background: var(--mantine-color-body);
   padding-inline-end: 0;
 }
 

@@ -107,6 +107,8 @@ export enum DrawMode {
   Select = 'select',
 }
 
+export type ParameterGroupMembers = Record<string, string[]>;
+
 export type MainState = {
   provider: string | null;
   setProvider: (provider: MainState['provider']) => void;
@@ -119,9 +121,10 @@ export type MainState = {
   hasGeographyFilter: () => boolean;
   basemap: BasemapId;
   setBasemap: (collection: MainState['basemap']) => void;
-
   charts: Chart[];
   setCharts: (charts: MainState['charts']) => void;
+  parameterGroupMembers: ParameterGroupMembers;
+  setParameterGroupMembers: (parameterGroupMembers: MainState['parameterGroupMembers']) => void;
 } & CollectionSlice &
   LocationSlice &
   LayerSlice &
