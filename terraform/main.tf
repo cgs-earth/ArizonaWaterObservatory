@@ -9,7 +9,7 @@ provider "google" {
 # Cloud SQL Instance
 resource "google_sql_database_instance" "postgis" {
   name             = var.instance_name
-  database_version = "POSTGRES_17"
+  database_version = var.POSTGRES_VERSION
   region           = var.region
 
   settings {
@@ -17,9 +17,8 @@ resource "google_sql_database_instance" "postgis" {
     tier = "db-f1-micro"
     # There is a bug in gcp where you need to explicitly set this https://github.com/hashicorp/terraform-provider-google/issues/20498
     # otherwise it will default to ENTERPRISE PLUS which is too much for us; ENTERPRISE is the lowest tier
-    edition  = "ENTERPRISE"
+    edition = "ENTERPRISE"
     ip_configuration {
-      # We will use Cloud SQL Auth Proxy or gcloud sql connect
       ipv4_enabled = true
     }
 
@@ -36,17 +35,66 @@ resource "google_sql_database_instance" "postgis" {
   deletion_protection = false
 }
 
-# Database
-resource "google_sql_database" "postgis_db" {
-  name     = var.POSTGRES_TABLE
-  instance = google_sql_database_instance.postgis.name
+resource "google_cloud_run_v2_job" "groundwatersqldumpjob" {
+  name     = "groundwatersqldumpjob"
+  location = var.region
+
+  template {
+    template {
+      containers {
+        image = "debian:trixie-slim"
+        env {
+          name  = "PGHOST"
+          value = "/cloudsql/${google_sql_database_instance.postgis.connection_name}"
+        }
+        env {
+          name  = "PGDATABASE"
+          value = var.POSTGRES_TABLE
+        }
+        env {
+          name  = "PGUSER"
+          value = var.POSTGRES_USER
+        }
+        env {
+          name  = "PGPASSWORD"
+          value = var.POSTGRES_PASSWORD
+        }
+        command = [
+          "/bin/bash",
+          "-c",
+          <<-EOT
+            apt update
+            apt install -y postgresql-client-${local.postgres_version_number} curl
+            curl -LO "https://github.com/oras-project/oras/releases/download/v1.3.0/oras_1.3.0_linux_amd64.tar.gz"
+            mkdir -p oras-install/
+            tar -zxf oras_1.3.0_*.tar.gz -C oras-install/
+            ./oras-install/oras pull ghcr.io/cgs-earth/arizona-groundwater-dump:latest
+
+            pg_restore --host=/cloudsql/${google_sql_database_instance.postgis.connection_name} --username=${var.POSTGRES_USER} --dbname=${var.POSTGRES_TABLE} --verbose edr_backup.dump
+          EOT
+        ]
+        volume_mounts {
+          name       = "cloudsql"
+          mount_path = "/cloudsql"
+        }
+      }
+      volumes {
+        name = "cloudsql"
+        cloud_sql_instance {
+          instances = [google_sql_database_instance.postgis.connection_name]
+        }
+      }
+    }
+  }
+  deletion_protection = false
 }
 
-# User
-resource "google_sql_user" "postgis_user" {
-  name     = var.POSTGRES_USER
-  instance = google_sql_database_instance.postgis.name
-  password = var.POSTGRES_PASSWORD
+resource "null_resource" "run_groundwater_sql_dump_job" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      ${local.expanded_gcloud_bin} run jobs execute groundwatersqldumpjob --region=${var.region}
+    EOT
+  }
+
+  depends_on = [google_cloud_run_v2_job.groundwatersqldumpjob]
 }
-
-

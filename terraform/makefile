@@ -3,8 +3,4 @@ export ORAS_CACHE=$(HOME)/.oras/cache
 
 apply:
 	# 	source the .env file so that we know the password that is going to be used
-	source ../.env && terraform plan && terraform apply
-
-restore:
-	oras pull ghcr.io/cgs-earth/arizona-groundwater-dump:latest
-	./restore_backup.sh
+	source ../.env && terraform apply
