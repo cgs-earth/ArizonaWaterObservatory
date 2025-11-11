@@ -4,6 +4,8 @@
  */
 
 import { ActionIcon, Stack, Tooltip } from '@mantine/core';
+import CircleDown from '@/assets/CircleDown';
+import CircleUp from '@/assets/CircleUp';
 import Minus from '@/assets/Minus';
 import Plus from '@/assets/Plus';
 import styles from '@/features/Panel/Panel.module.css';
@@ -31,7 +33,7 @@ export const Control: React.FC<Props> = (props) => {
   const disableDown = layer.position === length;
 
   return (
-    <Stack gap={4}>
+    <Stack gap={4} my={8}>
       <Tooltip
         label={
           disableUp
@@ -41,7 +43,6 @@ export const Control: React.FC<Props> = (props) => {
         openDelay={500}
       >
         <ActionIcon
-          size="sm"
           disabled={disableUp}
           data-disabled={disableUp}
           variant="transparent"
@@ -49,7 +50,7 @@ export const Control: React.FC<Props> = (props) => {
           className={styles.actionIcon}
           onClick={() => handlePositionChange(layer.position - 1)}
         >
-          <Plus />
+          <CircleUp />
         </ActionIcon>
       </Tooltip>
       <Tooltip
@@ -61,7 +62,6 @@ export const Control: React.FC<Props> = (props) => {
         openDelay={500}
       >
         <ActionIcon
-          size="sm"
           variant="transparent"
           title="Move layer down"
           disabled={disableDown}
@@ -69,7 +69,7 @@ export const Control: React.FC<Props> = (props) => {
           className={styles.actionIcon}
           onClick={() => handlePositionChange(layer.position + 1)}
         >
-          <Minus />
+          <CircleDown />
         </ActionIcon>
       </Tooltip>
     </Stack>
