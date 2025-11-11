@@ -436,6 +436,7 @@ class MainManager {
       locations: [],
       opacity:
         collectionType === CollectionType.Map ? DEFAULT_RASTER_OPACITY : DEFAULT_FILL_OPACITY,
+      position: layers.length + 1,
     };
 
     const drawnShapes = this.store.getState().drawnShapes;
@@ -465,6 +466,30 @@ class MainManager {
 
     this.store.getState().setCharts(charts);
     this.store.getState().setLayers(layers);
+  }
+
+  public reorderLayers() {
+    if (!this.map) {
+      return;
+    }
+
+    const layers = [...this.store.getState().layers].sort((a, b) => a.position - b.position);
+    let lastLayer = '';
+    for (const layer of layers) {
+      const { rasterLayerId, fillLayerId, lineLayerId, pointLayerId } = this.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
+      // Intentional ordering of sub-layers
+      for (const layerId of [rasterLayerId, fillLayerId, lineLayerId, pointLayerId]) {
+        if (this.map.getLayer(layerId)) {
+          if (lastLayer.length > 0) {
+            this.map.moveLayer(layerId, lastLayer);
+          }
+          lastLayer = layerId;
+        }
+      }
+    }
   }
 
   /**

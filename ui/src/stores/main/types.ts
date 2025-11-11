@@ -77,6 +77,7 @@ export type Layer = {
   visible: boolean; // visible ? 'visible' : 'none'
   locations: string[]; // locationId's
   opacity: number;
+  position: number; // The order this layer is drawn relative to other user layers
 };
 
 export type Table = {

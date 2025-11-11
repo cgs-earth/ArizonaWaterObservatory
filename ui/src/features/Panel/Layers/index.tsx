@@ -13,6 +13,7 @@ import { Header } from '@/features/Panel/Layers/Layer/Header';
 import styles from '@/features/Panel/Panel.module.css';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
+import { Control } from './Layer/Control';
 
 type Props = {
   datasetsOpen: boolean;
@@ -67,19 +68,22 @@ const Layers: React.FC<Props> = (props) => {
           content: (
             <Box mah={`calc(100vh - ${maxHeight}px)`} className={styles.accordionBody}>
               {layers.length > 0 ? (
-                layers.map((layer) => (
-                  <Accordion
-                    key={`layers-accordion-${layer.id}`}
-                    items={[
-                      {
-                        id: `layers-accordion-${layer.id}`,
-                        title: <Header layer={layer} />,
-                        content: <Layer layer={layer} />,
-                      },
-                    ]}
-                    variant={Variant.Secondary}
-                  />
-                ))
+                [...layers]
+                  .sort((a, b) => a.position - b.position)
+                  .map((layer) => (
+                    <Accordion
+                      key={`layers-accordion-${layer.id}`}
+                      items={[
+                        {
+                          id: `layers-accordion-${layer.id}`,
+                          title: <Header layer={layer} />,
+                          content: <Layer layer={layer} />,
+                          control: <Control layer={layer} />,
+                        },
+                      ]}
+                      variant={Variant.Secondary}
+                    />
+                  ))
               ) : (
                 <Fallback />
               )}
