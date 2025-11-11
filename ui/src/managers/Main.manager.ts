@@ -11,7 +11,7 @@ import { GeoJSONFeature, GeoJSONSource, Map, Popup, RasterTileSource } from 'map
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
 import { getDefaultGeoJSON } from '@/consts/geojson';
-import { DEFAULT_BBOX } from '@/features/Map/consts';
+import { DEFAULT_BBOX, DEFAULT_FILL_OPACITY, DEFAULT_RASTER_OPACITY } from '@/features/Map/consts';
 import { Config, GetConfigResponse, PostConfigResponse, SourceOptions } from '@/managers/types';
 import { CoverageGridService } from '@/services/coverageGrid.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
@@ -434,6 +434,8 @@ class MainManager {
       to: to.format('YYYY-MM-DD'),
       visible: true,
       locations: [],
+      opacity:
+        collectionType === CollectionType.Map ? DEFAULT_RASTER_OPACITY : DEFAULT_FILL_OPACITY,
     };
 
     const drawnShapes = this.store.getState().drawnShapes;
@@ -919,14 +921,15 @@ class MainManager {
     color: Layer['color'],
     parameters: Layer['parameters'],
     from: Layer['from'],
-    to: Layer['to']
+    to: Layer['to'],
+    visible: Layer['visible'],
+    opacity: Layer['opacity']
   ): Promise<void> {
+    const layerIds = this.getLocationsLayerIds(layer.datasourceId, layer.id);
+
     if (color !== layer.color) {
       if (this.map) {
-        const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
-          layer.datasourceId,
-          layer.id
-        );
+        const { pointLayerId, fillLayerId, lineLayerId } = layerIds;
         if (this.map.getLayer(pointLayerId)) {
           this.map.setPaintProperty(pointLayerId, 'circle-color', color);
         }
@@ -935,6 +938,35 @@ class MainManager {
         }
         if (this.map.getLayer(lineLayerId)) {
           this.map.setPaintProperty(lineLayerId, 'line-color', color);
+        }
+      }
+    }
+
+    if (visible !== layer.visible) {
+      if (this.map) {
+        for (const layerId of Object.values(layerIds)) {
+          if (this.map.getLayer(layerId)) {
+            this.map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+          }
+        }
+      }
+    }
+
+    if (opacity !== layer.opacity) {
+      if (this.map) {
+        const { fillLayerId, rasterLayerId } = layerIds;
+        // TODO: readd if meaningful
+        // if (this.map.getLayer(pointLayerId)) {
+        //   this.map.setPaintProperty(pointLayerId, 'circle-opacity', opacity);
+        // }
+        if (this.map.getLayer(fillLayerId)) {
+          this.map.setPaintProperty(fillLayerId, 'fill-opacity', opacity);
+        }
+        // if (this.map.getLayer(lineLayerId)) {
+        //   this.map.setPaintProperty(lineLayerId, 'line-opacity', opacity);
+        // }
+        if (this.map.getLayer(rasterLayerId)) {
+          this.map.setPaintProperty(rasterLayerId, 'raster-opacity', opacity);
         }
       }
     }
@@ -966,6 +998,8 @@ class MainManager {
       parameters,
       from,
       to,
+      visible,
+      opacity,
     });
   }
 

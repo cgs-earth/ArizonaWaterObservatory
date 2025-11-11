@@ -4,8 +4,8 @@
  */
 
 import { Box, List, Text } from '@mantine/core';
+import { glossaryEntries } from '@/features/TopBar/Info/consts';
 import styles from '@/features/TopBar/TopBar.module.css';
-import { glossaryEntries } from './consts';
 
 export const Glossary: React.FC = () => {
   const label = {

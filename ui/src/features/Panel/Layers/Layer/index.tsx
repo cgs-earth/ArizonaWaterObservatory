@@ -17,6 +17,7 @@ import Select from '@/components/Select';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
 import styles from '@/features/Panel/Panel.module.css';
+import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
@@ -39,6 +40,7 @@ const Layer: React.FC<Props> = (props) => {
   const [parameters, setParameters] = useState(layer.parameters);
   const [from, setFrom] = useState<string | null>(layer.from);
   const [to, setTo] = useState<string | null>(layer.to);
+  const [opacity, setOpacity] = useState(layer.opacity);
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
   const [data, setData] = useState<ComboboxData>();
@@ -71,6 +73,9 @@ const Layer: React.FC<Props> = (props) => {
   useEffect(() => {
     setColor(layer.color);
   }, [layer.color]);
+  useEffect(() => {
+    setOpacity(layer.opacity);
+  }, [layer.opacity]);
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -80,7 +85,16 @@ const Layer: React.FC<Props> = (props) => {
       LoadingType.Locations
     );
     try {
-      await mainManager.updateLayer(layer, name, color, parameters, from, to);
+      await mainManager.updateLayer(
+        layer,
+        name,
+        color,
+        parameters,
+        from,
+        to,
+        layer.visible,
+        opacity
+      );
       notificationManager.show(`Updated layer: ${updateName}`, NotificationType.Success);
     } catch (error) {
       if ((error as Error)?.message) {
@@ -99,6 +113,7 @@ const Layer: React.FC<Props> = (props) => {
     setParameters(layer.parameters);
     setFrom(layer.from);
     setTo(layer.to);
+    setOpacity(layer.opacity);
   };
 
   const handleDelete = () => {
@@ -106,8 +121,17 @@ const Layer: React.FC<Props> = (props) => {
     notificationManager.show(`Deleted layer: ${layer.name}`, NotificationType.Success);
   };
 
+  const handleOpacityChange = (opacity: LayerType['opacity'], _layerId: LayerType['id']) => {
+    setOpacity(opacity);
+  };
+
   const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
   const isMissingParameters = collectionType === CollectionType.EDRGrid && parameters.length === 0;
+
+  const showDateInputs = [CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType);
+  const showFeaturesMessage = collectionType === CollectionType.Features;
+  const showDateRangeWarning = collectionType === CollectionType.EDRGrid;
+  const showOpacitySlider = [CollectionType.Map, CollectionType.EDRGrid].includes(collectionType);
 
   return (
     <Stack gap="xs" className={styles.accordionContent}>
@@ -130,13 +154,13 @@ const Layer: React.FC<Props> = (props) => {
           />
         )}
       </Group>
-      {collectionType === CollectionType.Features && (
+      {showFeaturesMessage && (
         <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">
           This is a features layer which contains no parameter values. Rendered data is a standard
           feature collection with accessible properties and no underlying data.
         </Text>
       )}
-      {[CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType) && (
+      {showDateInputs && (
         <>
           <Divider />
           <Group justify="space-between">
@@ -177,7 +201,7 @@ const Layer: React.FC<Props> = (props) => {
               error={isValidRange ? false : 'Invalid date range'}
             />
           </Group>
-          {collectionType === CollectionType.EDRGrid && (
+          {showDateRangeWarning && (
             <>
               <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">
                 If no data renders after the layer is finished updating, increase the date range to
@@ -197,6 +221,16 @@ const Layer: React.FC<Props> = (props) => {
             data={data}
             value={parameters}
             onChange={setParameters}
+          />
+        </>
+      )}
+      {showOpacitySlider && (
+        <>
+          <Divider />
+          <OpacitySlider
+            id={layer.id}
+            opacity={opacity}
+            handleOpacityChange={handleOpacityChange}
           />
         </>
       )}

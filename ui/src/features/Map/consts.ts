@@ -7,4 +7,5 @@ export const DEFAULT_BBOX: [number, number, number, number] = [
   -114.81651, 31.332177, -109.045223, 37.0042,
 ];
 
-export const DEFAULT_OPACITY = 0.5;
+export const DEFAULT_RASTER_OPACITY = 0.5;
+export const DEFAULT_FILL_OPACITY = 0.7;
