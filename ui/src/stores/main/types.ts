@@ -76,6 +76,7 @@ export type Layer = {
   to: string | null; // UTC timestamp
   visible: boolean; // visible ? 'visible' : 'none'
   locations: string[]; // locationId's
+  opacity: number;
 };
 
 export type Table = {
