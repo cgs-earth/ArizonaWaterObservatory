@@ -439,6 +439,8 @@ class MainManager {
       position: layers.length + 1,
     };
 
+    this.store.getState().addLayer(layer);
+
     const drawnShapes = this.store.getState().drawnShapes;
 
     const sourceId = await this.addSource(datasource.id, layer, {
@@ -448,12 +450,16 @@ class MainManager {
     });
     this.addLayer(layer, sourceId);
 
-    this.store.getState().addLayer(layer);
+    this.reorderLayers();
   }
 
   public deleteLayer(layer: Layer) {
     const charts = this.store.getState().charts.filter((chart) => chart.layer !== layer.id);
-    const layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
+    let layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
+
+    layers = layers
+      .sort((a, b) => a.position - b.position)
+      .map((l, index) => ({ ...l, position: index + 1 }));
 
     if (this.map) {
       const layerIds = Object.values(this.getLocationsLayerIds(layer.datasourceId, layer.id));
@@ -481,7 +487,7 @@ class MainManager {
         layer.id
       );
       // Intentional ordering of sub-layers
-      for (const layerId of [rasterLayerId, fillLayerId, lineLayerId, pointLayerId]) {
+      for (const layerId of [pointLayerId, lineLayerId, fillLayerId, rasterLayerId]) {
         if (this.map.getLayer(layerId)) {
           if (lastLayer.length > 0) {
             this.map.moveLayer(layerId, lastLayer);
