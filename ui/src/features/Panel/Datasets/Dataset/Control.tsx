@@ -5,7 +5,7 @@
 
 import { useRef } from 'react';
 import { ActionIcon, Tooltip } from '@mantine/core';
-import Plus from '@/assets/Plus';
+import Map from '@/assets/Map';
 import styles from '@/features/Panel/Panel.module.css';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
@@ -52,12 +52,13 @@ export const Control: React.FC<Props> = (props) => {
   return (
     <Tooltip label="Add an instance of this dataset as an interactive layer" openDelay={500}>
       <ActionIcon
+        size="lg"
         variant="transparent"
         title="Add Layer"
         className={styles.actionIcon}
         onClick={() => handleClick(dataset.title ?? dataset.id, dataset.id)}
       >
-        <Plus />
+        <Map />
       </ActionIcon>
     </Tooltip>
   );

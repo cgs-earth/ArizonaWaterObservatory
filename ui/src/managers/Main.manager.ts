@@ -436,7 +436,10 @@ class MainManager {
       locations: [],
       opacity:
         collectionType === CollectionType.Map ? DEFAULT_RASTER_OPACITY : DEFAULT_FILL_OPACITY,
+      position: layers.length + 1,
     };
+
+    this.store.getState().addLayer(layer);
 
     const drawnShapes = this.store.getState().drawnShapes;
 
@@ -447,12 +450,16 @@ class MainManager {
     });
     this.addLayer(layer, sourceId);
 
-    this.store.getState().addLayer(layer);
+    this.reorderLayers();
   }
 
   public deleteLayer(layer: Layer) {
     const charts = this.store.getState().charts.filter((chart) => chart.layer !== layer.id);
-    const layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
+    let layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
+
+    layers = layers
+      .sort((a, b) => a.position - b.position)
+      .map((l, index) => ({ ...l, position: index + 1 }));
 
     if (this.map) {
       const layerIds = Object.values(this.getLocationsLayerIds(layer.datasourceId, layer.id));
@@ -465,6 +472,30 @@ class MainManager {
 
     this.store.getState().setCharts(charts);
     this.store.getState().setLayers(layers);
+  }
+
+  public reorderLayers() {
+    if (!this.map) {
+      return;
+    }
+
+    const layers = [...this.store.getState().layers].sort((a, b) => a.position - b.position);
+    let lastLayer = '';
+    for (const layer of layers) {
+      const { rasterLayerId, fillLayerId, lineLayerId, pointLayerId } = this.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
+      // Intentional ordering of sub-layers
+      for (const layerId of [pointLayerId, lineLayerId, fillLayerId, rasterLayerId]) {
+        if (this.map.getLayer(layerId)) {
+          if (lastLayer.length > 0) {
+            this.map.moveLayer(layerId, lastLayer);
+          }
+          lastLayer = layerId;
+        }
+      }
+    }
   }
 
   /**

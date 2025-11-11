@@ -3,16 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  Dispatch,
-  ReactElement,
-  // Ref,
-  RefObject,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Box, Text, Title, Tooltip, VisuallyHidden } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
@@ -24,24 +15,13 @@ import { FilterTitle } from '@/features/Panel/Datasets/Filter/Header';
 import styles from '@/features/Panel/Panel.module.css';
 import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
-import useSessionStore from '@/stores/session';
 import { filterCollections } from '@/utils/filterCollections';
 
-type Props = {
-  layersRef: RefObject<HTMLDivElement | null>;
-  setDatasetsOpen: Dispatch<SetStateAction<boolean>>;
-};
-
-const Datasets: React.FC<Props> = (props) => {
-  const { layersRef, setDatasetsOpen } = props;
-
+const Datasets: React.FC = () => {
   const provider = useMainStore((state) => state.provider);
   const category = useMainStore((state) => state.category);
   const parameterGroupMembers = useMainStore((state) => state.parameterGroupMembers);
   const datasets = useMainStore((state) => state.collections);
-  const loadingInstances = useSessionStore((state) => state.loadingInstances);
-
-  const [maxHeight, setMaxHeight] = useState(555);
 
   const [value, setValue] = useState<string | null>();
   const [filteredDatasets, setFilteredDatasets] = useState<ICollection[]>(datasets);
@@ -81,30 +61,6 @@ const Datasets: React.FC<Props> = (props) => {
   }, [filteredDatasets]);
 
   useEffect(() => {
-    if (!layersRef.current) {
-      return;
-    }
-
-    const observer = new ResizeObserver(() => {
-      const header = document.getElementById('header-wrapper');
-      const layers = document.getElementById('layers-wrapper');
-      const datasets = document.getElementById('datasets-wrapper-control-datasets-accordion');
-
-      if (header && layers && datasets) {
-        const total =
-          header.getBoundingClientRect().height +
-          layers.getBoundingClientRect().height +
-          datasets.getBoundingClientRect().height;
-
-        setMaxHeight(Math.min(total, 555));
-      }
-    });
-
-    observer.observe(layersRef.current);
-    return () => observer.disconnect();
-  }, [layersRef.current]);
-
-  useEffect(() => {
     if (datasets.length === 0) {
       return;
     }
@@ -112,11 +68,6 @@ const Datasets: React.FC<Props> = (props) => {
     const filteredDatasets = filterCollections(datasets, provider, category, parameterGroupMembers);
     setFilteredDatasets(filteredDatasets);
   }, [datasets, provider, category, parameterGroupMembers]);
-
-  const handleChange = (value: string | null) => {
-    setDatasetsOpen(Boolean(value) && value === 'datasets-accordion');
-    setValue(value);
-  };
 
   const datasetHelpText = (
     <>
@@ -133,7 +84,7 @@ const Datasets: React.FC<Props> = (props) => {
     <Accordion
       id="datasets-wrapper"
       value={value}
-      onChange={handleChange}
+      onChange={setValue}
       sticky="top"
       items={[
         {
@@ -149,14 +100,7 @@ const Datasets: React.FC<Props> = (props) => {
               <VisuallyHidden>{datasetHelpText}</VisuallyHidden>
             </>
           ),
-          content: (
-            <Box
-              className={styles.accordionBody}
-              mah={`calc(100vh - ${maxHeight + (loadingInstances.length > 0 ? 12 : 0)}px)`}
-            >
-              {accordions}
-            </Box>
-          ),
+          content: <Box className={styles.accordionBody}>{accordions}</Box>,
         },
       ]}
       variant={Variant.Primary}

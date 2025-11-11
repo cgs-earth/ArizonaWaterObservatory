@@ -43,7 +43,9 @@
 }
 
 .accordions {
+  max-height: calc(100vh - 150px);
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .accordionContent {
@@ -82,13 +84,15 @@
 .actionIcon {
   margin-left: var(--default-spacing);
   margin-right: var(--default-spacing);
-  stroke: var(--asu-gray-2);
+  stroke: var(--asu-gray-1);
+  fill: var(--asu-gray-1);
 }
 
-.actionIcon:hover,
-.actionIcon:focus,
-.actionIcon:active {
-  stroke: var(--asu-gray-3);
+.actionIcon:hover:not(:disabled),
+.actionIcon:focus:not(:disabled),
+.actionIcon:active:not(:disabled) {
+  stroke: var(--asu-gray-2);
+  fill: var(--asu-gray-2);
 }
 
 .datasetsBody {
