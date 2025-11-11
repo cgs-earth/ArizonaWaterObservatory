@@ -6,8 +6,6 @@
 import { ActionIcon, Stack, Tooltip } from '@mantine/core';
 import CircleDown from '@/assets/CircleDown';
 import CircleUp from '@/assets/CircleUp';
-import Minus from '@/assets/Minus';
-import Plus from '@/assets/Plus';
 import styles from '@/features/Panel/Panel.module.css';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';

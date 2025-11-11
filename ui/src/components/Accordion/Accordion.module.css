@@ -4,9 +4,13 @@
  */
 
 .item {
-  border-top: 1px solid var(--border);
   border-right: 1px solid var(--border);
   border-left: 0.5rem solid;
+}
+
+.item > *:first-child {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .control {
@@ -21,18 +25,20 @@
 }
 
 .panel {
+  position: relative;
   border-right: 1px solid var(--border);
+  z-index: 1;
 }
 
 .content {
   border-top: 1px solid var(--border);
-
   padding: 0;
 }
 
 .chevron {
   width: 20px;
   margin-right: var(--default-spacing);
+
   &[data-rotate] {
     transform: rotate(45deg);
   }
@@ -59,16 +65,17 @@
   border-left-color: var(--asu-color-tertiary);
 }
 
-.sticky {
+.sticky .control {
   position: sticky;
   background: var(--mantine-color-body);
+  z-index: 2;
 }
 
-.top {
+.top .control {
   top: 0;
 }
 
-.bottom {
+.bottom .control {
   bottom: 0;
 }
 
