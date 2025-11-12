@@ -11,7 +11,12 @@ import { GeoJSONFeature, GeoJSONSource, Map, Popup, RasterTileSource } from 'map
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
 import { getDefaultGeoJSON } from '@/consts/geojson';
-import { DEFAULT_BBOX, DEFAULT_FILL_OPACITY, DEFAULT_RASTER_OPACITY } from '@/features/Map/consts';
+import {
+  DEFAULT_BBOX,
+  DEFAULT_FILL_OPACITY,
+  DEFAULT_RASTER_OPACITY,
+  drawLayers,
+} from '@/features/Map/consts';
 import { Config, GetConfigResponse, PostConfigResponse, SourceOptions } from '@/managers/types';
 import { CoverageGridService } from '@/services/coverageGrid.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
@@ -486,6 +491,7 @@ class MainManager {
         layer.datasourceId,
         layer.id
       );
+
       // Intentional ordering of sub-layers
       for (const layerId of [pointLayerId, lineLayerId, fillLayerId, rasterLayerId]) {
         if (this.map.getLayer(layerId)) {
@@ -496,6 +502,7 @@ class MainManager {
         }
       }
     }
+    drawLayers.forEach((layerId) => this.map!.moveLayer(layerId));
   }
 
   /**

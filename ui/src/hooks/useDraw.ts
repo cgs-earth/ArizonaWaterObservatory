@@ -121,6 +121,7 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
 
     map.on('draw.modechange', (e) => {
       const { mode } = e;
+
       if (mode === 'draw_polygon') {
         setDrawMode(DrawMode.Polygon);
       } else {

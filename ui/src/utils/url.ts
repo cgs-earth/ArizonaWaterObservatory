@@ -54,15 +54,26 @@ export const buildLocationUrl = (
 export const buildItemUrl = (
   collectionId: ICollection['id'],
   locationId: Location['id'],
-  csv: boolean = false,
-  format: boolean = true
+  format: null | 'csv' | 'json' | 'kml' | 'shp' = null
 ): string => {
   const url = new URL(
     `${import.meta.env.VITE_AWO_SOURCE}/collections/${collectionId}/items/${locationId}`
   );
 
-  if (format) {
-    url.searchParams.set('f', csv ? 'csv' : 'json');
+  if (format && format.length) {
+    url.searchParams.set('f', format);
+  }
+  return url.toString();
+};
+
+export const buildItemsUrl = (
+  collectionId: ICollection['id'],
+  format: null | 'csv' | 'json' | 'kml' | 'shp' = null
+): string => {
+  const url = new URL(`${import.meta.env.VITE_AWO_SOURCE}/collections/${collectionId}/items`);
+
+  if (format && format.length) {
+    url.searchParams.set('f', format);
   }
   return url.toString();
 };

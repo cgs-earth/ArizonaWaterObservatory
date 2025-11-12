@@ -65,7 +65,7 @@ const Dataset: React.FC<Props> = (props) => {
 
   return (
     <Stack gap="xs" className={styles.accordionContent}>
-      <Text size="sm">{dataset.description}</Text>
+      <Text size="sm">This dataset {dataset.description}</Text>
       {parameters.length > 0 && (
         <>
           <TextInput

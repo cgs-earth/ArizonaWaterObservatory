@@ -5,7 +5,7 @@
 
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { Feature } from 'geojson';
 import { Anchor, Collapse, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -19,9 +19,13 @@ import { Chart } from '@/features/Popup/Chart';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import { Table } from '@/features/TopBar/Links/Table';
 import styles from '@/features/TopBar/TopBar.module.css';
+import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
+import notificationManager from '@/managers/Notification.init';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
+import { LoadingType, NotificationType } from '@/stores/session/types';
+import { createEmptyCsv } from '@/utils/csv';
 import { buildLocationUrl } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
@@ -43,10 +47,15 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
   const [datasetName, setDatasetName] = useState<string>('');
-  const [parameters, setParameters] = useState<string[]>([]);
+  const [parameters, setParameters] = useState<Layer['parameters']>([]);
 
-  const [from, setFrom] = useState<string | null>(layer.from);
-  const [to, setTo] = useState<string | null>(layer.to);
+  const [from, setFrom] = useState<Layer['from']>(layer.from);
+  const [to, setTo] = useState<Layer['to']>(layer.to);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const controller = useRef<AbortController>(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
     const url = buildLocationUrl(
@@ -96,6 +105,90 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
     }
   }, [location, layer]);
 
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+      if (controller.current) {
+        controller.current.abort('Component unmount');
+      }
+    };
+  }, []);
+
+  const getFileName = () => {
+    let name = `data-${location.id}-${layer.parameters.join('_')}`;
+
+    if (from && dayjs(from).isValid()) {
+      name += `-${dayjs(from).format('MM/DD/YYYY')}`;
+    }
+
+    if (to && dayjs(to).isValid()) {
+      name += `-${dayjs(to).format('MM/DD/YYYY')}`;
+    }
+
+    return `${name}.csv`;
+  };
+
+  const handleCSVClick = async () => {
+    const url = buildLocationUrl(
+      collection.id,
+      String(location.id),
+      layer.parameters,
+      from,
+      to,
+      true,
+      true
+    );
+
+    const loadingInstance = loadingManager.add(
+      `Generating csv for location: ${location.id}`,
+      LoadingType.Data
+    );
+    try {
+      setIsLoading(true);
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error(`Error: ${res.statusText.length > 0 ? res.statusText : 'Unknown error'}`);
+      }
+
+      let objectUrl = '';
+      if (res.status === 204) {
+        notificationManager.show(
+          `No data found for location: ${location.id} with the current parameter and date range selection.`,
+          NotificationType.Error,
+          10000
+        );
+        objectUrl = createEmptyCsv();
+      } else {
+        const blob = await res.blob();
+        objectUrl = URL.createObjectURL(blob);
+      }
+
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = getFileName();
+      document.body.appendChild(a);
+      a.click();
+
+      URL.revokeObjectURL(objectUrl);
+      a.remove();
+      notificationManager.show('CSV generated successfully.', NotificationType.Success, 10000);
+    } catch (err) {
+      if (((err as Error)?.message ?? '').length > 0) {
+        notificationManager.show((err as Error)?.message, NotificationType.Error, 10000);
+      } else if (typeof err === 'string') {
+        notificationManager.show(err, NotificationType.Error, 10000);
+      }
+    } finally {
+      loadingManager.remove(loadingInstance);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
 
@@ -143,7 +236,10 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
             >
               GeoJSON
             </Button>
-            {parameters.length > 0 ? (
+            <Tooltip
+              label="Select one or more parameters in the layer controls to enable charts."
+              disabled={parameters.length > 0}
+            >
               <Button
                 size="xs"
                 variant={openedChart ? Variant.Selected : Variant.Secondary}
@@ -152,13 +248,25 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               >
                 Chart
               </Button>
-            ) : (
-              <Tooltip label="Select one or more parameters in the layer controls to enable charts.">
-                <Button size="xs" variant={Variant.Secondary} disabled data-disabled>
-                  Chart
-                </Button>
-              </Tooltip>
-            )}
+            </Tooltip>
+            <Tooltip
+              label={
+                isLoading
+                  ? 'Please wait for download to finish.'
+                  : 'Download the parameter data in CSV format.'
+              }
+            >
+              <Button
+                size="xs"
+                disabled={isLoading}
+                data-disabled={isLoading}
+                variant={Variant.Primary}
+                className={styles.propertiesButton}
+                onClick={handleCSVClick}
+              >
+                CSV
+              </Button>
+            </Tooltip>
           </Group>
           <Group gap={16} align="flex-end">
             <DateInput
