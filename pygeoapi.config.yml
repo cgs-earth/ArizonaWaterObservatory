@@ -68,8 +68,15 @@ resources:
   National_Water_Model_Channel_Routing_Output:
     type: collection
     title: National Water Model Channel Routing Output
-    description: National Water Model Channel Routing Output
+    # https://hdsc.nws.noaa.gov/pub/hdsc/data/papers/articles/HRL_Pubs_PDF_May12_2009/HRL_PUBS_201-250/206_CHANNEL_ROUTING,_HYDROLOGICAL_FORECASTING.pdf
+    description: Channel Routing Output is a mathematical model to predict the change of a flood wave as it propagates through waterways
     keywords: ["NWM"]
+    links:
+      - type: application/html
+        rel: docs
+        title: documentation
+        hreflang: en-U
+        href: https://hdsc.nws.noaa.gov/pub/hdsc/data/papers/articles/HRL_Pubs_PDF_May12_2009/HRL_PUBS_201-250/206_CHANNEL_ROUTING,_HYDROLOGICAL_FORECASTING.pdf
     extents:  &nwm-extents
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -100,7 +107,7 @@ resources:
   National_Water_Model_Land_Data_Assimilation_System_Output:
     type: collection
     title: National Water Model Land Data Assimilation System Output
-    description: National Water Model Land Data Assimilation System Output
+    description: The Land Data Assimilation System aims to produce high quality fields of land surface states and fluxes by integrating satellite and ground-based observational data products
     keywords: ["NWM"]
     extents: *nwm-extents
     providers:
@@ -168,7 +175,7 @@ resources:
   usace-edr:
     type: collection
     title: US Army Corps of Engineers Access2Water API
-    description: US Army Corps of Engineers Access2Water API
+    description: The Access2Water API provides a subset of the USACE Corps Water Management System (CWMS) API specifically focused on water control management data
     extents: 
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -179,18 +186,19 @@ resources:
       - &default-edr
         type: edr
         name: usace.usace_edr.USACEEDRProvider
-        data: https://wcc.sc.egov.usda.gov/awdbRestApi/v3/api-docs
+        data: https://water.usace.army.mil/
       - &default-feature
         type: feature
         name: usace.usace.USACEProvider
-        data: https://wcc.sc.egov.usda.gov/awdbRestApi/v3/api-docs
+        data: https://water.usace.army.mil/
         entity: Observation
         title_field: name
 
   snotel-edr:
     type: collection
-    title: Snow Telemetry Network
-    description: USDA Snow Telemetry Network (SNOTEL) EDR
+    title: Snowpack Telemetry Network
+    # https://snow.nasa.gov/data/snotel-data
+    description: SNOTEL is an automated system of snowpack and related climate sensors in the Western United States which collects snow data that include snow water equivalent, accumulated precipitation, and air temperature. 
     keywords:
       - EDR
       - SNOTEL
@@ -411,7 +419,7 @@ resources:
     title:
       en: Arizona Groundwater 
     description:
-      en: Arizona Groundwater Wells data from the ADWR Tabular Data Download joined with info frm the Wells 55 Registry
+      en: Arizona Groundwater Wells data from the ADWR Tabular Data Download joined with info from the Wells 55 Registry
     keywords:
       en:
         - example
