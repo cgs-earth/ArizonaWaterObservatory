@@ -438,10 +438,8 @@ resources:
         
   ArizonaWaterWells:
     type: collection
-    title:
-      en: Arizona Department of Water Resources Groundwater Site Inventory
-    description:
-      en: consists of field-verified data regarding wells and springs collected by personnel from the Hydrology Division's Basic Data Section, the U.S. Geological Survey and other co-operating agencies. This collection contains additional info joined from the Arizona Wells 55 Registry to enrich well metadata.
+    title: Arizona Department of Water Resources Groundwater Site Inventory
+    description: consists of field-verified data regarding wells and springs collected by personnel from the Hydrology Division's Basic Data Section, the U.S. Geological Survey and other co-operating agencies. This collection contains additional info joined from the Arizona Wells 55 Registry to enrich well metadata.
     provider-name:
       - Arizona Department of Water Resources
     keywords:
