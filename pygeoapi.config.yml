@@ -71,6 +71,8 @@ resources:
     # https://hdsc.nws.noaa.gov/pub/hdsc/data/papers/articles/HRL_Pubs_PDF_May12_2009/HRL_PUBS_201-250/206_CHANNEL_ROUTING,_HYDROLOGICAL_FORECASTING.pdf
     description: contains simulated flow and channel-related variables for river and stream segments, representing the movement of water through the channel network.
     keywords: ["NWM"]
+    provider-name:  
+      - NOAA
     links:
       - type: application/html
         rel: docs
@@ -109,6 +111,8 @@ resources:
     title: National Water Model Land Data Assimilation System Output
     description: aims to produce high quality fields of land surface states and fluxes by integrating satellite and ground-based observational data products
     keywords: ["NWM"]
+    provider-name:  
+      - NOAA
     extents: *nwm-extents
     providers:
       - &nwm-raster-edr
@@ -123,6 +127,8 @@ resources:
     title: National Water Model Reach to Reach Routing Output
     description: provides simulated streamflow and related hydrologic variables for millions of individual river and stream reaches across the U.S., representing how water is routed downstream through the national river network.
     keywords: ["NWM"]
+    provider-name:  
+      - NOAA
     extents: *nwm-extents
     providers:
       - <<: *nwm-raster-edr
@@ -155,6 +161,8 @@ resources:
     title: Arizona Department of Water Resources Groundwater Storage Index
     description: contains well sites including the state well registration number of the well and metadata about its creation
     keywords: ["sites"]
+    provider-name:  
+      - Arizona Department of Water Resources
     links:
       - type: application/html
         rel: canonical
@@ -176,6 +184,8 @@ resources:
     type: collection
     title: US Army Corps of Engineers Access2Water API
     description: provides a subset of the USACE Corps Water Management System (CWMS) API specifically focused on water control management data
+    provider-name:  
+      - US Army Corps of Engineers
     extents: 
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -199,6 +209,8 @@ resources:
     title: Snowpack Telemetry Network (SNOTEL)
     # https://snow.nasa.gov/data/snotel-data
     description: is an automated system of snowpack and related climate sensors primarily in mountainous regions in the Western United States which aims to collect data like snow water equivalent, accumulated precipitation, and air temperature. 
+    provider-name:
+      - US Department of Agriculture
     keywords:
       - EDR
       - SNOTEL
@@ -227,6 +239,8 @@ resources:
     type: collection
     title: United States Geologic Survey Streamgages
     description: measures real-time streamflow (discharge), water levels, and other hydrologic data in rivers and streams across the United States.
+    provider-name:
+      - USGS
     keywords:
       - EDR
       - SensorThings
@@ -252,8 +266,8 @@ resources:
     type: collection
     title: Air and Water Database (AWDB) Forecasts
     description: provides predictions for climate and water supply conditions. It uses the same endpoint as SNOTEL but includes only forecasts
-    keywords:
-      - open data
+    provider-name:
+      - US Department of Agriculture
     extents: *default-extent
     providers:
       - type: edr
@@ -269,6 +283,8 @@ resources:
     type: collection
     title: River Forecast Center Seasonal Forecasts
     description: aggregates water supply forecast data from all regional NOAA river forecast centers into one collection. 
+    provider-name:
+      - NOAA
     keywords: [NOAA]
     links:
       - <<: *default-link
@@ -284,6 +300,8 @@ resources:
     type: collection
     title: Parameter-elevation Regressions on Independent Slopes Model (PRISM)
     description: provides a raster for high-resolution spatial climate data, including precipitation, temperature, and other climate variables, derived by combining point-based weather observations with digital elevation and other geographic information.
+    provider-name:
+      - USGS
     keywords:
       - temperature
       - precipitation
@@ -312,6 +330,8 @@ resources:
     title: River Stage Forecast Day 1
     description: NOAA River Stage Forecast 24 Hours / 1 day from now
     keywords: [NOAA, riv_gauges]
+    provider-name:
+      - NOAA
     links:
       - <<: *default-link
         href: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer
@@ -355,6 +375,8 @@ resources:
     title: Arizona Wells 55 Registry
     description: contains Arizona well information such as NOIs to drill, replace, modify, abandon, or deepen, registrations, driller reports, completion reports, change of well information, change of ownership, notice of well capping, and abandonment completion reports. 
     keywords: [Arizona]
+    provider-name:
+      - Arizona Department of Water Resources
     links:
       - <<: *default-link
         href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
