@@ -21,14 +21,14 @@ server:
     url: https://tile.openstreetmap.org/{z}/{x}/{y}.png
     attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'
 
-  # manager:
-  #   name: PostgreSQL
-  #   connection:
-  #     host: ${TF_VAR_POSTGRES_HOST:-localhost}
-  #     port: 5432
-  #     database: edr
-  #     user: postgres
-  #     password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+  manager:
+    name: PostgreSQL
+    connection:
+      host: ${TF_VAR_POSTGRES_HOST:-localhost}
+      port: 5432
+      database: edr
+      user: postgres
+      password: ${TF_VAR_POSTGRES_PASSWORD:-password}
       
 logging:
   level: ${PYGEOAPI_LOGLEVEL:-WARNING}
@@ -407,7 +407,7 @@ resources:
           mimetype: image/png
         
   ArizonaWaterWells:
-    type: collection
+    type: ${ArizonaWaterWellsType:-skip}
     title:
       en: Arizona Groundwater 
     description:
@@ -461,10 +461,10 @@ resources:
             remote: parameter_id
             foreign: parameter_id
 
-  # config-store:
-  #     type: process
-  #     processor:
-  #         name: config_store.ConfigStoreProcessor
+  config-store:
+      type: process
+      processor:
+          name: config_store.ConfigStoreProcessor
 
 
     

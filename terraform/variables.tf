@@ -12,7 +12,7 @@ variable "region" {
 variable "instance_name" {
   default = "postgis"
 }
-variable "POSTGRES_TABLE" {
+variable "POSTGRES_DB" {
   default = "edr"
 }
 variable "POSTGRES_USER" {
