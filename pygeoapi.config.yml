@@ -346,24 +346,24 @@ resources:
 
   noaa-river-stage-forecast-day-2:
     <<: *default-river-stage
-    title: River Stage Forecast Day 2
-    description: NOAA River Stage Forecast 48 hours / 2 days from now
+    title: NOAA River Stage Forecast Day 2
+    description: predicts the water level (stage) in rivers and streams 2 days from now and is updated every 15-minutes
     providers:
       - <<: *default-feature-river-stage
         data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/2
 
   noaa-river-stage-forecast-day-3:
     <<: *default-river-stage
-    title: River Stage Forecast Day 3
-    description: NOAA River Stage Forecast 72 hours / 3 days from now
+    title: NOAARiver Stage Forecast Day 3
+    description: predicts the water level (stage) in rivers and streams 3 days from now and is updated every 15-minutes
     providers:
       - <<: *default-feature-river-stage
         data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/3
 
   noaa-river-stage-forecast-day-10:
     <<: *default-river-stage
-    title: River Stage Forecast Day 10
-    description: NOAA River Stage Forecast 240 hours / 10 days from now
+    title: NOAA River Stage Forecast Day 10
+    description: predicts the water level (stage) in rivers and streams 10 days from now and is updated every 15-minutes
     providers:
       - <<: *default-feature-river-stage
         data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/10
