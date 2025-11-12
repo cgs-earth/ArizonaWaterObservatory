@@ -135,11 +135,10 @@ const Layer: React.FC<Props> = (props) => {
 
   return (
     <Stack gap="xs" className={styles.accordionContent}>
-      <Group justify="space-between">
+      <Group justify="space-between" grow gap={16}>
         <TextInput
           size="xs"
           label="Layer Name"
-          className={styles.layerInput}
           mr="auto"
           value={name}
           onChange={(event) => setName(event.currentTarget.value)}
@@ -148,7 +147,6 @@ const Layer: React.FC<Props> = (props) => {
           <ColorInput
             size="xs"
             label="Symbol Color"
-            className={styles.layerInput}
             value={color}
             onChange={(value) => setColor(value)}
           />

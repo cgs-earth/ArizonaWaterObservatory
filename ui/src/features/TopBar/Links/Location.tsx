@@ -139,7 +139,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
       to,
       true,
       true
-    ).toString();
+    );
 
     const loadingInstance = loadingManager.add(
       `Generating csv for location: ${location.id}`,

@@ -4,21 +4,18 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Feature } from 'geojson';
 import { Anchor, Box, Group, Text, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { useLocations } from '@/hooks/useLocations';
-import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
-import useMainStore from '@/stores/main';
 import { Layer as LayerType, Location } from '@/stores/main/types';
-import { LoadingType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getProvider } from '@/utils/provider';
+import { Download } from './Download';
 
 type Props = {
   layer: LayerType;
@@ -105,6 +102,11 @@ export const Layer: React.FC<Props> = (props) => {
   const hasSelectedLocations = selectedLocations.length > 0;
   const hasOtherLocations = otherLocations.length > 0;
 
+  // This is a raster layer with no underlying data
+  if (collectionType === CollectionType.Map) {
+    return null;
+  }
+
   return (
     <Accordion
       defaultValue={`links-${linkLocation?.layerId}-accordion`}
@@ -140,6 +142,9 @@ export const Layer: React.FC<Props> = (props) => {
               )}
             </Box>
           ),
+          control: [CollectionType.EDR, CollectionType.Features].includes(collectionType) ? (
+            <Download collectionId={layer.datasourceId} />
+          ) : null,
           content: (
             <Box className={styles.accordionBody}>
               {!isEnabled || (!hasSelectedLocations && !hasOtherLocations) ? (

@@ -91,3 +91,13 @@
   overflow-wrap: break-word;
   white-space: pre-wrap;
 }
+.downloadDropdown {
+  border: unset;
+  padding: 0;
+}
+
+.downloadContent {
+  border: 5px solid var(--asu-color-tertiary);
+  padding: var(--default-spacing);
+  border-radius: var(--popover-radius, var(--mantine-radius-default));
+}

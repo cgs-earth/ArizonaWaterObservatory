@@ -39,9 +39,9 @@ export const Item = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [codeUrl, setCodeUrl] = useState('');
 
   useEffect(() => {
-    const url = buildItemUrl(collection.id, String(location.id), false, false);
+    const url = buildItemUrl(collection.id, String(location.id));
 
-    const codeUrl = buildItemUrl(collection.id, String(location.id), false, false);
+    const codeUrl = buildItemUrl(collection.id, String(location.id));
 
     setUrl(url);
     setCodeUrl(codeUrl);
