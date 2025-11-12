@@ -37,6 +37,6 @@ jobs:
           context: .
           file: pygeoapi-deployment/Dockerfile
           push: true
-          tags: asu-awo-pygeoapi:latest
+          tags: ghcr.io/cgs-earth/asu-awo-pygeoapi:latest
           cache-from: type=gha,scope=asu-awo-pygeoapi
           cache-to: type=gha,mode=max,scope=asu-awo-pygeoapi
