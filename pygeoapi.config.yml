@@ -407,7 +407,7 @@ resources:
           mimetype: image/png
         
   ArizonaWaterWells:
-    type: ${ArizonaWaterWellsType}
+    type: collection
     title:
       en: Arizona Groundwater 
     description:
