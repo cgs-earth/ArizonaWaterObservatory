@@ -34,6 +34,7 @@ export enum Overlay {
   Legend = 'legend',
   Info = 'info',
   Warning = 'warning',
+  Download = 'download',
 }
 
 export type Notification = {

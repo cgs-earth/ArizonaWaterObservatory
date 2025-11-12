@@ -10,6 +10,7 @@ import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
 import styles from '@/features/TopBar/TopBar.module.css';
+import { useLocations } from '@/hooks/useLocations';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
@@ -27,10 +28,8 @@ type Props = {
 export const Layer: React.FC<Props> = (props) => {
   const { layer, linkLocation } = props;
 
-  const locations = useMainStore((state) => state.locations);
+  const { selectedLocations, otherLocations } = useLocations(layer);
 
-  const [selectedLocations, setSelectedLocations] = useState<Feature[]>([]);
-  const [otherLocations, setOtherLocations] = useState<Feature[]>([]);
   const [dataset, setDataset] = useState<ICollection>();
   const [provider, setProvider] = useState<string>('');
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
@@ -39,43 +38,6 @@ export const Layer: React.FC<Props> = (props) => {
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
-
-  // Get all non-selected locations, rendered or not on map
-  const getOtherLocations = async () => {
-    const loadingInstance = loadingManager.add(
-      `Fetching locations for: ${layer.name}`,
-      LoadingType.Locations
-    );
-    try {
-      controller.current = new AbortController();
-
-      const allLocations = await mainManager.getFeatures(layer, controller.current.signal);
-
-      const layerLocations = locations.filter((location) => location.layerId === layer.id);
-
-      const selectedLocations = allLocations.features.filter((feature) =>
-        layerLocations.some((location) => location.id === String(feature.id))
-      );
-      const otherLocations = allLocations.features.filter(
-        (feature) => !layerLocations.some((location) => location.id === String(feature.id))
-      );
-
-      if (isMounted.current) {
-        setSelectedLocations(selectedLocations);
-        setOtherLocations(otherLocations);
-      }
-    } catch (error) {
-      if ((error as Error)?.name !== 'AbortError') {
-        console.error(error);
-      }
-    } finally {
-      loadingManager.remove(loadingInstance);
-    }
-  };
-
-  useEffect(() => {
-    void getOtherLocations();
-  }, []);
 
   useEffect(() => {
     if (dataset) {
