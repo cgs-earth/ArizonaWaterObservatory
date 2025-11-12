@@ -36,7 +36,7 @@ resource "google_sql_database_instance" "postgis" {
 }
 
 resource "google_sql_database" "postgis" {
-  name     = var.POSTGRES_TABLE
+  name     = var.POSTGRES_DB
   instance = google_sql_database_instance.postgis.name
 }
 
@@ -60,10 +60,6 @@ resource "google_cloud_run_v2_job" "groundwatersqldumpjob" {
           value = "/cloudsql/${google_sql_database_instance.postgis.connection_name}"
         }
         env {
-          name  = "PGDATABASE"
-          value = var.POSTGRES_TABLE
-        }
-        env {
           name  = "PGUSER"
           value = var.POSTGRES_USER
         }
@@ -84,10 +80,16 @@ resource "google_cloud_run_v2_job" "groundwatersqldumpjob" {
             tar -zxf oras_1.3.0_*.tar.gz -C oras-install/
             ./oras-install/oras pull ghcr.io/cgs-earth/arizona-groundwater-dump:latest
 
+            # in pygeoapi the jobs table needed for the postgresql ogc api process provider is not created by default
+            # as such we need to create it manually; we fetch the sql from the pygeoapi repo since this is the file that is used
+            # to create the jobs table in the test
+            curl --fail --show-error --silent https://raw.githubusercontent.com/geopython/pygeoapi/refs/heads/master/tests/data/postgres_manager_full_structure.backup.sql -o create_jobs_table.sql
+
             # we need to wipe the database before restoring since you can't restore a dump over an existing database trivially
-            psql -h /cloudsql/${google_sql_database_instance.postgis.connection_name} -U ${var.POSTGRES_USER} -d postgres -c "DROP DATABASE IF EXISTS ${var.POSTGRES_TABLE};"
-            psql -h /cloudsql/${google_sql_database_instance.postgis.connection_name} -U ${var.POSTGRES_USER} -d postgres -c "CREATE DATABASE ${var.POSTGRES_TABLE};"
-            pg_restore --host=/cloudsql/${google_sql_database_instance.postgis.connection_name} --username=${var.POSTGRES_USER} --dbname=${var.POSTGRES_TABLE} --verbose --exit-on-error edr_backup.dump
+            psql -d postgres -c "DROP DATABASE IF EXISTS ${var.POSTGRES_DB};"
+            psql -d postgres -c "CREATE DATABASE ${var.POSTGRES_DB};"
+            pg_restore --dbname=${var.POSTGRES_DB} --verbose --exit-on-error edr_backup.dump
+            psql -d ${var.POSTGRES_DB} -f create_jobs_table.sql
           EOT
         ]
         volume_mounts {
