@@ -407,7 +407,7 @@ resources:
           mimetype: image/png
         
   ArizonaWaterWells:
-    type: ${ArizonaWaterWellsType:-skip}
+    type: ${ArizonaWaterWellsType}
     title:
       en: Arizona Groundwater 
     description:
