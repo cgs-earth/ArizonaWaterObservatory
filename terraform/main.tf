@@ -84,7 +84,7 @@ resource "google_cloud_run_v2_job" "groundwatersqldumpjob" {
             # as such we need to create it manually; we fetch the sql from the pygeoapi repo since this is the file that is used
             # to create the jobs table in the test
             curl --fail --show-error --silent https://raw.githubusercontent.com/geopython/pygeoapi/refs/heads/master/tests/data/postgres_manager_full_structure.backup.sql -o create_jobs_table.sql
-            psql -d postgres -f create_jobs_table.sql
+            psql -d ${var.POSTGRES_DB} -f create_jobs_table.sql
 
             # we need to wipe the database before restoring since you can't restore a dump over an existing database trivially
             psql -d postgres -c "DROP DATABASE IF EXISTS ${var.POSTGRES_DB};"
