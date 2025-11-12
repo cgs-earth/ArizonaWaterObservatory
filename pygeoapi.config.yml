@@ -75,10 +75,17 @@ resources:
       - NOAA
     links:
       - type: application/html
-        rel: docs
-        title: documentation
-        hreflang: en-U
+        rel: methodology
+        title: methodology
         href: https://hdsc.nws.noaa.gov/pub/hdsc/data/papers/articles/HRL_Pubs_PDF_May12_2009/HRL_PUBS_201-250/206_CHANNEL_ROUTING,_HYDROLOGICAL_FORECASTING.pdf
+      - type: application/html
+        rel: canonical 
+        title: data source
+        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com
+      - type: application/html
+        rel: documentation
+        title: documentation
+        href: https://registry.opendata.aws/nwm-archive/
     extents:  &nwm-extents
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -266,6 +273,10 @@ resources:
     type: collection
     title: Air and Water Database (AWDB) Forecasts
     description: provides predictions for climate and water supply conditions. It uses the same endpoint as SNOTEL but includes only forecasts
+    keywords:
+      - EDR
+      - AWDB
+      - USDA
     provider-name:
       - US Department of Agriculture
     extents: *default-extent
