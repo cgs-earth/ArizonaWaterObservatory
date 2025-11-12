@@ -26,8 +26,8 @@ server:
     connection:
       host: ${TF_VAR_POSTGRES_HOST:-localhost}
       port: 5432
-      database: edr
-      user: postgres
+      database: ${TF_VAR_POSTGRES_DB}
+      user: ${TF_VAR_POSTGRES_USER:-postgres}
       password: ${TF_VAR_POSTGRES_PASSWORD:-password}
       
 logging:
