@@ -37,6 +37,7 @@ export const Download: React.FC<Props> = (props) => {
       <Popover
         opened={show}
         onChange={setShow}
+        offset={-5}
         withArrow
         classNames={{ dropdown: styles.downloadDropdown }}
         target={
