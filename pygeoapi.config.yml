@@ -81,7 +81,7 @@ resources:
       - type: application/html
         rel: canonical 
         title: data source
-        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com
+        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/index.html#CONUS/zarr/chrtout.zarr/
       - type: application/html
         rel: documentation
         title: documentation
@@ -121,6 +121,15 @@ resources:
     provider-name:  
       - NOAA
     extents: *nwm-extents
+    links:
+      - type: application/html
+        rel: canonical 
+        title: data source
+        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/index.html#CONUS/zarr/ldasout.zarr/
+      - type: application/html
+        rel: documentation
+        title: documentation
+        href: https://registry.opendata.aws/nwm-archive/
     providers:
       - &nwm-raster-edr
         <<: *nwm-edr
@@ -137,6 +146,15 @@ resources:
     provider-name:  
       - NOAA
     extents: *nwm-extents
+    links:
+      - type: application/html
+        rel: canonical 
+        title: data source
+        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/index.html#CONUS/zarr/rtout.zarr/
+      - type: application/html
+        rel: documentation
+        title: documentation
+        href: https://registry.opendata.aws/nwm-archive/
     providers:
       - <<: *nwm-raster-edr
         remote_dataset: CONUS/zarr/rtout.zarr
@@ -147,12 +165,22 @@ resources:
     description: provides simulated water levels, storage, and outflows for lakes and reservoirs across the U.S. It delivers time-series data that supports monitoring, forecasting, and management of lake and reservoir conditions within the hydrologic network.
     keywords: ["NWM"]
     extents: *nwm-extents
+    links:
+      - type: application/html
+        rel: canonical 
+        title: data source
+        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/index.html#CONUS/zarr/lakeout.zarr/
+      - type: application/html
+        rel: documentation
+        title: documentation
+        href: https://registry.opendata.aws/nwm-archive/
     providers:  
       - <<: *nwm-edr
         remote_dataset: CONUS/zarr/lakeout.zarr
       - <<: *nwm-feature
         remote_dataset: CONUS/zarr/lakeout.zarr
   
+  ## This is currently commented out since it relies on adding extra geometry metadata; currently it has no geometry
   # National_Water_Model_Groundwater_Output:
   #   type: collection
   #   title: National Water Model Groundwater Output
@@ -162,30 +190,31 @@ resources:
   #   providers:
   #     - <<: *nwm-raster-edr
   #       remote_dataset: CONUS/zarr/gwout.zarr
-
-  ADWR_GWSI_Sites:
-    type: collection
-    title: Arizona Department of Water Resources Groundwater Storage Index
-    description: contains well sites including the state well registration number of the well and metadata about its creation
-    keywords: ["sites"]
-    provider-name:  
-      - Arizona Department of Water Resources
-    links:
-      - type: application/html
-        rel: canonical
-        title: data source
-        hreflang: en-U
-        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/GWSI_Layers/FeatureServer/7
-    extents: 
-      spatial:
-        bbox: [-170, 15, -51, 72]
-        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
-    providers:
-        - data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/GWSI_Layers/FeatureServer/7
-          type: feature
-          name: ESRI
-          id_field: OBJECTID
-          time_field: LASTWLDATE
+  
+  #### This is currently commented out since it is duplicated info from the postgis pgedr provider for arizona groundwater data
+  # ADWR_GWSI_Sites:
+  #   type: collection
+  #   title: Arizona Department of Water Resources Groundwater Storage Index
+  #   description: contains well sites including the state well registration number of the well and metadata about its creation
+  #   keywords: ["sites"]
+  #   provider-name:  
+  #     - Arizona Department of Water Resources
+  #   links:
+  #     - type: application/html
+  #       rel: canonical
+  #       title: data source
+  #       hreflang: en-U
+  #       href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/GWSI_Layers/FeatureServer/7
+  #   extents: 
+  #     spatial:
+  #       bbox: [-170, 15, -51, 72]
+  #       crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+  #   providers:
+  #       - data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/GWSI_Layers/FeatureServer/7
+  #         type: feature
+  #         name: ESRI
+  #         id_field: OBJECTID
+  #         time_field: LASTWLDATE
 
   usace-edr:
     type: collection
@@ -193,6 +222,15 @@ resources:
     description: provides a subset of the USACE Corps Water Management System (CWMS) API specifically focused on water control management data
     provider-name:  
       - US Army Corps of Engineers
+    link:
+      - type: application/html
+        rel: canonical 
+        title: data source
+        href: https://cwms-data.usace.army.mil/cwms-data/swagger-ui.html
+      - type: application/html
+        rel: documentation
+        title: documentation
+        href: https://water.usace.army.mil/
     extents: 
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -224,11 +262,15 @@ resources:
       - NRCS
       - USDA
     links:
-      - &default-link
-        type: application/html
+      - type: application/html
+        rel: documentation
+        title: documentation
+        href: https://www.nrcs.usda.gov/wps/portal/wcc/home/aboutUs/monitoringPrograms/automatedSnowMonitoring/
+        hreflang: en-US
+      - type: application/html
         rel: canonical
         title: data source
-        href: https://www.nrcs.usda.gov/wps/portal/wcc/home/aboutUs/monitoringPrograms/automatedSnowMonitoring/
+        href: https://wcc.sc.egov.usda.gov/awdbRestApi/swagger-ui/index.html
         hreflang: en-US
     extents:
       spatial:
@@ -253,8 +295,15 @@ resources:
       - SensorThings
       - USGS
     links:
-      - <<: *default-link
-        href: https://labs.waterdata.usgs.gov
+      - type: application/html
+        rel: documentation
+        title: documentation
+        href: https://labs.waterdata.usgs.gov/
+        hreflang: en-US
+      - type: application/html
+        rel: canonical
+        title: data source
+        href: https://labs.waterdata.usgs.gov/sta/v1.1/
     extents: &default-extent
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -280,6 +329,17 @@ resources:
     provider-name:
       - US Department of Agriculture
     extents: *default-extent
+    links:
+      - type: application/html
+        rel: documentation
+        title: documentation
+        href: https://www.nrcs.usda.gov/wps/portal/wcc/home/aboutUs/monitoringPrograms/automatedSnowMonitoring/
+        hreflang: en-US
+      - type: application/html
+        rel: canonical
+        title: data source
+        href: https://wcc.sc.egov.usda.gov/awdbRestApi/swagger-ui/index.html
+        hreflang: en-US
     providers:
       - type: edr
         name: awdb_forecasts.awdb_forecasts_edr.AwdbForecastsEDRProvider
@@ -298,8 +358,17 @@ resources:
       - NOAA
     keywords: [NOAA]
     links:
-      - <<: *default-link
+      - type: application/html
+        rel: documentation
+        title: documentation
         href: https://www.cbrfc.noaa.gov/wsup/graph/west/map/esp_map.html
+        hreflang: en-US
+      #   # the datasource is the same as the documentation since this is an aggregation 
+      #   # of the data from the individual forecast centers
+      # - type: application/html
+      #   rel: canonical
+      #   title: data source
+      #   href: https://www.cbrfc.noaa.gov/wsup/graph/west/map/esp_map.html
     extents: *default-extent
     providers:
       - type: feature
@@ -318,8 +387,9 @@ resources:
       - precipitation
     extents: *default-extent
     links:
-      - <<: *default-link
-        title: information
+      - type: application/html
+        rel: documentation
+        title: documentation
         href: https://cida.usgs.gov/thredds/catalog.html?dataset=cida.usgs.gov/prism_v2
     providers:
       - type: edr
