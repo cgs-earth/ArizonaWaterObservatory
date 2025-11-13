@@ -223,10 +223,6 @@ def fetch_data(
             times_to_select = available_times[mask]
             selected = selected.sel(time=times_to_select, drop=False)
 
-    # Apply feature limit if provided
-    if feature_limit is not None:
-        selected = selected.isel(feature_id=slice(0, feature_limit))
-
     if bbox:
         # Geospatial filtering using latitude and longitude variables
         lon_min, lat_min, lon_max, lat_max = bbox
@@ -252,6 +248,15 @@ def fetch_data(
             selected = selected.where(mask, drop=True)
         else:
             selected = selected.isel(feature_id=mask)
+
+    # we apply the limit regardless of bbox or not
+    if not raster and feature_limit:
+        # apply feature limit at the end of processing
+        # ideally since this is lazy loaded this should still have
+        # predicate pushdown; we need to push this last otherwise
+        # we will filter too early and get the start of the dataset which
+        # is at an arbitrary location, potentially outside the bbox
+        selected = selected.isel(feature_id=slice(0, feature_limit))
 
     return selected.load()
 

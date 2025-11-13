@@ -11,6 +11,7 @@
         "PYGEOAPI_CONFIG": "${workspaceFolder}/pygeoapi.config.yml",
         "PYGEOAPI_OPENAPI": "${workspaceFolder}/local.openapi.yml"
       },
+      "envFile": "${workspaceFolder}/.env",
       "autoStartBrowser": true
     }
   ]
