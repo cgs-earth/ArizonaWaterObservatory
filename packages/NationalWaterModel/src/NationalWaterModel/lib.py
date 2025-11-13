@@ -248,13 +248,15 @@ def fetch_data(
             selected = selected.where(mask, drop=True)
         else:
             selected = selected.isel(feature_id=mask)
-            # apply feature limit at the end of processing
-            # ideally since this is lazy loaded this should still have
-            # predicate pushdown; we need to push this last otherwise
-            # we will filter too early and get the start of the dataset which
-            # is at an arbitrary location, potentially outside the bbox
-            if feature_limit:
-                selected = selected.isel(feature_id=slice(0, feature_limit))
+
+    # we apply the limit regardless of bbox or not
+    if not raster and feature_limit:
+        # apply feature limit at the end of processing
+        # ideally since this is lazy loaded this should still have
+        # predicate pushdown; we need to push this last otherwise
+        # we will filter too early and get the start of the dataset which
+        # is at an arbitrary location, potentially outside the bbox
+        selected = selected.isel(feature_id=slice(0, feature_limit))
 
     return selected.load()
 
