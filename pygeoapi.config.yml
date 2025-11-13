@@ -117,7 +117,7 @@ resources:
     type: collection
     title: National Water Model Land Data Assimilation System Output
     description: aims to produce high quality fields of land surface states and fluxes by integrating satellite and ground-based observational data products
-    keywords: ["NWM"]
+    keywords: ["NWM", "query_only_one_date_at_a_time"]
     provider-name:  
       - NOAA
     extents: *nwm-extents
@@ -142,7 +142,7 @@ resources:
     type: collection
     title: National Water Model Reach to Reach Routing Output
     description: provides simulated streamflow and related hydrologic variables for millions of individual river and stream reaches across the U.S., representing how water is routed downstream through the national river network.
-    keywords: ["NWM"]
+    keywords: ["NWM", "query_only_one_date_at_a_time"]
     provider-name:  
       - NOAA
     extents: *nwm-extents
@@ -589,6 +589,13 @@ resources:
       spatial:
         bbox: [-180, -90, 180, 90]
         crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+      temporal:
+        # Calculated via:
+        # SELECT MIN(observation_time) AS observation_start, MAX(observation_time) AS observation_end FROM edr_quickstart.observations;
+        start: 1902-03-31 00:00:00+00 
+        end: 2025-07-02 12:00:00+00
+        trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
+
     providers:
       - type: feature
         name: PostgreSQL
