@@ -1,4 +1,4 @@
-include .env
+export UV_ENV_FILE=.env
 
 precommit:
 	pre-commit install
