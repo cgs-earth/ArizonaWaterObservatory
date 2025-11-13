@@ -142,7 +142,7 @@ def fetch_data(
     datetime_filter: str | None,
     x_field: str | None,
     y_field: str | None,
-    bbox: list,
+    bbox: list[float],
     feature_id: str | None = None,
     feature_limit: int = 10,
     feature_offset: int = 0,

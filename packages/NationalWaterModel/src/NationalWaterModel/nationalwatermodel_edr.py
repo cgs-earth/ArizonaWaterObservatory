@@ -99,6 +99,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         crs: str | None = None,
         format_: str | None = None,
         limit: int = 0,
+        bbox: list[float] | None = None,
         **kwargs,
     ) -> (
         CoverageCollectionDict
@@ -118,13 +119,15 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             raise ProviderQueryError(
                 "datetime is required to prevent overfetching"
             )
+        if bbox:
+            bbox = transform_bbox(bbox, DEFAULT_CRS, self.storage_crs)
 
         loaded_data = fetch_data(
             unopened_dataset=self.zarr_dataset,
             timeseries_properties_to_fetch=select_properties,
             datetime_filter=datetime_,
             feature_id=location_id,
-            bbox=[],
+            bbox=bbox,
             feature_limit=limit,
             x_field=self.x_field,
             y_field=self.y_field,
