@@ -14,6 +14,7 @@ export enum CollectionId {
   NWMChannelRouting = 'National_Water_Model_Channel_Routing_Output',
   NWMAssimilationSystem = 'National_Water_Model_Land_Data_Assimilation_System_Output',
   NWMReachToReach = 'National_Water_Data_Reach_to_Reach_Routing_Output',
+  ArizonaWaterWells = 'ArizonaWaterWells',
 }
 
 export enum Provider {
@@ -37,4 +38,24 @@ export const DatasourceCollectionType: Record<CollectionType, string[]> = {
   [CollectionType.Features]: [],
   [CollectionType.Map]: [],
   [CollectionType.Unknown]: [],
+};
+
+export const CollectionRestrictions: Record<
+  string,
+  { size?: number; days?: number; message: string }
+> = {
+  [CollectionId.ArizonaWaterWells]: {
+    size: 83700000000,
+    message: "Try a polygon that's roughly 1/4th of Arizona.",
+  },
+  [CollectionId.NWMAssimilationSystem]: {
+    size: 41900000000,
+    days: 7,
+    message: "Try a polygon that's roughly 1/8th of Arizona.",
+  },
+  [CollectionId.NWMReachToReach]: {
+    size: 41900000000,
+    days: 7,
+    message: "Try a polygon that's roughly 1/8th of Arizona.",
+  },
 };

@@ -56,6 +56,8 @@ export const Draw: React.FC = () => {
       if ((error as Error)?.message) {
         const _error = error as Error;
         notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+      } else if (typeof error === 'string') {
+        notificationManager.show(`Error: ${error}`, NotificationType.Error, 10000);
       }
     } finally {
       loadingInstance.current = loadingManager.remove(loadingInstance.current);

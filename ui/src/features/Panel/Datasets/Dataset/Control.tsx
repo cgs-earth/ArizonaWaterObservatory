@@ -41,8 +41,11 @@ export const Control: React.FC<Props> = (props) => {
         setOverlay(Overlay.Warning);
       }
     } catch (error) {
-      if ((error as Error)?.name !== 'AbortError') {
-        console.error(error);
+      if ((error as Error)?.message) {
+        const _error = error as Error;
+        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+      } else if (typeof error === 'string') {
+        notificationManager.show(`Error: ${error}`, NotificationType.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);
