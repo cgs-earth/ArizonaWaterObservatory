@@ -34,6 +34,7 @@ const Info: React.FC = () => {
 
   // local state to trigger render cycle
   const [showHelp, setShowHelp] = useState(false);
+  // const onLoad = useRef(true)
 
   useEffect(() => {
     if (overlay !== Overlay.Info) {
