@@ -7,7 +7,14 @@ import dayjs from 'dayjs';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
 import { BBox, Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
-import { GeoJSONFeature, GeoJSONSource, Map, Popup, RasterTileSource } from 'mapbox-gl';
+import {
+  GeoJSONFeature,
+  GeoJSONSource,
+  Map,
+  MapMouseEvent,
+  Popup,
+  RasterTileSource,
+} from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
 import { getDefaultGeoJSON } from '@/consts/geojson';
@@ -17,7 +24,13 @@ import {
   DEFAULT_RASTER_OPACITY,
   drawLayers,
 } from '@/features/Map/consts';
-import { Config, GetConfigResponse, PostConfigResponse, SourceOptions } from '@/managers/types';
+import {
+  Config,
+  ExtendedFeatureCollection,
+  GetConfigResponse,
+  PostConfigResponse,
+  SourceOptions,
+} from '@/managers/types';
 import { CoverageGridService } from '@/services/coverageGrid.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
@@ -29,6 +42,7 @@ import {
   ParameterGroupMembers,
 } from '@/stores/main/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
+import { compareArrays } from '@/utils/compareArrays';
 import { getRandomHexColor } from '@/utils/hexColor';
 import {
   getFillLayerDefinition,
@@ -37,7 +51,20 @@ import {
   getRasterLayerSpecification,
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
+import { getTemporalExtent } from '@/utils/temporalExtent';
+import { getNextLink } from './Main.utils';
 
+/**
+ * MainManager is responsible for managing the core logic of the application. It handles functionality
+ * like new layers, locations, config objects, and more. It bridges the map and the global state while
+ * fetching the appropriate data for each layer instance.
+ *
+ * @class
+ * @classdesc This class handles complex interactions between the map instance and the zustand store. It
+ *  is responsible for loading data from the appropriate endpoint for each collection type. Any operation
+ *  that requires interacting with more than one global state variable should occur in this
+ *  class.
+ */
 class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
   private map: Map | null = null;
@@ -49,6 +76,7 @@ class MainManager {
   }
 
   /**
+   * Setter function to set map private variable after map initialization
    *
    * @function
    */
@@ -59,6 +87,7 @@ class MainManager {
   }
 
   /**
+   * Setter function to set hoverPopup private variable after map initialization
    *
    * @function
    */
@@ -69,6 +98,7 @@ class MainManager {
   }
 
   /**
+   * Setter function to set draw private variable after map initialization
    *
    * @function
    */
@@ -78,25 +108,31 @@ class MainManager {
     }
   }
 
+  /**
+   * Creates a new v6 uuid
+   *
+   * @function
+   */
   private createUUID(): string {
     return v6();
   }
 
+  /**
+   * Creates layer hex color
+   *
+   * @function
+   */
   private createHexColor(): ColorValueHex {
     return getRandomHexColor();
   }
 
-  private compareArrays<T>(a: T[], b: T[]): boolean {
-    if (a.length !== b.length) {
-      return false;
-    }
-
-    const sorted1 = [...a].sort();
-    const sorted2 = [...b].sort();
-
-    return sorted1.every((val, index) => val === sorted2[index]);
-  }
-
+  /**
+   * Ensure type safety in imported config
+   *
+   * @param {Config | undefined} config - The possible state config object.
+   *
+   * @function
+   */
   public isValidConfig(config: Config | undefined): { valid: boolean; reasons: string[] } {
     if (!config) {
       return {
@@ -125,6 +161,11 @@ class MainManager {
     return { valid: reasons.length === 0, reasons };
   }
 
+  /**
+   * Retrieve persistant values from global and map state.
+   *
+   * @function
+   */
   private generateConfig(): Config | undefined {
     if (!this.map) {
       return;
@@ -162,11 +203,23 @@ class MainManager {
     };
   }
 
+  /**
+   * Extract job uuid from the returned url.
+   *
+   * @param {string} jobId - The url returned from the processes endpoint, contains the share Id.
+   * @function
+   */
   private getShareId(jobId: string): string | undefined {
     const uuid = jobId.split('/').pop();
     return uuid;
   }
 
+  /**
+   * Write the config object to persistant storage. Return the share Id.
+   *
+   * @param {AbortSignal} [signal] - (Optional) Abort request signal from calling component
+   * @function
+   */
   public async saveConfig(signal?: AbortSignal): Promise<PostConfigResponse> {
     const config = this.generateConfig();
 
@@ -187,6 +240,7 @@ class MainManager {
     });
 
     if (response.ok) {
+      // Extract job uuid to retrieve the config later
       const jobId = response.headers.get('location');
       const shareId = this.getShareId(jobId ?? '');
       if (shareId) {
@@ -206,6 +260,13 @@ class MainManager {
     };
   }
 
+  /**
+   * Retrieve the config object from persistant storage using the share Id.
+   *
+   * @param {string} shareId - The job uuid returned from the processes endpoint
+   * @param {AbortSignal} [signal] - (Optional) Abort request signal from calling component
+   * @function
+   */
   public async getConfig(shareId: string, signal?: AbortSignal): Promise<GetConfigResponse> {
     const url = `${import.meta.env.VITE_AWO_CONFIG_SOURCE}/jobs/${shareId}/results?f=json`;
     const response = await fetch(url, {
@@ -233,6 +294,13 @@ class MainManager {
     };
   }
 
+  /**
+   * Validate and load the retrieved config object. Returns a boolean to indicate successful load.
+   *
+   * @param {Config} config - The retrieved state config object.
+   *
+   * @function
+   */
   public async loadConfig(config: Config): Promise<boolean> {
     if (!this.map || !this.draw || !this.isValidConfig(config).valid) {
       return false;
@@ -257,7 +325,7 @@ class MainManager {
 
     await this.applySpatialFilter(config.drawnShapes);
     for (const layer of config.layers) {
-      const sourceId = this.getSourceId(layer.datasourceId);
+      const sourceId = this.getSourceId(layer.datasourceId, layer.id);
       this.addLayer(layer, sourceId);
     }
 
@@ -301,7 +369,8 @@ class MainManager {
     from?: string | null,
     to?: string | null,
     parameterNames?: string[],
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    next?: string
   ): Promise<FeatureCollection> {
     const collection = this.getDatasource(collectionId);
 
@@ -313,9 +382,8 @@ class MainManager {
 
     switch (collectionType) {
       case CollectionType.EDR:
-        return await this.fetchLocations(collectionId, parameterNames, signal);
       case CollectionType.Features:
-        return await this.fetchItems(collectionId, parameterNames, signal);
+        return await this.fetchItems(collectionId, parameterNames, signal, next);
       case CollectionType.EDRGrid:
         if (!bbox) {
           throw new Error('No BBox provided for Grid layer');
@@ -337,6 +405,7 @@ class MainManager {
     return await awoService.getLocations<FeatureCollection>(collectionId, {
       signal,
       params: {
+        limit: 500,
         ...(parameterNames && parameterNames.length > 0
           ? { 'parameter-name': parameterNames.join(',') }
           : {}),
@@ -351,16 +420,29 @@ class MainManager {
   private async fetchItems(
     collectionId: ICollection['id'],
     parameterNames?: string[],
-    signal?: AbortSignal
-  ): Promise<FeatureCollection> {
-    return await awoService.getItems<FeatureCollection>(collectionId, {
-      signal,
-      params: {
-        ...(parameterNames && parameterNames.length > 0
-          ? { 'parameter-name': parameterNames.join(',') }
-          : {}),
+    signal?: AbortSignal,
+    next?: string
+  ): Promise<ExtendedFeatureCollection> {
+    const data = await awoService.getItems<ExtendedFeatureCollection>(
+      collectionId,
+      {
+        signal,
+        params: {
+          limit: 2000,
+          bbox: DEFAULT_BBOX,
+          ...(parameterNames && parameterNames.length > 0
+            ? { 'parameter-name': parameterNames.join(',') }
+            : {}),
+        },
       },
-    });
+      next
+    );
+
+    if (!data) {
+      return getDefaultGeoJSON();
+    }
+
+    return data;
   }
 
   /**
@@ -389,20 +471,33 @@ class MainManager {
    *
    * @function
    */
-  public getDatasourceCount = (datasourceId: ICollection['id']): number => {
+  public getDatasourceCount(datasourceId: ICollection['id']): number {
     return this.store.getState().layers.filter((layer) => layer.datasourceId === datasourceId)
       .length;
-  };
+  }
 
-  public getDatasource = (datasourceId: ICollection['id']): ICollection | undefined => {
+  public getDatasource(datasourceId: ICollection['id']): ICollection | undefined {
     return this.store
       .getState()
       .originalCollections.find((datasource) => datasource.id === datasourceId);
-  };
+  }
 
-  public getLayer = (layerId: Layer['id']): Layer | undefined => {
+  public getLayer(layerId: Layer['id']): Layer | undefined {
     return this.store.getState().layers.find((layer) => layer.id === layerId);
-  };
+  }
+
+  private getTo(datasource: ICollection): dayjs.Dayjs {
+    const temporalExtent = getTemporalExtent(datasource);
+
+    if (temporalExtent) {
+      const { max } = temporalExtent;
+      if (max && dayjs(max).isValid()) {
+        return dayjs(max);
+      }
+    }
+
+    return dayjs();
+  }
 
   public async createLayer(datasourceId: ICollection['id'], signal?: AbortSignal) {
     const datasource = this.getDatasource(datasourceId);
@@ -425,7 +520,7 @@ class MainManager {
       name = `${provider} ${title} ${currentDatasourceCount + next++}`;
     }
 
-    const to = dayjs();
+    const to = this.getTo(datasource);
     const from =
       collectionType === CollectionType.EDRGrid ? to.subtract(1, 'year') : to.subtract(1, 'week');
 
@@ -447,13 +542,15 @@ class MainManager {
     this.store.getState().addLayer(layer);
 
     const drawnShapes = this.store.getState().drawnShapes;
+    const sourceId = this.getSourceId(datasource.id, layer.id);
 
-    const sourceId = await this.addSource(datasource.id, layer, {
+    this.addSource(datasource.id, layer.id);
+    this.addLayer(layer, sourceId);
+    await this.addData(datasource.id, layer, {
       filterFeatures: drawnShapes,
       signal,
       noFetch: collectionType === CollectionType.EDRGrid,
     });
-    this.addLayer(layer, sourceId);
 
     this.reorderLayers();
   }
@@ -509,8 +606,8 @@ class MainManager {
    *
    * @function
    */
-  public getSourceId(collectionId: ICollection['id']): string {
-    return `user-${collectionId}-source`;
+  public getSourceId(collectionId: ICollection['id'], layerId: Layer['id']): string {
+    return `user-${collectionId}-${layerId}-source`;
   }
 
   /**
@@ -615,10 +712,9 @@ class MainManager {
 
     return turf.bbox(featureCollection);
   }
-
-  private async addSource(collectionId: ICollection['id'], layer: Layer, options?: SourceOptions) {
+  private async addData(collectionId: ICollection['id'], layer: Layer, options?: SourceOptions) {
     const datasource = this.getDatasource(collectionId);
-    const sourceId = this.getSourceId(collectionId);
+    const sourceId = this.getSourceId(collectionId, layer.id);
 
     if (datasource) {
       const collectionType = getCollectionType(datasource);
@@ -628,11 +724,91 @@ class MainManager {
           collectionType
         )
       ) {
-        await this.addGeoJsonSource(collectionId, layer, options);
-      } else if (collectionType === CollectionType.Map) {
-        this.addRasterSource(datasource);
+        await this.addGeoJsonData(collectionId, layer, options);
       }
     }
+
+    return sourceId;
+  }
+
+  private addSource(collectionId: ICollection['id'], layerId: Layer['id']) {
+    const datasource = this.getDatasource(collectionId);
+    const sourceId = this.getSourceId(collectionId, layerId);
+
+    if (datasource) {
+      const collectionType = getCollectionType(datasource);
+
+      if (
+        [CollectionType.EDR, CollectionType.Features, CollectionType.EDRGrid].includes(
+          collectionType
+        )
+      ) {
+        this.addGeoJsonSource(collectionId, layerId);
+      } else if (collectionType === CollectionType.Map) {
+        this.addRasterSource(datasource, layerId);
+      }
+    }
+
+    return sourceId;
+  }
+
+  /**
+   * * Adds (or updates) a GeoJSON source and pages through all results,
+   * streaming each page into the source as it arrives.
+   *
+   * @function
+   */
+  private async addGeoJsonData(
+    collectionId: ICollection['id'],
+    layer: Layer,
+    options?: SourceOptions
+  ): Promise<string> {
+    const sourceId = this.getSourceId(collectionId, layer.id);
+
+    if (!this.map) {
+      return sourceId;
+    }
+
+    const source = this.map.getSource(sourceId) as GeoJSONSource | undefined;
+
+    if (options?.noFetch || !source) {
+      return sourceId;
+    }
+
+    const bbox = this.getBBox();
+    const from = options?.from ?? layer.from;
+    const to = options?.to ?? layer.to;
+
+    let aggregate = getDefaultGeoJSON();
+    let next: string | undefined;
+
+    do {
+      if (options?.signal?.aborted) {
+        break;
+      }
+
+      const page = await this.fetchData(
+        collectionId,
+        bbox,
+        from,
+        to,
+        options?.parameterNames,
+        options?.signal,
+        next
+      );
+
+      let filtered = this.filterLocations(page, options?.filterFeatures);
+      this.clearInvalidLocations(layer.id, collectionId, filtered);
+      if (filtered?.features?.length) {
+        aggregate.features.push(...filtered.features);
+        source.setData(aggregate);
+      }
+
+      (filtered as any) = undefined;
+      next = getNextLink(page);
+    } while (next);
+
+    (aggregate as any) = undefined;
 
     return sourceId;
   }
@@ -641,68 +817,33 @@ class MainManager {
    *
    * @function
    */
-  private async addGeoJsonSource(
-    collectionId: ICollection['id'],
-    layer: Layer,
-    options?: SourceOptions
-  ): Promise<string> {
-    const sourceId = this.getSourceId(collectionId);
-    if (this.map) {
-      const source = this.map.getSource(sourceId) as GeoJSONSource;
-      const bbox = this.getBBox();
-      if (!source) {
-        if (options?.noFetch) {
-          this.map.addSource(sourceId, {
-            type: 'geojson',
-            data: getDefaultGeoJSON(),
-          });
+  /**
+   * Adds (or updates) a GeoJSON source and pages through all results,
+   * streaming each page into the source as it arrives.
+   */
+  private addGeoJsonSource(collectionId: ICollection['id'], layerId: Layer['id']): string {
+    const sourceId = this.getSourceId(collectionId, layerId);
 
-          return sourceId;
-        }
+    if (!this.map) {
+      return sourceId;
+    }
 
-        const data = await this.fetchData(
-          collectionId,
-          bbox,
-          options?.from ?? layer.from,
-          options?.to ?? layer.to,
-          options?.parameterNames,
-          options?.signal
-        );
-
-        const filteredData = this.filterLocations(data, options?.filterFeatures);
-
-        this.clearInvalidLocations(layer.id, collectionId, filteredData);
-
-        this.map.addSource(sourceId, {
-          type: 'geojson',
-          data: filteredData,
-        });
-      } else if (source && !options?.noFetch) {
-        const data = await this.fetchData(
-          collectionId,
-          bbox,
-          options?.from ?? layer.from,
-          options?.to ?? layer.to,
-          options?.parameterNames,
-          options?.signal
-        );
-
-        const filteredData = this.filterLocations(data, options?.filterFeatures);
-
-        this.clearInvalidLocations(layer.id, collectionId, filteredData);
-
-        source.setData(filteredData);
-      }
+    const source = this.map.getSource(sourceId) as GeoJSONSource | undefined;
+    if (!source) {
+      this.map.addSource(sourceId, {
+        type: 'geojson',
+        data: getDefaultGeoJSON(),
+      });
     }
 
     return sourceId;
   }
 
-  private addRasterSource(collection: ICollection) {
+  private addRasterSource(collection: ICollection, layerId: Layer['id']) {
     const link = collection.links.find(
       (link) => link.rel.includes('map') && link.type === 'image/png'
     );
-    const sourceId = this.getSourceId(collection.id);
+    const sourceId = this.getSourceId(collection.id, layerId);
     if (link && this.map) {
       const source = this.map.getSource(sourceId) as RasterTileSource;
 
@@ -719,6 +860,7 @@ class MainManager {
       }
     }
   }
+
   private addLayer(layer: Layer, sourceId: string): void {
     const datasource = this.getDatasource(layer.datasourceId);
 
@@ -730,7 +872,7 @@ class MainManager {
           collectionType
         )
       ) {
-        this.addStandardLayer(layer, sourceId);
+        this.addStandardLayer(layer, sourceId, collectionType);
       } else if (collectionType === CollectionType.Map) {
         this.addRasterLayer(layer, sourceId);
       }
@@ -745,11 +887,87 @@ class MainManager {
     }
   }
 
+  private getLabels(collectionType: CollectionType): {
+    upperLabel: string;
+    lowerLabel: string;
+  } {
+    switch (collectionType) {
+      case CollectionType.EDR:
+        return {
+          upperLabel: 'Location',
+          lowerLabel: 'location',
+        };
+      case CollectionType.EDRGrid:
+        return {
+          upperLabel: 'Grid',
+          lowerLabel: 'grid',
+        };
+
+      case CollectionType.Features:
+      default:
+        return {
+          upperLabel: 'Item',
+          lowerLabel: 'item',
+        };
+    }
+  }
+
+  private getClickEventHandler(mapLayerId: string, layerId: string): (e: MapMouseEvent) => void {
+    return (e) => {
+      e.originalEvent.preventDefault();
+
+      const features = this.map!.queryRenderedFeatures(e.point, {
+        layers: [mapLayerId],
+      });
+      if (features.length > 0) {
+        const uniqueFeatures = this.getUniqueIds(features);
+        uniqueFeatures.forEach((locationId) => {
+          if (this.hasLocation(locationId)) {
+            this.store.getState().removeLocation({
+              id: locationId,
+              layerId,
+            });
+          } else {
+            this.store.getState().addLocation({
+              id: locationId,
+              layerId,
+            });
+          }
+        });
+      }
+    };
+  }
+
+  private getHoverEventHandler(
+    name: string,
+    upperLabel: string,
+    lowerLabel: string
+  ): (e: MapMouseEvent) => void {
+    return (e) => {
+      this.map!.getCanvas().style.cursor = 'pointer';
+      const { features } = e;
+      if (features && features.length > 0) {
+        const uniqueFeatures = this.getUniqueIds(features);
+        const html = `
+            <span style="color:black;">
+              <strong>${name}</strong><br/>
+              ${uniqueFeatures.map((locationId) => `<strong>${upperLabel} Id: </strong>${locationId}`).join('<br/>')}
+              <div style="margin-top: 16px;display:flex;flex-direction:column;justify-content:center;align-items:center">
+                <p style="margin: 0;">Click to select the ${lowerLabel}.</p>
+                <p style="margin: 0;">Double-click to preview.</p>
+              </div>
+            </span>
+          `;
+        this.hoverPopup!.setLngLat(e.lngLat).setHTML(html).addTo(this.map!);
+      }
+    };
+  }
+
   /**
    *
    * @function
    */
-  private addStandardLayer(layer: Layer, sourceId: string): void {
+  private addStandardLayer(layer: Layer, sourceId: string, collectionType: CollectionType): void {
     const geographyFilter = this.store.getState().geographyFilter;
 
     const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
@@ -762,126 +980,28 @@ class MainManager {
         !this.map.getLayer(lineLayerId) &&
         !this.map.getLayer(pointLayerId)
       ) {
+        const { upperLabel, lowerLabel } = this.getLabels(collectionType);
+
         this.map.addLayer(getFillLayerDefinition(fillLayerId, sourceId, layer.color));
         this.map.addLayer(getLineLayerDefinition(lineLayerId, sourceId, layer.color));
         this.map.addLayer(getPointLayerDefinition(pointLayerId, sourceId, layer.color));
 
-        this.map.on('click', pointLayerId, (e) => {
-          e.originalEvent.preventDefault();
+        this.map.on('click', pointLayerId, this.getClickEventHandler(pointLayerId, layer.id));
 
-          const features = this.map!.queryRenderedFeatures(e.point, {
-            layers: [pointLayerId],
-          });
-          if (features.length > 0) {
-            const uniqueFeatures = this.getUniqueIds(features);
-            uniqueFeatures.forEach((locationId) => {
-              if (this.hasLocation(locationId)) {
-                this.store.getState().removeLocation({
-                  id: locationId,
-                  layerId: layer.id,
-                });
-              } else {
-                this.store.getState().addLocation({
-                  id: locationId,
-                  layerId: layer.id,
-                });
-              }
-            });
-          }
-        });
+        this.map.on('click', fillLayerId, this.getClickEventHandler(fillLayerId, layer.id));
 
-        this.map.on('click', fillLayerId, (e) => {
-          if (!e.originalEvent.defaultPrevented) {
-            e.originalEvent.preventDefault();
+        this.map.on('click', lineLayerId, this.getClickEventHandler(lineLayerId, layer.id));
 
-            const features = this.map!.queryRenderedFeatures(e.point, {
-              layers: [fillLayerId],
-            });
-            if (features.length > 0) {
-              const uniqueFeatures = this.getUniqueIds(features);
-              uniqueFeatures.forEach((locationId) => {
-                if (this.hasLocation(locationId)) {
-                  this.store.getState().removeLocation({
-                    id: locationId,
-                    layerId: layer.id,
-                  });
-                } else {
-                  this.store.getState().addLocation({
-                    id: locationId,
-                    layerId: layer.id,
-                  });
-                }
-              });
-            }
-          }
-        });
-
-        this.map.on('click', lineLayerId, (e) => {
-          if (!e.originalEvent.defaultPrevented) {
-            e.originalEvent.preventDefault();
-
-            const features = this.map!.queryRenderedFeatures(e.point, {
-              layers: [lineLayerId],
-            });
-            if (features.length > 0) {
-              const uniqueFeatures = this.getUniqueIds(features);
-              uniqueFeatures.forEach((locationId) => {
-                if (this.hasLocation(locationId)) {
-                  this.store.getState().removeLocation({
-                    id: locationId,
-                    layerId: layer.id,
-                  });
-                } else {
-                  this.store.getState().addLocation({
-                    id: locationId,
-                    layerId: layer.id,
-                  });
-                }
-              });
-            }
-          }
-        });
-
-        this.map.on('mouseenter', [pointLayerId, fillLayerId, lineLayerId], (e) => {
-          this.map!.getCanvas().style.cursor = 'pointer';
-          const { features } = e;
-          if (features && features.length > 0) {
-            const uniqueFeatures = this.getUniqueIds(features);
-            if (layer) {
-              const html = `
-                <span style="color:black;">
-                  <strong>${layer.name}</strong><br/>
-                  ${uniqueFeatures.map((locationId) => `<strong>Location Id: </strong>${locationId}`).join('<br/>')}
-                  <div style="margin-top: 16px;display:flex;flex-direction:column;justify-content:center;align-items:center">
-                    <p style="margin: 0;">Click to select the location.</p>
-                    <p style="margin: 0;">Double-click to preview.</p>
-                  </div>
-                </span>
-              `;
-              this.hoverPopup!.setLngLat(e.lngLat).setHTML(html).addTo(this.map!);
-            }
-          }
-        });
-        this.map.on('mousemove', [pointLayerId, fillLayerId, lineLayerId], (e) => {
-          this.map!.getCanvas().style.cursor = 'pointer';
-          const { features } = e;
-          if (features && features.length > 0) {
-            const uniqueFeatures = this.getUniqueIds(features);
-            if (layer) {
-              const html = `
-                <span style="color:black;">
-                  <strong>${layer.name}</strong><br/>
-                  ${uniqueFeatures.map((locationId) => `<strong>Location Id: </strong>${locationId}`).join('<br/>')}
-                  <div style="margin-top: 16px;display:flex;flex-direction:column;justify-content:center;align-items:center">
-                    <p style="margin: 0;">Click to select the location.</p>
-                    <p style="margin: 0;">Double-click to preview.</p>
-                  </div>
-                </span>
-              `;
-              this.hoverPopup!.setLngLat(e.lngLat).setHTML(html).addTo(this.map!);
-            }
-          }
-        });
+        this.map.on(
+          'mouseenter',
+          [pointLayerId, fillLayerId, lineLayerId],
+          this.getHoverEventHandler(layer.name, upperLabel, lowerLabel)
+        );
+        this.map.on(
+          'mousemove',
+          [pointLayerId, fillLayerId, lineLayerId],
+          this.getHoverEventHandler(layer.name, upperLabel, lowerLabel)
+        );
         this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
           this.map!.getCanvas().style.cursor = '';
           this.hoverPopup!.remove();
@@ -902,7 +1022,7 @@ class MainManager {
    */
   public async getFeatures(layer: Layer, signal: AbortSignal): Promise<FeatureCollection> {
     try {
-      const sourceId = this.getSourceId(layer.datasourceId);
+      const sourceId = this.getSourceId(layer.datasourceId, layer.id);
 
       const source = this.map?.getSource(sourceId) as GeoJSONSource;
 
@@ -945,7 +1065,7 @@ class MainManager {
       await Promise.all(
         chunk.map(async (layer) => {
           const collectionId = layer.datasourceId;
-          return await this.addSource(collectionId, layer, {
+          return await this.addData(collectionId, layer, {
             filterFeatures: drawnShapes,
           });
         })
@@ -1009,11 +1129,13 @@ class MainManager {
       }
     }
 
-    if (!this.compareArrays(layer.parameters, parameters)) {
+    if (!compareArrays(layer.parameters, parameters)) {
       const drawnShapes = this.store.getState().drawnShapes;
-      await this.addSource(layer.datasourceId, layer, {
+      await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
+        from,
+        to,
       });
     }
 
@@ -1021,7 +1143,7 @@ class MainManager {
     const drawnShapes = this.store.getState().drawnShapes;
 
     if (datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to)) {
-      await this.addSource(layer.datasourceId, layer, {
+      await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
         from,
@@ -1091,11 +1213,15 @@ class MainManager {
     }
 
     const originalCollections = this.store.getState().originalCollections;
+    const layers = this.store.getState().layers;
 
     for (const collection of originalCollections) {
-      const sourceId = this.getSourceId(collection.id);
-      if (this.map.getSource(sourceId)) {
-        this.map.removeSource(sourceId);
+      const collectionLayers = layers.filter((layer) => layer.datasourceId === collection.id);
+      for (const layer of collectionLayers) {
+        const sourceId = this.getSourceId(collection.id, layer.id);
+        if (this.map.getSource(sourceId)) {
+          this.map.removeSource(sourceId);
+        }
       }
     }
   }

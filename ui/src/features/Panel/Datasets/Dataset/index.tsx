@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Anchor, Divider, Group, List, ListItem, Stack, Text } from '@mantine/core';
 import Button from '@/components/Button';
 import TextInput from '@/components/TextInput';
@@ -24,18 +24,25 @@ const Dataset: React.FC<Props> = (props) => {
   const [search, setSearch] = useState('');
   const [show, setShow] = useState(5);
 
-  const [link, setLink] = useState('');
+  const [datasetLink, setDatasetLink] = useState('');
+  const [sourceLink, setSourceLink] = useState('');
+  const [documentationLink, setDocumentationLink] = useState('');
 
   useEffect(() => {
     const parameters = getParameterList(dataset, -1).sort();
     setParameters(parameters);
     setFilteredParameters(parameters);
 
-    const link =
+    const datasetLink =
       dataset.links.find((link) => link.rel === 'alternate' && link.type === 'text/html')?.href ??
       '';
+    const sourceLink = dataset.links.find((link) => link.rel === 'canonical')?.href ?? '';
+    const documentationLink =
+      dataset.links.find((link) => link.rel === 'documentation')?.href ?? '';
 
-    setLink(link);
+    setDatasetLink(datasetLink);
+    setSourceLink(sourceLink);
+    setDocumentationLink(documentationLink);
   }, [dataset]);
 
   useEffect(() => {
@@ -62,6 +69,16 @@ const Dataset: React.FC<Props> = (props) => {
       </Text>
     </>
   );
+
+  const links = [
+    { label: 'API', href: datasetLink, title: 'This dataset in the API' },
+    { label: 'Source', href: sourceLink, title: 'Original source of pre-transformed data' },
+    {
+      label: 'Methodology',
+      href: documentationLink,
+      title: 'The methodology of the original source data',
+    },
+  ].filter((link) => link.href?.length > 0);
 
   return (
     <Stack gap="xs" className={styles.accordionContent}>
@@ -120,11 +137,16 @@ const Dataset: React.FC<Props> = (props) => {
         </>
       )}
 
-      {link.length > 0 && (
-        <Anchor target="_blank" href={link} mt="md">
-          API
-        </Anchor>
-      )}
+      <Group align="center" mt={8} gap={4}>
+        {links.map(({ label, href, title }, index) => (
+          <Fragment key={`${dataset.id}-link-${label}`}>
+            {index > 0 && <Divider orientation="vertical" />}
+            <Anchor target="_blank" href={href} title={title}>
+              {label}
+            </Anchor>
+          </Fragment>
+        ))}
+      </Group>
     </Stack>
   );
 };

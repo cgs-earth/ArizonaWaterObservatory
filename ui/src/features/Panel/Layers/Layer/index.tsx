@@ -25,6 +25,7 @@ import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
+import { getTemporalExtent } from '@/utils/temporalExtent';
 
 dayjs.extend(isSameOrBefore);
 
@@ -39,7 +40,9 @@ const Layer: React.FC<Props> = (props) => {
   const [color, setColor] = useState(layer.color);
   const [parameters, setParameters] = useState(layer.parameters);
   const [from, setFrom] = useState<string | null>(layer.from);
+  const [minDate, setMinDate] = useState<string>();
   const [to, setTo] = useState<string | null>(layer.to);
+  const [maxDate, setMaxDate] = useState<string>();
   const [opacity, setOpacity] = useState(layer.opacity);
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
@@ -58,6 +61,19 @@ const Layer: React.FC<Props> = (props) => {
     if (collection) {
       const collectionType = getCollectionType(collection);
       setCollectionType(collectionType);
+
+      const temporalExtent = getTemporalExtent(collection);
+
+      if (temporalExtent) {
+        const { min, max } = temporalExtent;
+
+        if (min) {
+          setMinDate(min);
+        }
+        if (max) {
+          setMaxDate(max);
+        }
+      }
 
       const paramObjects = Object.values(collection?.parameter_names ?? {});
 
@@ -169,6 +185,8 @@ const Layer: React.FC<Props> = (props) => {
               placeholder="Pick start date"
               value={from}
               onChange={setFrom}
+              minDate={minDate}
+              maxDate={maxDate}
               simplePresets={[
                 DatePreset.Today,
                 DatePreset.OneYear,
@@ -187,6 +205,8 @@ const Layer: React.FC<Props> = (props) => {
               placeholder="Pick end date"
               value={to}
               onChange={setTo}
+              minDate={minDate}
+              maxDate={maxDate}
               simplePresets={[
                 DatePreset.Today,
                 DatePreset.OneYear,
