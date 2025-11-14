@@ -34,11 +34,13 @@ const Info: React.FC = () => {
 
   // local state to trigger render cycle
   const [showHelp, setShowHelp] = useState(false);
+  // const onLoad = useRef(true)
 
   useEffect(() => {
     if (overlay !== Overlay.Info) {
       close();
     } else {
+      console.log('ITS ME');
       open();
     }
   }, [overlay]);
@@ -46,6 +48,7 @@ const Info: React.FC = () => {
   useEffect(() => {
     const showHelp = localStorage.getItem(INFO_LOCAL_KEY);
     if (!showHelp || showHelp === 'true') {
+      console.log('ITS ME');
       setOverlay(Overlay.Info);
       setShowHelp(true);
     } else if (showHelp === 'false') {

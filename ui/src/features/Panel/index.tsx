@@ -55,7 +55,7 @@ const Panel: React.FC = () => {
 
   return (
     <>
-      {!opened && (
+      {mobile && (
         <IconButton
           size="lg"
           variant={Variant.Secondary}
