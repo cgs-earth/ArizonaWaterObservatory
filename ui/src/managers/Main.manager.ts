@@ -17,6 +17,7 @@ import {
 } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
+import { CollectionRestrictions } from '@/consts/collections';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import {
   DEFAULT_BBOX,
@@ -383,7 +384,7 @@ class MainManager {
     switch (collectionType) {
       case CollectionType.EDR:
       case CollectionType.Features:
-        return await this.fetchItems(collectionId, parameterNames, signal, next);
+        return await this.fetchItems(collectionId, parameterNames, bbox, signal, next);
       case CollectionType.EDRGrid:
         if (!bbox) {
           throw new Error('No BBox provided for Grid layer');
@@ -420,6 +421,7 @@ class MainManager {
   private async fetchItems(
     collectionId: ICollection['id'],
     parameterNames?: string[],
+    bbox?: BBox,
     signal?: AbortSignal,
     next?: string
   ): Promise<ExtendedFeatureCollection> {
@@ -429,7 +431,7 @@ class MainManager {
         signal,
         params: {
           limit: 2000,
-          bbox: DEFAULT_BBOX,
+          bbox,
           ...(parameterNames && parameterNames.length > 0
             ? { 'parameter-name': parameterNames.join(',') }
             : {}),
@@ -499,6 +501,21 @@ class MainManager {
     return dayjs();
   }
 
+  private getFrom(
+    datasourceId: ICollection['id'],
+    collectionType: CollectionType,
+    to: dayjs.Dayjs
+  ) {
+    const restriction = CollectionRestrictions[datasourceId];
+    if (restriction && restriction.days) {
+      return to.subtract(restriction.days, 'day');
+    }
+
+    return collectionType === CollectionType.EDRGrid
+      ? to.subtract(1, 'year')
+      : to.subtract(1, 'week');
+  }
+
   public async createLayer(datasourceId: ICollection['id'], signal?: AbortSignal) {
     const datasource = this.getDatasource(datasourceId);
 
@@ -521,8 +538,7 @@ class MainManager {
     }
 
     const to = this.getTo(datasource);
-    const from =
-      collectionType === CollectionType.EDRGrid ? to.subtract(1, 'year') : to.subtract(1, 'week');
+    const from = this.getFrom(datasourceId, collectionType, to);
 
     const layer: Layer = {
       id: this.createUUID(),
@@ -701,17 +717,86 @@ class MainManager {
     return featureCollection;
   }
 
-  private getBBox(): BBox {
+  private checkDateRestrictions(
+    collectionId: ICollection['id'],
+    from: Layer['from'],
+    to: Layer['to']
+  ) {
+    const restriction = CollectionRestrictions[collectionId];
+
+    if (restriction && restriction.days) {
+      const datasource = this.getDatasource(collectionId);
+      if (!from || !to) {
+        throw new Error(
+          `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${restriction.days} days.`
+        );
+      }
+      const diff = dayjs(to).diff(dayjs(from), 'days');
+
+      if (diff > restriction.days) {
+        throw new Error(
+          `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${restriction.days}. Current date range is ${diff - restriction.days} days too long.`
+        );
+      }
+    }
+  }
+
+  private checkCollectionBBoxRestrictions(collectionId: ICollection['id'], area: number) {
+    const restriction = CollectionRestrictions[collectionId];
+
+    if (restriction && restriction.size && area > restriction.size) {
+      const datasource = this.getDatasource(collectionId);
+      const factor = area / restriction.size;
+      throw new Error(
+        `Target area ${factor.toFixed(2)}x too large for instance of dataset: ${datasource?.title}.\n ${restriction.message}`
+      );
+    }
+  }
+
+  private validateBBox(bbox: BBox, collectionId: ICollection['id']) {
+    const userBBox = turf.bboxPolygon(bbox);
+    const AZBBox = turf.bboxPolygon(DEFAULT_BBOX);
+
+    const userBBoxArea = turf.area(userBBox);
+    const AZBBoxArea = turf.area(AZBBox);
+
+    // Valid bbox should touch the AZ bbox, not contain it fully, and be smaller than the size limit
+    // Certain collections have additional size restrictions due to large datasets
+    // Throw errors to stop process and provide feedback to user
+    this.checkCollectionBBoxRestrictions(collectionId, userBBoxArea);
+
+    const intersectsAZ = turf.booleanIntersects(userBBox, AZBBox);
+    const containsAZ = turf.booleanContains(userBBox, AZBBox);
+    const smaller = userBBoxArea <= AZBBoxArea;
+
+    if (!intersectsAZ) {
+      throw new Error('Target area not connected to Arizona.');
+    }
+    if (containsAZ) {
+      throw new Error('Target area can not contain Arizona.');
+    }
+    if (!smaller) {
+      throw new Error('Target area must be smaller than Arizona.');
+    }
+  }
+
+  private getBBox(collectionId: ICollection['id']): BBox {
     const drawnShapes = this.store.getState().drawnShapes;
 
     if (drawnShapes.length === 0) {
+      this.checkCollectionBBoxRestrictions(collectionId, turf.area(turf.bboxPolygon(DEFAULT_BBOX)));
       return DEFAULT_BBOX;
     }
 
     const featureCollection = turf.featureCollection(drawnShapes);
 
-    return turf.bbox(featureCollection);
+    const userBBox = turf.bbox(featureCollection);
+
+    this.validateBBox(userBBox, collectionId);
+
+    return userBBox;
   }
+
   private async addData(collectionId: ICollection['id'], layer: Layer, options?: SourceOptions) {
     const datasource = this.getDatasource(collectionId);
     const sourceId = this.getSourceId(collectionId, layer.id);
@@ -775,9 +860,11 @@ class MainManager {
       return sourceId;
     }
 
-    const bbox = this.getBBox();
+    const bbox = this.getBBox(collectionId);
     const from = options?.from ?? layer.from;
     const to = options?.to ?? layer.to;
+
+    this.checkDateRestrictions(collectionId, from, to);
 
     let aggregate = getDefaultGeoJSON();
     let next: string | undefined;
@@ -1038,7 +1125,7 @@ class MainManager {
       console.error(error);
     }
 
-    const bbox = this.getBBox();
+    const bbox = this.getBBox(layer.datasourceId);
 
     const data = await this.fetchData(
       layer.datasourceId,

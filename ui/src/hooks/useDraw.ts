@@ -114,6 +114,7 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
 
     map.on('draw.create', (e: DrawCreateEvent) => {
       const feature = e.features[0] as Feature<Polygon | MultiPolygon>;
+
       combineFeatures(feature);
     });
 
