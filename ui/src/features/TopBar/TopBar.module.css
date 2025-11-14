@@ -102,3 +102,18 @@
   padding: var(--default-spacing);
   border-radius: var(--popover-radius, var(--mantine-radius-default));
 }
+
+.mobileWrapper {
+  display: none;
+  margin-top: calc(var(--default-spacing) * 2);
+}
+
+@media screen and (max-width: 899px) {
+  .topBarWrapper {
+    display: none;
+  }
+
+  .mobileWrapper {
+    display: flex;
+  }
+}

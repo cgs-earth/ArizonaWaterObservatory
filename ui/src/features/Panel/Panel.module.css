@@ -16,6 +16,7 @@
   max-height: 100%;
 
   overflow: hidden;
+  z-index: 201;
 }
 
 .panelCollapse {
@@ -107,7 +108,30 @@
   width: calc(50% - var(--default-spacing));
 }
 
+.mobileClose {
+  position: absolute;
+  right: var(--default-spacing);
+  top: var(--default-spacing);
+  margin-left: unset;
+  margin-right: unset;
+  display: none;
+}
+
+.mobileOpen {
+  position: absolute;
+  left: var(--default-spacing);
+  top: var(--default-spacing);
+  margin-left: unset;
+  margin-right: unset;
+  display: none;
+}
+
 @media screen and (max-width: 899px) {
+  .mobileClose,
+  .mobileOpen {
+    display: block;
+  }
+
   .toggleButton {
     display: none;
   }
@@ -121,9 +145,25 @@
     max-width: unset;
   }
 
+  .panelContent {
+    position: absolute;
+    height: 90vh;
+    min-height: 90vh;
+    max-height: 90vh;
+    width: 95vw;
+    min-width: 95vw;
+    max-width: 95vw;
+    top: 5vh;
+    left: 2.5vw;
+    margin: auto;
+    padding: 16px;
+    background: white;
+    z-index: 3;
+    border-radius: 4px;
+  }
+
   .panelWrapper {
     height: unset;
     max-height: unset;
-    min-width: 100%;
   }
 }
