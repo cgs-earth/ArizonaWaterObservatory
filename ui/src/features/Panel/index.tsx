@@ -22,9 +22,9 @@ import { LoadingType, NotificationType } from '@/stores/session/types';
 import { Mobile } from '../TopBar/Mobile';
 
 const Panel: React.FC = () => {
-  const [opened, { toggle, open, close }] = useDisclosure(true);
-
   const mobile = useMediaQuery('(max-width: 899px)');
+
+  const [opened, { toggle, open, close }] = useDisclosure(false);
 
   const getCollections = async () => {
     const loadingInstance = loadingManager.add('Updating collections', LoadingType.Collections);
@@ -46,30 +46,26 @@ const Panel: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 899) {
-        open();
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [open]);
+    if (mobile) {
+      close();
+    } else {
+      open();
+    }
+  }, [mobile, open, close]);
 
   return (
     <>
+      {!opened && (
+        <IconButton
+          size="lg"
+          variant={Variant.Secondary}
+          className={styles.mobileOpen}
+          onClick={open}
+        >
+          <Menu />
+        </IconButton>
+      )}
       <Box className={styles.panelWrapper}>
-        {!opened && (
-          <IconButton
-            size="lg"
-            variant={Variant.Secondary}
-            className={styles.mobileOpen}
-            onClick={open}
-          >
-            <Menu />
-          </IconButton>
-        )}
         <Group gap={0} align="flex-start" className={styles.panelGroup} wrap="nowrap">
           <Collapse
             in={opened}

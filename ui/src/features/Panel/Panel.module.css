@@ -16,7 +16,6 @@
   max-height: 100%;
 
   overflow: hidden;
-  z-index: 201;
 }
 
 .panelCollapse {
@@ -124,6 +123,7 @@
   margin-left: unset;
   margin-right: unset;
   display: none;
+  z-index: 1;
 }
 
 @media screen and (max-width: 899px) {
@@ -165,5 +165,6 @@
   .panelWrapper {
     height: unset;
     max-height: unset;
+    z-index: 201;
   }
 }
