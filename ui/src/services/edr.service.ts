@@ -435,9 +435,10 @@ export class EDRService extends Service {
    */
   async getItems<T extends JSON | GeoJSON | string = GeoJSON>(
     collectionId: string,
-    options: IServiceRequestOptions<IGetCollectionsParams> = DEFAULT_OPTIONS
+    options: IServiceRequestOptions<IGetCollectionsParams> = DEFAULT_OPTIONS,
+    next?: string
   ): Promise<T> {
-    const url: string = `${this.baseUrl}/collections/${collectionId}/items`;
+    const url: string = next ?? `${this.baseUrl}/collections/${collectionId}/items`;
     const params = { ...options.params };
     const result: T = await request({
       url,
@@ -806,7 +807,7 @@ export interface IExtentTemporal {
   /**
    *
    */
-  interval: [string, string][];
+  interval: [string | null, string | null][];
 
   /**
    *
