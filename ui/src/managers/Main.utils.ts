@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExtendedFeatureCollection } from './types';
+import { ExtendedFeatureCollection } from '@/managers/types';
 
 export const getNextLink = (featureCollection: ExtendedFeatureCollection): string | undefined => {
   if (!featureCollection?.links?.length) {

@@ -17,7 +17,6 @@ export const WARNING_KEY = 'awo-warning-modal';
 
 export const Warning: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
-    onOpen: () => setOverlay(Overlay.Warning),
     onClose: () => {
       setOverlay(null);
     },

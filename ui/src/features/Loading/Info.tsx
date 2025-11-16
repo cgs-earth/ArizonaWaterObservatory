@@ -18,19 +18,15 @@ import styles from '@/features/Loading/Loading.module.css';
 
 type Props = {
   loadingTexts: string[];
-  desktop: boolean;
 };
 
 export const Info: React.FC<PropsWithChildren<Props>> = (props) => {
-  const { loadingTexts, desktop, children } = props;
+  const { loadingTexts, children } = props;
 
   return (
     <HoverCard width={300} shadow="md" position="top" withArrow>
       <HoverCardTarget>
-        <Box
-          w="100%"
-          className={`${styles.loadingBar} ${desktop ? styles.desktop : styles.mobile}`}
-        >
+        <Box w="100%" className={styles.loadingBar}>
           {children}
         </Box>
       </HoverCardTarget>

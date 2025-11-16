@@ -76,3 +76,21 @@
   border-radius: unset;
   box-shadow: 0px 2px 2px #00000040;
 }
+
+.mobileWrapper {
+  position: absolute;
+  right: var(--default-spacing);
+  top: var(--default-spacing);
+  width: 84px;
+  display: none;
+}
+
+@media screen and (max-width: 899px) {
+  .mobileWrapper {
+    display: block;
+  }
+
+  .geocoderWrapper {
+    min-width: calc(100vw - (var(--default-spacing) * 2));
+  }
+}

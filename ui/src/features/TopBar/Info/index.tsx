@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Stack, Tabs, Text, Tooltip } from '@mantine/core';
+import { Tabs, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import InfoSimple from '@/assets/InfoSimple';
 import IconButton from '@/components/IconButton';
@@ -21,7 +21,6 @@ export const INFO_LOCAL_KEY = 'awo-show-info';
 
 const Info: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
-    onOpen: () => setOverlay(Overlay.Info),
     onClose: () => {
       setOverlay(null);
     },
@@ -34,11 +33,12 @@ const Info: React.FC = () => {
 
   // local state to trigger render cycle
   const [showHelp, setShowHelp] = useState(false);
+  // const onLoad = useRef(true)
 
   useEffect(() => {
     if (overlay !== Overlay.Info) {
       close();
-    } else {
+    } else if (!opened) {
       open();
     }
   }, [overlay]);
@@ -69,41 +69,39 @@ const Info: React.FC = () => {
         </IconButton>
       </Tooltip>
       <Modal size="xl" opened={opened} onClose={close}>
-        <Stack className={styles.modalBody} align="center">
-          <Tabs
-            value={helpTab}
-            className={styles.tabs}
-            onChange={(tab) => setHelpTab(tab as HelpTab)}
-          >
-            <Tabs.List grow className={styles.tabList}>
-              <Tabs.Tab value={HelpTab.About}>
-                <Text size="lg" fw={700}>
-                  About
-                </Text>
-              </Tabs.Tab>
-              <Tabs.Tab value={HelpTab.Glossary}>
-                <Text size="lg" fw={700}>
-                  Glossary
-                </Text>
-              </Tabs.Tab>
-              <Tabs.Tab value={HelpTab.FAQ}>
-                <Text size="lg" fw={700}>
-                  Frequently Asked Questions
-                </Text>
-              </Tabs.Tab>
-            </Tabs.List>
+        <Tabs
+          value={helpTab}
+          className={`${styles.modalBody} ${styles.tabs}`}
+          onChange={(tab) => setHelpTab(tab as HelpTab)}
+        >
+          <Tabs.List grow className={styles.tabsList}>
+            <Tabs.Tab value={HelpTab.About}>
+              <Text size="lg" fw={700}>
+                About
+              </Text>
+            </Tabs.Tab>
+            <Tabs.Tab value={HelpTab.Glossary}>
+              <Text size="lg" fw={700}>
+                Glossary
+              </Text>
+            </Tabs.Tab>
+            <Tabs.Tab value={HelpTab.FAQ}>
+              <Text size="lg" fw={700}>
+                Frequently Asked Questions
+              </Text>
+            </Tabs.Tab>
+          </Tabs.List>
 
-            <Tabs.Panel value={HelpTab.About}>
-              <About showHelp={showHelp} />
-            </Tabs.Panel>
-            <Tabs.Panel value={HelpTab.Glossary}>
-              <Glossary />
-            </Tabs.Panel>
-            <Tabs.Panel value={HelpTab.FAQ}>
-              <FAQ />
-            </Tabs.Panel>
-          </Tabs>
-        </Stack>
+          <Tabs.Panel value={HelpTab.About}>
+            <About showHelp={showHelp} />
+          </Tabs.Panel>
+          <Tabs.Panel value={HelpTab.Glossary}>
+            <Glossary />
+          </Tabs.Panel>
+          <Tabs.Panel value={HelpTab.FAQ}>
+            <FAQ />
+          </Tabs.Panel>
+        </Tabs>
       </Modal>
     </>
   );
