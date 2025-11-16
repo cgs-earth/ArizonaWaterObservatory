@@ -33,7 +33,7 @@ export const Download: React.FC<Props> = (props) => {
   };
 
   return (
-    <Box p={8}>
+    <Box p="var(--default-spacing)">
       <Popover
         opened={show}
         onChange={setShow}
@@ -58,7 +58,7 @@ export const Download: React.FC<Props> = (props) => {
             <Text size="sm" fw={700}>
               Download Formats
             </Text>
-            <Group mt={8}>
+            <Group mt="var(--default-spacing)">
               <Button size="xs" variant={Variant.Primary} onClick={() => handleDownload('kml')}>
                 KML
               </Button>

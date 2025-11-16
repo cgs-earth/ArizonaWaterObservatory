@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { Box, Divider, Stack, Title, Tooltip } from '@mantine/core';
 import LegendIcon from '@/assets/Legend';
 import IconButton from '@/components/IconButton';
@@ -26,6 +26,8 @@ const Legend: React.FC = () => {
 
   const overlay = useSessionStore((state) => state.overlay);
   const setOverlay = useSessionStore((state) => state.setOverlay);
+
+  const firstLayer = useRef(true);
 
   const [show, setShow] = useState(false);
 
@@ -103,6 +105,14 @@ const Legend: React.FC = () => {
   }, [overlay]);
 
   useEffect(() => {
+    if (firstLayer.current && layers.length > 0) {
+      firstLayer.current = false;
+      setShow(true);
+      setOverlay(Overlay.Legend);
+    }
+  }, [layers]);
+
+  useEffect(() => {
     if (overlay === Overlay.Legend && layers.length === 0) {
       setOverlay(null);
     }
@@ -115,6 +125,7 @@ const Legend: React.FC = () => {
       onChange={setShow}
       closeOnClickOutside={false}
       classNames={{ dropdown: styles.legendContent }}
+      position="bottom-start"
       target={
         <Tooltip
           label={layers.length > 0 ? 'View map legend.' : 'No layers added to legend.'}
@@ -131,7 +142,10 @@ const Legend: React.FC = () => {
         </Tooltip>
       }
       content={
-        <Stack gap={8} className={`${styles.container} ${styles.legendWrapper}`}>
+        <Stack
+          gap="var(--default-spacing)"
+          className={`${styles.container} ${styles.legendWrapper}`}
+        >
           <Title order={5} size="h3" className={styles.legendTitle}>
             Legend
           </Title>

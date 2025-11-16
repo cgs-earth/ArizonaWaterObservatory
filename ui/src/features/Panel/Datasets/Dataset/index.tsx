@@ -137,7 +137,7 @@ const Dataset: React.FC<Props> = (props) => {
         </>
       )}
 
-      <Group align="center" mt={8} gap={4}>
+      <Group align="center" mt="var(--default-spacing)" gap="calc(var(--default-spacing) / 2)">
         {links.map(({ label, href, title }, index) => (
           <Fragment key={`${dataset.id}-link-${label}`}>
             {index > 0 && <Divider orientation="vertical" />}

@@ -31,7 +31,7 @@ export const Control: React.FC<Props> = (props) => {
   const disableDown = layer.position === length;
 
   return (
-    <Stack gap={4} my={8}>
+    <Stack gap="calc(var(--default-spacing) / 2)" my="var(--default-spacing)">
       <Tooltip
         label={
           disableUp

@@ -63,8 +63,13 @@ export const Location: React.FC<Props> = (props) => {
       <Box style={{ display: tab === 'table' ? 'block' : 'none' }} className={styles.tableWrapper}>
         {feature && <Table size="xs" properties={feature.properties} />}
       </Box>
-      <Group justify="space-between" align="flex-end" mt={8} mb={8}>
-        <Group gap={8} align="flex-end">
+      <Group
+        justify="space-between"
+        align="flex-end"
+        mt="var(--default-spacing)"
+        mb="var(--default-spacing)"
+      >
+        <Group gap="var(--default-spacing)" align="flex-end">
           {locations.length > 1 && (
             <Select
               className={styles.locationsDropdown}

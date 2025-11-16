@@ -39,7 +39,7 @@ const Filter: React.FC = () => {
 
   return (
     <>
-      <Stack gap={8} className={styles.filterBody}>
+      <Stack gap="var(--default-spacing)" className={styles.filterBody}>
         {!provider && !category && !collection && <Text ta="center">No filters selected</Text>}
         {provider && (
           <>
