@@ -23,7 +23,7 @@ import { LoadingType, NotificationType } from '@/stores/session/types';
 import { ClearAll } from './ClearAll';
 
 const Panel: React.FC = () => {
-  const mobile = useMediaQuery('(max-width: var(--mobile-width))');
+  const mobile = useMediaQuery('(max-width: 899px)');
 
   const [opened, { toggle, open, close }] = useDisclosure(true);
 

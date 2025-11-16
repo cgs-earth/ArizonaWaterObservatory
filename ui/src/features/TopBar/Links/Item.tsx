@@ -71,7 +71,7 @@ export const Item = forwardRef<HTMLDivElement, Props>((props, ref) => {
         <CopyInput size="xs" className={styles.copyInput} url={url} />
         <Code size="xs" code={code} />
         <Group justify="space-between" align="flex-end">
-          <Group gap={8}>
+          <Group gap="var(--default-spacing)">
             <Button
               size="xs"
               variant={openedProps ? Variant.Selected : Variant.Secondary}
@@ -91,7 +91,7 @@ export const Item = forwardRef<HTMLDivElement, Props>((props, ref) => {
           </Group>
         </Group>
         <Stack>
-          <Group align="flex-start" gap={16} grow>
+          <Group align="flex-start" gap="calc(var(--default-spacing) * 2)" grow>
             {openedProps && (
               <Collapse in={openedProps}>
                 <Table properties={location.properties} search />

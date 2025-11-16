@@ -141,7 +141,10 @@ const Legend: React.FC = () => {
         </Tooltip>
       }
       content={
-        <Stack gap={8} className={`${styles.container} ${styles.legendWrapper}`}>
+        <Stack
+          gap="var(--default-spacing)"
+          className={`${styles.container} ${styles.legendWrapper}`}
+        >
           <Title order={5} size="h3" className={styles.legendTitle}>
             Legend
           </Title>

@@ -8,7 +8,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import styles from '@/features/Panel/Panel.module.css';
 
 export const Header: React.FC = () => {
-  const mobile = useMediaQuery('(max-width: var(--mobile-width))');
+  const mobile = useMediaQuery('(max-width: 899px)');
 
   return (
     <Stack

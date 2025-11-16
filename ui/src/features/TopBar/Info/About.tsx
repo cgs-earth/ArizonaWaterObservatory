@@ -37,8 +37,8 @@ export const About: React.FC<Props> = (props) => {
   };
 
   return (
-    <Stack mt={16}>
-      <Box px={8} mb={16}>
+    <Stack mt="calc(var(--default-spacing) * 2)">
+      <Box px="var(--default-spacing)" mb="calc(var(--default-spacing) * 2)">
         <Text {...paragraph}>
           The Center for Hydrologic Innovations at Arizona State University and the Center for
           Geospatial Solutions present the Arizona Water Observatory (AWO) - an open-source,

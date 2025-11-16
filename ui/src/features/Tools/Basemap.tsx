@@ -52,7 +52,7 @@ export const BasemapSelector: React.FC = () => {
         </Tooltip>
       }
       content={
-        <Stack gap={8} className={styles.container} align="flex-start">
+        <Stack gap="var(--default-spacing)" className={styles.container} align="flex-start">
           <Title order={5} size="h3">
             Basemaps
           </Title>

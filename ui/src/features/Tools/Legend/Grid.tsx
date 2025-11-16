@@ -21,7 +21,7 @@ export const Grid: React.FC<Props> = (props) => {
         <Square fill={color} />
         <Square fill={color} stroke="#fff" />
       </Stack>
-      <Stack gap={10} pt={8} mt={0} align="flex-start">
+      <Stack gap={10} pt="var(--default-spacing)" mt={0} align="flex-start">
         <Text size="xs">Grid Spaces</Text>
         <Stack gap={0}>
           <Text size="xs">Selected Grid Spaces</Text>

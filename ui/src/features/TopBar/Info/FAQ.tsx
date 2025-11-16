@@ -7,7 +7,7 @@ import { Group } from '@mantine/core';
 
 export const FAQ: React.FC = () => {
   return (
-    <Group justify="center" align="center" mt={16}>
+    <Group justify="center" align="center" mt="calc(var(--default-spacing) * 2)">
       This tab is in development.
     </Group>
   );

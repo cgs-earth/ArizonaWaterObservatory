@@ -151,7 +151,7 @@ const Layer: React.FC<Props> = (props) => {
 
   return (
     <Stack gap="xs" className={styles.accordionContent}>
-      <Group justify="space-between" grow gap={16}>
+      <Group justify="space-between" grow gap="calc(var(--default-spacing) * 2)">
         <TextInput
           size="xs"
           label="Layer Name"

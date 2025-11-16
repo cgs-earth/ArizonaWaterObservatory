@@ -25,7 +25,7 @@ export const Shapes: React.FC<Props> = (props) => {
         <Square fill={color} />
         <Circle fill={color} stroke="#fff" />
       </Stack>
-      <Stack gap={10} pt={8} mt={0} align="flex-start">
+      <Stack gap={10} pt="var(--default-spacing)" mt={0} align="flex-start">
         <Text size="xs">Point Locations</Text>
         <Text size="xs">Line Locations</Text>
         <Text size="xs">Polygon Locations</Text>

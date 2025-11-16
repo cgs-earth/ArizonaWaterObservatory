@@ -28,7 +28,12 @@ export const Item: React.FC<Props> = (props) => {
       <Box className={styles.tableWrapper}>
         {feature && <Table size="xs" properties={feature.properties} />}
       </Box>
-      <Group justify="space-between" align="flex-end" mt={8} mb={8}>
+      <Group
+        justify="space-between"
+        align="flex-end"
+        mt="var(--default-spacing)"
+        mb="var(--default-spacing)"
+      >
         {locations.length > 1 && (
           <Select
             className={styles.locationsDropdown}

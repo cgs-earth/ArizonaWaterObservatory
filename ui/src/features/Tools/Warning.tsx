@@ -32,7 +32,7 @@ export const Warning: React.FC = () => {
     const showWarning = sessionStorage.getItem(WARNING_KEY);
     if (overlay !== Overlay.Warning) {
       close();
-    } else if (!showWarning || showWarning === 'true') {
+    } else if (!opened && (!showWarning || showWarning === 'true')) {
       open();
     }
   }, [overlay]);

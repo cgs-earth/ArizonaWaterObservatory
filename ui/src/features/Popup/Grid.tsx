@@ -84,17 +84,22 @@ export const Grid: React.FC<Props> = (props) => {
     <>
       <Divider mt={4} />
       {time && (
-        <Text size="sm" mt={16} mb={8}>
+        <Text size="sm" mt="calc(var(--default-spacing) * 2)" mb="var(--default-spacing)">
           {time?.label}
         </Text>
       )}
 
       <ScrollArea scrollbars="x" type="hover" style={{ maxWidth: '100%' }}>
-        <Group justify="flex-start" align="flex-start" mb={16} wrap="nowrap">
+        <Group
+          justify="flex-start"
+          align="flex-start"
+          mb="calc(var(--default-spacing) * 2)"
+          wrap="nowrap"
+        >
           {displayValues.map((displayValue) => (
             <Stack
               key={`${location.id}-${displayValue.label}-${displayValue.value}`}
-              gap={8}
+              gap="var(--default-spacing)"
               miw={120}
             >
               <Text size="sm" fw={700}>
@@ -107,8 +112,13 @@ export const Grid: React.FC<Props> = (props) => {
           ))}
         </Group>
       </ScrollArea>
-      <Group justify="space-between" align="flex-end" mt={8} mb={8}>
-        <Group gap={8} align="flex-end">
+      <Group
+        justify="space-between"
+        align="flex-end"
+        mt="var(--default-spacing)"
+        mb="var(--default-spacing)"
+      >
+        <Group gap="var(--default-spacing)" align="flex-end">
           {locations.length > 1 && (
             <Select
               className={styles.locationsDropdown}

@@ -13,10 +13,14 @@ export const Glossary: React.FC = () => {
     fw: 700,
   };
   return (
-    <Box className={styles.glossaryWrapper} my={16} pl={8}>
+    <Box
+      className={styles.glossaryWrapper}
+      my="calc(var(--default-spacing) * 2)"
+      pl="var(--default-spacing)"
+    >
       <List>
         {glossaryEntries.map((entry) => (
-          <List.Item key={`glossary-${entry.id}`} mt={8}>
+          <List.Item key={`glossary-${entry.id}`} mt="var(--default-spacing)">
             <Text {...label}>{entry.label}</Text>
             <List>
               {entry.descriptions.map((description, index) => (
