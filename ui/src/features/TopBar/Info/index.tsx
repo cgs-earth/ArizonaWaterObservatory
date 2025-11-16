@@ -46,7 +46,7 @@ const Info: React.FC = () => {
   useEffect(() => {
     const showHelp = localStorage.getItem(INFO_LOCAL_KEY);
     if (!showHelp || showHelp === 'true') {
-      open();
+      setOverlay(Overlay.Info);
       setShowHelp(true);
     } else if (showHelp === 'false') {
       setShowHelp(false);
@@ -68,7 +68,7 @@ const Info: React.FC = () => {
           <InfoSimple />
         </IconButton>
       </Tooltip>
-      <Modal size="xl" opened={opened} onClose={close} keepMounted>
+      <Modal size="xl" opened={opened} onClose={close}>
         <Tabs
           value={helpTab}
           className={`${styles.modalBody} ${styles.tabs}`}

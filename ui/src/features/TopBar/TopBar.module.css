@@ -3,6 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.actionIconRoot {
+  margin-right: var(--default-spacing);
+}
+
+.actionIcon {
+  stroke: var(--asu-gray-1);
+  fill: var(--asu-gray-1);
+}
+
+.actionIcon > svg {
+  width: 100%;
+  height: auto;
+}
+
+.actionIcon:hover:not(:disabled),
+.actionIcon:focus:not(:disabled),
+.actionIcon:active:not(:disabled) {
+  stroke: var(--asu-gray-2);
+  fill: var(--asu-gray-2);
+}
+
 .topBarWrapper {
   padding: var(--default-spacing);
   border-bottom: 1px solid var(--border);

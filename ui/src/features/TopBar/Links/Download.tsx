@@ -46,6 +46,7 @@ export const Download: React.FC<Props> = (props) => {
               size="lg"
               variant="transparent"
               title="Show download menu"
+              classNames={{ root: styles.actionIconRoot, icon: styles.actionIcon }}
               onClick={() => setShow(!show)}
             >
               <DownloadIcon />
