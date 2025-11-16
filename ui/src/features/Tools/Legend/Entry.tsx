@@ -71,7 +71,7 @@ export const Entry: React.FC<Props> = (props) => {
 
           <Switch
             size="lg"
-            mb={4}
+            mb="calc(var(--default-spacing) / 2)"
             onLabel="VISIBLE"
             offLabel="HIDDEN"
             checked={layer.visible}

@@ -82,7 +82,7 @@ export const Grid: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Divider mt={4} />
+      <Divider mt="calc(var(--default-spacing) / 2)" />
       {time && (
         <Text size="sm" mt="calc(var(--default-spacing) * 2)" mb="var(--default-spacing)">
           {time?.label}

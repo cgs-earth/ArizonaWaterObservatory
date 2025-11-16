@@ -47,9 +47,10 @@
 }
 
 .accordions {
-  max-height: calc(100vh - 150px);
+  max-height: calc(100vh - 220px);
   overflow-x: hidden;
   overflow-y: auto;
+  border-bottom: 1px solid var(--asu-color-tertiary);
 }
 
 .accordionContent {

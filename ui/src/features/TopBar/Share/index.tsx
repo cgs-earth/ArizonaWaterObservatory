@@ -135,7 +135,7 @@ const Share: React.FC = () => {
                     <Stack className={styles.copyInputWrapper} gap="0">
                       <CopyInput className={styles.copyInput} url={getShareUrl(shareId)} />
                       {!configGenerated && (
-                        <Text size="sm" c="red" mt={4}>
+                        <Text size="sm" c="red" mt="calc(var(--default-spacing) / 2)">
                           This URL does not contain recent changes made in the application. Please
                           generate a new URL to reflect the latest choices.
                         </Text>
