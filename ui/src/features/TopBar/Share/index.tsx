@@ -69,6 +69,10 @@ const Share: React.FC = () => {
     close();
   };
 
+  const handleClick = () => {
+    setOverlay(Overlay.Info);
+  };
+
   const getShareUrl = (shareId: string): string => {
     const url = new URL(window.location.href);
     url.searchParams.set(SHARE_VARIABLE, shareId);
@@ -89,6 +93,8 @@ const Share: React.FC = () => {
   useEffect(() => {
     if (overlay !== Overlay.Share) {
       close();
+    } else if (!opened) {
+      open();
     }
   }, [overlay]);
 
@@ -110,7 +116,7 @@ const Share: React.FC = () => {
           size="sm"
           w="fit-content"
           variant={opened ? Variant.Selected : Variant.Secondary}
-          onClick={open}
+          onClick={handleClick}
         >
           Share
         </Button>

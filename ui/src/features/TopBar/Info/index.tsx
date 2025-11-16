@@ -55,7 +55,7 @@ const Info: React.FC = () => {
 
   const handleClick = () => {
     setHelpTab(HelpTab.About);
-    open();
+    setOverlay(Overlay.Info);
   };
 
   return (
