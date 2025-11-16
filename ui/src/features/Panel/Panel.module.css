@@ -18,6 +18,10 @@
   overflow: hidden;
 }
 
+.panelContent {
+  z-index: 199;
+}
+
 .panelCollapse {
   width: 100%;
 }
@@ -81,11 +85,18 @@
   background-color: pink; /* REMOVE AFTER WE GET THE LOGO */
 }
 
-.actionIcon {
-  margin-left: var(--default-spacing);
+.actionIconRoot {
   margin-right: var(--default-spacing);
+}
+
+.actionIcon {
   stroke: var(--asu-gray-1);
   fill: var(--asu-gray-1);
+}
+
+.actionIcon > svg {
+  width: 100%;
+  height: auto;
 }
 
 .actionIcon:hover:not(:disabled),
@@ -158,13 +169,12 @@
     margin: auto;
     padding: 16px;
     background: white;
-    z-index: 3;
+
     border-radius: 4px;
   }
 
   .panelWrapper {
     height: unset;
     max-height: unset;
-    z-index: 201;
   }
 }

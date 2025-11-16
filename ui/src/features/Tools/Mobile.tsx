@@ -14,7 +14,7 @@ import { Geocoder } from '@/features/Tools/Geocoder';
 import Legend from '@/features/Tools/Legend';
 import styles from '@/features/Tools/Tools.module.css';
 import { Warning } from '@/features/Tools/Warning';
-import Info from '../TopBar/Info';
+import Info from '@/features/TopBar/Info';
 
 export const Mobile: React.FC = () => {
   const [opened, { toggle }] = useDisclosure(false);

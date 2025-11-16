@@ -25,6 +25,7 @@ import {
   DEFAULT_RASTER_OPACITY,
   drawLayers,
 } from '@/features/Map/consts';
+import { getNextLink } from '@/managers/Main.utils';
 import {
   Config,
   ExtendedFeatureCollection,
@@ -53,7 +54,6 @@ import {
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
 import { getTemporalExtent } from '@/utils/temporalExtent';
-import { getNextLink } from './Main.utils';
 
 /**
  * MainManager is responsible for managing the core logic of the application. It handles functionality

@@ -24,7 +24,10 @@
   margin-top: calc(var(--default-spacing) * 3);
 }
 
+.filter {
+  min-width: fit-content;
+}
+
 .filterSelect {
-  width: 265px;
   min-width: 265px;
 }

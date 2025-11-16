@@ -76,7 +76,7 @@ const Info: React.FC = () => {
             className={styles.tabs}
             onChange={(tab) => setHelpTab(tab as HelpTab)}
           >
-            <Tabs.List grow className={styles.tabList}>
+            <Tabs.List grow className={styles.tabsList}>
               <Tabs.Tab value={HelpTab.About}>
                 <Text size="lg" fw={700}>
                   About

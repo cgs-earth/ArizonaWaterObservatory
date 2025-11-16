@@ -45,7 +45,7 @@ export const Control: React.FC<Props> = (props) => {
           data-disabled={disableUp}
           variant="transparent"
           title="Move layer up"
-          className={styles.actionIcon}
+          classNames={{ root: styles.actionIconRoot, icon: styles.actionIcon }}
           onClick={() => handlePositionChange(layer.position - 1)}
         >
           <CircleUp />
@@ -64,7 +64,7 @@ export const Control: React.FC<Props> = (props) => {
           title="Move layer down"
           disabled={disableDown}
           data-disabled={disableDown}
-          className={styles.actionIcon}
+          classNames={{ root: styles.actionIconRoot, icon: styles.actionIcon }}
           onClick={() => handlePositionChange(layer.position + 1)}
         >
           <CircleDown />

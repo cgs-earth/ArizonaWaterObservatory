@@ -15,16 +15,16 @@ import { Header } from '@/features/Panel/Header';
 import Layers from '@/features/Panel/Layers';
 import styles from '@/features/Panel/Panel.module.css';
 import { Toggle } from '@/features/Panel/Toggle';
+import { Mobile } from '@/features/TopBar/Mobile';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { LoadingType, NotificationType } from '@/stores/session/types';
-import { Mobile } from '../TopBar/Mobile';
 
 const Panel: React.FC = () => {
   const mobile = useMediaQuery('(max-width: 899px)');
 
-  const [opened, { toggle, open, close }] = useDisclosure(false);
+  const [opened, { toggle, open, close }] = useDisclosure(true);
 
   const getCollections = async () => {
     const loadingInstance = loadingManager.add('Updating collections', LoadingType.Collections);
@@ -47,11 +47,9 @@ const Panel: React.FC = () => {
 
   useEffect(() => {
     if (mobile) {
-      close();
-    } else {
       open();
     }
-  }, [mobile, open, close]);
+  }, [mobile, open]);
 
   return (
     <>
@@ -77,7 +75,8 @@ const Panel: React.FC = () => {
                 size="sm"
                 variant="transparent"
                 onClick={close}
-                className={`${styles.actionIcon} ${styles.mobileClose}`}
+                classNames={{ root: styles.actionIconRoot, icon: styles.actionIcon }}
+                className={styles.mobileClose}
               >
                 <X />
               </ActionIcon>
@@ -93,7 +92,7 @@ const Panel: React.FC = () => {
           <Toggle open={opened} setOpen={toggle} />
         </Group>
       </Box>
-      {mobile && opened && <Overlay color="#000" backgroundOpacity={0.7} />}
+      {mobile && opened && <Overlay zIndex={198} color="#000" backgroundOpacity={0.7} />}
     </>
   );
 };

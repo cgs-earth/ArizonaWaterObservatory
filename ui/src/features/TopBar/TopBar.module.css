@@ -17,6 +17,12 @@
   width: 100%;
 }
 
+.tabsList {
+  position: sticky;
+  top: 0;
+  background: var(--mantine-color-body);
+}
+
 .accordionBody {
   background-color: var(--mantine-color-gray-1);
 }

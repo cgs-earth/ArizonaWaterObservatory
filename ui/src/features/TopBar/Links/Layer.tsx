@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Anchor, Box, Group, Text, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
+import { Download } from '@/features/TopBar/Links/Download';
 import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { useLocations } from '@/hooks/useLocations';
@@ -15,7 +16,6 @@ import { ICollection } from '@/services/edr.service';
 import { Layer as LayerType, Location } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getProvider } from '@/utils/provider';
-import { Download } from './Download';
 
 type Props = {
   layer: LayerType;

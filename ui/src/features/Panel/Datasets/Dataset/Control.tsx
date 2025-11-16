@@ -58,7 +58,7 @@ export const Control: React.FC<Props> = (props) => {
         size="lg"
         variant="transparent"
         title="Add Layer"
-        className={styles.actionIcon}
+        classNames={{ root: styles.actionIconRoot, icon: styles.actionIcon }}
         onClick={() => handleClick(dataset.title ?? dataset.id, dataset.id)}
       >
         <Map />
