@@ -106,6 +106,7 @@ const Legend: React.FC = () => {
 
   useEffect(() => {
     if (firstLayer.current && layers.length > 0) {
+      firstLayer.current = false;
       setShow(true);
       setOverlay(Overlay.Legend);
     }
