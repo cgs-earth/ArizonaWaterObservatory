@@ -1085,6 +1085,15 @@ export type CoverageCollection = {
   coverages: CoverageJSON[];
 };
 
+export type CoverageAxesSegments = {
+  start: number;
+  stop: number;
+  num: number;
+};
+export type CoverageAxesValues = {
+  values: (number | string)[];
+};
+
 export interface CoverageJSON {
   type: string;
   domain: {
@@ -1092,15 +1101,7 @@ export interface CoverageJSON {
     domainType: string;
 
     axes: {
-      [key: string]:
-        | {
-            start: number;
-            stop: number;
-            num: number;
-          }
-        | {
-            values: (number | string)[];
-          };
+      [key: string]: CoverageAxesSegments | CoverageAxesValues;
     };
 
     referencing: {

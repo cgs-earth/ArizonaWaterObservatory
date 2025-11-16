@@ -920,6 +920,7 @@ class MainManager {
       this.map.addSource(sourceId, {
         type: 'geojson',
         data: getDefaultGeoJSON(),
+        generateId: true,
       });
     }
 
@@ -1315,6 +1316,9 @@ class MainManager {
 
   public clearAllData(): void {
     this.store.getState().setLocations([]);
+
+    this.store.getState().setLayers([]);
+    this.store.getState().setDrawnShapes([]);
 
     this.clearLayers();
     this.clearSources();

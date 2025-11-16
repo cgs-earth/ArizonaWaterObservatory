@@ -146,7 +146,7 @@ const Share: React.FC = () => {
               )}
             </Group>
           )}
-          <Group>
+          <Group mr="auto">
             <Tooltip disabled={!configGenerated} label="No changes made to application config.">
               <Button
                 size="sm"

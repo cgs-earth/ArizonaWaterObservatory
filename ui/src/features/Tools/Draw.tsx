@@ -153,6 +153,7 @@ export const Draw: React.FC = () => {
           opened={show}
           onChange={setShow}
           closeOnClickOutside={false}
+          position="bottom-start"
           target={
             <Tooltip
               label="Measure distances and filter by drawn or existing geometries."

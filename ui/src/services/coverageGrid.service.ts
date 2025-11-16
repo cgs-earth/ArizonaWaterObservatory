@@ -6,7 +6,13 @@
 import { bboxPolygon } from '@turf/turf';
 import { BBox, FeatureCollection, Polygon } from 'geojson';
 import { getDefaultGeoJSON } from '@/consts/geojson';
-import { CoverageCollection, CoverageJSON, ICollection } from '@/services/edr.service';
+import {
+  CoverageAxesSegments,
+  CoverageAxesValues,
+  CoverageCollection,
+  CoverageJSON,
+  ICollection,
+} from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { isCoverageJSON } from '@/utils/isTypeObject';
 import { getDatetime } from '@/utils/url';
@@ -31,6 +37,24 @@ export class CoverageGridService {
       keys[key] = coverage.ranges[key].values;
     }
     return keys;
+  }
+
+  private isSegments(
+    axis: CoverageAxesSegments | CoverageAxesValues
+  ): axis is CoverageAxesSegments {
+    const a = axis as CoverageAxesSegments;
+    return (
+      typeof a?.start !== 'undefined' &&
+      typeof a?.stop !== 'undefined' &&
+      typeof a?.num !== 'undefined' &&
+      typeof a.start === 'number' &&
+      typeof a.stop === 'number' &&
+      typeof a.num === 'number'
+    );
+  }
+
+  private isValues(axis: CoverageAxesSegments | CoverageAxesValues): axis is CoverageAxesValues {
+    return Array.isArray((axis as any)?.values);
   }
 
   private getAxes(coverage: CoverageJSON): Axes {
@@ -62,7 +86,76 @@ export class CoverageGridService {
     };
   }
 
-  private addGridConstructor(
+  private addGridValuesConstructor(
+    xValues: number[],
+    yValues: number[],
+    featureCollection: FeatureCollection<Polygon>,
+    times: (string | number)[],
+    values: Values
+  ) {
+    const count = times.length;
+
+    const xLength = xValues.length;
+    const yLength = yValues.length;
+
+    const getCurrentValues = this.getCurrentValuesConstructor(count, values, xLength, yLength);
+    let id = 1;
+
+    return (x: number, y: number) => {
+      const currentValues = getCurrentValues(x, y);
+
+      // This grid entry would have no values to display
+      if (Object.values(currentValues).every((array) => array.every((value) => value === null))) {
+        return;
+      }
+      const startY = yValues[y];
+      const endY = yValues[y + 1];
+
+      const startX = xValues[x];
+      const endX = xValues[x + 1];
+
+      const grid = bboxPolygon([startX, startY, endX, endY], {
+        id,
+        properties: {
+          times,
+          gridIdentifier: `${startX}_${startY}_${endX}_${endY}`,
+          ...currentValues,
+        },
+      });
+      featureCollection.features.push(grid);
+      id += 1;
+    };
+  }
+
+  private createGridValues(
+    timesObj: CoverageAxesValues,
+    xObj: CoverageAxesValues,
+    yObj: CoverageAxesValues,
+    coverage: CoverageJSON
+  ): FeatureCollection<Polygon> {
+    let values: Values | null = this.getValues(coverage);
+
+    const featureCollection = getDefaultGeoJSON<Polygon>();
+
+    const addGrid = this.addGridValuesConstructor(
+      xObj.values as number[],
+      yObj.values as number[],
+      featureCollection as FeatureCollection<Polygon>,
+      timesObj.values,
+      values
+    );
+
+    for (let y = 0; y < yObj.values.length - 1; y++) {
+      for (let x = 0; x < xObj.values.length - 1; x++) {
+        addGrid(x, y);
+      }
+    }
+    values = null;
+
+    return featureCollection;
+  }
+
+  private addGridSegmentConstructor(
     xStart: number,
     yStart: number,
     xLength: number,
@@ -70,7 +163,7 @@ export class CoverageGridService {
     xCount: number,
     yCount: number,
     featureCollection: FeatureCollection<Polygon>,
-    times: string[],
+    times: (string | number)[],
     values: Values
   ) {
     const count = times.length;
@@ -105,15 +198,12 @@ export class CoverageGridService {
     };
   }
 
-  private createGridCollection(coverage: CoverageJSON): FeatureCollection<Polygon> {
-    if (coverage.domain.domainType !== 'Grid') {
-      throw new Error(
-        `Coverage domain type: ${coverage.domain.domainType} is not supported by grid builder`
-      );
-    }
-
-    const { t, x: xObj, y: yObj } = this.getAxes(coverage);
-
+  private createGridSegments(
+    timesObj: CoverageAxesValues,
+    xObj: CoverageAxesSegments,
+    yObj: CoverageAxesSegments,
+    coverage: CoverageJSON
+  ): FeatureCollection<Polygon> {
     const xLength = this.getLength(xObj);
     const yLength = this.getLength(yObj);
 
@@ -121,7 +211,7 @@ export class CoverageGridService {
 
     const featureCollection = getDefaultGeoJSON<Polygon>();
 
-    const addGrid = this.addGridConstructor(
+    const addGrid = this.addGridSegmentConstructor(
       xObj.start,
       yObj.start,
       xLength,
@@ -129,7 +219,7 @@ export class CoverageGridService {
       xObj.num,
       yObj.num,
       featureCollection as FeatureCollection<Polygon>,
-      t.values,
+      timesObj.values,
       values
     );
 
@@ -141,6 +231,28 @@ export class CoverageGridService {
     values = null;
 
     return featureCollection;
+  }
+
+  private createGridCollection(coverage: CoverageJSON): FeatureCollection<Polygon> {
+    if (coverage.domain.domainType !== 'Grid') {
+      throw new Error(
+        `Coverage domain type: ${coverage.domain.domainType} is not supported by grid builder`
+      );
+    }
+
+    const { t, x: xObj, y: yObj } = this.getAxes(coverage);
+
+    if (this.isSegments(xObj) && this.isSegments(yObj)) {
+      return this.createGridSegments(t, xObj, yObj, coverage);
+    }
+
+    if (this.isValues(xObj) && this.isValues(yObj)) {
+      return this.createGridValues(t, xObj, yObj, coverage);
+    }
+
+    throw new Error(
+      'Mixed axis types are not supported (x and y must both be segments or both be values).'
+    );
   }
 
   public async createGrid(

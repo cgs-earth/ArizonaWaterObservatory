@@ -20,9 +20,10 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { LoadingType, NotificationType } from '@/stores/session/types';
+import { ClearAll } from './ClearAll';
 
 const Panel: React.FC = () => {
-  const mobile = useMediaQuery('(max-width: 899px)');
+  const mobile = useMediaQuery('(max-width: var(--mobile-width))');
 
   const [opened, { toggle, open, close }] = useDisclosure(true);
 
@@ -70,7 +71,7 @@ const Panel: React.FC = () => {
             transitionDuration={0}
             className={`${styles.panelBody} ${opened ? styles.panelOpen : styles.panelClosed}`}
           >
-            <Stack gap={0} className={styles.panelContent}>
+            <Stack gap={0} align="center" className={styles.panelContent}>
               <ActionIcon
                 size="sm"
                 variant="transparent"
@@ -85,7 +86,10 @@ const Panel: React.FC = () => {
                 <Datasets />
                 <Layers />
               </Box>
-              <Mobile />
+              <Group justify="space-between" align="flex-start" w="100%">
+                <ClearAll />
+                <Mobile />
+              </Group>
             </Stack>
           </Collapse>
 

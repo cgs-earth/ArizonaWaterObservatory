@@ -40,6 +40,7 @@ export const BasemapSelector: React.FC = () => {
       offset={16}
       opened={show}
       onChange={setShow}
+      position="bottom-start"
       target={
         <Tooltip label="Change map styling." disabled={show}>
           <IconButton
