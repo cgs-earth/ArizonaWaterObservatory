@@ -258,7 +258,7 @@ def fetch_data(
     end: int | None = start + feature_limit if feature_limit else None
 
     # we apply the limit regardless of bbox or not
-    if not raster:
+    if not raster and (feature_limit or feature_offset):
         # apply feature limit at the end of processing
         # ideally since this is lazy loaded this should still have
         # predicate pushdown; we need to push this last otherwise
