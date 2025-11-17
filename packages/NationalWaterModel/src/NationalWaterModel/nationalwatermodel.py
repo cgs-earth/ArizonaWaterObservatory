@@ -62,7 +62,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         limit: int = 500,
         itemId: str
         | None = None,  # unlike edr, this is a string; we need to case to an int before filtering
-        offset: int | None = 0,
+        offset: int = 0,
         skip_geometry: bool | None = False,
         **kwargs,
     ) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:

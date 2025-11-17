@@ -98,7 +98,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         select_properties: list[str] | None = None,
         crs: str | None = None,
         format_: str | None = None,
-        limit: int | None = None,
+        limit: int = 0,
         **kwargs,
     ) -> (
         CoverageCollectionDict
