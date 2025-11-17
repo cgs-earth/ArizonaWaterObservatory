@@ -286,7 +286,7 @@ resources:
 
   usgs-sta:
     type: collection
-    title: United States Geologic Survey Streamgages
+    title: United States Geological Survey Streamgages
     description: measures real-time streamflow (discharge), water levels, and other hydrologic data in rivers and streams across the United States.
     provider-name:
       - USGS
