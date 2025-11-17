@@ -144,7 +144,8 @@ def fetch_data(
     y_field: str | None,
     bbox: list,
     feature_id: str | None = None,
-    feature_limit: int | None = None,
+    feature_limit: int = 10,
+    feature_offset: int = 0,
     raster: bool = False,
 ) -> xr.Dataset:
     """
@@ -250,14 +251,22 @@ def fetch_data(
         else:
             selected = selected.isel(feature_id=mask)
 
+    # start is always the feature_offset since the default is 0
+    start = feature_offset
+    # the end should be such that it generates a response with length equal to feature_limit
+    end: int | None = start + feature_limit
+
     # we apply the limit regardless of bbox or not
-    if not raster and feature_limit:
+    # we always run this if it is not raster data
+    # given the fact that there will always be some sort of limit
+    # in pygeoapi
+    if not raster:
         # apply feature limit at the end of processing
         # ideally since this is lazy loaded this should still have
         # predicate pushdown; we need to push this last otherwise
         # we will filter too early and get the start of the dataset which
         # is at an arbitrary location, potentially outside the bbox
-        selected = selected.isel(feature_id=slice(0, feature_limit))
+        selected = selected.isel(feature_id=slice(start, end))
 
     return selected.load()
 

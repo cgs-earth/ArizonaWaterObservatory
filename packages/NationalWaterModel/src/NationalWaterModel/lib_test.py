@@ -105,3 +105,36 @@ def test_crs():
         projected_dataset["longitude"].values[0]
         != provider.zarr_dataset["longitude"].values[0]
     )
+
+
+def test_limit():
+    result = fetch_data(
+        bbox=ARIZONA_BBOX,
+        timeseries_properties_to_fetch=["streamflow"],
+        time_field="time",
+        datetime_filter="2023-01-01",
+        x_field="longitude",
+        y_field="latitude",
+        unopened_dataset=provider.zarr_dataset,
+        feature_limit=10,
+    )
+
+    assert result.sizes["feature_id"] == 10
+    assert result["feature_id"].values[-1].tolist() == 15840270
+
+
+def test_limit_with_offset():
+    result = fetch_data(
+        bbox=ARIZONA_BBOX,
+        timeseries_properties_to_fetch=["streamflow"],
+        time_field="time",
+        datetime_filter="2023-01-01",
+        x_field="longitude",
+        y_field="latitude",
+        unopened_dataset=provider.zarr_dataset,
+        feature_limit=1,
+        feature_offset=9,
+    )
+
+    assert result.sizes["feature_id"] == 1
+    assert result["feature_id"].values[0].tolist() == 15840270
