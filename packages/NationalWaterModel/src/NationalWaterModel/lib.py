@@ -7,13 +7,14 @@ from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
 import numpy as np
+from pandas import to_datetime
 from pygeoapi.api import DEFAULT_STORAGE_CRS
 from pygeoapi.provider.base import (
     ProviderInvalidDataError,
     ProviderNoDataError,
     ProviderQueryError,
 )
-from pygeoapi.util import get_crs_from_uri
+from pygeoapi.util import DATETIME_FORMAT, get_crs_from_uri
 import pyproj
 import s3fs
 import xarray as xr
@@ -280,7 +281,9 @@ def dataset_to_covjson(
 
     # cast to list of ISO strings so that it is serializable into json
     time_values = (
-        dataset[time_axis].values.astype("datetime64[ns]").astype(str).tolist()
+        to_datetime(dataset[time_axis].values)
+        .strftime(DATETIME_FORMAT)
+        .tolist()
     )
     timeseries_values = dataset[timeseries_parameter_name].values
 
