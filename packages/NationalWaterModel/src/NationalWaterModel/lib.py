@@ -143,7 +143,7 @@ def fetch_data(
     y_field: str | None,
     bbox: list,
     feature_id: str | None = None,
-    feature_limit: int = 0,
+    feature_limit: int = 10,
     feature_offset: int = 0,
     raster: bool = False,
 ) -> xr.Dataset:
