@@ -250,15 +250,16 @@ def fetch_data(
         else:
             selected = selected.isel(feature_id=mask)
 
-    # if there is an offset, change the start index to that offset
-    start = feature_offset if feature_offset else 0
-    # if there is a limit set the end index to have that many features
-    # otherwise by using `None` we signify there is no end limit and
-    # we will go to the end of the dataset
-    end: int | None = start + feature_limit if feature_limit else None
+    # start is always the feature_offset since the default is 0
+    start = feature_offset
+    # the end should be such that it generates a response with length equal to feature_limit
+    end: int | None = start + feature_limit
 
     # we apply the limit regardless of bbox or not
-    if not raster and (feature_limit or feature_offset):
+    # we always run this if it is not raster data
+    # given the fact that there will always be some sort of limit
+    # in pygeoapi
+    if not raster:
         # apply feature limit at the end of processing
         # ideally since this is lazy loaded this should still have
         # predicate pushdown; we need to push this last otherwise
