@@ -250,17 +250,21 @@ def fetch_data(
         else:
             selected = selected.isel(feature_id=mask)
 
+    # if there is an offset, change the start index to that offset
     start = feature_offset if feature_offset else 0
+    # if there is a limit set the end index to have that many features
+    # otherwise by using `None` we signify there is no end limit and
+    # we will go to the end of the dataset
+    end: int | None = start + feature_limit if feature_limit else None
+
     # we apply the limit regardless of bbox or not
-    if not raster and feature_limit:
+    if not raster:
         # apply feature limit at the end of processing
         # ideally since this is lazy loaded this should still have
         # predicate pushdown; we need to push this last otherwise
         # we will filter too early and get the start of the dataset which
         # is at an arbitrary location, potentially outside the bbox
-        selected = selected.isel(
-            feature_id=slice(start, start + feature_limit)
-        )
+        selected = selected.isel(feature_id=slice(start, end))
 
     return selected.load()
 
