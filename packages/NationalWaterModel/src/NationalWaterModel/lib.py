@@ -250,6 +250,7 @@ def fetch_data(
         else:
             selected = selected.isel(feature_id=mask)
 
+    start = feature_offset if feature_offset else 0
     # we apply the limit regardless of bbox or not
     if not raster and feature_limit:
         # apply feature limit at the end of processing
@@ -258,7 +259,7 @@ def fetch_data(
         # we will filter too early and get the start of the dataset which
         # is at an arbitrary location, potentially outside the bbox
         selected = selected.isel(
-            feature_id=slice(feature_offset, feature_offset + feature_limit)  # type: ignore
+            feature_id=slice(start, start + feature_limit)
         )
 
     return selected.load()
