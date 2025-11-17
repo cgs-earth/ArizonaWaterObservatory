@@ -7,7 +7,6 @@ from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
 import numpy as np
-from pandas import to_datetime
 from pygeoapi.api import DEFAULT_STORAGE_CRS
 from pygeoapi.provider.base import (
     ProviderInvalidDataError,
@@ -290,10 +289,9 @@ def dataset_to_covjson(
 
     # cast to list of ISO strings so that it is serializable into json
     time_values = (
-        to_datetime(dataset[time_axis].values)
-        .strftime(DATETIME_FORMAT)
-        .tolist()
+        dataset[time_axis].dt.strftime(DATETIME_FORMAT).values.tolist()
     )
+
     timeseries_values = dataset[timeseries_parameter_name].values
 
     try:
