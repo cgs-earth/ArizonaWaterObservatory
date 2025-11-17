@@ -144,6 +144,7 @@ def fetch_data(
     bbox: list,
     feature_id: str | None = None,
     feature_limit: int | None = None,
+    feature_offset: int | None = None,
     raster: bool = False,
 ) -> xr.Dataset:
     """
@@ -256,7 +257,9 @@ def fetch_data(
         # predicate pushdown; we need to push this last otherwise
         # we will filter too early and get the start of the dataset which
         # is at an arbitrary location, potentially outside the bbox
-        selected = selected.isel(feature_id=slice(0, feature_limit))
+        selected = selected.isel(
+            feature_id=slice(feature_offset, feature_offset + feature_limit)  # type: ignore
+        )
 
     return selected.load()
 

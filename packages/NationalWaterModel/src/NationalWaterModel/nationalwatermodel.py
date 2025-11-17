@@ -82,6 +82,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             unopened_dataset=self.zarr_dataset,
             feature_id=itemId,
             feature_limit=limit,
+            feature_offset=offset,
         )
 
         result = project_dataset(
