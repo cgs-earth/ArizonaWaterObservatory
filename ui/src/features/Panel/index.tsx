@@ -28,10 +28,10 @@ const Panel: React.FC = () => {
   const [opened, { toggle, open, close }] = useDisclosure(true);
 
   const getCollections = async () => {
-    const loadingInstance = loadingManager.add('Updating collections', LoadingType.Collections);
+    const loadingInstance = loadingManager.add('Fetching all datasets.', LoadingType.Collections);
     try {
       await mainManager.getCollections();
-      notificationManager.show('Updated collections', NotificationType.Success);
+      notificationManager.show('Updated datasets', NotificationType.Success);
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;

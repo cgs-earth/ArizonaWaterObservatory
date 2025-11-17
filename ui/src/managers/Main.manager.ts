@@ -17,7 +17,7 @@ import {
 } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
-import { CollectionRestrictions } from '@/consts/collections';
+import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import {
   DEFAULT_BBOX,
@@ -44,7 +44,7 @@ import {
   ParameterGroupMembers,
 } from '@/stores/main/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
-import { compareArrays } from '@/utils/compareArrays';
+import { isSameArray } from '@/utils/compareArrays';
 import { getRandomHexColor } from '@/utils/hexColor';
 import {
   getFillLayerDefinition,
@@ -506,9 +506,14 @@ class MainManager {
     collectionType: CollectionType,
     to: dayjs.Dayjs
   ) {
-    const restriction = CollectionRestrictions[datasourceId];
-    if (restriction && restriction.days) {
-      return to.subtract(restriction.days, 'day');
+    const restrictions = CollectionRestrictions[datasourceId];
+    if (restrictions && restrictions.length > 0) {
+      const dateRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Day
+      );
+      if (dateRestriction && dateRestriction.days) {
+        return to.subtract(dateRestriction.days, 'day');
+      }
     }
 
     return collectionType === CollectionType.EDRGrid
@@ -722,34 +727,46 @@ class MainManager {
     from: Layer['from'],
     to: Layer['to']
   ) {
-    const restriction = CollectionRestrictions[collectionId];
+    const restrictions = CollectionRestrictions[collectionId];
 
-    if (restriction && restriction.days) {
-      const datasource = this.getDatasource(collectionId);
-      if (!from || !to) {
-        throw new Error(
-          `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${restriction.days} days.`
-        );
-      }
-      const diff = dayjs(to).diff(dayjs(from), 'days');
+    if (restrictions && restrictions.length > 0) {
+      const dateRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Day
+      );
 
-      if (diff > restriction.days) {
-        throw new Error(
-          `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${restriction.days}. Current date range is ${diff - restriction.days} days too long.`
-        );
+      if (dateRestriction && dateRestriction.days) {
+        const datasource = this.getDatasource(collectionId);
+        if (!from || !to) {
+          throw new Error(
+            `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${dateRestriction.days} days.`
+          );
+        }
+        const diff = dayjs(to).diff(dayjs(from), 'days');
+
+        if (diff > dateRestriction.days) {
+          throw new Error(
+            `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${dateRestriction.days}. Current date range is ${diff - dateRestriction.days} days too long.`
+          );
+        }
       }
     }
   }
 
   private checkCollectionBBoxRestrictions(collectionId: ICollection['id'], area: number) {
-    const restriction = CollectionRestrictions[collectionId];
+    const restrictions = CollectionRestrictions[collectionId];
 
-    if (restriction && restriction.size && area > restriction.size) {
-      const datasource = this.getDatasource(collectionId);
-      const factor = area / restriction.size;
-      throw new Error(
-        `Target area ${factor.toFixed(2)}x too large for instance of dataset: ${datasource?.title}.\n ${restriction.message}`
+    if (restrictions && restrictions.length > 0) {
+      const sizeRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Size
       );
+
+      if (sizeRestriction && sizeRestriction.size && area > sizeRestriction.size) {
+        const datasource = this.getDatasource(collectionId);
+        const factor = area / sizeRestriction.size;
+        throw new Error(
+          `Target area ${factor.toFixed(2)}x too large for instance of dataset: ${datasource?.title}.\n ${sizeRestriction.message}`
+        );
+      }
     }
   }
 
@@ -1217,7 +1234,7 @@ class MainManager {
       }
     }
 
-    if (!compareArrays(layer.parameters, parameters)) {
+    if (!isSameArray(layer.parameters, parameters)) {
       const drawnShapes = this.store.getState().drawnShapes;
       await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,

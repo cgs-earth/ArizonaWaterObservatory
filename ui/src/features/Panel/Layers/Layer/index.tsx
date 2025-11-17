@@ -16,6 +16,7 @@ import IconButton from '@/components/IconButton';
 import Select from '@/components/Select';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
+import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import styles from '@/features/Panel/Panel.module.css';
 import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { useLoading } from '@/hooks/useLoading';
@@ -25,6 +26,7 @@ import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
+import { isSameArray } from '@/utils/compareArrays';
 import { getTemporalExtent } from '@/utils/temporalExtent';
 
 dayjs.extend(isSameOrBefore);
@@ -48,6 +50,9 @@ const Layer: React.FC<Props> = (props) => {
 
   const [data, setData] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
+
+  const [parameterLimit, setParameterLimit] = useState<number>();
+  const [daysLimit, setDaysLimit] = useState<number>();
 
   const { isFetchingCollections } = useLoading();
 
@@ -84,6 +89,28 @@ const Layer: React.FC<Props> = (props) => {
       setData(data);
     }
   }, [isFetchingCollections]);
+
+  useEffect(() => {
+    const restrictions = CollectionRestrictions[layer.datasourceId];
+
+    if (restrictions && restrictions.length > 0) {
+      const parameterLimitRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Parameter
+      );
+
+      if (parameterLimitRestriction && parameterLimitRestriction.count > 0) {
+        setParameterLimit(parameterLimitRestriction.count);
+      }
+
+      const daysLimitRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Day
+      );
+
+      if (daysLimitRestriction && daysLimitRestriction.days > 0) {
+        setDaysLimit(daysLimitRestriction.days);
+      }
+    }
+  }, [layer]);
 
   // If user updates color through the legend, update it here
   useEffect(() => {
@@ -141,13 +168,22 @@ const Layer: React.FC<Props> = (props) => {
     setOpacity(opacity);
   };
 
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
   const isMissingParameters = collectionType === CollectionType.EDRGrid && parameters.length === 0;
+  const isParameterSelectionOverLimit = parameterLimit ? parameters.length > parameterLimit : false;
+  const isDateRangeOverLimit = daysLimit ? dayjs(to).diff(dayjs(from), 'days') > daysLimit : false;
+  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
 
   const showDateInputs = [CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType);
   const showFeaturesMessage = collectionType === CollectionType.Features;
   const showDateRangeWarning = collectionType === CollectionType.EDRGrid;
   const showOpacitySlider = [CollectionType.Map, CollectionType.EDRGrid].includes(collectionType);
+
+  const hasUnsavedChanges =
+    name !== layer.name ||
+    color !== layer.color ||
+    !isSameArray(parameters, layer.parameters) ||
+    from !== layer.from ||
+    to !== layer.to;
 
   return (
     <Stack gap="xs" className={styles.accordionContent}>
@@ -196,7 +232,13 @@ const Layer: React.FC<Props> = (props) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
-              error={isValidRange ? false : 'Invalid date range'}
+              error={
+                isValidRange
+                  ? isDateRangeOverLimit && daysLimit
+                    ? `${dayjs(to).diff(dayjs(from), 'days') - daysLimit} day(s) over limit`
+                    : false
+                  : 'Invalid date range'
+              }
             />
             <DateInput
               label="To"
@@ -216,7 +258,13 @@ const Layer: React.FC<Props> = (props) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
-              error={isValidRange ? false : 'Invalid date range'}
+              error={
+                isValidRange
+                  ? isDateRangeOverLimit && daysLimit
+                    ? `${dayjs(to).diff(dayjs(from), 'days') - daysLimit} day(s) over limit`
+                    : false
+                  : 'Invalid date range'
+              }
             />
           </Group>
           {showDateRangeWarning && (
@@ -231,7 +279,7 @@ const Layer: React.FC<Props> = (props) => {
           <Select
             size="sm"
             label="Parameter"
-            description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters"
+            description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters."
             placeholder="Select a Parameter"
             multiple
             clearable
@@ -239,6 +287,11 @@ const Layer: React.FC<Props> = (props) => {
             data={data}
             value={parameters}
             onChange={setParameters}
+            error={
+              isParameterSelectionOverLimit && parameterLimit
+                ? `Please remove ${parameters.length - parameterLimit} parameter${parameters.length - parameterLimit > 1 ? 's' : ''}`
+                : false
+            }
           />
         </>
       )}
@@ -256,20 +309,35 @@ const Layer: React.FC<Props> = (props) => {
         <Group mt="md">
           <Tooltip
             label={
-              isLoading
-                ? 'Please wait for layer update to finish.'
-                : !isValidRange
-                  ? 'Please correct date range.'
-                  : isMissingParameters
-                    ? 'Grid layers require at least one parameter.'
-                    : null
+              hasUnsavedChanges
+                ? 'Save changes to layer.'
+                : isLoading
+                  ? 'Please wait for layer update to finish.'
+                  : !isValidRange || isDateRangeOverLimit
+                    ? 'Please correct date range.'
+                    : isMissingParameters
+                      ? 'Grid layers require at least one parameter.'
+                      : isParameterSelectionOverLimit
+                        ? 'Please remove parameters.'
+                        : 'Layer has not been modified.'
             }
-            disabled={!isLoading && isValidRange && !isMissingParameters}
           >
             <Button
               size="xs"
-              disabled={isLoading || !isValidRange || isMissingParameters}
-              data-disabled={isLoading || !isValidRange || isMissingParameters}
+              disabled={
+                !hasUnsavedChanges ||
+                isLoading ||
+                !isValidRange ||
+                isMissingParameters ||
+                isParameterSelectionOverLimit
+              }
+              data-disabled={
+                !hasUnsavedChanges ||
+                isLoading ||
+                !isValidRange ||
+                isMissingParameters ||
+                isParameterSelectionOverLimit
+              }
               variant={Variant.Primary}
               onClick={() => handleSave()}
             >
@@ -277,13 +345,19 @@ const Layer: React.FC<Props> = (props) => {
             </Button>
           </Tooltip>
           <Tooltip
-            label={isLoading ? 'Please wait for layer update to finish.' : null}
-            disabled={!isLoading}
+            label={
+              isLoading
+                ? 'Please wait for layer update to finish.'
+                : !hasUnsavedChanges
+                  ? 'Layer has not been modified.'
+                  : null
+            }
+            disabled={!isLoading && hasUnsavedChanges}
           >
             <Button
               size="xs"
-              disabled={isLoading}
-              data-disabled={isLoading}
+              disabled={isLoading || !hasUnsavedChanges}
+              data-disabled={isLoading || !hasUnsavedChanges}
               variant={Variant.Tertiary}
               onClick={() => handleCancel()}
             >
@@ -302,6 +376,11 @@ const Layer: React.FC<Props> = (props) => {
           </IconButton>
         </Tooltip>
       </Group>
+      {hasUnsavedChanges && (
+        <Text size="xs" c="red">
+          Unsaved changes!
+        </Text>
+      )}
     </Stack>
   );
 };

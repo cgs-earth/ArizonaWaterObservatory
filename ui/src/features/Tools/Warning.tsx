@@ -10,12 +10,21 @@ import Button from '@/components/Button';
 import Checkbox from '@/components/Checkbox';
 import Modal from '@/components/Modal';
 import styles from '@/features/Tools/Tools.module.css';
+import warningManager from '@/managers/Warning.init';
+import { WARNING_PREFIX } from '@/managers/Warning.manager';
 import useSessionStore from '@/stores/session';
-import { Overlay } from '@/stores/session/types';
+import { Overlay, Warning as WarningType } from '@/stores/session/types';
 
-export const WARNING_KEY = 'awo-warning-modal';
+type Props = {
+  id: WarningType['id'];
+  content: WarningType['content'];
+};
 
-export const Warning: React.FC = () => {
+export const Warning: React.FC<Props> = (props) => {
+  const { id, content } = props;
+
+  const key = `${WARNING_PREFIX}-${id}`;
+
   const [opened, { open, close }] = useDisclosure(false, {
     onClose: () => {
       setOverlay(null);
@@ -29,37 +38,49 @@ export const Warning: React.FC = () => {
   const [showWarning, setShowWarning] = useState(true);
 
   useEffect(() => {
-    const showWarning = sessionStorage.getItem(WARNING_KEY);
+    const showWarning = sessionStorage.getItem(key);
+
     if (overlay !== Overlay.Warning) {
       close();
-    } else if (!opened && (!showWarning || showWarning === 'true')) {
+    } else if (!showWarning || showWarning === 'true') {
       open();
     }
   }, [overlay]);
 
+  const handleClick = () => {
+    warningManager.remove(id);
+    setOverlay(null);
+  };
+
+  const handleClose = () => {
+    warningManager.remove(id);
+    setOverlay(null);
+  };
+
   const handleDontShowClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked } = event.currentTarget;
+
     if (checked) {
-      sessionStorage.setItem(WARNING_KEY, 'false');
+      sessionStorage.setItem(key, 'false');
       setShowWarning(false);
     } else {
-      sessionStorage.setItem(WARNING_KEY, 'true');
+      sessionStorage.setItem(key, 'true');
       setShowWarning(true);
     }
   };
 
   return (
-    <Modal size="md" opened={opened} onClose={close} centered>
-      <Stack className={styles.warningBody} align="center">
+    <Modal size="md" opened={opened} onClose={handleClose} centered>
+      <Stack className={styles.warningBody} align="center" gap="var(--default-spacing)">
         <Text size="lg" mr="auto" fw={700}>
           Notice
         </Text>
         <Text size="md">
-          This source requires selecting at least one parameter before any spatial data can be
-          rendered.
+          This dataset has UI-only restrictions to allow this data to render in browser:
         </Text>
+        {content}
         <Group justify="space-between" w="100%">
-          <Button size="sm" onClick={() => setOverlay(null)}>
+          <Button size="sm" onClick={() => handleClick()}>
             Ok
           </Button>
           <Checkbox

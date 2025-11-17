@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const compareArrays = <T>(a: T[], b: T[]): boolean => {
+export const isSameArray = <T>(a: T[], b: T[]): boolean => {
   if (a.length !== b.length) {
     return false;
   }
