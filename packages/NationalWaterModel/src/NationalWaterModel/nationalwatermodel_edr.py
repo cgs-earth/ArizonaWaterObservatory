@@ -99,7 +99,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         crs: str | None = None,
         format_: str | None = None,
         limit: int = 0,
-        bbox: list[float] | None = None,
+        bbox: list = [],
         **kwargs,
     ) -> (
         CoverageCollectionDict
