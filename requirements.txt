@@ -531,7 +531,7 @@ pandas==2.3.3 \
     # via
     #   geopandas
     #   xarray
-pgedr @ git+https://github.com/internetofwater/pgedr.git@c77a2384b9db2482d0b8ffefb09296a9609cf298
+pgedr @ git+https://github.com/internetofwater/pgedr.git@eb6c86dc410bdfdd214c8cb8aa4a67943ae2968a
     # via arizonawaterobservatory
 pluggy==1.6.0 \
     --hash=sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3 \
@@ -606,7 +606,7 @@ pydantic-core==2.41.5 \
     --hash=sha256:ed2e99c456e3fadd05c991f8f437ef902e00eedf34320ba2b0842bd1c3ca3a75 \
     --hash=sha256:f41a7489d32336dbf2199c8c0a215390a751c5b014c2c1c5366e817202e9cdf7
     # via pydantic
-pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@f231e9bd057675dad4df5bbe0500cc2708ce3106
+pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@dbcb34802b72c4e4d61a5e60e6c13c9abd32c57b
     # via pgedr
 pygeofilter==0.3.1 \
     --hash=sha256:f13dcdd685bdca32cf9e6665bf2938522276bee140abff321ab04abb12f5761d \
