@@ -70,7 +70,7 @@ export const Warning: React.FC<Props> = (props) => {
   };
 
   return (
-    <Modal size="md" opened={opened} onClose={handleClose} centered>
+    <Modal size="lg" opened={opened} onClose={handleClose} centered>
       <Stack className={styles.warningBody} align="center" gap="var(--default-spacing)">
         <Text size="lg" mr="auto" fw={700}>
           Notice

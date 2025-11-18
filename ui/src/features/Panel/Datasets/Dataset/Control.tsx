@@ -38,8 +38,7 @@ export const Control: React.FC<Props> = (props) => {
       if (collectionType === CollectionType.EDRGrid) {
         restrictions.push({
           type: RestrictionType.ParameterFirst,
-          message:
-            'This source requires selecting at least one parameter before any spatial data can be rendered.',
+          message: 'Select at least one parameter before any spatial data can be rendered.',
         });
       }
 
