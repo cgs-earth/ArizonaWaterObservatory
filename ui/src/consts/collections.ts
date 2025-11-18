@@ -17,6 +17,7 @@ export enum CollectionId {
   NWMLakeOutput = 'National_Water_Model_Lakeout',
 
   ArizonaWaterWells = 'ArizonaWaterWells',
+  AWDB = 'awdb-forecasts-edr',
 }
 
 export enum Provider {
@@ -32,6 +33,16 @@ export const ProviderDatasources: Record<Provider, string[]> = {
   [Provider.USGS]: [CollectionId.Streamgages],
   [Provider.USACE]: [CollectionId.USACEEdr],
 };
+
+export const idStoreProperty = 'id_store';
+
+// These feature collections have feature identifiers not compatible with Mapbox
+export const StringIdentifierCollections: string[] = [
+  CollectionId.AWDB,
+  CollectionId.ArizonaWaterWells,
+  CollectionId.NWMLakeOutput,
+  CollectionId.Streamgages,
+];
 
 // Some collections support locations but the data size is too large to reasonably render
 export const DatasourceCollectionType: Record<CollectionType, string[]> = {

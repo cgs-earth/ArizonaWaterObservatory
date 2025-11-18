@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { Feature } from 'geojson';
 import { Stack } from '@mantine/core';
+import { StringIdentifierCollections } from '@/consts/collections';
 import { Grid } from '@/features/Popup/Grid';
 import { Header } from '@/features/Popup/Header';
 import { Item } from '@/features/Popup/Item';
@@ -16,6 +17,7 @@ import { Layer, Location as LocationType } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
+import { getIdStore } from '@/utils/getIdStore';
 import { getParameterUnit } from '@/utils/parameters';
 
 export type Parameter = {
@@ -40,6 +42,8 @@ const Popup: React.FC<Props> = (props) => {
   const [layer, setLayer] = useState<Layer | null>(null);
   const [datasetName, setDatasetName] = useState<string>('');
   const [parameters, setParameters] = useState<Parameter[]>([]);
+
+  const [id, setId] = useState<string>(location.id);
 
   const setLinkLocation = useSessionStore((state) => state.setLinkLocation);
   const setOverlay = useSessionStore((state) => state.setOverlay);
@@ -92,6 +96,19 @@ const Popup: React.FC<Props> = (props) => {
     }
   }, [location, layer]);
 
+  useEffect(() => {
+    if (feature && layer && StringIdentifierCollections.includes(layer.datasourceId)) {
+      const id = getIdStore(feature);
+      if (id) {
+        setId(id);
+      } else {
+        setId(location.id);
+      }
+    } else {
+      setId(location.id);
+    }
+  }, [layer, location, feature]);
+
   const handleLinkClick = () => {
     setLinkLocation(location);
     setOverlay(Overlay.Links);
@@ -110,7 +127,7 @@ const Popup: React.FC<Props> = (props) => {
 
   return (
     <Stack gap={0} className={styles.popupWrapper}>
-      <Header id={location.id} name={layer.name} collectionType={collectionType} />
+      <Header id={id} name={layer.name} collectionType={collectionType} />
 
       {collectionType === CollectionType.EDR && feature && datasetName.length > 0 && (
         <Location

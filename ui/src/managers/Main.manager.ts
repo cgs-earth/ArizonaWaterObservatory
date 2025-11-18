@@ -17,7 +17,12 @@ import {
 } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
-import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
+import {
+  CollectionRestrictions,
+  idStoreProperty,
+  RestrictionType,
+  StringIdentifierCollections,
+} from '@/consts/collections';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import {
   DEFAULT_BBOX,
@@ -45,6 +50,7 @@ import {
 } from '@/stores/main/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
 import { isSameArray } from '@/utils/compareArrays';
+import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
 import {
   getFillLayerDefinition,
@@ -336,11 +342,25 @@ class MainManager {
     return true;
   }
 
-  public getUniqueIds(features: GeoJSONFeature[]): Array<string> {
+  public getUniqueIds(features: GeoJSONFeature[], collectionId: ICollection['id']): Array<string> {
     const uniques = new Set<string>();
 
+    const useIdStore = StringIdentifierCollections.includes(collectionId);
+
     for (const feature of features) {
-      if (feature.id) {
+      if (useIdStore) {
+        const id = getIdStore(feature);
+        if (id) {
+          uniques.add(id);
+        } else {
+          console.error(
+            'Unable to find id store on layer from collection: ',
+            collectionId,
+            ', feature: ',
+            feature
+          );
+        }
+      } else if (feature.id) {
         uniques.add(String(feature.id));
       }
     }
@@ -394,6 +414,7 @@ class MainManager {
 
     throw new Error('Unsupported collection type');
   }
+
   /**
    *
    * @function
@@ -412,6 +433,25 @@ class MainManager {
           : {}),
       },
     });
+  }
+
+  /**
+   *
+   * @function
+   */
+  private storeIdentifiers(
+    featureCollection: ExtendedFeatureCollection
+  ): ExtendedFeatureCollection {
+    return {
+      ...featureCollection,
+      features: featureCollection.features.map((feature) => ({
+        ...feature,
+        properties: {
+          ...feature.properties,
+          [idStoreProperty]: feature.id,
+        },
+      })),
+    };
   }
 
   /**
@@ -442,6 +482,10 @@ class MainManager {
 
     if (!data) {
       return getDefaultGeoJSON();
+    }
+
+    if (StringIdentifierCollections.includes(collectionId)) {
+      return this.storeIdentifiers(data);
     }
 
     return data;
@@ -1025,7 +1069,8 @@ class MainManager {
         layers: [mapLayerId],
       });
       if (features.length > 0) {
-        const uniqueFeatures = this.getUniqueIds(features);
+        // Hack, use the feature id to track this location, fetch id store in consuming features
+        const uniqueFeatures = this.getUniqueIds(features, '');
         uniqueFeatures.forEach((locationId) => {
           if (this.hasLocation(locationId)) {
             this.store.getState().removeLocation({
@@ -1045,6 +1090,7 @@ class MainManager {
 
   private getHoverEventHandler(
     name: string,
+    collectionId: ICollection['id'],
     upperLabel: string,
     lowerLabel: string
   ): (e: MapMouseEvent) => void {
@@ -1052,7 +1098,7 @@ class MainManager {
       this.map!.getCanvas().style.cursor = 'pointer';
       const { features } = e;
       if (features && features.length > 0) {
-        const uniqueFeatures = this.getUniqueIds(features);
+        const uniqueFeatures = this.getUniqueIds(features, collectionId);
         const html = `
             <span style="color:black;">
               <strong>${name}</strong><br/>
@@ -1100,12 +1146,12 @@ class MainManager {
         this.map.on(
           'mouseenter',
           [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(layer.name, upperLabel, lowerLabel)
+          this.getHoverEventHandler(layer.name, layer.datasourceId, upperLabel, lowerLabel)
         );
         this.map.on(
           'mousemove',
           [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(layer.name, upperLabel, lowerLabel)
+          this.getHoverEventHandler(layer.name, layer.datasourceId, upperLabel, lowerLabel)
         );
         this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
           this.map!.getCanvas().style.cursor = '';
