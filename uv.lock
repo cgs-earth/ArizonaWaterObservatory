@@ -228,7 +228,7 @@ dev = [
 ]
 server = [
     { name = "gunicorn", specifier = ">=23.0.0" },
-    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=dbcb34802b72c4e4d61a5e60e6c13c9abd32c57b" },
+    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=85ff3017d27cf72fedbc336ab05a47f8db844a78" },
     { name = "starlette", specifier = ">=0.47.0" },
     { name = "uvicorn", specifier = ">=0.34.3" },
 ]
@@ -245,12 +245,12 @@ wheels = [
 [[package]]
 name = "awdb-com"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&branch=main#f950bf2043df7233f9a6f2dbb995fee3d9096dac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&branch=main#a7900c98158f04767dbeda4a3311804e9e76eed6" }
 
 [[package]]
 name = "awdb-forecasts"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&branch=main#f950bf2043df7233f9a6f2dbb995fee3d9096dac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&branch=main#a7900c98158f04767dbeda4a3311804e9e76eed6" }
 
 [[package]]
 name = "babel"
@@ -448,7 +448,7 @@ wheels = [
 [[package]]
 name = "com"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&branch=main#f950bf2043df7233f9a6f2dbb995fee3d9096dac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&branch=main#a7900c98158f04767dbeda4a3311804e9e76eed6" }
 
 [[package]]
 name = "config-store"
@@ -847,15 +847,15 @@ wheels = [
 
 [[package]]
 name = "geoalchemy2"
-version = "0.18.0"
+version = "0.18.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/15/88398e863a9e044e06957d0f214cc5f7ef3c1dee4c540d828bfa6c7d4535/geoalchemy2-0.18.0.tar.gz", hash = "sha256:9a04690cc33fbc580d15c7c028d9b1b1ea08271489730096c7092e1d486c2b7a", size = 239129, upload-time = "2025-07-21T10:51:47.52Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/05/df/f6d689120a15a2287794e16696c3bdb4cf2e53038255d288b61a4d59e1fa/geoalchemy2-0.18.1.tar.gz", hash = "sha256:4bdc7daf659e36f6456e2f2c3bcce222b879584921a4f50a803ab05fa2bb3124", size = 239302, upload-time = "2025-11-18T15:12:05.296Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b5/f5/1e36e49d4380d70d58c777953fd3c465b4fb242309b6bd6b88e45ef11bd7/geoalchemy2-0.18.0-py3-none-any.whl", hash = "sha256:ff0fe7339ba535c50845a2c7e8817a20c164364128991d795733b3c5904b1ee1", size = 81248, upload-time = "2025-07-21T10:51:46.291Z" },
+    { url = "https://files.pythonhosted.org/packages/48/25/b3d6fc757d8d909e0e666ec6fbf1b7914e9ad18d6e1b08994cd9d2e63330/geoalchemy2-0.18.1-py3-none-any.whl", hash = "sha256:a49d9559bf7acbb69129a01c6e1861657c15db420886ad0a09b1871fb0ff4bdb", size = 81261, upload-time = "2025-11-18T15:12:03.985Z" },
 ]
 
 [[package]]
@@ -1315,7 +1315,7 @@ wheels = [
 [[package]]
 name = "noaa-rfc"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fnoaa_rfc&branch=main#f950bf2043df7233f9a6f2dbb995fee3d9096dac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fnoaa_rfc&branch=main#a7900c98158f04767dbeda4a3311804e9e76eed6" }
 
 [[package]]
 name = "nodeenv"
@@ -1742,7 +1742,7 @@ wheels = [
 [[package]]
 name = "pygeoapi"
 version = "0.22.dev0"
-source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=dbcb34802b72c4e4d61a5e60e6c13c9abd32c57b#dbcb34802b72c4e4d61a5e60e6c13c9abd32c57b" }
+source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=85ff3017d27cf72fedbc336ab05a47f8db844a78#85ff3017d27cf72fedbc336ab05a47f8db844a78" }
 dependencies = [
     { name = "babel" },
     { name = "click" },
@@ -2143,7 +2143,7 @@ wheels = [
 [[package]]
 name = "rise"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&branch=main#f950bf2043df7233f9a6f2dbb995fee3d9096dac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&branch=main#a7900c98158f04767dbeda4a3311804e9e76eed6" }
 
 [[package]]
 name = "rpds-py"
@@ -2240,7 +2240,7 @@ wheels = [
 [[package]]
 name = "snotel"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&branch=main#f950bf2043df7233f9a6f2dbb995fee3d9096dac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&branch=main#a7900c98158f04767dbeda4a3311804e9e76eed6" }
 
 [[package]]
 name = "sqlalchemy"
@@ -2459,7 +2459,7 @@ wheels = [
 [[package]]
 name = "usace"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&branch=main#f950bf2043df7233f9a6f2dbb995fee3d9096dac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&branch=main#a7900c98158f04767dbeda4a3311804e9e76eed6" }
 
 [[package]]
 name = "uvicorn"
@@ -2606,16 +2606,16 @@ wheels = [
 
 [[package]]
 name = "xarray"
-version = "2025.10.1"
+version = "2025.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "packaging" },
     { name = "pandas" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7b/ce/f5dd613ddd0b3f839c59e6c2fa20c62469bf671bf4c92a12b09dc0972326/xarray-2025.10.1.tar.gz", hash = "sha256:3c2b5ad7389825bd624ada5ff26b01ac54b1aae72e2fe0d724d81d40a2bf5785", size = 3058736, upload-time = "2025-10-07T20:25:56.708Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/39/ad/b072c970cfb2e2724509bf1e8d7fb4084cc186a90d486c9ac4a48ff83186/xarray-2025.11.0.tar.gz", hash = "sha256:d7a4aa4500edbfd60676b1613db97da309ab144cac0bcff0cbf483c61c662af1", size = 3072276, upload-time = "2025-11-17T16:12:09.167Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/78/4d6d68555a92cb97b4c192759c4ab585c5cb23490f64d4ddf12c66a3b051/xarray-2025.10.1-py3-none-any.whl", hash = "sha256:a4e699433b87a7fac340951bc36648645eeef72bdd915ff055ac2fd99865a73d", size = 1365202, upload-time = "2025-10-07T20:25:54.964Z" },
+    { url = "https://files.pythonhosted.org/packages/86/b4/cfa7aa56807dd2d9db0576c3440b3acd51bae6207338ec5610d4878e5c9b/xarray-2025.11.0-py3-none-any.whl", hash = "sha256:986893b995de4a948429356a3897d78e634243c1cac242bd59d03832b9d72dd1", size = 1375447, upload-time = "2025-11-17T16:12:07.123Z" },
 ]
 
 [[package]]
