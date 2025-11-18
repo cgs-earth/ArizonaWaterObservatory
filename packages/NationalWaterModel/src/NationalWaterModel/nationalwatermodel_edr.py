@@ -166,6 +166,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         Example: http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-110.7,33.0&f=json&parameter-name=streamflow&datetime=2023-01-01
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-110.7,33.0&f=html&parameter-name=streamflow&datetime=2023-01-01
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-111.7,31.9&f=html&parameter-name=velocity&datetime=2023-01-01/2023-01-02
+                 http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=sfcheadsubrt&bbox=-112.5,31.7,-110.7,33.0&datetime=2020-01-01
+                 http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=sfcheadsubrt&bbox=-112.5,31.7,-111.7,32.0&datetime=2020-01-01/2020-01-02&f=json
         """
         if not select_properties or len(select_properties) > 1:
             raise ValueError(

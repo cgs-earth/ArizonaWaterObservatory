@@ -210,6 +210,14 @@ def fetch_data(
         )
         stop = np.datetime64(stop) if stop != ".." else available_times.max()
 
+        if start > stop:
+            raise ProviderQueryError(
+                f"Invalid datetime range: start {start} is after stop {stop}"
+            )
+        elif start == stop:
+            raise ProviderQueryError(
+                f"Invalid datetime range: start {start} is equal to stop {stop}"
+            )
         # Clip start/stop to available range
         start = max(start, available_times.min())
         stop = min(stop, available_times.max())
@@ -391,7 +399,11 @@ def dataset_to_covjson(
                     "y": {
                         "values": y_values,
                     },
-                    "t": {"values": [time_values]},
+                    "t": {
+                        "values": time_values
+                        if not singleItem
+                        else [time_values]
+                    },
                 },
                 "referencing": [
                     {
