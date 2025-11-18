@@ -1,7 +1,9 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: Apache-2.0
 
-from pygeoapi.provider.base import ProviderNoDataError
+from pygeoapi.crs import DEFAULT_CRS
+from pygeoapi.provider.base import ProviderNoDataError, ProviderQueryError
+from pygeoapi.util import transform_bbox
 import pyproj
 import pytest
 
@@ -25,6 +27,19 @@ provider = NationalWaterModelEDRProvider(
     }
 )
 
+route_to_route_provider = NationalWaterModelEDRProvider(
+    provider_def={
+        "type": "edr",
+        "name": "test_route_to_route",
+        "data": "https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com",
+        "remote_dataset": "CONUS/zarr/rtout.zarr",
+        "x_field": "x",
+        "y_field": "y",
+        "time_field": "time",
+        "raster": True,
+    }
+)
+
 ARIZONA_BBOX = [-112.5, 31.7, -110.7, 33.0]
 
 
@@ -37,6 +52,19 @@ def test_provider_no_data():
             x_field="longitude",
             y_field="latitude",
             datetime_filter="1900-01-01",
+            unopened_dataset=provider.zarr_dataset,
+        )
+
+
+def test_provider_invalid_date_range():
+    with pytest.raises(ProviderQueryError):
+        fetch_data(
+            bbox=ARIZONA_BBOX,
+            timeseries_properties_to_fetch=["streamflow"],
+            time_field="time",
+            x_field="longitude",
+            y_field="latitude",
+            datetime_filter="2000-01-01/1900-01-01",
             unopened_dataset=provider.zarr_dataset,
         )
 
@@ -105,3 +133,56 @@ def test_crs():
         projected_dataset["longitude"].values[0]
         != provider.zarr_dataset["longitude"].values[0]
     )
+
+
+def test_limit():
+    result = fetch_data(
+        bbox=ARIZONA_BBOX,
+        timeseries_properties_to_fetch=["streamflow"],
+        time_field="time",
+        datetime_filter="2023-01-01",
+        x_field="longitude",
+        y_field="latitude",
+        unopened_dataset=provider.zarr_dataset,
+        feature_limit=10,
+    )
+
+    assert result.sizes["feature_id"] == 10
+    assert result["feature_id"].values[-1].tolist() == 15840270
+
+
+def test_limit_with_offset():
+    result = fetch_data(
+        bbox=ARIZONA_BBOX,
+        timeseries_properties_to_fetch=["streamflow"],
+        time_field="time",
+        datetime_filter="2023-01-01",
+        x_field="longitude",
+        y_field="latitude",
+        unopened_dataset=provider.zarr_dataset,
+        feature_limit=1,
+        feature_offset=9,
+    )
+
+    assert result.sizes["feature_id"] == 1
+    assert result["feature_id"].values[0].tolist() == 15840270
+
+
+def test_raster_with_range():
+    # Roughly equivalent to the following
+    # http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=sfcheadsubrt&bbox=-112.5,31.7,-111.7,32.0&datetime=2020-01-01/2020-01-02&f=json
+    small_arizona_bbox = [-112.5, 31.7, -111.7, 32.0]
+    crs = get_crs_from_dataset(route_to_route_provider.zarr_dataset)
+    result = fetch_data(
+        bbox=transform_bbox(small_arizona_bbox, DEFAULT_CRS, crs),
+        timeseries_properties_to_fetch=["sfcheadsubrt"],
+        time_field="time",
+        datetime_filter="2020-01-01/2020-01-02",
+        x_field="x",
+        y_field="y",
+        unopened_dataset=route_to_route_provider.zarr_dataset,
+        raster=True,
+    )
+    assert result
+    assert result.variables["sfcheadsubrt"].shape
+    assert len(result.coords["time"]) >= 1

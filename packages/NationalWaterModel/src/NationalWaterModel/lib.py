@@ -13,7 +13,7 @@ from pygeoapi.provider.base import (
     ProviderNoDataError,
     ProviderQueryError,
 )
-from pygeoapi.util import get_crs_from_uri
+from pygeoapi.util import DATETIME_FORMAT, get_crs_from_uri
 import pyproj
 import s3fs
 import xarray as xr
@@ -141,9 +141,10 @@ def fetch_data(
     datetime_filter: str | None,
     x_field: str | None,
     y_field: str | None,
-    bbox: list,
+    bbox: list = [],
     feature_id: str | None = None,
-    feature_limit: int | None = None,
+    feature_limit: int = 10,
+    feature_offset: int = 0,
     raster: bool = False,
 ) -> xr.Dataset:
     """
@@ -209,6 +210,14 @@ def fetch_data(
         )
         stop = np.datetime64(stop) if stop != ".." else available_times.max()
 
+        if start > stop:
+            raise ProviderQueryError(
+                f"Invalid datetime range: start {start} is after stop {stop}"
+            )
+        elif start == stop:
+            raise ProviderQueryError(
+                f"Invalid datetime range: start {start} is equal to stop {stop}"
+            )
         # Clip start/stop to available range
         start = max(start, available_times.min())
         stop = min(stop, available_times.max())
@@ -222,10 +231,6 @@ def fetch_data(
         else:
             times_to_select = available_times[mask]
             selected = selected.sel(time=times_to_select, drop=False)
-
-    # Apply feature limit if provided
-    if feature_limit is not None:
-        selected = selected.isel(feature_id=slice(0, feature_limit))
 
     if bbox:
         # Geospatial filtering using latitude and longitude variables
@@ -253,6 +258,23 @@ def fetch_data(
         else:
             selected = selected.isel(feature_id=mask)
 
+    # start is always the feature_offset since the default is 0
+    start = feature_offset
+    # the end should be such that it generates a response with length equal to feature_limit
+    end: int | None = start + feature_limit
+
+    # we apply the limit regardless of bbox or not
+    # we always run this if it is not raster data
+    # given the fact that there will always be some sort of limit
+    # in pygeoapi
+    if not raster:
+        # apply feature limit at the end of processing
+        # ideally since this is lazy loaded this should still have
+        # predicate pushdown; we need to push this last otherwise
+        # we will filter too early and get the start of the dataset which
+        # is at an arbitrary location, potentially outside the bbox
+        selected = selected.isel(feature_id=slice(start, end))
+
     return selected.load()
 
 
@@ -275,8 +297,9 @@ def dataset_to_covjson(
 
     # cast to list of ISO strings so that it is serializable into json
     time_values = (
-        dataset[time_axis].values.astype("datetime64[ns]").astype(str).tolist()
+        dataset[time_axis].dt.strftime(DATETIME_FORMAT).values.tolist()
     )
+
     timeseries_values = dataset[timeseries_parameter_name].values
 
     try:
@@ -376,7 +399,11 @@ def dataset_to_covjson(
                     "y": {
                         "values": y_values,
                     },
-                    "t": {"values": [time_values]},
+                    "t": {
+                        "values": time_values
+                        if not singleItem
+                        else [time_values]
+                    },
                 },
                 "referencing": [
                     {

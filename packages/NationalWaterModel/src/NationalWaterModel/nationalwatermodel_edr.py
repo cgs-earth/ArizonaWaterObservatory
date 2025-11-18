@@ -98,7 +98,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         select_properties: list[str] | None = None,
         crs: str | None = None,
         format_: str | None = None,
-        limit: int | None = None,
+        limit: int = 0,
+        bbox: list = [],
         **kwargs,
     ) -> (
         CoverageCollectionDict
@@ -118,13 +119,15 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             raise ProviderQueryError(
                 "datetime is required to prevent overfetching"
             )
+        if bbox:
+            bbox = transform_bbox(bbox, DEFAULT_CRS, self.storage_crs)
 
         loaded_data = fetch_data(
             unopened_dataset=self.zarr_dataset,
             timeseries_properties_to_fetch=select_properties,
             datetime_filter=datetime_,
             feature_id=location_id,
-            bbox=[],
+            bbox=bbox,
             feature_limit=limit,
             x_field=self.x_field,
             y_field=self.y_field,
@@ -166,6 +169,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         Example: http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-110.7,33.0&f=json&parameter-name=streamflow&datetime=2023-01-01
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-110.7,33.0&f=html&parameter-name=streamflow&datetime=2023-01-01
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-111.7,31.9&f=html&parameter-name=velocity&datetime=2023-01-01/2023-01-02
+                 http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=sfcheadsubrt&bbox=-112.5,31.7,-110.7,33.0&datetime=2020-01-01
+                 http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=sfcheadsubrt&bbox=-112.5,31.7,-111.7,32.0&datetime=2020-01-01/2020-01-02&f=json
         """
         if not select_properties or len(select_properties) > 1:
             raise ValueError(
