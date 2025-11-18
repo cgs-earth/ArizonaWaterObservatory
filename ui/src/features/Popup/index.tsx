@@ -56,16 +56,21 @@ const Popup: React.FC<Props> = (props) => {
   }, [locations]);
 
   useEffect(() => {
-    if (feature && feature.id === location.id) {
+    if (
+      !layer ||
+      (feature && (feature.id === location.id || getIdStore(feature) === location.id))
+    ) {
       return;
     }
 
-    const newFeature = features.find((feature) => String(feature.id) === location.id);
+    const newFeature = features.find(
+      (feature) => String(feature.id) === location.id || getIdStore(feature) === location.id
+    );
 
     if (newFeature) {
       setFeature(newFeature);
     }
-  }, [location]);
+  }, [location, layer]);
 
   useEffect(() => {
     const newLayer = mainManager.getLayer(location.layerId);

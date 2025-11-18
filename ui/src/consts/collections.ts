@@ -42,6 +42,7 @@ export const StringIdentifierCollections: string[] = [
   CollectionId.ArizonaWaterWells,
   CollectionId.NWMLakeOutput,
   CollectionId.Streamgages,
+  CollectionId.SNOTELEdr,
 ];
 
 // Some collections support locations but the data size is too large to reasonably render

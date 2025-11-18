@@ -947,7 +947,7 @@ class MainManager {
 
       let filtered = this.filterLocations(page, options?.filterFeatures);
       this.clearInvalidLocations(layer.id, collectionId, filtered);
-      if (filtered?.features?.length) {
+      if (Array.isArray(filtered.features)) {
         aggregate.features.push(...filtered.features);
         source.setData(aggregate);
       }
@@ -1061,7 +1061,11 @@ class MainManager {
     }
   }
 
-  private getClickEventHandler(mapLayerId: string, layerId: string): (e: MapMouseEvent) => void {
+  private getClickEventHandler(
+    mapLayerId: string,
+    layerId: string,
+    collectionId: ICollection['id']
+  ): (e: MapMouseEvent) => void {
     return (e) => {
       e.originalEvent.preventDefault();
 
@@ -1070,7 +1074,7 @@ class MainManager {
       });
       if (features.length > 0) {
         // Hack, use the feature id to track this location, fetch id store in consuming features
-        const uniqueFeatures = this.getUniqueIds(features, '');
+        const uniqueFeatures = this.getUniqueIds(features, collectionId);
         uniqueFeatures.forEach((locationId) => {
           if (this.hasLocation(locationId)) {
             this.store.getState().removeLocation({
@@ -1137,11 +1141,23 @@ class MainManager {
         this.map.addLayer(getLineLayerDefinition(lineLayerId, sourceId, layer.color));
         this.map.addLayer(getPointLayerDefinition(pointLayerId, sourceId, layer.color));
 
-        this.map.on('click', pointLayerId, this.getClickEventHandler(pointLayerId, layer.id));
+        this.map.on(
+          'click',
+          pointLayerId,
+          this.getClickEventHandler(pointLayerId, layer.id, layer.datasourceId)
+        );
 
-        this.map.on('click', fillLayerId, this.getClickEventHandler(fillLayerId, layer.id));
+        this.map.on(
+          'click',
+          fillLayerId,
+          this.getClickEventHandler(fillLayerId, layer.id, layer.datasourceId)
+        );
 
-        this.map.on('click', lineLayerId, this.getClickEventHandler(lineLayerId, layer.id));
+        this.map.on(
+          'click',
+          lineLayerId,
+          this.getClickEventHandler(lineLayerId, layer.id, layer.datasourceId)
+        );
 
         this.map.on(
           'mouseenter',

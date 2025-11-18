@@ -5,11 +5,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Feature } from 'geojson';
+import { StringIdentifierCollections } from '@/consts/collections';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
+import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
-import { Layer } from '@/stores/main/types';
+import { Layer, Location } from '@/stores/main/types';
 import { LoadingType } from '@/stores/session/types';
+import { getIdStore } from '@/utils/getIdStore';
 
 export const useLocations = (layer: Layer) => {
   const locations = useMainStore((state) => state.locations);
@@ -19,6 +22,14 @@ export const useLocations = (layer: Layer) => {
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
+
+  const getFilterFunction = (datasourceId: ICollection['id']) => {
+    if (StringIdentifierCollections.includes(datasourceId)) {
+      return (location: Location, feature: Feature) => location.id === getIdStore(feature);
+    }
+
+    return (location: Location, feature: Feature) => location.id === feature.id;
+  };
 
   // Get all non-selected locations, rendered or not on map
   const getOtherLocations = async () => {
@@ -33,11 +44,14 @@ export const useLocations = (layer: Layer) => {
 
       const layerLocations = locations.filter((location) => location.layerId === layer.id);
 
+      const filterFunction = getFilterFunction(layer.datasourceId);
+
       const selectedLocations = allLocations.features.filter((feature) =>
-        layerLocations.some((location) => location.id === String(feature.id))
+        layerLocations.some((location) => filterFunction(location, feature))
       );
+
       const otherLocations = allLocations.features.filter(
-        (feature) => !layerLocations.some((location) => location.id === String(feature.id))
+        (feature) => !layerLocations.some((location) => filterFunction(location, feature))
       );
 
       if (isMounted.current) {
@@ -69,3 +83,9 @@ export const useLocations = (layer: Layer) => {
 
   return { selectedLocations, otherLocations };
 };
+
+// USGS
+// Discharge in cubic feet/s
+
+// ADWR Groundwater
+// Depth to Water
