@@ -111,8 +111,6 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         Extract data from location
         """
 
-        if bbox is None:
-            bbox = []
         if not select_properties or len(select_properties) > 1:
             raise ProviderQueryError(
                 f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
