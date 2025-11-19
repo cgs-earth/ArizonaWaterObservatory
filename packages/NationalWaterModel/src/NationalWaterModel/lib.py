@@ -6,6 +6,8 @@ import logging
 from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
+from com.env import TRACER
+from com.otel import otel_trace
 import numpy as np
 from pygeoapi.api import DEFAULT_STORAGE_CRS
 from pygeoapi.provider.base import (
@@ -51,6 +53,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 @functools.cache
+@otel_trace()
 def get_zarr_dataset_handle(
     data: str, remote_dataset: str | None
 ) -> xr.Dataset:
@@ -103,6 +106,7 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
     return get_crs_from_uri(DEFAULT_STORAGE_CRS)
 
 
+@otel_trace()
 def project_dataset(
     dataset: xr.Dataset,
     storage_crs: pyproj.CRS,
@@ -134,6 +138,7 @@ def project_dataset(
         return dataset.rio.reproject(dst_crs=output_crs.to_wkt())
 
 
+@otel_trace()
 def fetch_data(
     unopened_dataset: xr.Dataset,
     timeseries_properties_to_fetch: list[str],
@@ -214,13 +219,17 @@ def fetch_data(
             raise ProviderQueryError(
                 f"Invalid datetime range: start {start} is equal to stop {stop}"
             )
-        # Clip start/stop to available range
-        start = max(start, available_times.min())
-        stop = min(stop, available_times.max())
-
-        # Select only times that exist in the dataset
-        mask = (available_times >= start) & (available_times <= stop)
-        if not mask.any():
+        # Get date time range
+        with TRACER.start_as_current_span("clip_datetime_range") as span:
+            start = max(start, available_times.min())
+            stop = min(stop, available_times.max())
+            span.set_attribute("dataset_start", str(start))
+            span.set_attribute("dataset_end", str(stop))
+        with TRACER.start_as_current_span("check_no_data") as span:
+            # Select only times that exist in the dataset
+            mask = (available_times >= start) & (available_times <= stop)
+            has_data = mask.any()
+        if not has_data:
             raise ProviderNoDataError(
                 f"No data available between {start} and {stop}."
             )
@@ -231,30 +240,28 @@ def fetch_data(
     if feature_id is not None:
         selected = selected.sel(feature_id=int(feature_id))
     if bbox:
-        # Geospatial filtering using latitude and longitude variables
         lon_min, lat_min, lon_max, lat_max = bbox
 
-        # latitude/longitude are 1D coords along "feature_id"
-        lon = selected[x_field].compute()
-        lat = selected[y_field].compute()
+        with TRACER.start_as_current_span("generate_bbox_mask") as span:
+            # Build lazy mask
+            mask_lazy = (
+                (selected[x_field] >= lon_min)
+                & (selected[x_field] <= lon_max)
+                & (selected[y_field] >= lat_min)
+                & (selected[y_field] <= lat_max)
+            )
 
-        # get only data within the bbox
-        mask = (
-            (lon >= lon_min)
-            & (lon <= lon_max)
-            & (lat >= lat_min)
-            & (lat <= lat_max)
-        )
+            if raster:
+                # Raster: can stay lazy
+                selected = selected.where(mask_lazy, drop=True)
+            else:
+                # Vector: compute mask, but not the whole dataset
+                mask = mask_lazy.compute()
 
-        if not mask.any():
-            raise ProviderNoDataError(f"No data in bbox {bbox}")
+                if not mask.any():
+                    raise ProviderNoDataError(f"No data in bbox {bbox}")
 
-        if raster:
-            # if it is raster there is no feature_id
-            # and thus the mask needs to be applied to the dataset as a whole
-            selected = selected.where(mask, drop=True)
-        else:
-            selected = selected.isel(feature_id=mask)
+                selected = selected.isel(feature_id=mask)
 
     # start is always the feature_offset since the default is 0
     start = feature_offset
@@ -275,9 +282,11 @@ def fetch_data(
         # is at an arbitrary location, potentially outside the bbox
         selected = selected.isel(feature_id=slice(start, end))
 
-    return selected.load()
+    with TRACER.start_as_current_span("load_nwm_dataset"):
+        return selected.load()
 
 
+@otel_trace()
 def dataset_to_covjson(
     dataset: xr.Dataset,
     x_axis: str | None,

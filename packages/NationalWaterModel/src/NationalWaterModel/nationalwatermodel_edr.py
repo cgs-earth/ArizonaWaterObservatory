@@ -99,7 +99,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         crs: str | None = None,
         format_: str | None = None,
         limit: int = 0,
-        bbox: list = [],
+        bbox: list = [],  # noqa: B006 we ignore this since pygeoapi always passes in an empty bbox and we want this to be understood in our tests
         **kwargs,
     ) -> (
         CoverageCollectionDict
@@ -111,6 +111,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         Extract data from location
         """
 
+        if bbox is None:
+            bbox = []
         if not select_properties or len(select_properties) > 1:
             raise ProviderQueryError(
                 f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
@@ -155,6 +157,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             output_crs=pyproj.CRS.from_epsg(4326),
         )
 
+    @otel_trace()
     def cube(
         self,
         bbox: list,
