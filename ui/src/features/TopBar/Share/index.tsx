@@ -70,7 +70,7 @@ const Share: React.FC = () => {
   };
 
   const handleClick = () => {
-    setOverlay(Overlay.Info);
+    setOverlay(Overlay.Share);
   };
 
   const getShareUrl = (shareId: string): string => {

@@ -3,16 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActionIcon, List, Tooltip } from '@mantine/core';
 import Map from '@/assets/Map';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import styles from '@/features/Panel/Panel.module.css';
+import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import warningManager from '@/managers/Warning.init';
 import { ICollection } from '@/services/edr.service';
+import useMainStore from '@/stores/main';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 
@@ -23,10 +25,18 @@ type Props = {
 export const Control: React.FC<Props> = (props) => {
   const { dataset } = props;
 
+  const layerCount = useMainStore((state) => state.layers.length);
+
+  const { isLoadingGeography } = useLoading();
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const controller = useRef<AbortController | null>(null);
+  const isMounted = useRef(false);
 
   const handleClick = async (name: string, id: ICollection['id']) => {
     const loadingInstance = loadingManager.add(`Creating layer for: ${name}`, LoadingType.Data);
+    setIsLoading(true);
 
     try {
       controller.current = new AbortController();
@@ -76,16 +86,49 @@ export const Control: React.FC<Props> = (props) => {
       }
     } finally {
       loadingManager.remove(loadingInstance);
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+      if (controller.current) {
+        controller.current.abort('Component unmount');
+      }
+    };
+  }, []);
+
+  const atLayerLimit = layerCount === 10;
+  const isControlDisabled = atLayerLimit || isLoading || isLoadingGeography;
+
+  const getTooltipLabel = () => {
+    if (atLayerLimit) {
+      return 'At layer limit. Please remove layers before adding any new layers.';
+    }
+
+    if (isLoading) {
+      return 'Please wait until layer creation has finished.';
+    }
+
+    if (isLoadingGeography) {
+      return 'Please wait until spatial filters are applied.';
+    }
+
+    return 'Add an instance of this dataset as an interactive layer';
+  };
+
   return (
-    <Tooltip label="Add an instance of this dataset as an interactive layer" openDelay={500}>
+    <Tooltip label={getTooltipLabel()} openDelay={500}>
       <ActionIcon
         size="lg"
         variant="transparent"
         title="Add Layer"
         classNames={{ root: styles.actionIconRoot, icon: styles.actionIcon }}
+        disabled={isControlDisabled}
+        data-disabled={isControlDisabled}
         onClick={() => handleClick(dataset.title ?? dataset.id, dataset.id)}
       >
         <Map />
