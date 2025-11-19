@@ -569,11 +569,15 @@ class MainManager {
     const datasource = this.getDatasource(datasourceId);
 
     if (!datasource) {
-      throw new Error('Error: datasource not found');
+      throw new Error('Datasource not found');
     }
 
     const currentDatasourceCount = this.getDatasourceCount(datasource.id);
     const layers = this.store.getState().layers;
+
+    if (layers.length === 10) {
+      throw new Error('Layer limit reached.');
+    }
 
     const provider = getProvider(datasource.id);
 
