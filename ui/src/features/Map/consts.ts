@@ -27,7 +27,7 @@ export const drawLayers = [
   SubLayerId.VertexInnerHot,
   SubLayerId.MidpointCold,
   SubLayerId.MidpointHot,
-  SubLayerId.MeasureLine,
-  SubLayerId.MeasurePoints,
-  SubLayerId.MeasureLabel,
+  // SubLayerId.MeasureLine,
+  // SubLayerId.MeasurePoints,
+  // SubLayerId.MeasureLabel,
 ];

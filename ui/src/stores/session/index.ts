@@ -8,6 +8,7 @@ import { immer } from 'zustand/middleware/immer';
 import { createLoadingSlice } from '@/stores/session/slices/loading';
 import { createMeasureSlice } from '@/stores/session/slices/measure';
 import { createNotificationsSlice } from '@/stores/session/slices/notifications';
+import { createWarningsSlice } from '@/stores/session/slices/warning';
 import { HelpTab, SessionState, Tool } from '@/stores/session/types';
 
 const useSessionStore = create<SessionState>()(
@@ -33,6 +34,7 @@ const useSessionStore = create<SessionState>()(
     ...createLoadingSlice(set, get, store),
     ...createMeasureSlice(set, get, store),
     ...createNotificationsSlice(set, get, store),
+    ...createWarningsSlice(set, get, store),
   }))
 );
 

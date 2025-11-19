@@ -15,6 +15,7 @@ import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import { Variant } from '@/components/types';
+import { StringIdentifierCollections } from '@/consts/collections';
 import { Chart } from '@/features/Popup/Chart';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import { Table } from '@/features/TopBar/Links/Table';
@@ -26,6 +27,7 @@ import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { createEmptyCsv } from '@/utils/csv';
+import { getIdStore } from '@/utils/getIdStore';
 import { buildLocationUrl } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
@@ -52,35 +54,21 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [from, setFrom] = useState<Layer['from']>(layer.from);
   const [to, setTo] = useState<Layer['to']>(layer.to);
 
+  const [id, setId] = useState<string>(String(location.id));
+
   const [isLoading, setIsLoading] = useState(false);
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
 
   useEffect(() => {
-    const url = buildLocationUrl(
-      collection.id,
-      String(location.id),
-      layer.parameters,
-      from,
-      to,
-      false,
-      true
-    );
+    const url = buildLocationUrl(collection.id, id, layer.parameters, from, to, false, true);
 
-    const codeUrl = buildLocationUrl(
-      collection.id,
-      String(location.id),
-      layer.parameters,
-      from,
-      to,
-      false,
-      false
-    );
+    const codeUrl = buildLocationUrl(collection.id, id, layer.parameters, from, to, false, false);
 
     setUrl(url);
     setCodeUrl(codeUrl);
-  }, [from, to]);
+  }, [id, from, to]);
 
   useEffect(() => {
     if (!layer) {
@@ -116,6 +104,19 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (StringIdentifierCollections.includes(layer.datasourceId)) {
+      const id = getIdStore(location);
+      if (id) {
+        setId(id);
+      } else {
+        setId(String(location.id));
+      }
+    } else {
+      setId(String(location.id));
+    }
+  }, [layer, location]);
+
   const getFileName = () => {
     let name = `data-${location.id}-${layer.parameters.join('_')}`;
 
@@ -131,15 +132,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   };
 
   const handleCSVClick = async () => {
-    const url = buildLocationUrl(
-      collection.id,
-      String(location.id),
-      layer.parameters,
-      from,
-      to,
-      true,
-      true
-    );
+    const url = buildLocationUrl(collection.id, id, layer.parameters, from, to, true, true);
 
     const loadingInstance = loadingManager.add(
       `Generating csv for location: ${location.id}`,
@@ -311,9 +304,9 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               <Chart
                 className={styles.linksChart}
                 collectionId={layer.datasourceId}
-                locationId={String(location.id)}
+                locationId={id}
                 title={datasetName}
-                parameters={parameters}
+                parameters={layer.parameters}
                 from={from}
                 to={to}
               />

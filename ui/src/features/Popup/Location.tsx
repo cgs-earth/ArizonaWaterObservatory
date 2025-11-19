@@ -9,11 +9,13 @@ import { Box, Group, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
+import { StringIdentifierCollections } from '@/consts/collections';
 import { Parameter } from '@/features/Popup';
 import { Chart } from '@/features/Popup/Chart';
 import styles from '@/features/Popup/Popup.module.css';
 import { Table } from '@/features/TopBar/Links/Table';
 import { Layer, Location as LocationType } from '@/stores/main/types';
+import { getIdStore } from '@/utils/getIdStore';
 
 type Props = {
   location: LocationType;
@@ -39,6 +41,7 @@ export const Location: React.FC<Props> = (props) => {
   } = props;
 
   const [tab, setTab] = useState<'chart' | 'table'>('chart');
+  const [id, setId] = useState<string>();
 
   useEffect(() => {
     if (parameters.length === 0) {
@@ -46,15 +49,24 @@ export const Location: React.FC<Props> = (props) => {
     }
   }, [parameters]);
 
+  useEffect(() => {
+    if (StringIdentifierCollections.includes(layer.datasourceId)) {
+      const id = getIdStore(feature);
+      setId(id);
+    } else {
+      setId(location.id);
+    }
+  }, [layer, location, feature]);
+
   return (
     <>
       <Box style={{ display: tab === 'chart' ? 'block' : 'none' }}>
-        {layer && datasetName.length > 0 && parameters.length > 0 && (
+        {layer && datasetName.length > 0 && parameters.length > 0 && id && (
           <Chart
             collectionId={layer.datasourceId}
-            locationId={location.id}
+            locationId={id}
             title={datasetName}
-            parameters={parameters.map((parameter) => parameter.name)}
+            parameters={layer.parameters}
             from={layer.from}
             to={layer.to}
           />

@@ -14,7 +14,10 @@ export enum CollectionId {
   NWMChannelRouting = 'National_Water_Model_Channel_Routing_Output',
   NWMAssimilationSystem = 'National_Water_Model_Land_Data_Assimilation_System_Output',
   NWMReachToReach = 'National_Water_Data_Reach_to_Reach_Routing_Output',
+  NWMLakeOutput = 'National_Water_Model_Lakeout',
+
   ArizonaWaterWells = 'ArizonaWaterWells',
+  AWDB = 'awdb-forecasts-edr',
 }
 
 export enum Provider {
@@ -31,6 +34,17 @@ export const ProviderDatasources: Record<Provider, string[]> = {
   [Provider.USACE]: [CollectionId.USACEEdr],
 };
 
+export const idStoreProperty = 'id_store';
+
+// These feature collections have feature identifiers not compatible with Mapbox
+export const StringIdentifierCollections: string[] = [
+  CollectionId.AWDB,
+  CollectionId.ArizonaWaterWells,
+  CollectionId.NWMLakeOutput,
+  CollectionId.Streamgages,
+  CollectionId.SNOTELEdr,
+];
+
 // Some collections support locations but the data size is too large to reasonably render
 export const DatasourceCollectionType: Record<CollectionType, string[]> = {
   [CollectionType.EDRGrid]: [CollectionId.NWMChannelRouting],
@@ -40,22 +54,110 @@ export const DatasourceCollectionType: Record<CollectionType, string[]> = {
   [CollectionType.Unknown]: [],
 };
 
-export const CollectionRestrictions: Record<
-  string,
-  { size?: number; days?: number; message: string }
-> = {
-  [CollectionId.ArizonaWaterWells]: {
-    size: 83700000000,
-    message: "Try a polygon that's roughly 1/4th of Arizona.",
-  },
-  [CollectionId.NWMAssimilationSystem]: {
-    size: 41900000000,
-    days: 7,
-    message: "Try a polygon that's roughly 1/8th of Arizona.",
-  },
-  [CollectionId.NWMReachToReach]: {
-    size: 41900000000,
-    days: 7,
-    message: "Try a polygon that's roughly 1/8th of Arizona.",
-  },
+export enum RestrictionType {
+  Size = 'size',
+  Day = 'day',
+  Parameter = 'parameter', // Limit number of parameters
+  ParameterFirst = 'parameter-first', // Select a parameter before fetch
+}
+
+type RestrictionBase = {
+  type: RestrictionType;
+  message: string;
+  noWarning?: boolean;
+};
+
+type SizeRestriction = RestrictionBase & {
+  type: RestrictionType.Size;
+  size: number;
+};
+type DayRestriction = RestrictionBase & {
+  type: RestrictionType.Day;
+  days: number;
+};
+type ParameterRestriction = RestrictionBase & {
+  type: RestrictionType.Parameter;
+  count: number;
+};
+type ParameterFirstRestriction = RestrictionBase & {
+  type: RestrictionType.ParameterFirst;
+};
+
+export type Restiction =
+  | SizeRestriction
+  | DayRestriction
+  | ParameterRestriction
+  | ParameterFirstRestriction;
+
+export const CollectionRestrictions: Record<string, Restiction[]> = {
+  [CollectionId.ArizonaWaterWells]: [
+    {
+      type: RestrictionType.Size,
+      size: 83700000000,
+      message: "Draw a polygon that's roughly 1/4th of Arizona.",
+    },
+  ],
+  [CollectionId.NWMAssimilationSystem]: [
+    {
+      type: RestrictionType.Size,
+      size: 41900000000,
+      message: "Draw a polygon that's roughly 1/8th of Arizona.",
+    },
+    {
+      type: RestrictionType.Day,
+      days: 1,
+      message: 'Select a date range no greater than one day.',
+    },
+    {
+      type: RestrictionType.Parameter,
+      count: 1,
+      message: 'Select only one parameter.',
+    },
+  ],
+  [CollectionId.NWMReachToReach]: [
+    {
+      type: RestrictionType.Size,
+      size: 41900000000,
+      message: "Draw a polygon that's roughly 1/8th of Arizona.",
+    },
+    {
+      type: RestrictionType.Day,
+      days: 1,
+      message: 'Select a date range no greater than one day.',
+    },
+    {
+      type: RestrictionType.Parameter,
+      count: 1,
+      message: 'Select only one parameter.',
+    },
+  ],
+  [CollectionId.NWMChannelRouting]: [
+    {
+      type: RestrictionType.Size,
+      size: 41900000000,
+      message: "Draw a polygon that's roughly 1/8th of Arizona.",
+    },
+    {
+      type: RestrictionType.Day,
+      days: 1,
+      message: 'Select a date range no greater than one day.',
+    },
+    {
+      type: RestrictionType.Parameter,
+      count: 1,
+      message: 'Select only one parameter.',
+    },
+  ],
+  [CollectionId.NWMLakeOutput]: [
+    {
+      type: RestrictionType.Day,
+      days: 7,
+      message: 'Select a date range no greater than one week.',
+    },
+    {
+      type: RestrictionType.Parameter,
+      count: 1,
+      message: 'Select only one parameter.',
+    },
+  ],
 };

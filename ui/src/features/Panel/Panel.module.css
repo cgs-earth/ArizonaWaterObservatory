@@ -47,6 +47,7 @@
 }
 
 .accordions {
+  width: 100%;
   max-height: calc(100vh - 220px);
   overflow-x: hidden;
   overflow-y: auto;

@@ -17,7 +17,12 @@ import {
 } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
-import { CollectionRestrictions } from '@/consts/collections';
+import {
+  CollectionRestrictions,
+  idStoreProperty,
+  RestrictionType,
+  StringIdentifierCollections,
+} from '@/consts/collections';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import {
   DEFAULT_BBOX,
@@ -44,7 +49,8 @@ import {
   ParameterGroupMembers,
 } from '@/stores/main/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
-import { compareArrays } from '@/utils/compareArrays';
+import { isSameArray } from '@/utils/compareArrays';
+import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
 import {
   getFillLayerDefinition,
@@ -336,11 +342,25 @@ class MainManager {
     return true;
   }
 
-  public getUniqueIds(features: GeoJSONFeature[]): Array<string> {
+  public getUniqueIds(features: GeoJSONFeature[], collectionId: ICollection['id']): Array<string> {
     const uniques = new Set<string>();
 
+    const useIdStore = StringIdentifierCollections.includes(collectionId);
+
     for (const feature of features) {
-      if (feature.id) {
+      if (useIdStore) {
+        const id = getIdStore(feature);
+        if (id) {
+          uniques.add(id);
+        } else {
+          console.error(
+            'Unable to find id store on layer from collection: ',
+            collectionId,
+            ', feature: ',
+            feature
+          );
+        }
+      } else if (feature.id) {
         uniques.add(String(feature.id));
       }
     }
@@ -394,6 +414,7 @@ class MainManager {
 
     throw new Error('Unsupported collection type');
   }
+
   /**
    *
    * @function
@@ -412,6 +433,25 @@ class MainManager {
           : {}),
       },
     });
+  }
+
+  /**
+   *
+   * @function
+   */
+  private storeIdentifiers(
+    featureCollection: ExtendedFeatureCollection
+  ): ExtendedFeatureCollection {
+    return {
+      ...featureCollection,
+      features: featureCollection.features.map((feature) => ({
+        ...feature,
+        properties: {
+          ...feature.properties,
+          [idStoreProperty]: feature.id,
+        },
+      })),
+    };
   }
 
   /**
@@ -442,6 +482,10 @@ class MainManager {
 
     if (!data) {
       return getDefaultGeoJSON();
+    }
+
+    if (StringIdentifierCollections.includes(collectionId)) {
+      return this.storeIdentifiers(data);
     }
 
     return data;
@@ -506,9 +550,14 @@ class MainManager {
     collectionType: CollectionType,
     to: dayjs.Dayjs
   ) {
-    const restriction = CollectionRestrictions[datasourceId];
-    if (restriction && restriction.days) {
-      return to.subtract(restriction.days, 'day');
+    const restrictions = CollectionRestrictions[datasourceId];
+    if (restrictions && restrictions.length > 0) {
+      const dateRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Day
+      );
+      if (dateRestriction && dateRestriction.days) {
+        return to.subtract(dateRestriction.days, 'day');
+      }
     }
 
     return collectionType === CollectionType.EDRGrid
@@ -722,34 +771,46 @@ class MainManager {
     from: Layer['from'],
     to: Layer['to']
   ) {
-    const restriction = CollectionRestrictions[collectionId];
+    const restrictions = CollectionRestrictions[collectionId];
 
-    if (restriction && restriction.days) {
-      const datasource = this.getDatasource(collectionId);
-      if (!from || !to) {
-        throw new Error(
-          `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${restriction.days} days.`
-        );
-      }
-      const diff = dayjs(to).diff(dayjs(from), 'days');
+    if (restrictions && restrictions.length > 0) {
+      const dateRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Day
+      );
 
-      if (diff > restriction.days) {
-        throw new Error(
-          `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${restriction.days}. Current date range is ${diff - restriction.days} days too long.`
-        );
+      if (dateRestriction && dateRestriction.days) {
+        const datasource = this.getDatasource(collectionId);
+        if (!from || !to) {
+          throw new Error(
+            `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${dateRestriction.days} days.`
+          );
+        }
+        const diff = dayjs(to).diff(dayjs(from), 'days');
+
+        if (diff > dateRestriction.days) {
+          throw new Error(
+            `Dataset: ${datasource?.title}, requires a bounded date range of no longer than ${dateRestriction.days}. Current date range is ${diff - dateRestriction.days} days too long.`
+          );
+        }
       }
     }
   }
 
   private checkCollectionBBoxRestrictions(collectionId: ICollection['id'], area: number) {
-    const restriction = CollectionRestrictions[collectionId];
+    const restrictions = CollectionRestrictions[collectionId];
 
-    if (restriction && restriction.size && area > restriction.size) {
-      const datasource = this.getDatasource(collectionId);
-      const factor = area / restriction.size;
-      throw new Error(
-        `Target area ${factor.toFixed(2)}x too large for instance of dataset: ${datasource?.title}.\n ${restriction.message}`
+    if (restrictions && restrictions.length > 0) {
+      const sizeRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Size
       );
+
+      if (sizeRestriction && sizeRestriction.size && area > sizeRestriction.size) {
+        const datasource = this.getDatasource(collectionId);
+        const factor = area / sizeRestriction.size;
+        throw new Error(
+          `Target area ${factor.toFixed(2)}x too large for instance of dataset: ${datasource?.title}.\n ${sizeRestriction.message}`
+        );
+      }
     }
   }
 
@@ -886,7 +947,7 @@ class MainManager {
 
       let filtered = this.filterLocations(page, options?.filterFeatures);
       this.clearInvalidLocations(layer.id, collectionId, filtered);
-      if (filtered?.features?.length) {
+      if (Array.isArray(filtered.features)) {
         aggregate.features.push(...filtered.features);
         source.setData(aggregate);
       }
@@ -1000,7 +1061,11 @@ class MainManager {
     }
   }
 
-  private getClickEventHandler(mapLayerId: string, layerId: string): (e: MapMouseEvent) => void {
+  private getClickEventHandler(
+    mapLayerId: string,
+    layerId: string,
+    collectionId: ICollection['id']
+  ): (e: MapMouseEvent) => void {
     return (e) => {
       e.originalEvent.preventDefault();
 
@@ -1008,7 +1073,8 @@ class MainManager {
         layers: [mapLayerId],
       });
       if (features.length > 0) {
-        const uniqueFeatures = this.getUniqueIds(features);
+        // Hack, use the feature id to track this location, fetch id store in consuming features
+        const uniqueFeatures = this.getUniqueIds(features, collectionId);
         uniqueFeatures.forEach((locationId) => {
           if (this.hasLocation(locationId)) {
             this.store.getState().removeLocation({
@@ -1028,6 +1094,7 @@ class MainManager {
 
   private getHoverEventHandler(
     name: string,
+    collectionId: ICollection['id'],
     upperLabel: string,
     lowerLabel: string
   ): (e: MapMouseEvent) => void {
@@ -1035,7 +1102,7 @@ class MainManager {
       this.map!.getCanvas().style.cursor = 'pointer';
       const { features } = e;
       if (features && features.length > 0) {
-        const uniqueFeatures = this.getUniqueIds(features);
+        const uniqueFeatures = this.getUniqueIds(features, collectionId);
         const html = `
             <span style="color:black;">
               <strong>${name}</strong><br/>
@@ -1074,21 +1141,33 @@ class MainManager {
         this.map.addLayer(getLineLayerDefinition(lineLayerId, sourceId, layer.color));
         this.map.addLayer(getPointLayerDefinition(pointLayerId, sourceId, layer.color));
 
-        this.map.on('click', pointLayerId, this.getClickEventHandler(pointLayerId, layer.id));
+        this.map.on(
+          'click',
+          pointLayerId,
+          this.getClickEventHandler(pointLayerId, layer.id, layer.datasourceId)
+        );
 
-        this.map.on('click', fillLayerId, this.getClickEventHandler(fillLayerId, layer.id));
+        this.map.on(
+          'click',
+          fillLayerId,
+          this.getClickEventHandler(fillLayerId, layer.id, layer.datasourceId)
+        );
 
-        this.map.on('click', lineLayerId, this.getClickEventHandler(lineLayerId, layer.id));
+        this.map.on(
+          'click',
+          lineLayerId,
+          this.getClickEventHandler(lineLayerId, layer.id, layer.datasourceId)
+        );
 
         this.map.on(
           'mouseenter',
           [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(layer.name, upperLabel, lowerLabel)
+          this.getHoverEventHandler(layer.name, layer.datasourceId, upperLabel, lowerLabel)
         );
         this.map.on(
           'mousemove',
           [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(layer.name, upperLabel, lowerLabel)
+          this.getHoverEventHandler(layer.name, layer.datasourceId, upperLabel, lowerLabel)
         );
         this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
           this.map!.getCanvas().style.cursor = '';
@@ -1217,7 +1296,7 @@ class MainManager {
       }
     }
 
-    if (!compareArrays(layer.parameters, parameters)) {
+    if (!isSameArray(layer.parameters, parameters)) {
       const drawnShapes = this.store.getState().drawnShapes;
       await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,

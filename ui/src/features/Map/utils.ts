@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExpressionSpecification } from 'mapbox-gl';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { bboxPolygon, booleanContains } from '@turf/turf';
+import { ExpressionSpecification, GeoJSONFeature, Map } from 'mapbox-gl';
+import { idStoreProperty } from '@/consts/collections';
 import { LayerId, SubLayerId } from '@/features/Map/config';
 import { Location } from '@/stores/main/types';
 
@@ -125,9 +128,45 @@ export const getSelectedColor = (
   locationIds: Array<Location['id']>,
   originalColor: string = '#000'
 ): ExpressionSpecification => {
-  return ['case', ['in', ['to-string', ['id']], ['literal', locationIds]], '#FFF', originalColor];
+  return [
+    'case',
+    ['in', ['to-string', ['coalesce', ['get', idStoreProperty], ['id']]], ['literal', locationIds]],
+    '#FFF',
+    originalColor,
+  ];
 };
 
 export const getSortKey = (locationIds: Array<Location['id']>): ExpressionSpecification => {
-  return ['case', ['in', ['to-string', ['id']], ['literal', locationIds]], 1, 0];
+  return [
+    'case',
+    ['in', ['to-string', ['coalesce', ['get', idStoreProperty], ['id']]], ['literal', locationIds]],
+    1,
+    0,
+  ];
+};
+
+export const drawnFeatureContainsExtent = (
+  drawnFeature: GeoJSONFeature,
+  draw: MapboxDraw,
+  map: Map
+): boolean => {
+  const bounds = map.getBounds();
+  const drawnFeatures = draw.getAll();
+  if (drawnFeatures.features.length && bounds) {
+    const targetFeature = drawnFeatures.features.find(
+      (feature) => feature.id === drawnFeature.properties?.id
+    );
+    if (targetFeature) {
+      const extentPolygon = bboxPolygon([
+        bounds.getWest(),
+        bounds.getSouth(),
+        bounds.getEast(),
+        bounds.getNorth(),
+      ]);
+
+      return booleanContains(targetFeature, extentPolygon);
+    }
+  }
+
+  return false;
 };

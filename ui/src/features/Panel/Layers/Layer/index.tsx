@@ -16,6 +16,7 @@ import IconButton from '@/components/IconButton';
 import Select from '@/components/Select';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
+import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import styles from '@/features/Panel/Panel.module.css';
 import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { useLoading } from '@/hooks/useLoading';
@@ -25,6 +26,7 @@ import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
+import { isSameArray } from '@/utils/compareArrays';
 import { getTemporalExtent } from '@/utils/temporalExtent';
 
 dayjs.extend(isSameOrBefore);
@@ -49,7 +51,10 @@ const Layer: React.FC<Props> = (props) => {
   const [data, setData] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { isFetchingCollections } = useLoading();
+  const [parameterLimit, setParameterLimit] = useState<number>();
+  const [daysLimit, setDaysLimit] = useState<number>();
+
+  const { isFetchingCollections, isLoadingGeography } = useLoading();
 
   useEffect(() => {
     if (isFetchingCollections || data) {
@@ -84,6 +89,28 @@ const Layer: React.FC<Props> = (props) => {
       setData(data);
     }
   }, [isFetchingCollections]);
+
+  useEffect(() => {
+    const restrictions = CollectionRestrictions[layer.datasourceId];
+
+    if (restrictions && restrictions.length > 0) {
+      const parameterLimitRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Parameter
+      );
+
+      if (parameterLimitRestriction && parameterLimitRestriction.count > 0) {
+        setParameterLimit(parameterLimitRestriction.count);
+      }
+
+      const daysLimitRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Day
+      );
+
+      if (daysLimitRestriction && daysLimitRestriction.days > 0) {
+        setDaysLimit(daysLimitRestriction.days);
+      }
+    }
+  }, [layer]);
 
   // If user updates color through the legend, update it here
   useEffect(() => {
@@ -141,13 +168,149 @@ const Layer: React.FC<Props> = (props) => {
     setOpacity(opacity);
   };
 
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
-  const isMissingParameters = collectionType === CollectionType.EDRGrid && parameters.length === 0;
+  const getIsDateRangeOverLimit = () => {
+    if (daysLimit) {
+      if (!from || !to || !dayjs(from).isValid() || !dayjs(to).isValid()) {
+        return true;
+      }
 
+      return dayjs(to).diff(dayjs(from), 'days') > daysLimit;
+    }
+    return false;
+  };
+
+  /**
+   * This layer is a grid type which requires at least one selected parameter
+   *
+   * @constant
+   */
+  const isMissingParameters = collectionType === CollectionType.EDRGrid && parameters.length === 0;
+  /**
+   * There is a parameter count limit on for this dataset and we have exceeded it
+   *
+   * @constant
+   */
+  const isParameterSelectionOverLimit = parameterLimit ? parameters.length > parameterLimit : false;
+  /**
+   * There is a limit to the number of days allowed within this range on for this dataset and we have exceeded it
+   *
+   * @constant
+   */
+  const isDateRangeOverLimit = getIsDateRangeOverLimit();
+  /**
+   * Is the to date before the from date if both exist
+   *
+   * @constant
+   */
+  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
+
+  /**
+   * This dataset supports date ranges
+   *
+   * @constant
+   */
   const showDateInputs = [CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType);
+  /**
+   * This is a features dataset, show additional message
+   *
+   * @constant
+   */
   const showFeaturesMessage = collectionType === CollectionType.Features;
+  /**
+   * Show additional warning about date ranges for EDRGrid
+   *
+   * @constant
+   */
   const showDateRangeWarning = collectionType === CollectionType.EDRGrid;
+  /**
+   * This is a raster or grid layer which can meaningfully implement opacity
+   *
+   * @constant
+   */
   const showOpacitySlider = [CollectionType.Map, CollectionType.EDRGrid].includes(collectionType);
+
+  /**
+   * The user has modified this layer since the last save
+   *
+   * @constant
+   */
+  const hasUnsavedChanges =
+    name !== layer.name ||
+    color !== layer.color ||
+    !isSameArray(parameters, layer.parameters) ||
+    from !== layer.from ||
+    to !== layer.to;
+
+  /**
+   * This layer has validation issues or there are blocking actions
+   *
+   * @constant
+   */
+  const isSaveDisabled =
+    isLoadingGeography ||
+    !hasUnsavedChanges ||
+    isLoading ||
+    !isValidRange ||
+    isMissingParameters ||
+    isParameterSelectionOverLimit;
+
+  const getDateInputError = () => {
+    // is to >= from?
+    if (isValidRange) {
+      // is there a limit on days and have we exceeded it?
+      if (daysLimit && isDateRangeOverLimit) {
+        return `${dayjs(to).diff(dayjs(from), 'days') - daysLimit} day(s) over limit`;
+      }
+      return false;
+    }
+
+    return 'Invalid date range';
+  };
+
+  const getParameterError = () => {
+    if (parameterLimit && isParameterSelectionOverLimit) {
+      return `Please remove ${parameters.length - parameterLimit} parameter${parameters.length - parameterLimit > 1 ? 's' : ''}`;
+    }
+
+    return false;
+  };
+
+  const getSaveTooltip = () => {
+    if (isLoadingGeography) {
+      return 'Please wait for spatial filter to finish loading data.';
+    }
+
+    if (hasUnsavedChanges) {
+      return 'Save changes to layer.';
+    }
+    if (isLoading) {
+      return 'Please wait for layer update to finish.';
+    }
+    if (!isValidRange || isDateRangeOverLimit) {
+      return 'Please correct date range.';
+    }
+    if (isMissingParameters) {
+      return 'Grid layers require at least one parameter.';
+    }
+    if (isParameterSelectionOverLimit) {
+      return 'Please remove parameters.';
+    }
+    return 'Layer has not been modified.';
+  };
+
+  const getCancelTooltip = () => {
+    if (isLoadingGeography) {
+      return 'Please wait for spatial filter to finish loading data.';
+    }
+
+    if (isLoading) {
+      return 'Please wait for layer update to finish.';
+    }
+    if (!hasUnsavedChanges) {
+      return 'Layer has not been modified.';
+    }
+    return null;
+  };
 
   return (
     <Stack gap="xs" className={styles.accordionContent}>
@@ -196,7 +359,7 @@ const Layer: React.FC<Props> = (props) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
             <DateInput
               label="To"
@@ -216,7 +379,7 @@ const Layer: React.FC<Props> = (props) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
           </Group>
           {showDateRangeWarning && (
@@ -231,7 +394,7 @@ const Layer: React.FC<Props> = (props) => {
           <Select
             size="sm"
             label="Parameter"
-            description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters"
+            description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters."
             placeholder="Select a Parameter"
             multiple
             clearable
@@ -239,6 +402,7 @@ const Layer: React.FC<Props> = (props) => {
             data={data}
             value={parameters}
             onChange={setParameters}
+            error={getParameterError()}
           />
         </>
       )}
@@ -254,22 +418,11 @@ const Layer: React.FC<Props> = (props) => {
       )}
       <Group justify="space-between" align="flex-end">
         <Group mt="md">
-          <Tooltip
-            label={
-              isLoading
-                ? 'Please wait for layer update to finish.'
-                : !isValidRange
-                  ? 'Please correct date range.'
-                  : isMissingParameters
-                    ? 'Grid layers require at least one parameter.'
-                    : null
-            }
-            disabled={!isLoading && isValidRange && !isMissingParameters}
-          >
+          <Tooltip label={getSaveTooltip()}>
             <Button
               size="xs"
-              disabled={isLoading || !isValidRange || isMissingParameters}
-              data-disabled={isLoading || !isValidRange || isMissingParameters}
+              disabled={isSaveDisabled}
+              data-disabled={isSaveDisabled}
               variant={Variant.Primary}
               onClick={() => handleSave()}
             >
@@ -277,13 +430,13 @@ const Layer: React.FC<Props> = (props) => {
             </Button>
           </Tooltip>
           <Tooltip
-            label={isLoading ? 'Please wait for layer update to finish.' : null}
-            disabled={!isLoading}
+            label={getCancelTooltip()}
+            disabled={!isLoading && hasUnsavedChanges && !isLoadingGeography}
           >
             <Button
               size="xs"
-              disabled={isLoading}
-              data-disabled={isLoading}
+              disabled={isLoading || !hasUnsavedChanges || isLoadingGeography}
+              data-disabled={isLoading || !hasUnsavedChanges || isLoadingGeography}
               variant={Variant.Tertiary}
               onClick={() => handleCancel()}
             >
@@ -302,6 +455,11 @@ const Layer: React.FC<Props> = (props) => {
           </IconButton>
         </Tooltip>
       </Group>
+      {hasUnsavedChanges && (
+        <Text size="xs" c="red">
+          Unsaved changes!
+        </Text>
+      )}
     </Stack>
   );
 };

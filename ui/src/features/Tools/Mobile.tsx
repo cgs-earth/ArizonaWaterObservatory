@@ -10,10 +10,9 @@ import IconButton from '@/components/IconButton';
 import { Variant } from '@/components/types';
 import BasemapSelector from '@/features/Tools/Basemap';
 import { Draw } from '@/features/Tools/Draw';
-import { Geocoder } from '@/features/Tools/Geocoder';
 import Legend from '@/features/Tools/Legend';
 import styles from '@/features/Tools/Tools.module.css';
-import { Warning } from '@/features/Tools/Warning';
+import { Warnings } from '@/features/Tools/Warnings';
 import Info from '@/features/TopBar/Info';
 
 export const Mobile: React.FC = () => {
@@ -29,11 +28,10 @@ export const Mobile: React.FC = () => {
       </Group>
       <Collapse in={opened}>
         <Stack mt="var(--default-spacing)" align="flex-end" justify="flex-end">
-          <Geocoder />
           <Legend />
           <BasemapSelector />
           <Draw />
-          <Warning />
+          <Warnings />
         </Stack>
       </Collapse>
     </Box>
