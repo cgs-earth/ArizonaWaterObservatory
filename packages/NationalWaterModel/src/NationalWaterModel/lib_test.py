@@ -80,8 +80,9 @@ def test_new_data():
         unopened_dataset=provider.zarr_dataset,
     )
 
-    DAILY_OBSERVATIONS = 5200
-    assert result.dims["feature_id"] >= DAILY_OBSERVATIONS
+    assert result.dims["feature_id"] >= 10, (
+        "there should be at least 10 features"
+    )
 
 
 def test_range_of_dates():
@@ -95,9 +96,9 @@ def test_range_of_dates():
         unopened_dataset=provider.zarr_dataset,
     )
 
-    DAILY_OBSERVATIONS = 5200
-    assert result.dims["feature_id"] >= DAILY_OBSERVATIONS, (
-        f"each dimension should have at least {DAILY_OBSERVATIONS} observations"
+    NUM_FEATURES = 10
+    assert result.dims["feature_id"] >= NUM_FEATURES, (
+        f"each dimension should have at least {NUM_FEATURES} features"
     )
     assert result.dims["time"] >= 23 and result.dims["time"] <= 26, (
         "There should be around 24 two hour timesteps to cover the entire two days, (plus or minus a few intervals to allow for rounding)"

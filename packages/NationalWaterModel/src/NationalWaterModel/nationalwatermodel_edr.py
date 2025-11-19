@@ -99,7 +99,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         crs: str | None = None,
         format_: str | None = None,
         limit: int = 0,
-        bbox: list = [],
+        bbox: list = [],  # noqa: B006 we ignore this since pygeoapi always passes in an empty bbox and we want this to be understood in our tests
         **kwargs,
     ) -> (
         CoverageCollectionDict
@@ -155,6 +155,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             output_crs=pyproj.CRS.from_epsg(4326),
         )
 
+    @otel_trace()
     def cube(
         self,
         bbox: list,
