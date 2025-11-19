@@ -141,7 +141,7 @@ def fetch_data(
     datetime_filter: str | None,
     x_field: str | None,
     y_field: str | None,
-    bbox: list = [],
+    bbox: list,
     feature_id: str | None = None,
     feature_limit: int = 10,
     feature_offset: int = 0,
@@ -174,10 +174,6 @@ def fetch_data(
         raise KeyError(
             f"Could not find {variables_to_select} in {unopened_dataset.variables}; resulted in error {e}"
         ) from e
-
-    if feature_id is not None:
-        selected = selected.sel(feature_id=int(feature_id))
-        return selected.load()
 
     if datetime_filter is None:
         raise ProviderQueryError(
@@ -232,6 +228,8 @@ def fetch_data(
             times_to_select = available_times[mask]
             selected = selected.sel(time=times_to_select, drop=False)
 
+    if feature_id is not None:
+        selected = selected.sel(feature_id=int(feature_id))
     if bbox:
         # Geospatial filtering using latitude and longitude variables
         lon_min, lat_min, lon_max, lat_max = bbox
@@ -267,7 +265,9 @@ def fetch_data(
     # we always run this if it is not raster data
     # given the fact that there will always be some sort of limit
     # in pygeoapi
-    if not raster:
+
+    # don't apply the limit if we are selecting a single feature by id
+    if not raster and not feature_id:
         # apply feature limit at the end of processing
         # ideally since this is lazy loaded this should still have
         # predicate pushdown; we need to push this last otherwise
@@ -292,8 +292,25 @@ def dataset_to_covjson(
     Given a dataset, return a covjson point series which essentially
     represents a list of points with a timeseries line graph for eawch
     """
-    x_values = dataset[x_axis].values.tolist()
-    y_values = dataset[y_axis].values.tolist()
+    x_values: list[int | float] | int | float = dataset[x_axis].values.tolist()
+    y_values: list[int | float] | int | float = dataset[y_axis].values.tolist()
+
+    x_value_list: list[int | float]
+    y_value_list: list[int | float]
+    singlePoint = False
+    if isinstance(x_values, list):
+        x_value_list = x_values
+    else:
+        singlePoint = True
+        x_value_list = [x_values]
+
+    if isinstance(y_values, list):
+        assert isinstance(x_values, list), (
+            "x_value was a list but y_values was not; this means the axes may not be aligned"
+        )
+        y_value_list = y_values
+    else:
+        y_value_list = [y_values]
 
     # cast to list of ISO strings so that it is serializable into json
     time_values = (
@@ -303,14 +320,11 @@ def dataset_to_covjson(
     timeseries_values = dataset[timeseries_parameter_name].values
 
     try:
-        singleItem = len(dataset[time_axis].values) == 1
+        singleTimeseriesValue = len(dataset[time_axis].values) == 1
     except TypeError:
-        singleItem = True
+        singleTimeseriesValue = True
 
     # if it is a single item we have to make sure it is nested properly in a list
-    if singleItem and not raster:
-        time_values = [time_values]
-        timeseries_values = [timeseries_values]
 
     coverages: list[CoverageDict] = []
 
@@ -319,7 +333,23 @@ def dataset_to_covjson(
     output_uri = f"http://www.opengis.net/def/crs/{authority}/{LATEST}/{code}"
 
     if not raster:
-        for i in range(len(x_values)):
+        if singlePoint and not singleTimeseriesValue:
+            # if there is a single point but not a single timeseries value
+            # the timeseries array will be like [0,0,0] but we need it like [[0],[0],[0]]
+            timeseries_values = timeseries_values.reshape(-1, 1)
+        elif singlePoint and singleTimeseriesValue:
+            # if there is a single point and a single timeseries value
+            # we need to just make it into a nested list like [[0]]
+            # and also make sure the timeseries value are nested similarly
+            time_values = [time_values]
+            timeseries_values = [[float(timeseries_values)]]
+        elif not singlePoint and singleTimeseriesValue:
+            # if there are multiple points but a single timeseries value
+            # we need to make sure the timeseries values are nested properly
+            time_values = [time_values]
+            timeseries_values = timeseries_values.reshape(1, -1)
+
+        for i in range(len(x_value_list)):
             coverage: CoverageDict = {
                 "type": "Coverage",
                 "domain": {
@@ -327,9 +357,9 @@ def dataset_to_covjson(
                     "domainType": "PointSeries",
                     "axes": {
                         # The x axis is one value since it represents a point
-                        "x": {"values": [x_values[i]]},
+                        "x": {"values": [x_value_list[i]]},
                         # The y axis is one value since it represents a point
-                        "y": {"values": [y_values[i]]},
+                        "y": {"values": [y_value_list[i]]},
                         # The t axis is a list of times since it represents a time series
                         "t": {"values": time_values},
                     },
@@ -400,9 +430,9 @@ def dataset_to_covjson(
                         "values": y_values,
                     },
                     "t": {
-                        "values": time_values
-                        if not singleItem
-                        else [time_values]
+                        "values": [time_values]
+                        if singleTimeseriesValue
+                        else time_values
                     },
                 },
                 "referencing": [
@@ -439,9 +469,9 @@ def dataset_to_covjson(
                     "dataType": "float",
                     "axisNames": ["t", "y", "x"],
                     "shape": [
-                        len(time_values) if not singleItem else 1,
-                        len(y_values),
-                        len(x_values),
+                        len(time_values) if not singleTimeseriesValue else 1,
+                        len(y_value_list),
+                        len(x_value_list),
                     ],
                     "values": [
                         None if np.isnan(val) else val
