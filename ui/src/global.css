@@ -30,6 +30,7 @@
   --asu-color-selected: var(--asu-blue);
 
   --default-spacing: 8px;
+  --mobile-width: 899px;
 }
 
 :where([data-mantine-color-scheme='dark']) {

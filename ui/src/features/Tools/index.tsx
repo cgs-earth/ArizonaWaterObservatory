@@ -10,7 +10,7 @@ import { FAQ } from '@/features/Tools/FAQ';
 import { Geocoder } from '@/features/Tools/Geocoder';
 import { Glossary } from '@/features/Tools/Glossary';
 import Legend from '@/features/Tools/Legend';
-import { Warning } from '@/features/Tools/Warning';
+import { Warnings } from '@/features/Tools/Warnings';
 
 const Tools: React.FC = () => {
   return (
@@ -21,7 +21,7 @@ const Tools: React.FC = () => {
       <BasemapSelector />
       <Draw />
       <Geocoder />
-      <Warning />
+      <Warnings />
     </Group>
   );
 };

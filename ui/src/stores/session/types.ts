@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ReactNode } from 'react';
 import { Location } from '@/stores/main/types';
 import { LoadingSlice } from '@/stores/session/slices/loading';
 import { MeasureSlice } from '@/stores/session/slices/measure';
 import { NotificationsSlice } from '@/stores/session/slices/notifications';
+import { WarningsSlice } from '@/stores/session/slices/warning';
 
 export enum NotificationType {
   Success = 'success',
@@ -27,6 +29,7 @@ export enum Tool {
 }
 
 export enum Overlay {
+  Filter = 'filter',
   Links = 'links',
   Share = 'share',
   Draw = 'draw',
@@ -34,6 +37,7 @@ export enum Overlay {
   Legend = 'legend',
   Info = 'info',
   Warning = 'warning',
+  Download = 'download',
 }
 
 export type Notification = {
@@ -41,6 +45,11 @@ export type Notification = {
   message: string;
   type: NotificationType;
   visible: boolean;
+};
+
+export type Warning = {
+  id: string;
+  content: ReactNode;
 };
 
 export type Loading = {
@@ -76,4 +85,5 @@ export type SessionState = {
   setHelpTab: (helpTab: SessionState['helpTab']) => void;
 } & NotificationsSlice &
   LoadingSlice &
-  MeasureSlice;
+  MeasureSlice &
+  WarningsSlice;

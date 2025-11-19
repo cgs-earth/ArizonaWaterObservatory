@@ -114,6 +114,7 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
 
     map.on('draw.create', (e: DrawCreateEvent) => {
       const feature = e.features[0] as Feature<Polygon | MultiPolygon>;
+
       combineFeatures(feature);
     });
 
@@ -121,6 +122,7 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
 
     map.on('draw.modechange', (e) => {
       const { mode } = e;
+
       if (mode === 'draw_polygon') {
         setDrawMode(DrawMode.Polygon);
       } else {

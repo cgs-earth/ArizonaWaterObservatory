@@ -3,6 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.actionIconRoot {
+  margin-right: var(--default-spacing);
+}
+
+.actionIcon {
+  stroke: var(--asu-gray-1);
+  fill: var(--asu-gray-1);
+}
+
+.actionIcon > svg {
+  width: 100%;
+  height: auto;
+}
+
+.actionIcon:hover:not(:disabled),
+.actionIcon:focus:not(:disabled),
+.actionIcon:active:not(:disabled) {
+  stroke: var(--asu-gray-2);
+  fill: var(--asu-gray-2);
+}
+
 .topBarWrapper {
   padding: var(--default-spacing);
   border-bottom: 1px solid var(--border);
@@ -15,6 +36,12 @@
 
 .tabs {
   width: 100%;
+}
+
+.tabsList {
+  position: sticky;
+  top: 0;
+  background: var(--mantine-color-body);
 }
 
 .accordionBody {
@@ -90,4 +117,30 @@
 .valueColumn {
   overflow-wrap: break-word;
   white-space: pre-wrap;
+}
+
+.downloadDropdown {
+  border: unset;
+  padding: 0;
+}
+
+.downloadContent {
+  border: 5px solid var(--asu-color-tertiary);
+  padding: var(--default-spacing);
+  border-radius: var(--popover-radius, var(--mantine-radius-default));
+}
+
+.mobileWrapper {
+  display: none;
+  margin-top: calc(var(--default-spacing) * 2);
+}
+
+@media screen and (max-width: 899px) {
+  .topBarWrapper {
+    display: none;
+  }
+
+  .mobileWrapper {
+    display: flex;
+  }
 }

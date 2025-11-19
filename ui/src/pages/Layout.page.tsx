@@ -11,6 +11,7 @@ import Loading from '@/features/Loading';
 import { MAP_ID } from '@/features/Map/config';
 import Notifications from '@/features/Notifications';
 import Panel from '@/features/Panel';
+import { Mobile as MobileTools } from '@/features/Tools/Mobile';
 import TopBar from '@/features/TopBar';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
@@ -95,13 +96,13 @@ export const LayoutPage: React.FC = () => {
           <Panel />
           <Stack gap={0} className={styles.right}>
             <TopBar />
-            <Loading desktop={false} />
             <Outlet />
+            <Loading />
           </Stack>
         </Group>
-        <Loading desktop />
       </Stack>
       <Notifications />
+      <MobileTools />
     </Box>
   );
 };

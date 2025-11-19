@@ -15,6 +15,7 @@ import { CoverageCollection, CoverageJSON, ICollection } from '@/services/edr.se
 import awoService from '@/services/init/awo.init';
 import { Location } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
+import { isCoverageCollection } from '@/utils/isTypeObject';
 import { getDatetime } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
@@ -117,9 +118,17 @@ export const Chart: React.FC<Props> = (props) => {
     };
   }, [locationId, from, to]);
 
+  const isValid = (coverage: CoverageCollection | CoverageJSON) => {
+    if (isCoverageCollection(coverage) && coverage.coverages.length === 0) {
+      return false;
+    }
+
+    return true;
+  };
+
   return (
     <Skeleton visible={isLoading} className={`${className} ${styles.chartWrapper}`}>
-      {data ? (
+      {data && isValid(data) ? (
         <LineChart
           data={data}
           legend

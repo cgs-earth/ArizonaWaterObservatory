@@ -56,6 +56,8 @@ export const Draw: React.FC = () => {
       if ((error as Error)?.message) {
         const _error = error as Error;
         notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+      } else if (typeof error === 'string') {
+        notificationManager.show(`Error: ${error}`, NotificationType.Error, 10000);
       }
     } finally {
       loadingInstance.current = loadingManager.remove(loadingInstance.current);
@@ -151,6 +153,7 @@ export const Draw: React.FC = () => {
           opened={show}
           onChange={setShow}
           closeOnClickOutside={false}
+          position="bottom-start"
           target={
             <Tooltip
               label="Measure distances and filter by drawn or existing geometries."
@@ -165,7 +168,7 @@ export const Draw: React.FC = () => {
             </Tooltip>
           }
           content={
-            <Stack gap={8} className={styles.container} align="flex-start">
+            <Stack gap="var(--default-spacing)" className={styles.container} align="flex-start">
               <Title order={5} size="h3">
                 Draw Tools
               </Title>

@@ -3,59 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
-import { Slider } from '@mantine/core';
-import { useMap } from '@/contexts/MapContexts';
-import { MAP_ID } from '@/features/Map/config';
-import { DEFAULT_OPACITY } from '@/features/Map/consts';
-import mainManager from '@/managers/Main.init';
+import { Box, Slider, Text } from '@mantine/core';
+import styles from '@/features/Tools/Tools.module.css';
 import { Layer } from '@/stores/main/types';
 
 type Props = {
-  layer: Layer;
+  id: Layer['id'];
+  opacity: Layer['opacity'];
+  handleOpacityChange: (opacity: Layer['opacity'], layerId: Layer['id']) => void;
 };
 
 export const OpacitySlider: React.FC<Props> = (props) => {
-  const { layer } = props;
-
-  const { map } = useMap(MAP_ID);
-
-  const [opacity, setOpacity] = useState(DEFAULT_OPACITY);
-
-  useEffect(() => {
-    if (!map) {
-      return;
-    }
-
-    const { rasterLayerId } = mainManager.getLocationsLayerIds(layer.datasourceId, layer.id);
-    if (map.getLayer(rasterLayerId)) {
-      const opacity = map.getPaintProperty(rasterLayerId, 'raster-opacity');
-      if (opacity && typeof opacity === 'number') {
-        setOpacity(opacity);
-      }
-    }
-  }, [map]);
-
-  useEffect(() => {
-    if (!map) {
-      return;
-    }
-
-    const { rasterLayerId } = mainManager.getLocationsLayerIds(layer.datasourceId, layer.id);
-
-    if (map.getLayer(rasterLayerId)) {
-      map.setPaintProperty(rasterLayerId, 'raster-opacity', opacity);
-    }
-  }, [opacity]);
+  const { id, opacity, handleOpacityChange } = props;
 
   return (
-    <Slider
-      min={0}
-      max={1}
-      step={0.05}
-      value={opacity}
-      onChange={setOpacity}
-      label={(value) => `${Math.round(value * 100)}%`}
-    />
+    <Box>
+      <Text size="sm">Layer Opacity</Text>
+      <Slider
+        className={styles.opacitySlider}
+        min={0}
+        max={1}
+        step={0.05}
+        value={opacity}
+        onChange={(value) => handleOpacityChange(value, id)}
+        label={(value) => `${Math.round(value * 100)}%`}
+      />
+    </Box>
   );
 };

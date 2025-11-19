@@ -435,9 +435,10 @@ export class EDRService extends Service {
    */
   async getItems<T extends JSON | GeoJSON | string = GeoJSON>(
     collectionId: string,
-    options: IServiceRequestOptions<IGetCollectionsParams> = DEFAULT_OPTIONS
+    options: IServiceRequestOptions<IGetCollectionsParams> = DEFAULT_OPTIONS,
+    next?: string
   ): Promise<T> {
-    const url: string = `${this.baseUrl}/collections/${collectionId}/items`;
+    const url: string = next ?? `${this.baseUrl}/collections/${collectionId}/items`;
     const params = { ...options.params };
     const result: T = await request({
       url,
@@ -806,7 +807,7 @@ export interface IExtentTemporal {
   /**
    *
    */
-  interval: [string, string][];
+  interval: [string | null, string | null][];
 
   /**
    *
@@ -1084,6 +1085,15 @@ export type CoverageCollection = {
   coverages: CoverageJSON[];
 };
 
+export type CoverageAxesSegments = {
+  start: number;
+  stop: number;
+  num: number;
+};
+export type CoverageAxesValues = {
+  values: (number | string)[];
+};
+
 export interface CoverageJSON {
   type: string;
   domain: {
@@ -1091,15 +1101,7 @@ export interface CoverageJSON {
     domainType: string;
 
     axes: {
-      [key: string]:
-        | {
-            start: number;
-            stop: number;
-            num: number;
-          }
-        | {
-            values: (number | string)[];
-          };
+      [key: string]: CoverageAxesSegments | CoverageAxesValues;
     };
 
     referencing: {
