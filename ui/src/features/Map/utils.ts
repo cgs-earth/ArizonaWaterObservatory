@@ -6,6 +6,7 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { bboxPolygon, booleanContains } from '@turf/turf';
 import { ExpressionSpecification, GeoJSONFeature, Map } from 'mapbox-gl';
+import { idStoreProperty } from '@/consts/collections';
 import { LayerId, SubLayerId } from '@/features/Map/config';
 import { Location } from '@/stores/main/types';
 
@@ -127,11 +128,21 @@ export const getSelectedColor = (
   locationIds: Array<Location['id']>,
   originalColor: string = '#000'
 ): ExpressionSpecification => {
-  return ['case', ['in', ['to-string', ['id']], ['literal', locationIds]], '#FFF', originalColor];
+  return [
+    'case',
+    ['in', ['to-string', ['coalesce', ['get', idStoreProperty], ['id']]], ['literal', locationIds]],
+    '#FFF',
+    originalColor,
+  ];
 };
 
 export const getSortKey = (locationIds: Array<Location['id']>): ExpressionSpecification => {
-  return ['case', ['in', ['to-string', ['id']], ['literal', locationIds]], 1, 0];
+  return [
+    'case',
+    ['in', ['to-string', ['coalesce', ['get', idStoreProperty], ['id']]], ['literal', locationIds]],
+    1,
+    0,
+  ];
 };
 
 export const drawnFeatureContainsExtent = (
