@@ -5,7 +5,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Box, Group, Image, Stack } from '@mantine/core';
+import { Anchor, Box, Group, Image, Stack } from '@mantine/core';
 import { useMap } from '@/contexts/MapContexts';
 import Loading from '@/features/Loading';
 import { MAP_ID } from '@/features/Map/config';
@@ -98,15 +98,17 @@ export const LayoutPage: React.FC = () => {
             <TopBar />
             <Outlet />
             <Box className={styles.cgsLogo}>
-              <Image
-                src="/poweredbycgs_v2.png"
-                alt="Center for Geospatial Solutions Logo"
-                style={{
-                  height: 36,
-                  width: 'auto',
-                }}
-                fit="contain"
-              />
+              <Anchor target="_blank" href="https://cgsearth.org/">
+                <Image
+                  src="/poweredbycgs_v2.png"
+                  alt="Center for Geospatial Solutions Logo"
+                  style={{
+                    height: 36,
+                    width: 'auto',
+                  }}
+                  fit="contain"
+                />
+              </Anchor>
             </Box>
             <Loading />
           </Stack>
