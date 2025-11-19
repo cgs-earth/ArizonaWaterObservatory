@@ -23,7 +23,7 @@ server:
 
   manager:
     name: PostgreSQL
-    output_dir: ${PYGEOAPI_JOB_RESULT_DIR:-"."}
+    output_dir: ${PYGEOAPI_JOB_RESULT_DIR:-"/tmp/"}
     connection:
       host: ${TF_VAR_POSTGRES_HOST:-localhost}
       port: 5432
