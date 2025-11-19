@@ -228,7 +228,7 @@ dev = [
 ]
 server = [
     { name = "gunicorn", specifier = ">=23.0.0" },
-    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=85ff3017d27cf72fedbc336ab05a47f8db844a78" },
+    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=e6b12b0224163f4eaf5c58f37049f44fc8dc77e8" },
     { name = "starlette", specifier = ">=0.47.0" },
     { name = "uvicorn", specifier = ">=0.34.3" },
 ]
@@ -1742,7 +1742,7 @@ wheels = [
 [[package]]
 name = "pygeoapi"
 version = "0.22.dev0"
-source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=85ff3017d27cf72fedbc336ab05a47f8db844a78#85ff3017d27cf72fedbc336ab05a47f8db844a78" }
+source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=e6b12b0224163f4eaf5c58f37049f44fc8dc77e8#e6b12b0224163f4eaf5c58f37049f44fc8dc77e8" }
 dependencies = [
     { name = "babel" },
     { name = "click" },
