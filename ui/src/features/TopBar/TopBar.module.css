@@ -124,6 +124,15 @@
   padding: 0;
 }
 
+.faqAnswer {
+  margin-left: var(--default-spacing);
+}
+
+.faqBullets {
+  margin-left: calc(var(--default-spacing) * 2);
+  margin-right: calc(var(--default-spacing) * 2);
+}
+
 .downloadContent {
   border: 5px solid var(--asu-color-tertiary);
   padding: var(--default-spacing);

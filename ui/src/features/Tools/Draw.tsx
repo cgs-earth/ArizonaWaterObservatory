@@ -189,18 +189,6 @@ export const Draw: React.FC = () => {
                 >
                   <Text size="sm">{drawMode === DrawMode.Measure ? 'Cancel' : 'Measure'}</Text>
                 </Button>
-                <Tooltip label="Feature in development">
-                  <Button
-                    size="sm"
-                    className={styles.drawButton}
-                    variant={drawMode === DrawMode.Select ? Variant.Selected : Variant.Secondary}
-                    onClick={() => setDrawMode(DrawMode.Select)}
-                    disabled
-                    data-disabled
-                  >
-                    <Text size="sm">{drawMode === DrawMode.Select ? 'Cancel' : 'Select'}</Text>
-                  </Button>
-                </Tooltip>
               </Group>
               <Collapse in={drawMode === DrawMode.Measure}>
                 <RadioGroup

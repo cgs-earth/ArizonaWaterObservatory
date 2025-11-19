@@ -82,10 +82,12 @@ const Layer: React.FC<Props> = (props) => {
 
       const paramObjects = Object.values(collection?.parameter_names ?? {});
 
-      const data = paramObjects.map((object) => ({
-        label: object.name,
-        value: object.id,
-      }));
+      const data = paramObjects
+        .map((object) => ({
+          label: object.name,
+          value: object.id,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
       setData(data);
     }
   }, [isFetchingCollections]);
