@@ -18,6 +18,12 @@
   padding-inline-end: 0;
 }
 
+.control:hover,
+.control:focus,
+.control:active {
+  background: var(--mantine-color-default-hover);
+}
+
 .label {
   padding-top: 8px;
   padding-bottom: 8px;
@@ -66,7 +72,6 @@
 
 .sticky .control {
   position: sticky;
-  background: var(--mantine-color-body);
   z-index: 2;
 }
 

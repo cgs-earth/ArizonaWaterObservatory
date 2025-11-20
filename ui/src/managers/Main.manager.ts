@@ -985,7 +985,6 @@ class MainManager {
       this.map.addSource(sourceId, {
         type: 'geojson',
         data: getDefaultGeoJSON(),
-        generateId: true,
       });
     }
 
