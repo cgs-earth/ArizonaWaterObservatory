@@ -134,7 +134,7 @@
 }
 
 .downloadContent {
-  border: 5px solid var(--asu-color-tertiary);
+  border: 5px solid var(--border);
   padding: var(--default-spacing);
   border-radius: var(--popover-radius, var(--mantine-radius-default));
 }
@@ -142,6 +142,32 @@
 .mobileWrapper {
   display: none;
   margin-top: calc(var(--default-spacing) * 2);
+}
+
+.contactWrapper {
+  color: var(--mantine-color-text);
+}
+
+.contact {
+  border: 1px solid var(--border);
+  margin: calc(var(--default-spacing) / 2);
+  padding: calc(var(--default-spacing) / 2);
+}
+
+.contactImage {
+  padding: calc(var(--default-spacing) * 0.75);
+  max-width: 25%;
+}
+
+.contactBody {
+  padding-top: calc(var(--default-spacing) / 2);
+  padding-right: calc(var(--default-spacing) / 4);
+  max-width: calc(75% - var(--default-spacing));
+}
+
+.contactLink {
+  margin-top: var(--default-spacing);
+  white-space: nowrap;
 }
 
 @media screen and (max-width: 899px) {

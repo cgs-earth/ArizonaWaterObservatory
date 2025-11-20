@@ -71,25 +71,31 @@ const Info: React.FC = () => {
       <Modal size="xl" opened={opened} onClose={close}>
         <Tabs
           value={helpTab}
+          color="var(--asu-color-primary)"
           className={`${styles.modalBody} ${styles.tabs}`}
           onChange={(tab) => setHelpTab(tab as HelpTab)}
         >
-          <Tabs.List grow className={styles.tabsList}>
+          <Tabs.List className={styles.tabsList}>
             <Tabs.Tab value={HelpTab.About}>
-              <Text size="lg" fw={700}>
+              <Text size="md" fw={700}>
                 About
               </Text>
             </Tabs.Tab>
             <Tabs.Tab value={HelpTab.Glossary}>
-              <Text size="lg" fw={700}>
+              <Text size="md" fw={700}>
                 Glossary
               </Text>
             </Tabs.Tab>
             <Tabs.Tab value={HelpTab.FAQ}>
-              <Text size="lg" fw={700}>
+              <Text size="md" fw={700}>
                 Frequently Asked Questions
               </Text>
             </Tabs.Tab>
+            {/* <Tabs.Tab value={HelpTab.Contact}>
+              <Text size="md" fw={700}>
+                Contact Us
+              </Text>
+            </Tabs.Tab> */}
           </Tabs.List>
 
           <Tabs.Panel value={HelpTab.About}>
@@ -101,6 +107,9 @@ const Info: React.FC = () => {
           <Tabs.Panel value={HelpTab.FAQ}>
             <FAQ />
           </Tabs.Panel>
+          {/* <Tabs.Panel value={HelpTab.Contact}>
+            <Contact />
+          </Tabs.Panel> */}
         </Tabs>
       </Modal>
     </>

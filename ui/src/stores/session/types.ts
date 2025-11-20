@@ -68,6 +68,7 @@ export enum HelpTab {
   About = 'about',
   FAQ = 'FAQ',
   Glossary = 'glossary',
+  Contact = 'contact',
 }
 
 export type SessionState = {

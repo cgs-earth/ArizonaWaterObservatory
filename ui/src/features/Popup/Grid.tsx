@@ -36,18 +36,36 @@ export const Grid: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (feature.properties) {
-      const { times: rawTimes } = feature.properties as { times: string };
+      if (typeof feature.properties === 'object') {
+        const { times: rawTimes } = feature.properties as { times: string };
 
-      const times = JSON.parse(rawTimes) as string[];
+        const times = JSON.parse(rawTimes) as string[];
 
-      if (
-        times &&
-        times.every((time) => typeof time === 'string') &&
-        times.every((time) => dayjs(time).isValid())
-      ) {
-        setTimes(
-          times.map((time) => ({ value: time, label: dayjs(time).format('MMMM D, YYYY h:mm A') }))
-        );
+        if (
+          times &&
+          times.every((time) => typeof time === 'string') &&
+          times.every((time) => dayjs(time).isValid())
+        ) {
+          setTimes(
+            times.map((time) => ({ value: time, label: dayjs(time).format('MMMM D, YYYY h:mm A') }))
+          );
+        }
+      } else if (typeof feature.properties === 'string') {
+        const properties = JSON.parse(feature.properties);
+
+        const { times: rawTimes } = properties as { times: string };
+
+        const times = JSON.parse(rawTimes) as string[];
+
+        if (
+          times &&
+          times.every((time) => typeof time === 'string') &&
+          times.every((time) => dayjs(time).isValid())
+        ) {
+          setTimes(
+            times.map((time) => ({ value: time, label: dayjs(time).format('MMMM D, YYYY h:mm A') }))
+          );
+        }
       }
     }
   }, [feature]);
