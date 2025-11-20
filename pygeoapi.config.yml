@@ -10,6 +10,8 @@ server:
   cors: true
   pretty_print: true
   # admin: true
+  icon: https://www.asu.edu/themes/custom/asu_edu/favicon.ico
+  logo: https://awo-ui.netlify.app/ASU-logo.png
   templates:
     path: /opt/pygeoapi/pygeoapi-deployment/templates
   limits:
@@ -19,10 +21,15 @@ server:
     url: https://tile.openstreetmap.org/{z}/{x}/{y}.png
     attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>'
 
-  manager:  # optional OGC API - Processes asynchronous job management
-      name: TinyDB  # plugin name (see pygeoapi.plugin for supported process_manager's)
-      connection: ${JOB_MANAGER_CONNECTION:-/tmp/pygeoapi-process-manager.db}  # connection info to store jobs (e.g. filepath)
-      output_dir: ${JOB_MANAGER_DIRECTORY:-/tmp/}  # directory to store process outputs (e.g. files)
+  manager:
+    name: PostgreSQL
+    output_dir: ${PYGEOAPI_JOB_RESULT_DIR:-"/tmp/"}
+    connection:
+      host: ${TF_VAR_POSTGRES_HOST:-localhost}
+      port: 5432
+      database: ${TF_VAR_POSTGRES_DB}
+      user: ${TF_VAR_POSTGRES_USER:-postgres}
+      password: ${TF_VAR_POSTGRES_PASSWORD:-password}
       
 logging:
   level: ${PYGEOAPI_LOGLEVEL:-WARNING}
@@ -62,8 +69,24 @@ resources:
   National_Water_Model_Channel_Routing_Output:
     type: collection
     title: National Water Model Channel Routing Output
-    description: National Water Model Channel Routing Output
+    # https://hdsc.nws.noaa.gov/pub/hdsc/data/papers/articles/HRL_Pubs_PDF_May12_2009/HRL_PUBS_201-250/206_CHANNEL_ROUTING,_HYDROLOGICAL_FORECASTING.pdf
+    description: contains simulated flow and channel-related variables for river and stream segments, representing the movement of water through the channel network.
     keywords: ["NWM"]
+    provider-name:  
+      - NOAA
+    links:
+      - type: application/html
+        rel: methodology
+        title: Methodology
+        href: https://hdsc.nws.noaa.gov/pub/hdsc/data/papers/articles/HRL_Pubs_PDF_May12_2009/HRL_PUBS_201-250/206_CHANNEL_ROUTING,_HYDROLOGICAL_FORECASTING.pdf
+      - type: application/html
+        rel: canonical 
+        title: Data source
+        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/index.html#CONUS/zarr/chrtout.zarr/
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://registry.opendata.aws/nwm-archive/
     extents:  &nwm-extents
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -94,9 +117,20 @@ resources:
   National_Water_Model_Land_Data_Assimilation_System_Output:
     type: collection
     title: National Water Model Land Data Assimilation System Output
-    description: National Water Model Land Data Assimilation System Output
+    description: aims to produce high quality fields of land surface states and fluxes by integrating satellite and ground-based observational data products
     keywords: ["NWM"]
+    provider-name:  
+      - NOAA
     extents: *nwm-extents
+    links:
+      - type: application/html
+        rel: canonical 
+        title: Data source
+        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/index.html#CONUS/zarr/ldasout.zarr/
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://registry.opendata.aws/nwm-archive/
     providers:
       - &nwm-raster-edr
         <<: *nwm-edr
@@ -108,9 +142,20 @@ resources:
   National_Water_Data_Reach_to_Reach_Routing_Output:
     type: collection
     title: National Water Model Reach to Reach Routing Output
-    description: National Water Model Reach to Reach Routing Output
+    description: provides simulated streamflow and related hydrologic variables for millions of individual river and stream reaches across the U.S., representing how water is routed downstream through the national river network.
     keywords: ["NWM"]
+    provider-name:  
+      - NOAA
     extents: *nwm-extents
+    links:
+      - type: application/html
+        rel: canonical 
+        title: Data source
+        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/index.html#CONUS/zarr/rtout.zarr/
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://registry.opendata.aws/nwm-archive/
     providers:
       - <<: *nwm-raster-edr
         remote_dataset: CONUS/zarr/rtout.zarr
@@ -118,15 +163,25 @@ resources:
   National_Water_Model_Lakeout:
     type: collection
     title: National Water Model Lake Output
-    description: National Water Model Lake Output
+    description: provides simulated water levels, storage, and outflows for lakes and reservoirs across the U.S. It delivers time-series data that supports monitoring, forecasting, and management of lake and reservoir conditions within the hydrologic network.
     keywords: ["NWM"]
     extents: *nwm-extents
+    links:
+      - type: application/html
+        rel: canonical 
+        title: Data source
+        href: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com/index.html#CONUS/zarr/lakeout.zarr/
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://registry.opendata.aws/nwm-archive/
     providers:  
       - <<: *nwm-edr
         remote_dataset: CONUS/zarr/lakeout.zarr
       - <<: *nwm-feature
         remote_dataset: CONUS/zarr/lakeout.zarr
   
+  ## This is currently commented out since it relies on adding extra geometry metadata; currently it has no geometry
   # National_Water_Model_Groundwater_Output:
   #   type: collection
   #   title: National Water Model Groundwater Output
@@ -136,33 +191,47 @@ resources:
   #   providers:
   #     - <<: *nwm-raster-edr
   #       remote_dataset: CONUS/zarr/gwout.zarr
-
-  ADWR_GWSI_Sites:
-    type: collection
-    title: Arizona Department of Water Resources Groundwater Storage Index
-    description: Sites of the Arizona Department of Water Resources Groundwater Storage Index
-    keywords: ["sites"]
-    links:
-      - type: application/html
-        rel: canonical
-        title: data source
-        hreflang: en-U
-        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/GWSI_Layers/FeatureServer/7
-    extents: 
-      spatial:
-        bbox: [-170, 15, -51, 72]
-        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
-    providers:
-        - data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/GWSI_Layers/FeatureServer/7
-          type: feature
-          name: ESRI
-          id_field: OBJECTID
-          time_field: LASTWLDATE
+  
+  #### This is currently commented out since it is duplicated info from the postgis pgedr provider for arizona groundwater data
+  # ADWR_GWSI_Sites:
+  #   type: collection
+  #   title: Arizona Department of Water Resources Groundwater Storage Index
+  #   description: contains well sites including the state well registration number of the well and metadata about its creation
+  #   keywords: ["sites"]
+  #   provider-name:  
+  #     - Arizona Department of Water Resources
+  #   links:
+  #     - type: application/html
+  #       rel: canonical
+  #       title: data source
+  #       hreflang: en-U
+  #       href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/GWSI_Layers/FeatureServer/7
+  #   extents: 
+  #     spatial:
+  #       bbox: [-170, 15, -51, 72]
+  #       crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+  #   providers:
+  #       - data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/GWSI_Layers/FeatureServer/7
+  #         type: feature
+  #         name: ESRI
+  #         id_field: OBJECTID
+  #         time_field: LASTWLDATE
 
   usace-edr:
     type: collection
-    title: US Army Corps of Engineers
-    description: USACE Access2Water API
+    title: US Army Corps of Engineers Access2Water API
+    description: provides a subset of the USACE Corps Water Management System (CWMS) API specifically focused on water control management data
+    provider-name:  
+      - US Army Corps of Engineers
+    link:
+      - type: application/html
+        rel: canonical 
+        title: Data source
+        href: https://cwms-data.usace.army.mil/cwms-data/swagger-ui.html
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://water.usace.army.mil/
     extents: 
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -173,29 +242,36 @@ resources:
       - &default-edr
         type: edr
         name: usace.usace_edr.USACEEDRProvider
-        data: https://wcc.sc.egov.usda.gov/awdbRestApi/v3/api-docs
+        data: https://water.usace.army.mil/
       - &default-feature
         type: feature
         name: usace.usace.USACEProvider
-        data: https://wcc.sc.egov.usda.gov/awdbRestApi/v3/api-docs
+        data: https://water.usace.army.mil/
         entity: Observation
         title_field: name
 
   snotel-edr:
     type: collection
-    title: Snow Telemetry Network
-    description: USDA Snow Telemetry Network (SNOTEL) EDR
+    title: Snowpack Telemetry Network (SNOTEL)
+    # https://snow.nasa.gov/data/snotel-data
+    description: is an automated system of snowpack and related climate sensors primarily in mountainous regions in the Western United States which aims to collect data like snow water equivalent, accumulated precipitation, and air temperature. 
+    provider-name:
+      - US Department of Agriculture
     keywords:
       - EDR
       - SNOTEL
       - NRCS
       - USDA
     links:
-      - &default-link
-        type: application/html
-        rel: canonical
-        title: data source
+      - type: application/html
+        rel: documentation
+        title: Documentation
         href: https://www.nrcs.usda.gov/wps/portal/wcc/home/aboutUs/monitoringPrograms/automatedSnowMonitoring/
+        hreflang: en-US
+      - type: application/html
+        rel: canonical
+        title: Data source
+        href: https://wcc.sc.egov.usda.gov/awdbRestApi/swagger-ui/index.html
         hreflang: en-US
     extents:
       spatial:
@@ -211,15 +287,24 @@ resources:
 
   usgs-sta:
     type: collection
-    title: United States Geologic Survey Streamgages
-    description: USGS Streamgages SensorThings API EDR
+    title: United States Geological Survey Streamgages
+    description: measures real-time streamflow (discharge), water levels, and other hydrologic data in rivers and streams across the United States.
+    provider-name:
+      - USGS
     keywords:
       - EDR
       - SensorThings
       - USGS
     links:
-      - <<: *default-link
-        href: https://labs.waterdata.usgs.gov
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://labs.waterdata.usgs.gov/
+        hreflang: en-US
+      - type: application/html
+        rel: canonical
+        title: Data source
+        href: https://labs.waterdata.usgs.gov/sta/v1.1/
     extents: &default-extent
       spatial:
         bbox: [-170, 15, -51, 72]
@@ -236,11 +321,26 @@ resources:
 
   awdb-forecasts-edr:
     type: collection
-    title: Air and Water Database Forecasts
-    description: USDA Air and Water Database Forecasts (AWDB) EDR
+    title: Air and Water Database (AWDB) Forecasts
+    description: provides predictions for climate and water supply conditions. It uses the same endpoint as SNOTEL but includes only forecasts
     keywords:
-      - open data
+      - EDR
+      - AWDB
+      - USDA
+    provider-name:
+      - US Department of Agriculture
     extents: *default-extent
+    links:
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://www.nrcs.usda.gov/wps/portal/wcc/home/aboutUs/monitoringPrograms/automatedSnowMonitoring/
+        hreflang: en-US
+      - type: application/html
+        rel: canonical
+        title: Data source
+        href: https://wcc.sc.egov.usda.gov/awdbRestApi/swagger-ui/index.html
+        hreflang: en-US
     providers:
       - type: edr
         name: awdb_forecasts.awdb_forecasts_edr.AwdbForecastsEDRProvider
@@ -254,11 +354,30 @@ resources:
   noaa-rfc:
     type: collection
     title: River Forecast Center Seasonal Forecasts
-    description: NOAA River Forecast Center Forecasts
+    description: aggregates water supply forecast data from all regional NOAA river forecast centers into one collection. 
+    provider-name:
+      - NOAA
     keywords: [NOAA]
     links:
-      - <<: *default-link
+      - type: application/html
+        rel: documentation
+        title: Documentation
         href: https://www.cbrfc.noaa.gov/wsup/graph/west/map/esp_map.html
+        hreflang: en-US
+     # there are multiple canonical dataset sources here since noaa rfc joins data from multiple sources
+      - type: application/html
+        rel: canonical
+        title: California Nevada River Forecast Center Data Source
+        href: https://www.cnrfc.noaa.gov/ensembleProduct.php
+      - type: application/html
+        rel: canonical
+        title: Colorado Basin River Forecast Center Data Source
+        href: https://www.cbrfc.noaa.gov/lmap/lmap.php
+      - type: application/html
+        rel: canonical
+        title: Northwest River Forecast Center Data Source
+        href: https://www.nwrfc.noaa.gov/rfc/
+        
     extents: *default-extent
     providers:
       - type: feature
@@ -269,15 +388,22 @@ resources:
   usgs-prism:
     type: collection
     title: Parameter-elevation Regressions on Independent Slopes Model (PRISM)
-    description: PRISM Monthly Climate Data for the Continental United States
+    description: provides a raster for high-resolution spatial climate data, including precipitation, temperature, and other climate variables, derived by combining point-based weather observations with digital elevation and other geographic information.
+    provider-name:
+      - USGS
     keywords:
       - temperature
       - precipitation
     extents: *default-extent
     links:
-      - <<: *default-link
-        title: information
+      - type: application/html
+        rel: documentation
+        title: Documentation
         href: https://cida.usgs.gov/thredds/catalog.html?dataset=cida.usgs.gov/prism_v2
+      - type: application/html
+        rel: canonical
+        title: Data source
+        href: https://usgs.osn.mghpcc.org/mdmf/gdp/PRISM_v2.zarr
     providers:
       - type: edr
         name: xarray-edr
@@ -295,11 +421,19 @@ resources:
 
   noaa-river-stage-forecast-day-1: &default-river-stage
     type: collection
-    title: River Stage Forecast Day 1
+    title: NOAA River Stage Forecast Day 1
     description: NOAA River Stage Forecast 24 Hours / 1 day from now
     keywords: [NOAA, riv_gauges]
-    links:
-      - <<: *default-link
+    provider-name:
+      - NOAA
+    links: &default-noaa-river-stage-links
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer
+      - type: application/html
+        rel: canonical
+        title: Data source
         href: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer
     extents: *default-extent
     providers:
@@ -312,57 +446,72 @@ resources:
 
   noaa-river-stage-forecast-day-2:
     <<: *default-river-stage
-    title: River Stage Forecast Day 2
-    description: NOAA River Stage Forecast 48 hours / 2 days from now
+    title: NOAA River Stage Forecast Day 2
+    description: predicts the water level (stage) in rivers and streams 2 days from now and is updated every 15-minutes
+    links: *default-noaa-river-stage-links
     providers:
       - <<: *default-feature-river-stage
         data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/2
 
   noaa-river-stage-forecast-day-3:
     <<: *default-river-stage
-    title: River Stage Forecast Day 3
-    description: NOAA River Stage Forecast 72 hours / 3 days from now
+    title: NOAA River Stage Forecast Day 3
+    description: predicts the water level (stage) in rivers and streams 3 days from now and is updated every 15-minutes
+    links: *default-noaa-river-stage-links
     providers:
       - <<: *default-feature-river-stage
         data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/3
 
   noaa-river-stage-forecast-day-10:
     <<: *default-river-stage
-    title: River Stage Forecast Day 10
-    description: NOAA River Stage Forecast 240 hours / 10 days from now
+    title: NOAA River Stage Forecast Day 10
+    description: predicts the water level (stage) in rivers and streams 10 days from now and is updated every 15-minutes
+    links: *default-noaa-river-stage-links
     providers:
       - <<: *default-feature-river-stage
         data: https://mapservices.weather.noaa.gov/eventdriven/rest/services/water/riv_gauges/MapServer/10
 
 
-
-  arizona-well-registry:
-    type: collection
-    title: Arizona Well Registry
-    description:  The Wells 55 Registry database contains different well types - Notices of Intent to Drill (NOI) (55-500000 and 55-200000, series), Electronic NOI (eNOI) (55-900000 series), registrations of existing wells (55-600000 and 55-800000 series), discovered unregistered wells (55-700000 series),and existing wells that are registered to be abandoned (55-400000 series). In other words, the database contains NOIs to drill, replace, modify, abandon, or deepen, registrations, driller reports, completion reports, change of well information, change of ownership, notice of well capping, and abandonment completion reports. This layer is displayed in the Well Registry application.
-    keywords: [Arizona]
-    links:
-      - <<: *default-link
-        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
-    extents: *default-extent
-    providers:
-      - type: feature
-        name: ESRI
-        data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
-        id_field: REGISTRY_ID
-        time_field: installed
+  ## This is commented out because it is superceded by the pgedr arizona ground water collection which contains both
+  ## the wells 55 data and the azwater.gov timeseries data in the same collection; this is only keppt here for posterity
+  # arizona-well-registry:
+  #   type: collection
+  #   title: Arizona Wells 55 Registry
+  #   description: contains Arizona well information such as NOIs to drill, replace, modify, abandon, or deepen, registrations, driller reports, completion reports, change of well information, change of ownership, notice of well capping, and abandonment completion reports. 
+  #   keywords: [Arizona]
+  #   provider-name:
+  #     - Arizona Department of Water Resources
+  #   links:
+  #     - <<: *default-link
+  #       href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
+  #   extents: *default-extent
+  #   providers:
+  #     - type: feature
+  #       name: ESRI
+  #       data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
+  #       id_field: REGISTRY_ID
+  #       time_field: installed
 
   usgs-national-map/elevation: 
     type: collection
-    title: USGS National Map Elevation
-    description: USGS National Map 3D Elevation Program (3DEPElevation)
+    title: USGS National Map 3D Elevation Program (3DEP)
+    description: provides nationwide topographic elevation data, including bare-earth digital elevation models (DEMs) and derivative products such as hillshades, contours, and 3D surface models.
     provider-name:
       - USGS
     keywords: [USGS]
     links:
-      - <<: *default-link
-        href: https://tnmaccess.nationalmap.gov/api/v1/map_services
-        all_national_map_links: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
+      - type: application/html
+        rel: canonical
+        title: Data source
+        href: https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://www.usgs.gov/3d-elevation-program
+      - type: application/html
+        rel: map list 
+        title: The list of all map services available by the USGS
+        href: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
     extents: *default-extent
     providers:
      -  type: map
@@ -376,17 +525,26 @@ resources:
           name: png
           mimetype: image/png
 
-  usgs-national-map/land-use: 
+  usgs-national-map/land-cover: 
     type: collection
-    title: USGS National Map Land Use
-    description: USGS National Map Land Use
+    title: USGS National Map Land Cover
+    description: provides a raster for classification of land cover types across the Contiguous United States (CONUS), including forests, wetlands, urban areas, agricultural lands, and water bodies. It is derived from satellite imagery and other remote sensing data
     provider-name:
       - USGS
     keywords: [USGS]
     links:
-      - <<: *default-link
-        href: https://tnmaccess.nationalmap.gov/api/v1/map_services
-        all_national_map_links: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
+      - type: application/html
+        rel: canonical
+        title: Data source
+        href: https://www.mrlc.gov/geoserver/NLCD_Land_Cover/wms
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://www.usgs.gov/centers/eros/science/national-land-cover-database
+      - type: application/html
+        rel: map list 
+        title: List of all map services available by the USGS
+        href: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
     extents: *default-extent
     providers:
       - type: map
@@ -400,8 +558,83 @@ resources:
           name: png
           mimetype: image/png
         
+  ArizonaWaterWells:
+    type: collection
+    title: Arizona Department of Water Resources Groundwater Site Inventory
+    description: consists of field-verified data regarding wells and springs collected by personnel from the Hydrology Division's Basic Data Section, the U.S. Geological Survey and other co-operating agencies. This collection contains additional info joined from the Arizona Wells 55 Registry to enrich well metadata.
+    provider-name:
+      - Arizona Department of Water Resources
+    links:
+      - type: application/html
+        rel: canonical
+        title: Wells 55 Registry Data Source
+        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
+      - type: application/html
+        rel: canonical
+        title: Groundwater Timeseries Data source
+        href: https://www.azwater.gov/sites/default/files/zip/GWSI_ZIP_20251014.zip
+      - type: application/html
+        rel: documentation
+        title: ADWR Interactive Maps and Data Documentation
+        href: https://www.azwater.gov/gis-data-and-maps
+      - type: application/html
+        rel: documentation 
+        title: Water Resources Open Data Portal
+        href: https://gisdata2016-11-18t150447874z-azwater.opendata.arcgis.com/
+
+    keywords:
+      en:
+        - example
+        - quickstart
+    extents:
+      spatial:
+        bbox: [-180, -90, 180, 90]
+        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+    providers:
+      - type: feature
+        name: PostgreSQL
+        data:
+          host: ${TF_VAR_POSTGRES_HOST:-localhost}
+          dbname: ${TF_VAR_POSTGRES_DB:-edr}
+          user: ${TF_VAR_POSTGRES_USER:-postgres}
+          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+          search_path: [edr_quickstart]
+        table: locations
+        id_field: location_id
+        geom_field: geometry
+
+      - type: edr
+        name: pgedr.PostgresEDRProvider
+        data:
+          host: ${TF_VAR_POSTGRES_HOST:-localhost}
+          dbname: ${TF_VAR_POSTGRES_DB:-edr}
+          user: ${TF_VAR_POSTGRES_USER:-postgres}
+          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+          search_path: [edr_quickstart]
+        table: observations
+    
+        edr_fields: # Required EDR Fields
+          id_field: observation_id
+          location_field: locations.location_id
+          geom_field: locations.geometry # Result geometry field
+          time_field: observation_time
+          result_field: observation_value
+          parameter_id: parameters.parameter_id
+          parameter_name: parameters.parameter_name
+          parameter_unit: parameters.parameter_unit_symbol
+
+        external_tables: # Additional table joins
+          locations:
+            remote: location_id
+            foreign: location_id
+          parameters:
+            remote: parameter_id
+            foreign: parameter_id
 
   config-store:
       type: process
       processor:
           name: config_store.ConfigStoreProcessor
+
+
+    

@@ -14,3 +14,9 @@ downloads/
 GWSI_ZIP_*/
 
 .env
+
+.terraform*
+
+*.tfstate*
+
+edr_backup.dump

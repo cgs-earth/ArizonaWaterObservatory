@@ -30,6 +30,7 @@ dependencies = [
     "config-store",
     "rioxarray>=0.19.0",
     "geopandas>=1.1.1",
+    "pgedr",
 ]
 
 [dependency-groups]
@@ -50,7 +51,8 @@ server = [
 members = ["packages/*"]
 
 [tool.uv.sources]
-pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="2021551eb8175d88103444815e5e9b2a1d1b75f4" }
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="e6b12b0224163f4eaf5c58f37049f44fc8dc77e8" }
+pgedr = {git = "https://github.com/internetofwater/pgedr.git", rev="eb6c86dc410bdfdd214c8cb8aa4a67943ae2968a"}
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }

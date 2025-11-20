@@ -9,6 +9,7 @@ from com.geojson.helpers import (
     GeojsonFeatureDict,
     SortDict,
 )
+from com.otel import otel_trace
 from com.protocols.providers import OAFProviderProtocol
 from pygeoapi.provider.base import BaseProvider
 from pygeoapi.util import crs_transform
@@ -48,6 +49,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         if "storage_crs" not in provider_def:
             self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
 
+    @otel_trace()
     def items(  # type: ignore
         self,
         bbox: list,
@@ -62,7 +64,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         limit: int = 500,
         itemId: str
         | None = None,  # unlike edr, this is a string; we need to case to an int before filtering
-        offset: int | None = 0,
+        offset: int = 0,
         skip_geometry: bool | None = False,
         **kwargs,
     ) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
@@ -82,6 +84,7 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             unopened_dataset=self.zarr_dataset,
             feature_id=itemId,
             feature_limit=limit,
+            feature_offset=offset,
         )
 
         result = project_dataset(

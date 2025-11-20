@@ -1,3 +1,5 @@
+export UV_ENV_FILE=.env
+
 precommit:
 	pre-commit install
 	pre-commit run 

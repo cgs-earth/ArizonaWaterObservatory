@@ -118,6 +118,7 @@ const Layer: React.FC<Props> = (props) => {
   useEffect(() => {
     setColor(layer.color);
   }, [layer.color]);
+
   useEffect(() => {
     setOpacity(layer.opacity);
   }, [layer.opacity]);
