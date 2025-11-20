@@ -1230,8 +1230,6 @@ class MainManager {
 
     const chunkSize = 5;
 
-    console.log('Im the layers', layers);
-
     for (let i = 0; i < layers.length; i += chunkSize) {
       const chunk = layers.slice(i, i + chunkSize);
       await Promise.all(
