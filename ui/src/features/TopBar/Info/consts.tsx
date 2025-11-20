@@ -74,18 +74,9 @@ export const glossaryEntries: Array<{ id: string; label: ReactNode; descriptions
     label: 'Links',
     descriptions: [
       <Text {...description}>
-        Use the Links modal to retrieve the API requests used to fetch the same data visualized on
-        the map and in the charts.
-      </Text>,
-    ],
-  },
-  {
-    id: 'download',
-    label: 'Download',
-    descriptions: [
-      <Text {...description}>
-        Non-spatial attributes associated with a geographic feature. Properties may contain helpful
-        information like location names or the date of the last change to underlying data.
+        Use the Links modal to explore features in more detail. Find file downloads, explore data,
+        and retrieve API requests used to fetch the same data visualized on the map and in the
+        charts.
       </Text>,
     ],
   },
