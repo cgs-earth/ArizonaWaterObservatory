@@ -944,7 +944,7 @@ class MainManager {
         bbox,
         from,
         to,
-        options?.parameterNames,
+        options?.parameterNames ?? layer.parameters,
         options?.signal,
         next
       );
