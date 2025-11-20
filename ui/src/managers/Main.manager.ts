@@ -944,7 +944,7 @@ class MainManager {
         bbox,
         from,
         to,
-        options?.parameterNames,
+        options?.parameterNames ?? layer.parameters,
         options?.signal,
         next
       );
@@ -1229,6 +1229,8 @@ class MainManager {
     const layers = this.store.getState().layers;
 
     const chunkSize = 5;
+
+    console.log('Im the layers', layers);
 
     for (let i = 0; i < layers.length; i += chunkSize) {
       const chunk = layers.slice(i, i + chunkSize);
