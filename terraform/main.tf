@@ -85,10 +85,11 @@ resource "google_cloud_run_v2_job" "groundwatersqldumpjob" {
             # to create the jobs table in the test
             curl --fail --show-error --silent https://raw.githubusercontent.com/geopython/pygeoapi/refs/heads/master/tests/data/postgres_manager_full_structure.backup.sql -o create_jobs_table.sql
 
-            # we need to wipe the database before restoring since you can't restore a dump over an existing database trivially
-            psql -d postgres -c "DROP DATABASE IF EXISTS ${var.POSTGRES_DB};"
-            psql -d postgres -c "CREATE DATABASE ${var.POSTGRES_DB};"
-            pg_restore --dbname=${var.POSTGRES_DB} --verbose --exit-on-error edr_backup.dump
+            # restore the database dump
+            #  --clean --if-exists to drop existing db objects prior to restore without dropping the whole database itself
+            # --disable-triggers make it so we don't run hooks on every insert which would slow down the restore; we are 
+            #                    restoring from a validated dump so there should be integrity  
+            pg_restore --dbname=${var.POSTGRES_DB} --verbose --exit-on-error --disable-triggers --clean --if-exists edr_backup.dump
             psql -d ${var.POSTGRES_DB} -f create_jobs_table.sql
           EOT
         ]

@@ -620,7 +620,7 @@ resources:
           time_field: observation_time
           result_field: observation_value
           parameter_id: parameters.parameter_id
-          parameter_name: parameters.parameter_name
+          parameter_name: parameters.parameter_unit_label
           parameter_unit: parameters.parameter_unit_symbol
 
         external_tables: # Additional table joins
