@@ -23,8 +23,10 @@ export const filterCollections = (
     filterFunctions.push((collection) => getProvider(collection.id) === provider);
   }
 
-  return collections.filter(
-    (collection) =>
-      filterFunctions.length === 0 || filterFunctions.every((filter) => filter(collection))
-  );
+  return collections
+    .filter(
+      (collection) =>
+        filterFunctions.length === 0 || filterFunctions.every((filter) => filter(collection))
+    )
+    .sort((a, b) => (a.title ?? '').localeCompare(b.title ?? ''));
 };

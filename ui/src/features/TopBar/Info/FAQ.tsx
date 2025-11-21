@@ -3,12 +3,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Group } from '@mantine/core';
+import { Fragment } from 'react';
+import { Divider, List, Stack, Text } from '@mantine/core';
+import { questions } from '@/features/TopBar/Info/consts';
+import styles from '@/features/TopBar/TopBar.module.css';
 
 export const FAQ: React.FC = () => {
   return (
-    <Group justify="center" align="center" mt={16}>
-      This tab is in development.
-    </Group>
+    <Stack
+      my="calc(var(--default-spacing) * 2)"
+      mx="var(--default-spacing)"
+      gap="calc(var(--default-spacing) * 2)"
+    >
+      {questions.map((question, index) => (
+        <Fragment key={`faq-${question.id}`}>
+          {index > 0 && <Divider />}
+          <Stack gap="calc(var(--default-spacing) / 2)">
+            <Text fw={700}>{question.question}</Text>
+            <Text className={styles.faqAnswer}>{question.answer}</Text>
+            {question.bullets && question.bullets.length && (
+              <List className={styles.faqBullets}>
+                {question.bullets.map((bullet, index) => (
+                  <List.Item key={`faq-${question.id}-bullet-${index}`}>
+                    <Text size="sm">
+                      {bullet.label && <strong>{bullet.label}&nbsp;</strong>}
+                      {bullet.content}
+                    </Text>
+                  </List.Item>
+                ))}
+              </List>
+            )}
+          </Stack>
+        </Fragment>
+      ))}
+    </Stack>
   );
 };

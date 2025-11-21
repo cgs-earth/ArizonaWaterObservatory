@@ -16,7 +16,7 @@ import { Overlay } from '@/stores/session/types';
 
 const Filter: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
-    onOpen: () => setOverlay(Overlay.Share),
+    onOpen: () => setOverlay(Overlay.Filter),
   });
 
   const provider = useMainStore((state) => state.provider);
@@ -27,7 +27,7 @@ const Filter: React.FC = () => {
   const setOverlay = useSessionStore((store) => store.setOverlay);
 
   useEffect(() => {
-    if (overlay !== Overlay.Share) {
+    if (overlay !== Overlay.Filter) {
       close();
     }
   }, [overlay]);
@@ -39,7 +39,7 @@ const Filter: React.FC = () => {
 
   return (
     <>
-      <Stack gap={8} className={styles.filterBody}>
+      <Stack gap="var(--default-spacing)" className={styles.filterBody}>
         {!provider && !category && !collection && <Text ta="center">No filters selected</Text>}
         {provider && (
           <>

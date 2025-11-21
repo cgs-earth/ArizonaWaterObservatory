@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DatasourceCollectionType } from '@/consts/collections';
 import { ICollection } from '@/services/edr.service';
 
 // This is non-exhaustive, reflects currently supported types
@@ -40,7 +41,27 @@ export const isFeatures = (collection: ICollection): boolean => {
   return Boolean(collection?.itemType) && collection.itemType === 'feature';
 };
 
+export const getCollectionTypeDefaults = (
+  collectionId: ICollection['id']
+): CollectionType | undefined => {
+  if (DatasourceCollectionType[CollectionType.EDRGrid].includes(collectionId)) {
+    return CollectionType.EDRGrid;
+  }
+  if (DatasourceCollectionType[CollectionType.EDR].includes(collectionId)) {
+    return CollectionType.EDR;
+  }
+  if (DatasourceCollectionType[CollectionType.Features].includes(collectionId)) {
+    return CollectionType.Features;
+  }
+};
+
 export const getCollectionType = (collection: ICollection): CollectionType => {
+  const defaultCollectionType = getCollectionTypeDefaults(collection.id);
+
+  if (defaultCollectionType) {
+    return defaultCollectionType;
+  }
+
   if (isEdr(collection)) {
     return CollectionType.EDR;
   }

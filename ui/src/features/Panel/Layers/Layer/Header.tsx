@@ -70,7 +70,7 @@ export const Header: React.FC<Props> = (props) => {
         {layer.name}
       </Title>
       {[CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType) && (
-        <Group justify="space-between" gap={8}>
+        <Group justify="space-between" gap="var(--default-spacing)">
           {parameters.length > 0 && <Text size="xs">{parameters.join(', ')}</Text>}
           {(layer.from || layer.to) && (
             <Text size="xs">

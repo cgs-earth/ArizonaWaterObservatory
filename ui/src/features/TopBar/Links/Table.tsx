@@ -46,7 +46,7 @@ export const Table: React.FC<Props> = (props) => {
           placeholder="Search property names and values"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.currentTarget.value)}
-          mb={8}
+          mb="var(--default-spacing)"
         />
       )}
       <TableComponent

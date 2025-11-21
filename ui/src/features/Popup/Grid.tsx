@@ -36,18 +36,36 @@ export const Grid: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (feature.properties) {
-      const { times: rawTimes } = feature.properties as { times: string };
+      if (typeof feature.properties === 'object') {
+        const { times: rawTimes } = feature.properties as { times: string };
 
-      const times = JSON.parse(rawTimes) as string[];
+        const times = JSON.parse(rawTimes) as string[];
 
-      if (
-        times &&
-        times.every((time) => typeof time === 'string') &&
-        times.every((time) => dayjs(time).isValid())
-      ) {
-        setTimes(
-          times.map((time) => ({ value: time, label: dayjs(time).format('MMMM D, YYYY h:mm A') }))
-        );
+        if (
+          times &&
+          times.every((time) => typeof time === 'string') &&
+          times.every((time) => dayjs(time).isValid())
+        ) {
+          setTimes(
+            times.map((time) => ({ value: time, label: dayjs(time).format('MMMM D, YYYY h:mm A') }))
+          );
+        }
+      } else if (typeof feature.properties === 'string') {
+        const properties = JSON.parse(feature.properties);
+
+        const { times: rawTimes } = properties as { times: string };
+
+        const times = JSON.parse(rawTimes) as string[];
+
+        if (
+          times &&
+          times.every((time) => typeof time === 'string') &&
+          times.every((time) => dayjs(time).isValid())
+        ) {
+          setTimes(
+            times.map((time) => ({ value: time, label: dayjs(time).format('MMMM D, YYYY h:mm A') }))
+          );
+        }
       }
     }
   }, [feature]);
@@ -82,19 +100,24 @@ export const Grid: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Divider mt={4} />
+      <Divider mt="calc(var(--default-spacing) / 2)" />
       {time && (
-        <Text size="sm" mt={16} mb={8}>
+        <Text size="sm" mt="calc(var(--default-spacing) * 2)" mb="var(--default-spacing)">
           {time?.label}
         </Text>
       )}
 
       <ScrollArea scrollbars="x" type="hover" style={{ maxWidth: '100%' }}>
-        <Group justify="flex-start" align="flex-start" mb={16} wrap="nowrap">
+        <Group
+          justify="flex-start"
+          align="flex-start"
+          mb="calc(var(--default-spacing) * 2)"
+          wrap="nowrap"
+        >
           {displayValues.map((displayValue) => (
             <Stack
               key={`${location.id}-${displayValue.label}-${displayValue.value}`}
-              gap={8}
+              gap="var(--default-spacing)"
               miw={120}
             >
               <Text size="sm" fw={700}>
@@ -107,8 +130,13 @@ export const Grid: React.FC<Props> = (props) => {
           ))}
         </Group>
       </ScrollArea>
-      <Group justify="space-between" align="flex-end" mt={8} mb={8}>
-        <Group gap={8} align="flex-end">
+      <Group
+        justify="space-between"
+        align="flex-end"
+        mt="var(--default-spacing)"
+        mb="var(--default-spacing)"
+      >
+        <Group gap="var(--default-spacing)" align="flex-end">
           {locations.length > 1 && (
             <Select
               className={styles.locationsDropdown}

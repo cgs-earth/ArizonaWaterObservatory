@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Feature, MultiPolygon, Polygon } from 'geojson';
+import { ILink } from '@ogcapi-js/shared';
+import { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { LngLat, LngLatBoundsLike } from 'mapbox-gl';
 import { MainState } from '@/stores/main/types';
 
@@ -42,4 +43,11 @@ export type SourceOptions = {
   from?: string | null;
   to?: string | null;
   noFetch?: boolean;
+};
+
+export type ExtendedFeatureCollection = FeatureCollection & {
+  links?: ILink[];
+  numberMatched?: number;
+  numberReturned?: number;
+  timeStamp?: string;
 };

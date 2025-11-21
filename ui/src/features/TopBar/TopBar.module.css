@@ -3,6 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.actionIconRoot {
+  margin-right: var(--default-spacing);
+}
+
+.actionIcon {
+  stroke: var(--asu-gray-1);
+  fill: var(--asu-gray-1);
+}
+
+.actionIcon > svg {
+  width: 100%;
+  height: auto;
+}
+
+.actionIcon:hover:not(:disabled),
+.actionIcon:focus:not(:disabled),
+.actionIcon:active:not(:disabled) {
+  stroke: var(--asu-gray-2);
+  fill: var(--asu-gray-2);
+}
+
 .topBarWrapper {
   padding: var(--default-spacing);
   border-bottom: 1px solid var(--border);
@@ -15,6 +36,12 @@
 
 .tabs {
   width: 100%;
+}
+
+.tabsList {
+  position: sticky;
+  top: 0;
+  background: var(--mantine-color-body);
 }
 
 .accordionBody {
@@ -90,4 +117,65 @@
 .valueColumn {
   overflow-wrap: break-word;
   white-space: pre-wrap;
+}
+
+.downloadDropdown {
+  border: unset;
+  padding: 0;
+}
+
+.faqAnswer {
+  margin-left: var(--default-spacing);
+}
+
+.faqBullets {
+  margin-left: calc(var(--default-spacing) * 2);
+  margin-right: calc(var(--default-spacing) * 2);
+}
+
+.downloadContent {
+  border: 5px solid var(--border);
+  padding: var(--default-spacing);
+  border-radius: var(--popover-radius, var(--mantine-radius-default));
+}
+
+.mobileWrapper {
+  display: none;
+  margin-top: calc(var(--default-spacing) * 2);
+}
+
+.contactWrapper {
+  color: var(--mantine-color-text);
+}
+
+.contact {
+  border: 1px solid var(--border);
+  margin: calc(var(--default-spacing) / 2);
+  padding: calc(var(--default-spacing) / 2);
+}
+
+.contactImage {
+  padding: calc(var(--default-spacing) * 0.75);
+  max-width: 25%;
+}
+
+.contactBody {
+  padding-top: calc(var(--default-spacing) / 2);
+  padding-right: calc(var(--default-spacing) / 4);
+  max-width: calc(75% - var(--default-spacing));
+}
+
+.contactLink {
+  margin-top: var(--default-spacing);
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 899px) {
+  .topBarWrapper {
+    display: none;
+  }
+
+  .mobileWrapper {
+    display: flex;
+  }
 }

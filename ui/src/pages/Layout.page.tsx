@@ -5,12 +5,13 @@
 
 import { useEffect, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Box, Group, Stack } from '@mantine/core';
+import { Anchor, Box, Group, Image, Stack } from '@mantine/core';
 import { useMap } from '@/contexts/MapContexts';
 import Loading from '@/features/Loading';
 import { MAP_ID } from '@/features/Map/config';
 import Notifications from '@/features/Notifications';
 import Panel from '@/features/Panel';
+import { Mobile as MobileTools } from '@/features/Tools/Mobile';
 import TopBar from '@/features/TopBar';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
@@ -95,13 +96,26 @@ export const LayoutPage: React.FC = () => {
           <Panel />
           <Stack gap={0} className={styles.right}>
             <TopBar />
-            <Loading desktop={false} />
             <Outlet />
+            <Box className={styles.cgsLogo}>
+              <Anchor target="_blank" href="https://cgsearth.org/">
+                <Image
+                  src="/poweredbycgs_v2.png"
+                  alt="Center for Geospatial Solutions Logo"
+                  style={{
+                    height: 36,
+                    width: 'auto',
+                  }}
+                  fit="contain"
+                />
+              </Anchor>
+            </Box>
+            <Loading />
           </Stack>
         </Group>
-        <Loading desktop />
       </Stack>
       <Notifications />
+      <MobileTools />
     </Box>
   );
 };

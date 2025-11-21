@@ -9,11 +9,13 @@ import { Box, Group, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
+import { StringIdentifierCollections } from '@/consts/collections';
 import { Parameter } from '@/features/Popup';
 import { Chart } from '@/features/Popup/Chart';
 import styles from '@/features/Popup/Popup.module.css';
 import { Table } from '@/features/TopBar/Links/Table';
 import { Layer, Location as LocationType } from '@/stores/main/types';
+import { getIdStore } from '@/utils/getIdStore';
 
 type Props = {
   location: LocationType;
@@ -39,6 +41,7 @@ export const Location: React.FC<Props> = (props) => {
   } = props;
 
   const [tab, setTab] = useState<'chart' | 'table'>('chart');
+  const [id, setId] = useState<string>();
 
   useEffect(() => {
     if (parameters.length === 0) {
@@ -46,15 +49,24 @@ export const Location: React.FC<Props> = (props) => {
     }
   }, [parameters]);
 
+  useEffect(() => {
+    if (StringIdentifierCollections.includes(layer.datasourceId)) {
+      const id = getIdStore(feature);
+      setId(id);
+    } else {
+      setId(location.id);
+    }
+  }, [layer, location, feature]);
+
   return (
     <>
       <Box style={{ display: tab === 'chart' ? 'block' : 'none' }}>
-        {layer && datasetName.length > 0 && parameters.length > 0 && (
+        {layer && datasetName.length > 0 && parameters.length > 0 && id && (
           <Chart
             collectionId={layer.datasourceId}
-            locationId={location.id}
+            locationId={id}
             title={datasetName}
-            parameters={parameters.map((parameter) => parameter.name)}
+            parameters={layer.parameters}
             from={layer.from}
             to={layer.to}
           />
@@ -63,8 +75,13 @@ export const Location: React.FC<Props> = (props) => {
       <Box style={{ display: tab === 'table' ? 'block' : 'none' }} className={styles.tableWrapper}>
         {feature && <Table size="xs" properties={feature.properties} />}
       </Box>
-      <Group justify="space-between" align="flex-end" mt={8} mb={8}>
-        <Group gap={8} align="flex-end">
+      <Group
+        justify="space-between"
+        align="flex-end"
+        mt="var(--default-spacing)"
+        mb="var(--default-spacing)"
+      >
+        <Group gap="var(--default-spacing)" align="flex-end">
           {locations.length > 1 && (
             <Select
               className={styles.locationsDropdown}

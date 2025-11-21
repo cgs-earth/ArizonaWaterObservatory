@@ -19,7 +19,6 @@ import { CollectionType, getCollectionType } from '@/utils/collection';
 
 const Links: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
-    onOpen: () => setOverlay(Overlay.Links),
     onClose: () => {
       setOverlay(null);
       setLinkLocation(null);
@@ -38,7 +37,7 @@ const Links: React.FC = () => {
   useEffect(() => {
     if (overlay !== Overlay.Links) {
       close();
-    } else {
+    } else if (!opened) {
       open();
     }
   }, [overlay]);

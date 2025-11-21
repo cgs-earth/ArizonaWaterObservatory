@@ -8,4 +8,5 @@ export enum Variant {
   Secondary = 'secondary',
   Tertiary = 'tertiary',
   Selected = 'selected',
+  Transparent = 'transparent',
 }

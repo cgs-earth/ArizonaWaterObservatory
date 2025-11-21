@@ -11,7 +11,7 @@ import {
   RasterLayerSpecification,
 } from 'mapbox-gl';
 import { LayerType } from '@/components/Map/types';
-import { DEFAULT_OPACITY } from '@/features/Map/consts';
+import { DEFAULT_FILL_OPACITY, DEFAULT_RASTER_OPACITY } from '@/features/Map/consts';
 import { Location } from '@/stores/main/types';
 
 export const getPointLayerDefinition = (
@@ -65,7 +65,7 @@ export const getFillLayerDefinition = (
     source: sourceId,
     filter: ['==', ['geometry-type'], 'Polygon'],
     paint: {
-      'fill-opacity': 0.7,
+      'fill-opacity': DEFAULT_FILL_OPACITY,
       'fill-color': color,
     },
   };
@@ -79,7 +79,7 @@ export const getRasterLayerSpecification = (
     type: LayerType.Raster,
     source: sourceId,
     paint: {
-      'raster-opacity': DEFAULT_OPACITY,
+      'raster-opacity': DEFAULT_RASTER_OPACITY,
     },
   };
 };
