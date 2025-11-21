@@ -390,6 +390,10 @@ export class CoverageGridService {
       },
     });
 
+    if (!coverage) {
+      throw new Error(`No data found.`);
+    }
+
     if (isCoverageJSON(coverage)) {
       return this.createGridCollection(coverage);
     }
