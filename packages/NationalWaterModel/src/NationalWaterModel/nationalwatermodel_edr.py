@@ -198,6 +198,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             y_field=self.y_field,
             time_field=self.time_field,
             raster=self.raster,
+            feature_limit=None,
         )
 
         projected_dataset = project_dataset(
