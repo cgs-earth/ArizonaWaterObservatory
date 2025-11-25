@@ -20,7 +20,8 @@ terraform {
 resource "google_redis_instance" "redis" {
   name = "redis"
   location_id = var.region
-  memory_size_gb = 0.8
+  # minimum memory
+  memory_size_gb = 1
   replica_count = 0
   deletion_protection = false
   connect_mode = "DIRECT_PEERING"
@@ -176,10 +177,14 @@ resource "google_cloud_run_v2_service" "pygeoapi" {
         mount_path = "/job_results"
       }
 
-      env {
-        name= "PYGEOAPI_URL"
-        value = google_cloud_run_v2_service.pygeoapi.uri
-      }
+      # ideally this would be set here; however, that would make
+      # the cloud run service dependent on itself which terraform
+      # does not allow; thus this needs to be set manually after deployment
+      
+      # env {
+      #   name= "PYGEOAPI_URL"
+      #   value = google_cloud_run_v2_service.pygeoapi.uri
+      # }
 
       env {
         name = "PYGEOAPI_JOB_RESULT_DIR"
