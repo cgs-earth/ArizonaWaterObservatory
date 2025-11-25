@@ -631,6 +631,87 @@ resources:
             remote: parameter_id
             foreign: parameter_id
 
+
+  Aquifers_USGS_West:
+    type: collection
+    title: USGS Principal Aquifers in the Colorado Basin States
+    description: contains data from the Ground Water Atlas of the United States (published as part of the National Atlas in 1998, revised 2003) and indicates the areal extent of the uppermost principal aquifers on a national scale.
+    provider-name:
+      - USGS
+    keywords:
+      - aquifers
+    links:
+      - type: application/html
+        rel: canonical
+        title: USGS Aquifers
+        href: https://services3.arcgis.com/0OPQIK59PJJqLK0A/arcgis/rest/services/Aquifers_USGS_West/FeatureServer/0
+      - type: application/html
+        rel: documentation
+        title: Arizona Water Blueprint
+        href: https://www.arcgis.com/apps/webappviewer/index.html?id=b84f6d906be94505b25d68d6af3b02ca
+      - type: application/html
+        rel: documentation
+        title: Acgis Layer 
+        href: https://www.arcgis.com/home/item.html?id=cf795fe0b23e4afc99728d1b97dd1253
+    extents: *default-extent
+    providers:
+      - type: feature
+        name: ESRI
+        data: https://services3.arcgis.com/0OPQIK59PJJqLK0A/arcgis/rest/services/Aquifers_USGS_West/FeatureServer/0
+        id_field: OBJECTID
+
+  Active_Managment_Areas_2025:
+    type: collection
+    title: Kyl Center for Water Policy Arizona Water Active Managment Areas
+    description: contains designated groundwater-management zones where water withdrawals are under regulatory oversight to address overdraft and ensure long-term sustainability
+    provider-name:
+      - Kyl Center for Water Policy
+    keywords:
+      - management
+    links:
+      - type: application/html
+        rel: canonical
+        title: Active Managment Areas
+        href: https://services3.arcgis.com/0OPQIK59PJJqLK0A/ArcGIS/rest/services/Active_Managment_Areas_2025/FeatureServer/0
+      - type: application/html
+        rel: documentation
+        title: Arizona Water Blueprint
+        href: https://www.arcgis.com/apps/webappviewer/index.html?id=b84f6d906be94505b25d68d6af3b02ca
+      - type: application/html
+        rel: documentation
+        title: Acgis Layer 
+        href: https://www.arcgis.com/home/item.html?id=cf795fe0b23e4afc99728d1b97dd1253
+    extents: *default-extent
+    providers:
+      - type: feature
+        name: ESRI
+        data: https://services3.arcgis.com/0OPQIK59PJJqLK0A/ArcGIS/rest/services/Active_Managment_Areas_2025/FeatureServer/0
+        id_field: OBJECTID
+
+  Arizona_Groundwater_Basins:
+    type: collection
+    title: Arizona Department of Water Resources Groundwater Basins
+    description: contains the list of groundwater basins in Arizona. According to ARS 45-402(13) "Groundwater basin" means an area which, as nearly as known facts permit as determined by the director pursuant to this chapter, may be designated so as to enclose a relatively hydrologically distinct body or related bodies of groundwater, which shall be described horizontally by surface description.
+    provider-name:
+      - Arizona Department of Water Resources
+    keywords:
+      - groundwater
+    links:
+      - type: application/html
+        rel: canonical
+        title: Groundwater Basins
+        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Groundwater_Basin/FeatureServer/0
+      - type: application/html
+        rel: documentation
+        title: Arizona Water Blueprint
+        href: https://www.arcgis.com/apps/webappviewer/index.html?id=b84f6d906be94505b25d68d6af3b02ca
+    extents: *default-extent
+    providers:
+      - type: feature
+        name: ESRI
+        data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Groundwater_Basin/FeatureServer/0
+        id_field: OBJECTID
+
   config-store:
       type: process
       processor:
