@@ -53,7 +53,9 @@ resource "google_sql_database_instance" "postgis" {
 
     availability_type = "ZONAL"
     disk_autoresize   = false
+    # smallest size possible
     disk_size         = 10
+    # cheapest persistent disk type
     disk_type         = "PD_HDD"
   }
 
@@ -187,7 +189,7 @@ resource "google_cloud_run_v2_service" "pygeoapi" {
       resources {
         limits = {
           cpu = "2"
-          memory = "4GiB"
+          memory = "7GiB"
         }
         cpu_idle = false
       }
