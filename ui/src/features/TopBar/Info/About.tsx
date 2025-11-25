@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Box, Group, Stack, Text } from '@mantine/core';
+import { Anchor, Box, Group, Stack, Text } from '@mantine/core';
 import Button from '@/components/Button';
 import Checkbox from '@/components/Checkbox';
 import { INFO_LOCAL_KEY } from '@/features/TopBar/Info';
@@ -37,26 +37,28 @@ export const About: React.FC<Props> = (props) => {
   };
 
   return (
-    <Stack mt={16}>
-      <Box px={8} mb={16}>
+    <Stack mt="calc(var(--default-spacing) * 2)">
+      <Box px="var(--default-spacing)" mb="calc(var(--default-spacing) * 2)">
         <Text {...paragraph}>
-          The Arizona State University Center for Hydrologic Innovations and the Center for
+          The Center for Hydrologic Innovations at Arizona State University and the Center for
           Geospatial Solutions present the Arizona Water Observatory (AWO) - an open-source,
-          map-based platform that aims to enhance situational awareness of Arizona's water
-          resources, inform key water-related decisions, and provide stakeholders and partnering
-          agencies with actionable insights.{' '}
+          map-based platform that enhances situational awareness of Arizona's water resources,
+          informs water-related decisions, and provides users with actionable insights.
         </Text>
         <br />
         <Text {...paragraph}>
-          The AWO centralizes disparate water data, including ground stations, remote sensing
-          products, and cloud-based modeling outputs, and makes them accessible through intuitive
-          design, curated visualizations, embedded analytics, and modernized hosting.
+          AWO centralizes water data, including ground stations, remote sensing products, and
+          modeling outputs, and makes them accessible through visualizations and embedded analytics.
         </Text>
         <br />
         <Text {...paragraph}>
-          Developed in collaboration with representatives for Arizona’s water science and management
-          community, the AWO continues to evolve to meet real-world needs. We invite your feedback
-          and participation as we refine and expand the platform.
+          Developed in collaboration with representatives for Arizona's water community, and in
+          accordance with the{' '}
+          <Anchor target="_blank" href="https://internetofwater.org/">
+            Internet of Water's
+          </Anchor>{' '}
+          open water data sharing principles, AWO will continue to evolve to meet real-world water
+          needs. We invite your feedback and participation as we refine and expand the platform.
         </Text>
       </Box>
       <Group justify="space-between">

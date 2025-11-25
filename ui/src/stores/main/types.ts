@@ -76,6 +76,8 @@ export type Layer = {
   to: string | null; // UTC timestamp
   visible: boolean; // visible ? 'visible' : 'none'
   locations: string[]; // locationId's
+  opacity: number;
+  position: number; // The order this layer is drawn relative to other user layers
 };
 
 export type Table = {

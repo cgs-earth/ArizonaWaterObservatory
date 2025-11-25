@@ -1,0 +1,86 @@
+/**
+ * Copyright 2025 Lincoln Institute of Land Policy
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useEffect, useState } from 'react';
+import { ColorInput, Group, Stack, Switch, Text } from '@mantine/core';
+import { Grid } from '@/features/Tools/Legend/Grid';
+import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
+import { Shapes } from '@/features/Tools/Legend/Shapes';
+import styles from '@/features/Tools/Tools.module.css';
+import mainManager from '@/managers/Main.init';
+import { Layer } from '@/stores/main/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
+
+type Props = {
+  layer: Layer;
+  handleColorChange: (color: Layer['color'], layerId: Layer['id']) => void;
+  handleVisibilityChange: (visible: boolean, layerId: Layer['id']) => void;
+  handleOpacityChange: (opacity: Layer['opacity'], layerId: Layer['id']) => void;
+};
+
+export const Entry: React.FC<Props> = (props) => {
+  const { layer, handleColorChange, handleVisibilityChange, handleOpacityChange } = props;
+
+  const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
+
+  useEffect(() => {
+    const collection = mainManager.getDatasource(layer.datasourceId);
+
+    if (collection) {
+      const collectionType = getCollectionType(collection);
+      setCollectionType(collectionType);
+    }
+  }, [layer]);
+
+  const showColors = [CollectionType.EDR, CollectionType.EDRGrid, CollectionType.Features].includes(
+    collectionType
+  );
+  const showShapes = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
+  const showGrid = [CollectionType.EDRGrid].includes(collectionType);
+  const showOpacity = [CollectionType.EDRGrid, CollectionType.Map].includes(collectionType);
+
+  return (
+    <Stack w="100%" gap="xs" className={styles.legendEntry}>
+      <Text size="lg" fw={700}>
+        {layer.name}
+      </Text>
+      {showOpacity && (
+        <OpacitySlider
+          id={layer.id}
+          opacity={layer.opacity}
+          handleOpacityChange={handleOpacityChange}
+        />
+      )}
+
+      <Group w="100%" justify="space-between" align="flex-start">
+        <Stack justify="flex-start">
+          {showColors && (
+            <ColorInput
+              label={
+                <Text size="xs" mt={0}>
+                  Symbol Color
+                </Text>
+              }
+              value={layer.color}
+              onChange={(color) => handleColorChange(color, layer.id)}
+              className={styles.colorPicker}
+            />
+          )}
+
+          <Switch
+            size="lg"
+            mb="calc(var(--default-spacing) / 2)"
+            onLabel="VISIBLE"
+            offLabel="HIDDEN"
+            checked={layer.visible}
+            onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
+          />
+        </Stack>
+        {showShapes && <Shapes color={layer.color} />}
+        {showGrid && <Grid color={layer.color} />}
+      </Group>
+    </Stack>
+  );
+};

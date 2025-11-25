@@ -23,6 +23,7 @@ server:
 
   manager:
     name: PostgreSQL
+    output_dir: ${PYGEOAPI_JOB_RESULT_DIR:-"/tmp/"}
     connection:
       host: ${TF_VAR_POSTGRES_HOST:-localhost}
       port: 5432
@@ -420,7 +421,7 @@ resources:
 
   noaa-river-stage-forecast-day-1: &default-river-stage
     type: collection
-    title: River Stage Forecast Day 1
+    title: NOAA River Stage Forecast Day 1
     description: NOAA River Stage Forecast 24 Hours / 1 day from now
     keywords: [NOAA, riv_gauges]
     provider-name:
@@ -454,7 +455,7 @@ resources:
 
   noaa-river-stage-forecast-day-3:
     <<: *default-river-stage
-    title: NOAARiver Stage Forecast Day 3
+    title: NOAA River Stage Forecast Day 3
     description: predicts the water level (stage) in rivers and streams 3 days from now and is updated every 15-minutes
     links: *default-noaa-river-stage-links
     providers:
@@ -619,7 +620,7 @@ resources:
           time_field: observation_time
           result_field: observation_value
           parameter_id: parameters.parameter_id
-          parameter_name: parameters.parameter_name
+          parameter_name: parameters.parameter_unit_label
           parameter_unit: parameters.parameter_unit_symbol
 
         external_tables: # Additional table joins

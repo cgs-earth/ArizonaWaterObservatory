@@ -22,7 +22,6 @@ import { LoadingType, Overlay } from '@/stores/session/types';
 
 const Share: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
-    onOpen: () => setOverlay(Overlay.Share),
     onClose: () => setOverlay(null),
   });
 
@@ -70,6 +69,10 @@ const Share: React.FC = () => {
     close();
   };
 
+  const handleClick = () => {
+    setOverlay(Overlay.Share);
+  };
+
   const getShareUrl = (shareId: string): string => {
     const url = new URL(window.location.href);
     url.searchParams.set(SHARE_VARIABLE, shareId);
@@ -90,6 +93,8 @@ const Share: React.FC = () => {
   useEffect(() => {
     if (overlay !== Overlay.Share) {
       close();
+    } else if (!opened) {
+      open();
     }
   }, [overlay]);
 
@@ -111,7 +116,7 @@ const Share: React.FC = () => {
           size="sm"
           w="fit-content"
           variant={opened ? Variant.Selected : Variant.Secondary}
-          onClick={open}
+          onClick={handleClick}
         >
           Share
         </Button>
@@ -136,7 +141,7 @@ const Share: React.FC = () => {
                     <Stack className={styles.copyInputWrapper} gap="0">
                       <CopyInput className={styles.copyInput} url={getShareUrl(shareId)} />
                       {!configGenerated && (
-                        <Text size="sm" c="red" mt={4}>
+                        <Text size="sm" c="red" mt="calc(var(--default-spacing) / 2)">
                           This URL does not contain recent changes made in the application. Please
                           generate a new URL to reflect the latest choices.
                         </Text>
@@ -147,7 +152,7 @@ const Share: React.FC = () => {
               )}
             </Group>
           )}
-          <Group>
+          <Group mr="auto">
             <Tooltip disabled={!configGenerated} label="No changes made to application config.">
               <Button
                 size="sm"

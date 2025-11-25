@@ -8,7 +8,7 @@ import { DataDrivenPropertyValueSpecification, LayerSpecification, Map, Popup } 
 import { Root } from 'react-dom/client';
 import { CustomListenerFunction, LayerType, MainLayerDefinition } from '@/components/Map/types';
 import { SourceId } from '@/features/Map/sources';
-import { getMessage } from '@/features/Map/utils';
+import { drawnFeatureContainsExtent, getMessage } from '@/features/Map/utils';
 
 export const MAP_ID = 'main-map';
 
@@ -182,15 +182,21 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
           if (!draw) {
             return;
           }
-          const feature = e.features?.[0];
-          if (feature && feature.properties && feature.properties?.active) {
-            const active = feature.properties.active === 'true';
-            const mode = draw.getMode();
 
-            const message = getMessage(id, active, mode);
-            if (message.length > 0) {
-              const html = `<strong style="color:black;">${message}</strong>`;
+          const feature = e.features?.[0];
+          if (feature && feature.properties) {
+            if (drawnFeatureContainsExtent(feature, draw, map)) {
+              const html = `<strong style="color:black;">Zoom out to interact with this drawn feature.</strong>`;
               hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            } else if (feature.properties?.active) {
+              const active = feature.properties.active === 'true';
+              const mode = draw.getMode();
+
+              const message = getMessage(id, active, mode);
+              if (message.length > 0) {
+                const html = `<strong style="color:black;">${message}</strong>`;
+                hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+              }
             }
           }
         };
@@ -291,15 +297,21 @@ export const getLayerMouseMoveFunction = (id: LayerId | SubLayerId): CustomListe
           if (!draw) {
             return;
           }
-          const feature = e.features?.[0];
-          if (feature && feature.properties && feature.properties?.active) {
-            const active = feature.properties.active === 'true';
-            const mode = draw.getMode();
 
-            const message = getMessage(id, active, mode);
-            if (message.length > 0) {
-              const html = `<strong style="color:black;">${message}</strong>`;
+          const feature = e.features?.[0];
+          if (feature && feature.properties) {
+            if (drawnFeatureContainsExtent(feature, draw, map)) {
+              const html = `<strong style="color:black;">Zoom out to interact with this drawn feature.</strong>`;
               hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            } else if (feature.properties?.active) {
+              const active = feature.properties.active === 'true';
+              const mode = draw.getMode();
+
+              const message = getMessage(id, active, mode);
+              if (message.length > 0) {
+                const html = `<strong style="color:black;">${message}</strong>`;
+                hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+              }
             }
           }
         };

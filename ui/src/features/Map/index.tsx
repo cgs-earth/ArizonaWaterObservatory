@@ -4,14 +4,14 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Marker } from 'mapbox-gl';
+import { MapMouseEvent, Marker } from 'mapbox-gl';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
-import { DEFAULT_BBOX } from '@/features/Map/consts';
+import { DEFAULT_BBOX, drawLayers } from '@/features/Map/consts';
 import { sourceConfigs } from '@/features/Map/sources';
-import { getSelectedColor, getSortKey } from '@/features/Map/utils';
+import { drawnFeatureContainsExtent, getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
@@ -45,6 +45,8 @@ const MainMap: React.FC<Props> = (props) => {
   const loadingInstances = useSessionStore((state) => state.loadingInstances);
 
   const [shouldResize, setShouldResize] = useState(false);
+
+  const [layerPopupListeners, setLayerPopupListeners] = useState<Record<string, boolean>>({});
 
   const { map, geocoder, hoverPopup, persistentPopup, draw, root, container } = useMap(MAP_ID);
 
@@ -113,30 +115,93 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
+    const allIds: string[] = [];
     layers.forEach((layer) => {
       const { pointLayerId, lineLayerId, fillLayerId } = mainManager.getLocationsLayerIds(
         layer.datasourceId,
         layer.id
       );
 
-      map.on('dblclick', [pointLayerId, lineLayerId, fillLayerId], (e) => {
-        const features = e.features;
-        if (features && features.length > 0) {
-          hoverPopup.remove();
+      allIds.push(pointLayerId);
+      allIds.push(lineLayerId);
+      allIds.push(fillLayerId);
+      if (!layerPopupListeners[layer.id]) {
+        map.on('dblclick', [pointLayerId, lineLayerId, fillLayerId], (e) => {
+          const features = e.features;
+          if (features && features.length > 0) {
+            hoverPopup.remove();
 
-          const uniqueFeatures = mainManager.getUniqueIds(features);
-          const locations: Location[] = uniqueFeatures.map((id) => ({
-            id,
-            layerId: layer.id,
-          }));
+            const uniqueFeatures = mainManager.getUniqueIds(features, layer.datasourceId);
+            const locations: Location[] = uniqueFeatures.map((id) => ({
+              id,
+              layerId: layer.id,
+            }));
 
-          locations.forEach((location) => useMainStore.getState().addLocation(location));
+            locations.forEach((location) => useMainStore.getState().addLocation(location));
 
-          showGraphPopup(locations, map, e, root, container, persistentPopup);
-        }
-      });
+            showGraphPopup(locations, map, e, root, container, persistentPopup);
+          }
+        });
+
+        setLayerPopupListeners({
+          ...layerPopupListeners,
+          [layer.id]: true,
+        });
+      }
     });
   }, [layers]);
+
+  useEffect(() => {
+    if (!map || !draw) {
+      return;
+    }
+
+    const allIds: string[] = [];
+    layers.forEach((layer) => {
+      const { pointLayerId, lineLayerId, fillLayerId } = mainManager.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
+
+      if (map.getLayer(pointLayerId)) {
+        allIds.push(pointLayerId);
+      }
+      if (map.getLayer(lineLayerId)) {
+        allIds.push(lineLayerId);
+      }
+      if (map.getLayer(fillLayerId)) {
+        allIds.push(fillLayerId);
+      }
+    });
+
+    // Simple blocker to prevent draw layer selection through other features
+    const blockDrawEvents = (e: MapMouseEvent) => {
+      const features = map.queryRenderedFeatures(e.point, { layers: allIds });
+      const drawnFeatures = map.queryRenderedFeatures(e.point, { layers: drawLayers });
+
+      // Check if the edges of the drawn feature are visible
+      const drawnFeature = drawnFeatures[0];
+      if (drawnFeatureContainsExtent(drawnFeature, draw, map)) {
+        e.originalEvent.preventDefault();
+        e.originalEvent.stopPropagation();
+        draw.changeMode('simple_select', { featureIds: [] });
+      }
+
+      if (features.length) {
+        e.originalEvent.preventDefault();
+        e.originalEvent.stopPropagation();
+        draw.changeMode('simple_select', { featureIds: [] });
+      }
+    };
+
+    map.on('mousedown', drawLayers, blockDrawEvents);
+    map.on('click', drawLayers, blockDrawEvents);
+
+    return () => {
+      map.off('mousedown', drawLayers, blockDrawEvents);
+      map.off('click', drawLayers, blockDrawEvents);
+    };
+  }, [draw, layers]);
 
   useEffect(() => {
     if (!map) {

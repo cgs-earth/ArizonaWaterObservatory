@@ -53,6 +53,7 @@ def test_provider_no_data():
             y_field="latitude",
             datetime_filter="1900-01-01",
             unopened_dataset=provider.zarr_dataset,
+            feature_limit=None,
         )
 
 
@@ -66,6 +67,7 @@ def test_provider_invalid_date_range():
             y_field="latitude",
             datetime_filter="2000-01-01/1900-01-01",
             unopened_dataset=provider.zarr_dataset,
+            feature_limit=None,
         )
 
 
@@ -78,10 +80,12 @@ def test_new_data():
         x_field="longitude",
         y_field="latitude",
         unopened_dataset=provider.zarr_dataset,
+        feature_limit=11,
     )
 
-    DAILY_OBSERVATIONS = 5200
-    assert result.dims["feature_id"] >= DAILY_OBSERVATIONS
+    assert result.dims["feature_id"] >= 10, (
+        "there should be at least 10 features"
+    )
 
 
 def test_range_of_dates():
@@ -93,11 +97,12 @@ def test_range_of_dates():
         y_field="latitude",
         datetime_filter="2020-01-01/2020-01-02",
         unopened_dataset=provider.zarr_dataset,
+        feature_limit=None,
     )
 
-    DAILY_OBSERVATIONS = 5200
-    assert result.dims["feature_id"] >= DAILY_OBSERVATIONS, (
-        f"each dimension should have at least {DAILY_OBSERVATIONS} observations"
+    NUM_FEATURES = 5299
+    assert result.dims["feature_id"] >= NUM_FEATURES, (
+        f"each dimension should have at least {NUM_FEATURES} features"
     )
     assert result.dims["time"] >= 23 and result.dims["time"] <= 26, (
         "There should be around 24 two hour timesteps to cover the entire two days, (plus or minus a few intervals to allow for rounding)"
@@ -113,6 +118,7 @@ def test_no_parameters():
         y_field="latitude",
         datetime_filter="2020-01-01",
         unopened_dataset=provider.zarr_dataset,
+        feature_limit=None,
     )
     assert len(result.data_vars.items()) == 0
 
@@ -182,6 +188,7 @@ def test_raster_with_range():
         y_field="y",
         unopened_dataset=route_to_route_provider.zarr_dataset,
         raster=True,
+        feature_limit=None,
     )
     assert result
     assert result.variables["sfcheadsubrt"].shape

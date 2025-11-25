@@ -121,7 +121,7 @@ export const Category: React.FC<Props> = (props) => {
   );
 
   return (
-    <Stack gap={0}>
+    <Stack align="flex-start" justify="flex-start" className={styles.filter} gap={0}>
       <Select
         size="sm"
         className={styles.filterSelect}
