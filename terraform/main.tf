@@ -136,6 +136,14 @@ resource "google_cloud_run_v2_job" "groundwatersqldumpjob" {
   deletion_protection = false
 }
 
+# The bucket used for storing job results
+resource "google_storage_bucket" "bucket" {
+  name = "asu-awo-data"
+  location = var.region
+  force_destroy = true
+  storage_class = "STANDARD"
+}
+
 resource "google_cloud_run_v2_service" "pygeoapi" {
   name = "pygeoapi"
   location = var.region
@@ -150,11 +158,34 @@ resource "google_cloud_run_v2_service" "pygeoapi" {
   }
 
   template {
+
+    volumes {
+      name = "job-store"
+      gcs {
+        bucket = "${google_storage_bucket.bucket.name}/job_results"
+      }
+    }
+
     containers {
       image = "ghcr.io/cgs-earth/asu-awo-pygeoapi:latest"
       ports {
         container_port = 80
       }
+      volume_mounts {
+        name       = "job-store"
+        mount_path = "/job_results"
+      }
+
+      env {
+        name= "PYGEOAPI_URL"
+        value = google_cloud_run_v2_service.pygeoapi.uri
+      }
+
+      env {
+        name = "PYGEOAPI_JOB_RESULT_DIR"
+        value = "/job_results"
+      }
+
       env {
         name = "TF_VAR_POSTGRES_HOST"
         value = "/cloudsql/${google_sql_database_instance.postgis.connection_name}"
@@ -188,7 +219,7 @@ resource "google_cloud_run_v2_service" "pygeoapi" {
 
       resources {
         limits = {
-          cpu = "2"
+          cpu = "3"
           memory = "7GiB"
         }
         cpu_idle = false
