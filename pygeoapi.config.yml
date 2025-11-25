@@ -632,8 +632,6 @@ resources:
             foreign: parameter_id
 
 
-  # This is commented out because it is superceded by the pgedr arizona ground water collection which contains both
-  # the wells 55 data and the azwater.gov timeseries data in the same collection; this is only keppt here for posterity
   Aquifers_USGS_West:
     type: collection
     title: USGS Principal Aquifers in the Colorado Basin States
