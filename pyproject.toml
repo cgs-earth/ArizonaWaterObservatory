@@ -54,8 +54,6 @@ server = [
 [tool.uv.workspace]
 members = [
     "packages/*",
-    "scripts",
-    "scripts/packages/NationalWaterModelGroundwaterETL",
 ]
 
 [tool.uv.sources]
