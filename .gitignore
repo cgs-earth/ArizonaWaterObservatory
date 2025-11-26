@@ -24,3 +24,5 @@ edr_backup.dump
 asu-awo*.json
 
 *.parquet
+
+zarr_dataset/*

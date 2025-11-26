@@ -6,6 +6,9 @@
 ###
 
 # %%
+import os
+from pathlib import Path
+
 import gcsfs
 import geopandas as gpd
 import numpy as np
@@ -99,13 +102,23 @@ zarr_dataset_with_geom = zarr_dataset_filtered.assign_coords(
 print(zarr_dataset_with_geom)
 
 # %%
-gcs_fs = gcsfs.GCSFileSystem(token="asu-awo-account.json")
 
-gcs_path = "asu-awo-data/filtered_gwout_with_geometry.zarr"
+if os.environ.get("WRITE_TO_GCS") == "true":
+    gcs_fs = gcsfs.GCSFileSystem(token="asu-awo-account.json")
+
+    gcs_path = "asu-awo-data/filtered_gwout_with_geometry.zarr"
+    print("Writing dataset to GCS...")
+    zarr_dataset_with_geom.to_zarr(
+        store=gcs_fs.get_mapper(gcs_path), mode="w", consolidated=True
+    )
+    print(f"Dataset written to gs://{gcs_path}")
+else:
+    local_path = Path(__file__).parent / "zarr_dataset"
+    local_path.mkdir(parents=True, exist_ok=True)
+
+    # Write directly using path string
+    zarr_dataset_with_geom.to_zarr(
+        str(local_path), mode="w", consolidated=True
+    )
 
 # %%
-print("Writing dataset to GCS...")
-zarr_dataset_with_geom.to_zarr(
-    store=gcs_fs.get_mapper(gcs_path), mode="w", consolidated=True
-)
-print(f"Dataset written to gs://{gcs_path}")
