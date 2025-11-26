@@ -11,7 +11,7 @@ members = [
     "arizonawaterobservatory",
     "config-store",
     "nationalwatermodel",
-    "nationalwatermodelgroundwateretl",
+    "nationalwatermodeletlgroundwater",
 ]
 
 [[package]]
@@ -1456,9 +1456,9 @@ requires-dist = [
 ]
 
 [[package]]
-name = "nationalwatermodelgroundwateretl"
+name = "nationalwatermodeletlgroundwater"
 version = "0.1.0"
-source = { editable = "packages/NationalWaterModelGroundwaterETL" }
+source = { editable = "packages/NationalWaterModelETLGroundwater" }
 
 [[package]]
 name = "nbformat"

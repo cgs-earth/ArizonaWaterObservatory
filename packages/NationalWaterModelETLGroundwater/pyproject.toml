@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [project]
-name = "NationalWaterModelGroundwaterETL"
+name = "nationalwatermodeletlgroundwater"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
