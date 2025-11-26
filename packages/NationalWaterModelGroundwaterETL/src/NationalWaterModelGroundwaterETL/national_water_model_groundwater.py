@@ -52,7 +52,8 @@ print(zarr_dataset)
 
 # %%
 mask = np.isin(
-    zarr_dataset["feature_id"].values, gdf_arizona["OBJECTID"].values
+    zarr_dataset["feature_id"].values,
+    gdf_arizona["OBJECTID"].values,  # type: ignore
 )
 
 # Select only matching features
@@ -61,7 +62,7 @@ print(zarr_dataset_filtered)
 
 # %%
 assert "FEATUREID" in gdf_arizona.columns
-gdf_arizona["FEATUREID"].values, gdf_arizona.head()
+print(gdf_arizona["FEATUREID"].values, gdf_arizona.head())
 
 # %%
 # Align geometries with filtered dataset
