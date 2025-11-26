@@ -62,14 +62,14 @@ print(zarr_dataset_filtered)
 
 # %%
 assert "FEATUREID" in gdf_arizona.columns
-print(gdf_arizona["FEATUREID"].values, gdf_arizona.head())
+print(gdf_arizona["FEATUREID"].values, gdf_arizona.head())  # type: ignore
 
 # %%
 # Align geometries with filtered dataset
 hasMatch = {}
 
 for fid in zarr_dataset_filtered["feature_id"].values:
-    if fid in gdf_arizona["OBJECTID"].values:
+    if fid in gdf_arizona["OBJECTID"].values:  # type: ignore
         hasMatch[fid] = True
 
 print(len(hasMatch), list(hasMatch.keys())[:5])
