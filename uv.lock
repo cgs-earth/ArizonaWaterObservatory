@@ -1489,7 +1489,7 @@ requires-dist = [
 ]
 
 [[package]]
-name = "nationalwatermodelgroundwateretl"
+name = "NationalWaterModelGroundwaterETL"
 version = "0.1.0"
 source = { editable = "packages/NationalWaterModelGroundwaterETL" }
 
