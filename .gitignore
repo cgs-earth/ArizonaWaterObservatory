@@ -20,3 +20,7 @@ GWSI_ZIP_*/
 *.tfstate*
 
 edr_backup.dump
+
+asu-awo*.json
+
+*.parquet
