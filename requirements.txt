@@ -110,9 +110,9 @@ attrs==25.4.0 \
     #   jsonschema
     #   rasterio
     #   referencing
-awdb-com @ git+https://github.com/internetofwater/Western-Water-Datahub.git@a7900c98158f04767dbeda4a3311804e9e76eed6#subdirectory=packages/awdb_com
+awdb-com @ git+https://github.com/internetofwater/Western-Water-Datahub.git@e54db81f966f9db1007cce99967cfc5353815fac#subdirectory=packages/awdb_com
     # via arizonawaterobservatory
-awdb-forecasts @ git+https://github.com/internetofwater/Western-Water-Datahub.git@a7900c98158f04767dbeda4a3311804e9e76eed6#subdirectory=packages/awdb_forecasts
+awdb-forecasts @ git+https://github.com/internetofwater/Western-Water-Datahub.git@e54db81f966f9db1007cce99967cfc5353815fac#subdirectory=packages/awdb_forecasts
     # via arizonawaterobservatory
 babel==2.17.0 \
     --hash=sha256:0c54cffb19f690cdcc52a3b50bcbf71e07a808d1c80d549f2459b9d2cf0afb9d \
@@ -257,9 +257,9 @@ charset-normalizer==3.4.4 \
     --hash=sha256:f8bf04158c6b607d747e93949aa60618b61312fe647a6369f88ce2ff16043490 \
     --hash=sha256:f9d332f8c2a2fcbffe1378594431458ddbef721c1769d78e2cbc06280d8155f9
     # via requests
-click==8.1.8 \
-    --hash=sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2 \
-    --hash=sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a
+click==8.3.1 \
+    --hash=sha256:12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a \
+    --hash=sha256:981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6
     # via
     #   click-plugins
     #   cligj
@@ -281,60 +281,12 @@ colorama==0.4.6 \
     #   click
     #   pytest
     #   radon
-com @ git+https://github.com/internetofwater/Western-Water-Datahub.git@a7900c98158f04767dbeda4a3311804e9e76eed6#subdirectory=packages/com
+com @ git+https://github.com/internetofwater/Western-Water-Datahub.git@e54db81f966f9db1007cce99967cfc5353815fac#subdirectory=packages/com
     # via arizonawaterobservatory
 covjson-pydantic==0.7.0 \
     --hash=sha256:9642672ce6c566a1a6dc6c1923c8dce13226cca43cc82b3c871421b521aaa5e2 \
     --hash=sha256:af47bff748174d08c426e208e6ae829bfa2f8c4b6a5343ac82c1209f83bfccd1
     # via arizonawaterobservatory
-crc32c==2.8 \
-    --hash=sha256:0450bb845b3c3c7b9bdc0b4e95620ec9a40824abdc8c86d6285c919a90743c1a \
-    --hash=sha256:086f64793c5ec856d1ab31a026d52ad2b895ac83d7a38fce557d74eb857f0a82 \
-    --hash=sha256:106fbd79013e06fa92bc3b51031694fcc1249811ed4364ef1554ee3dd2c7f5a2 \
-    --hash=sha256:14511d7cfc5d9f5e1a6c6b64caa6225c2bdc1ed00d725e9a374a3e84073ce180 \
-    --hash=sha256:171ff0260d112c62abcce29332986950a57bddee514e0a2418bfde493ea06bb3 \
-    --hash=sha256:1e3dde2ec59a8a830511d72a086ead95c0b0b7f0d418f93ea106244c5e77e350 \
-    --hash=sha256:20a9cfb897693eb6da19e52e2a7be2026fd4d9fc8ae318f086c0d71d5dd2d8e0 \
-    --hash=sha256:2e68264555fab19bab08331550dab58573e351a63ed79c869d455edd3b0aa417 \
-    --hash=sha256:2e8fe863fbbd8bdb6b414a2090f1b0f52106e76e9a9c96a413495dbe5ebe492a \
-    --hash=sha256:36f1e03ee9e9c6938e67d3bcb60e36f260170aa5f37da1185e04ef37b56af395 \
-    --hash=sha256:3a3b2e4bcf7b3ee333050e7d3ff38e2ba46ea205f1d73d8949b248aaffe937ac \
-    --hash=sha256:4379f73f9cdad31958a673d11a332ec725ca71572401ca865867229f5f15e853 \
-    --hash=sha256:445e559e66dff16be54f8a4ef95aa6b01db799a639956d995c5498ba513fccc2 \
-    --hash=sha256:4bb18e4bd98fb266596523ffc6be9c5b2387b2fa4e505ec56ca36336f49cb639 \
-    --hash=sha256:509e10035106df66770fe24b9eb8d9e32b6fb967df17744402fb67772d8b2bc7 \
-    --hash=sha256:5607ab8221e1ffd411f64aa40dbb6850cf06dd2908c9debd05d371e1acf62ff3 \
-    --hash=sha256:56b3b7d015247962cf58186e06d18c3d75a1a63d709d3233509e1c50a2d36aa2 \
-    --hash=sha256:572ffb1b78cce3d88e8d4143e154d31044a44be42cb3f6fbbf77f1e7a941c5ab \
-    --hash=sha256:578728964e59c47c356aeeedee6220e021e124b9d3e8631d95d9a5e5f06e261c \
-    --hash=sha256:59eee5f3a69ad0793d5fa9cdc9b9d743b0cd50edf7fccc0a3988a821fef0208c \
-    --hash=sha256:5c8933531442042438753755a5c8a9034e4d88b01da9eb796f7e151b31a7256c \
-    --hash=sha256:61d51681a08b6a2a2e771b7f0cd1947fb87cb28f38ed55a01cb7c40b2ac4cdd8 \
-    --hash=sha256:67c0716c3b1a02d5235be649487b637eed21f2d070f2b3f63f709dcd2fefb4c7 \
-    --hash=sha256:6dde035f91ffbfe23163e68605ee5a4bb8ceebd71ed54bb1fb1d0526cdd125a2 \
-    --hash=sha256:6e08628bc72d5b6bc8e0730e8f142194b610e780a98c58cb6698e665cb885a5b \
-    --hash=sha256:70b0153c4d418b673309d3529334d117e1074c4a3b2d7f676e430d72c14de67b \
-    --hash=sha256:7399b01db4adaf41da2fb36fe2408e75a8d82a179a9564ed7619412e427b26d6 \
-    --hash=sha256:765d220bfcbcffa6598ac11eb1e10af0ee4802b49fe126aa6bf79f8ddb9931d1 \
-    --hash=sha256:864359a39777a07b09b28eb31337c0cc603d5c1bf0fc328c3af736a8da624ec0 \
-    --hash=sha256:8a717dd9c3fd777d9bc6603717eae172887d402c4ab589d124ebd0184a83f89e \
-    --hash=sha256:8dd4a19505e0253892e1b2f1425cc3bd47f79ae5a04cb8800315d00aad7197f2 \
-    --hash=sha256:918b7999b52b5dcbcea34081e9a02d46917d571921a3f209956a9a429b2e06e5 \
-    --hash=sha256:a73d03ce3604aa5d7a2698e9057a0eef69f529c46497b27ee1c38158e90ceb76 \
-    --hash=sha256:b2f3226b94b85a8dd9b3533601d7a63e9e3e8edf03a8a169830ee8303a199aeb \
-    --hash=sha256:b48f2486727b8d0e7ccbae4a34cb0300498433d2a9d6b49cb13cb57c2e3f19cb \
-    --hash=sha256:b977a32a3708d6f51703c8557008f190aaa434d7347431efb0e86fcbe78c2a50 \
-    --hash=sha256:bcf72ee7e0135b3d941c34bb2c26c3fc6bc207106b49fd89aaafaeae223ae209 \
-    --hash=sha256:bf3040919e17afa5782e01b1875d6a05f44b8f19c05f211d8b9f8a1deb8bbd9c \
-    --hash=sha256:c7f5db4f16816926986d3c94253314920689706ae13a9bf4888b47336c6735ce \
-    --hash=sha256:cc445da03fc012a5a03b71da1df1b40139729e6a5571fd4215ab40bfb39689c7 \
-    --hash=sha256:cdc83a3fe6c4e5df9457294cfd643de7d95bd4e9382c1dd6ed1e0f0f9169172c \
-    --hash=sha256:cf827b3758ee0c4aacd21ceca0e2da83681f10295c38a10bfeb105f7d98f7a68 \
-    --hash=sha256:e41ebe7c2f0fdcd9f3a3fd206989a36b460b4d3f24816d53e5be6c7dba72c5e1 \
-    --hash=sha256:e636ac60f76de538f7a2c0d0f3abf43104ee83a8f5e516f6345dc283ed1a4df7 \
-    --hash=sha256:ecf123348934a086df8c8fde7f9f2d716d523ca0707c5a1367b8bb00d8134823 \
-    --hash=sha256:ecf66cf90266d9c15cea597d5cc86c01917cd1a238dc3c51420c7886fa750d7e
-    # via numcodecs
 cryptography==46.0.3 \
     --hash=sha256:00a5e7e87938e5ff9ff5447ab086a5706a957137e6e433841e9d24f38a065217 \
     --hash=sha256:01ca9ff2885f3acc98c29f1860552e37f6d7c7d013d7334ff2a9de43a449315d \
@@ -505,6 +457,21 @@ geopandas==1.1.1 \
     --hash=sha256:1745713f64d095c43e72e08e753dbd271678254b24f2e01db8cdb8debe1d293d \
     --hash=sha256:589e61aaf39b19828843df16cb90234e72897e2579be236f10eee0d052ad98e8
     # via arizonawaterobservatory
+google-crc32c==1.7.1 \
+    --hash=sha256:0f99eaa09a9a7e642a61e06742856eec8b19fc0037832e03f941fe7cf0c8e4db \
+    --hash=sha256:19eafa0e4af11b0a4eb3974483d55d2d77ad1911e6cf6f832e1574f6781fd337 \
+    --hash=sha256:22beacf83baaf59f9d3ab2bbb4db0fb018da8e5aebdce07ef9f09fce8220285e \
+    --hash=sha256:2bff2305f98846f3e825dbeec9ee406f89da7962accdb29356e4eadc251bd472 \
+    --hash=sha256:2d73a68a653c57281401871dd4aeebbb6af3191dcac751a76ce430df4d403194 \
+    --hash=sha256:32d1da0d74ec5634a05f53ef7df18fc646666a25efaaca9fc7dcfd4caf1d98c3 \
+    --hash=sha256:6b211ddaf20f7ebeec5c333448582c224a7c90a9d98826fbab82c0ddc11348e6 \
+    --hash=sha256:905a385140bf492ac300026717af339790921f411c0dfd9aa5a9e69a08ed32eb \
+    --hash=sha256:b6d86616faaea68101195c6bdc40c494e4d76f41e07a37ffdef270879c15fb65 \
+    --hash=sha256:b7491bdc0c7564fcf48c0179d2048ab2f7c7ba36b84ccd3a3e1c3f7a72d3bba6 \
+    --hash=sha256:df8b38bdaf1629d62d51be8bdd04888f37c451564c2042d36e5812da9eff3c35 \
+    --hash=sha256:e10554d4abc5238823112c2ad7e4560f96c7bf3820b202660373d769d9e6e4c9 \
+    --hash=sha256:e42e20a83a29aa2709a0cf271c7f8aefaa23b7ab52e53b322585297bb94d4638
+    # via zarr
 googleapis-common-protos==1.72.0 \
     --hash=sha256:4299c5a82d5ae1a9702ada957347726b167f9f8d1fc352477702a1e851ff4038 \
     --hash=sha256:e55a601c1b32b52d7a3e65f43563e2aa61bcd737998ee672ac9b951cd49319f5
@@ -790,24 +757,29 @@ netcdf4==1.7.3 \
     --hash=sha256:83f122fc3415e92b1d4904fd6a0898468b5404c09432c34beb6b16c533884673 \
     --hash=sha256:949e086d4d2612b49e5b95f60119d216c9ceb7b17bc771e9e0fa0e9b9c0a2f9f
     # via arizonawaterobservatory
-noaa-rfc @ git+https://github.com/internetofwater/Western-Water-Datahub.git@a7900c98158f04767dbeda4a3311804e9e76eed6#subdirectory=packages/noaa_rfc
+noaa-rfc @ git+https://github.com/internetofwater/Western-Water-Datahub.git@e54db81f966f9db1007cce99967cfc5353815fac#subdirectory=packages/noaa_rfc
     # via arizonawaterobservatory
 nodeenv==1.9.1 \
     --hash=sha256:6ec12890a2dab7946721edbfbcd91f3319c6ccc9aec47be7c7e6b7011ee6645f \
     --hash=sha256:ba11c9782d29c27c70ffbdda2d7415098754709be8a7056d79a737cd901155c9
     # via pyright
-numcodecs==0.16.3 \
-    --hash=sha256:010d628c95be1214536fb22c0df4ced58da954b404b1fcb25ddebf64e4a3f7f3 \
-    --hash=sha256:12f43fa4a347d1dba775c4506a1c9b15b90144c258433b81f79f1c1b1a990db5 \
-    --hash=sha256:270e7a33ee96bdf5c957acf25a2487002a233811a125a155c400c2f036b69c73 \
-    --hash=sha256:44869ef564a50aa545215c6a0d42ba5bbc34e9715523fb2336ada3d1fb2b331d \
-    --hash=sha256:53d705865faaf0a7927c973af3777532001c8fbb653de119c1e844608614d799 \
-    --hash=sha256:7cf50e351398a34b45817974c411527629e88937b7683695e276afd65da6ed6f \
-    --hash=sha256:947406b01c20f2ce7ce2e631e7f21b782e8a9d4b57b374a41c9e7b1341a8f3a2 \
-    --hash=sha256:9aae6996172ba10c5f5111b2998709071b5aeba6b58b1ee0b26b61ed6aa7f2f4 \
-    --hash=sha256:c77454d92941a335d148b0b822f5d4783103f392774d5d76283bbf7f21b49529 \
-    --hash=sha256:e83115e3c32de798c7b7164503e06aae9f9746c1cef564d029616eb44bd6cd90 \
-    --hash=sha256:f7938502fcc060ed9543814f38ca67048b33d7bd2667756e36e6b1060455b17e
+numcodecs==0.16.5 \
+    --hash=sha256:0107e839ef75b854e969cb577e140b1aadb9847893937636582d23a2a4c6ce50 \
+    --hash=sha256:015a7c859ecc2a06e2a548f64008c0ec3aaecabc26456c2c62f4278d8fc20597 \
+    --hash=sha256:0d0fb60852f84c0bd9543cc4d2ab9eefd37fc8efcc410acd4777e62a1d300318 \
+    --hash=sha256:24e675dc8d1550cd976a99479b87d872cb142632c75cc402fea04c08c4898523 \
+    --hash=sha256:25be3a516ab677dad890760d357cfe081a371d9c0a2e9a204562318ac5969de3 \
+    --hash=sha256:3832bd1b5af8bb3e413076b7d93318c8e7d7b68935006b9fa36ca057d1725a8f \
+    --hash=sha256:49f7b7d24f103187f53135bed28bb9f0ed6b2e14c604664726487bb6d7c882e1 \
+    --hash=sha256:5088145502ad1ebf677ec47d00eb6f0fd600658217db3e0c070c321c85d6cf3d \
+    --hash=sha256:84230b4b9dad2392f2a84242bd6e3e659ac137b5a1ce3571d6965fca673e0903 \
+    --hash=sha256:845a9857886ffe4a3172ba1c537ae5bcc01e65068c31cf1fce1a844bd1da050f \
+    --hash=sha256:94ddfa4341d1a3ab99989d13b01b5134abb687d3dab2ead54b450aefe4ad5bd6 \
+    --hash=sha256:ad1a379a45bd3491deab8ae6548313946744f868c21d5340116977ea3be5b1d6 \
+    --hash=sha256:aec9736d81b70f337d89c4070ee3ffeff113f386fd789492fa152d26a15043e4 \
+    --hash=sha256:b05647b8b769e6bc8016e9fd4843c823ce5c9f2337c089fb5c9c4da05e5275de \
+    --hash=sha256:b16a14303800e9fb88abc39463ab4706c037647ac17e49e297faa5f7d7dbbf1d \
+    --hash=sha256:b554ab9ecf69de7ca2b6b5e8bc696bd9747559cb4dd5127bd08d7a28bec59c3a
     # via zarr
 numpy==2.3.5 \
     --hash=sha256:00dc4e846108a382c5869e77c6ed514394bdeb3403461d25a829711041217d5b \
@@ -1123,14 +1095,15 @@ propcache==0.4.1 \
     # via
     #   aiohttp
     #   yarl
-protobuf==5.29.5 \
-    --hash=sha256:3f1c6468a2cfd102ff4703976138844f78ebd1fb45f49011afc5139e9e283079 \
-    --hash=sha256:3f76e3a3675b4a4d867b52e4a5f5b78a2ef9565549d4037e06cf7b0942b1d3fc \
-    --hash=sha256:63848923da3325e1bf7e9003d680ce6e14b07e55d0473253a690c3a8b8fd6e61 \
-    --hash=sha256:6cf42630262c59b2d8de33954443d94b746c952b01434fc58a417fdbd2e84bd5 \
-    --hash=sha256:bc1463bafd4b0929216c35f437a8e28731a2b7fe3d98bb77a600efced5a15c84 \
-    --hash=sha256:e38c5add5a311f2a6eb0340716ef9b039c1dfa428b28f25a7838ac329204a671 \
-    --hash=sha256:fa18533a299d7ab6c55a238bf8629311439995f2e7eca5caaff08663606e9015
+protobuf==6.33.1 \
+    --hash=sha256:0f4cf01222c0d959c2b399142deb526de420be8236f22c71356e2a544e153c53 \
+    --hash=sha256:8fd7d5e0eb08cd5b87fd3df49bc193f5cfd778701f47e11d127d0afc6c39f1d1 \
+    --hash=sha256:923aa6d27a92bf44394f6abf7ea0500f38769d4b07f4be41cb52bd8b1123b9ed \
+    --hash=sha256:97f65757e8d09870de6fd973aeddb92f85435607235d20b2dfed93405d00c85b \
+    --hash=sha256:d595a9fd694fdeb061a62fbe10eb039cc1e444df81ec9bb70c7fc59ebcb1eafa \
+    --hash=sha256:f8adba2e44cde2d7618996b3fc02341f03f5bc3f2748be72dc7b063319276178 \
+    --hash=sha256:f8d3fdbc966aaab1d05046d0240dd94d40f2a8c62856d41eaa141ff64a79de6b \
+    --hash=sha256:fe34575f2bdde76ac429ec7b570235bf0c788883e70aee90068e9981806f2490
     # via
     #   googleapis-common-protos
     #   opentelemetry-proto
@@ -1215,7 +1188,7 @@ pydantic-core==2.41.5 \
     --hash=sha256:ed2e99c456e3fadd05c991f8f437ef902e00eedf34320ba2b0842bd1c3ca3a75 \
     --hash=sha256:f41a7489d32336dbf2199c8c0a215390a751c5b014c2c1c5366e817202e9cdf7
     # via pydantic
-pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@e6b12b0224163f4eaf5c58f37049f44fc8dc77e8
+pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@c631bbae8611aa8a42edfdcea5416ccc045d776d
     # via pgedr
 pygeofilter==0.3.1 \
     --hash=sha256:f13dcdd685bdca32cf9e6665bf2938522276bee140abff321ab04abb12f5761d \
@@ -1396,9 +1369,9 @@ rdflib==7.4.0 \
     --hash=sha256:0af003470404ff21bc0eb04077cc97ee96da581f2429bf42a8e163fc1c2797bc \
     --hash=sha256:c8ee16c31848c19c174aed96185327ea139ca3d392fac7fa882ddf5687f8f533
     # via pygeoapi
-redis==7.0.1 \
-    --hash=sha256:4977af3c7d67f8f0eb8b6fec0dafc9605db9343142f634041fb0235f67c0588a \
-    --hash=sha256:c949df947dca995dc68fdf5a7863950bf6df24f8d6022394585acc98e81624f1
+redis==7.1.0 \
+    --hash=sha256:23c52b208f92b56103e17c5d06bdc1a6c2c0b3106583985a76a18f83b265de2b \
+    --hash=sha256:b1cc3cfa5a2cb9c2ab3ba700864fb0ad75617b41f01352ce5779dabf6d5f9c3c
     # via arizonawaterobservatory
 referencing==0.37.0 \
     --hash=sha256:381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231 \
@@ -1489,7 +1462,7 @@ rioxarray==0.20.0 \
     --hash=sha256:197b0638146dfc6093ef52f8bf8afb42757ca16bc2e0d87b6282ce54170c9799 \
     --hash=sha256:8bfc7e979edc7e30b4671d638a9be0e5a7d673dab2ea88e2445d3c7745599c02
     # via arizonawaterobservatory
-rise @ git+https://github.com/internetofwater/Western-Water-Datahub.git@a7900c98158f04767dbeda4a3311804e9e76eed6#subdirectory=packages/rise
+rise @ git+https://github.com/internetofwater/Western-Water-Datahub.git@e54db81f966f9db1007cce99967cfc5353815fac#subdirectory=packages/rise
     # via arizonawaterobservatory
 rpds-py==0.29.0 \
     --hash=sha256:00e56b12d2199ca96068057e1ae7f9998ab6e99cda82431afafd32f3ec98cca9 \
@@ -1626,7 +1599,7 @@ six==1.17.0 \
     # via
     #   mando
     #   python-dateutil
-snotel @ git+https://github.com/internetofwater/Western-Water-Datahub.git@a7900c98158f04767dbeda4a3311804e9e76eed6#subdirectory=packages/snotel
+snotel @ git+https://github.com/internetofwater/Western-Water-Datahub.git@e54db81f966f9db1007cce99967cfc5353815fac#subdirectory=packages/snotel
     # via arizonawaterobservatory
 sqlalchemy==2.0.44 \
     --hash=sha256:0765e318ee9179b3718c4fd7ba35c434f4dd20332fbc6857a5e8df17719c24d7 \
@@ -1694,7 +1667,7 @@ urllib3==2.5.0 \
     # via
     #   botocore
     #   requests
-usace @ git+https://github.com/internetofwater/Western-Water-Datahub.git@a7900c98158f04767dbeda4a3311804e9e76eed6#subdirectory=packages/usace
+usace @ git+https://github.com/internetofwater/Western-Water-Datahub.git@e54db81f966f9db1007cce99967cfc5353815fac#subdirectory=packages/usace
     # via arizonawaterobservatory
 werkzeug==3.1.3 \
     --hash=sha256:54b78bf3716d19a65be4fceccc0d1d7b89e608834989dfae50ea87564639213e \
@@ -1838,9 +1811,9 @@ yarl==1.22.0 \
     --hash=sha256:f87ac53513d22240c7d59203f25cc3beac1e574c6cd681bbfd321987b69f95fd \
     --hash=sha256:ff86011bd159a9d2dfc89c34cfd8aff12875980e3bd6a39ff097887520e60249
     # via aiohttp
-zarr==3.1.3 \
-    --hash=sha256:01342f3e26a02ed5670db608a5576fbdb8d76acb5c280bd2d0082454b1ba6f79 \
-    --hash=sha256:45f67f87f65f14fa453f99dd8110a5936b7ac69f3a21981d33e90407c80c302a
+zarr==3.1.5 \
+    --hash=sha256:29cd905afb6235b94c09decda4258c888fcb79bb6c862ef7c0b8fe009b5c8563 \
+    --hash=sha256:fbe0c79675a40c996de7ca08e80a1c0a20537bd4a9f43418b6d101395c0bba2b
     # via
     #   arizonawaterobservatory
     #   nationalwatermodel
