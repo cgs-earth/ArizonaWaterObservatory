@@ -14,9 +14,9 @@ import Menu from '@/components/Menu';
 import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
+import { LayerSection } from '@/features/Panel/Locations/LayerSection';
 import styles from '@/features/Panel/Panel.module.css';
 import useMainStore from '@/stores/main';
-import { LayerSection } from './LayerSection';
 
 const Locations: React.FC = () => {
   const [show, setShow] = useState(false);

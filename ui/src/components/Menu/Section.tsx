@@ -4,8 +4,8 @@
  */
 
 import { Menu } from '@mantine/core';
-import { Item } from './Item';
-import { Section as SectionType } from './types';
+import { Item } from '@/components/Menu/Item';
+import { Section as SectionType } from '@/components/Menu/types';
 
 type Props = {
   section: SectionType;

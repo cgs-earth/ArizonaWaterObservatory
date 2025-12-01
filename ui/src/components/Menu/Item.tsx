@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ActionItem } from './ActionItem';
-import { MenuItem } from './MenuItem';
-import { Item as ItemType } from './types';
-import { isMenuItem } from './utils';
+import { ActionItem } from '@/components/Menu/ActionItem';
+import { MenuItem } from '@/components/Menu/MenuItem';
+import { Item as ItemType } from '@/components/Menu/types';
+import { isMenuItem } from '@/components/Menu/utils';
 
 type Props = {
   item: ItemType;

@@ -4,7 +4,7 @@
  */
 
 import { Menu } from '@mantine/core';
-import { ActionItem as ActionItemType } from './types';
+import { ActionItem as ActionItemType } from '@/components/Menu/types';
 
 type Props = {
   item: ActionItemType;

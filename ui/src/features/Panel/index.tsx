@@ -10,9 +10,11 @@ import Menu from '@/assets/Menu';
 import X from '@/assets/X';
 import IconButton from '@/components/IconButton';
 import { Variant } from '@/components/types';
+import { ClearAll } from '@/features/Panel/ClearAll';
 import Datasets from '@/features/Panel/Datasets';
 import { Header } from '@/features/Panel/Header';
 import Layers from '@/features/Panel/Layers';
+import Locations from '@/features/Panel/Locations';
 import styles from '@/features/Panel/Panel.module.css';
 import { Toggle } from '@/features/Panel/Toggle';
 import { Mobile } from '@/features/TopBar/Mobile';
@@ -21,8 +23,6 @@ import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import useMainStore from '@/stores/main';
 import { LoadingType, NotificationType } from '@/stores/session/types';
-import { ClearAll } from './ClearAll';
-import Locations from './Locations';
 
 const Panel: React.FC = () => {
   const mobile = useMediaQuery('(max-width: 899px)');

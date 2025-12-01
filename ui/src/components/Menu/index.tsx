@@ -6,8 +6,8 @@
 import { ReactElement, ReactNode } from 'react';
 import { Menu as MenuComponent, MenuProps } from '@mantine/core';
 import styles from '@/components/Menu/Menu.module.css';
-import { Section } from './Section';
-import { Section as SectionType } from './types';
+import { Section } from '@/components/Menu/Section';
+import { Section as SectionType } from '@/components/Menu/types';
 
 type Props = MenuProps & {
   target: ReactElement;

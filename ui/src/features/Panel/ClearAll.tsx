@@ -8,8 +8,8 @@ import { basemaps } from '@/components/Map/consts';
 import { BasemapId } from '@/components/Map/types';
 import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
+import { MAP_ID } from '@/features/Map/config';
 import mainManager from '@/managers/Main.init';
-import { MAP_ID } from '../Map/config';
 
 export const ClearAll: React.FC = () => {
   const { map, draw } = useMap(MAP_ID);
