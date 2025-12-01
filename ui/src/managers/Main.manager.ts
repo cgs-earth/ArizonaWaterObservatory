@@ -332,11 +332,21 @@ class MainManager {
     this.map.setBearing(config.bearing);
     this.map.setPitch(config.pitch);
 
+    const dataFetches = [];
+
     await this.applySpatialFilter(config.drawnShapes);
     for (const layer of config.layers) {
       const sourceId = this.getSourceId(layer.datasourceId, layer.id);
+      this.addSource(layer.datasourceId, layer.id);
       this.addLayer(layer, sourceId);
+      dataFetches.push(
+        this.addData(layer.datasourceId, layer, {
+          filterFeatures: config.drawnShapes,
+        })
+      );
     }
+
+    await Promise.all(dataFetches);
 
     // Set locations after loading layer to reflect selected state in map
     this.store.getState().setLocations(config.locations);

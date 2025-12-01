@@ -56,8 +56,14 @@ export const LayoutPage: React.FC = () => {
         notificationManager.show(response, NotificationType.Error);
       }
     } catch (error) {
-      if ((error as Error)?.name !== 'AbortError') {
-        console.error(error);
+      if (
+        (error as Error)?.name === 'AbortError' ||
+        (typeof error === 'string' && error === 'Component unmount')
+      ) {
+        console.log('Fetch request canceled');
+      } else if ((error as Error)?.message) {
+        const _error = error as Error;
+        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);
