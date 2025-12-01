@@ -20,6 +20,7 @@ import { StoreApi, UseBoundStore } from 'zustand';
 import {
   CollectionRestrictions,
   idStoreProperty,
+  ItemsOnlyCollections,
   RestrictionType,
   StringIdentifierCollections,
 } from '@/consts/collections';
@@ -60,6 +61,7 @@ import {
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
 import { getTemporalExtent } from '@/utils/temporalExtent';
+import { getDatetime } from '@/utils/url';
 
 /**
  * MainManager is responsible for managing the core logic of the application. It handles functionality
@@ -403,6 +405,18 @@ class MainManager {
 
     switch (collectionType) {
       case CollectionType.EDR:
+        if (ItemsOnlyCollections.includes(collectionId)) {
+          return await this.fetchItems(collectionId, parameterNames, bbox, signal, next);
+        }
+        return await this.fetchLocations(
+          collectionId,
+          parameterNames,
+          bbox,
+          from,
+          to,
+          signal,
+          next
+        );
       case CollectionType.Features:
         return await this.fetchItems(collectionId, parameterNames, bbox, signal, next);
       case CollectionType.EDRGrid:
@@ -422,17 +436,41 @@ class MainManager {
   private async fetchLocations(
     collectionId: ICollection['id'],
     parameterNames?: string[],
-    signal?: AbortSignal
+    bbox?: BBox,
+    from?: string | null,
+    to?: string | null,
+    signal?: AbortSignal,
+    next?: string
   ): Promise<FeatureCollection> {
-    return await awoService.getLocations<FeatureCollection>(collectionId, {
-      signal,
-      params: {
-        limit: 500,
-        ...(parameterNames && parameterNames.length > 0
-          ? { 'parameter-name': parameterNames.join(',') }
-          : {}),
+    const datetime = getDatetime(from, to);
+
+    const data = await awoService.getLocations<FeatureCollection>(
+      collectionId,
+      {
+        signal,
+        params: {
+          limit: 2000,
+          bbox,
+          ...(parameterNames && parameterNames.length > 0
+            ? { 'parameter-name': parameterNames.join(',') }
+            : {}),
+          ...(datetime && {
+            datetime,
+          }),
+        },
       },
-    });
+      next
+    );
+
+    if (!data) {
+      return getDefaultGeoJSON();
+    }
+
+    if (StringIdentifierCollections.includes(collectionId)) {
+      return this.storeIdentifiers(data);
+    }
+
+    return data;
   }
 
   /**
@@ -774,6 +812,33 @@ class MainManager {
     return featureCollection;
   }
 
+  private checkParameterRestrictions(
+    collectionId: ICollection['id'],
+    parameters: Layer['parameters']
+  ) {
+    const restrictions = CollectionRestrictions[collectionId];
+    if (restrictions && restrictions.length > 0) {
+      const parameterRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Parameter
+      );
+
+      if (parameterRestriction) {
+        const datasource = this.getDatasource(collectionId);
+        const hasNoParameters = parameters.length === 0;
+
+        if (hasNoParameters || parameters.length > parameterRestriction.count) {
+          let message = `Dataset: ${datasource?.title}, requires at least one and up to ${parameterRestriction.count} parameter${parameters.length - parameterRestriction.count > 1 ? 's' : ''} to be fetched at one time.`;
+          if (hasNoParameters) {
+            message += ' Please select at least one parameter.';
+          } else {
+            message += ` Please remove ${parameters.length - parameterRestriction.count} parameter${parameters.length - parameterRestriction.count > 1 ? 's' : ''}`;
+          }
+          throw new Error(message);
+        }
+      }
+    }
+  }
+
   private checkDateRestrictions(
     collectionId: ICollection['id'],
     from: Layer['from'],
@@ -932,8 +997,11 @@ class MainManager {
     const bbox = this.getBBox(collectionId);
     const from = options?.from ?? layer.from;
     const to = options?.to ?? layer.to;
+    const parameters = options?.parameterNames ?? layer.parameters;
 
     this.checkDateRestrictions(collectionId, from, to);
+
+    this.checkParameterRestrictions(collectionId, parameters);
 
     let aggregate = getDefaultGeoJSON();
     let next: string | undefined;
@@ -948,7 +1016,7 @@ class MainManager {
         bbox,
         from,
         to,
-        options?.parameterNames ?? layer.parameters,
+        parameters,
         options?.signal,
         next
       );
