@@ -29,6 +29,8 @@
   --asu-color-tertiary: var(--asu-gray-5);
   --asu-color-selected: var(--asu-blue);
 
+  --error: #f00;
+
   --default-spacing: 8px;
   --mobile-width: 899px;
 }

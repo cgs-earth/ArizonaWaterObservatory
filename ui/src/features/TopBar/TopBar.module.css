@@ -141,7 +141,6 @@
 
 .mobileWrapper {
   display: none;
-  margin-top: calc(var(--default-spacing) * 2);
 }
 
 .contactWrapper {

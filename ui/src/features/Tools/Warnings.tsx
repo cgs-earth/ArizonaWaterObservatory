@@ -4,9 +4,9 @@
  */
 
 import { useEffect } from 'react';
+import { Warning } from '@/features/Tools/Warning';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
-import { Warning } from './Warning';
 
 export const Warnings: React.FC = () => {
   const warnings = useSessionStore((state) => state.warnings);
