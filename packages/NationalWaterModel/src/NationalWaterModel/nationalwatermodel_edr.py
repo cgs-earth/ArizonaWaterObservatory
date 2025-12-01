@@ -62,6 +62,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             provider_def["remote_dataset"]
             if "remote_dataset" in provider_def
             else None,
+            is_gcs=provider_def.get("is_gcs", False),
         )
 
         if "storage_crs" not in provider_def:

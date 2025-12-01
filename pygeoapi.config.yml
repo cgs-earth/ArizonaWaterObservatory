@@ -182,15 +182,38 @@ resources:
         remote_dataset: CONUS/zarr/lakeout.zarr
   
   ## This is currently commented out since it relies on adding extra geometry metadata; currently it has no geometry
-  # National_Water_Model_Groundwater_Output:
-  #   type: collection
-  #   title: National Water Model Groundwater Output
-  #   description: National Water Model Groundwater Output
-  #   keywords: ["NWM"]
-  #   extents: *nwm-extents
-  #   providers:
-  #     - <<: *nwm-raster-edr
-  #       remote_dataset: CONUS/zarr/gwout.zarr
+  National_Water_Model_Groundwater_Output:
+    type: collection
+    title: National Water Model Groundwater Output
+    description: National Water Model Groundwater Output
+    keywords: ["NWM"]
+    extents:
+      spatial:
+        bbox: [-114.81651, 31.332177, -109.045223, 37.00426]
+        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+      temporal:
+        begin: 1979-02-01T00:00:00Z
+        end: 2023-02-01T00:00:00Z
+        trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
+    providers:
+      - type: edr
+        name: NationalWaterModel.EDRProvider
+        is_gcs: true 
+        data: asu-awo
+        remote_dataset: asu-awo-data/filtered_gwout_with_geometry.zarr
+        x_field: centroid_lon
+        y_field: centroid_lat
+        wkb_field: geometry_wkb
+        time_field: time
+      - type: feature
+        name: NationalWaterModel.FeatureProvider
+        is_gcs: true 
+        data: asu-awo
+        remote_dataset: asu-awo-data/filtered_gwout_with_geometry.zarr
+        x_field: centroid_lon
+        y_field: centroid_lat
+        wkb_field: geometry_wkb
+        time_field: time
   
   #### This is currently commented out since it is duplicated info from the postgis pgedr provider for arizona groundwater data
   # ADWR_GWSI_Sites:

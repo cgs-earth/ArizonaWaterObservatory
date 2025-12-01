@@ -7,7 +7,8 @@ from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
 from com.env import TRACER
-from com.otel import otel_trace
+from com.otel import add_args_as_attributes_to_span, otel_trace
+import gcsfs
 import numpy as np
 from pygeoapi.api import DEFAULT_STORAGE_CRS
 from pygeoapi.provider.base import (
@@ -47,6 +48,12 @@ class ProviderSchema(TypedDict):
     storage_crs_override: NotRequired[str]
     # The crs of the dataset that should be output in covjson
     output_crs: NotRequired[str]
+    # Whether the dataset is hosted on google cloud
+    is_gcs: NotRequired[bool]
+    # the name of the variable containing well-known-binary
+    # geometry; this can be used to return complex geometry
+    # while still allowing for simple point filtering
+    wkb_field: NotRequired[str]
 
 
 LOGGER = logging.getLogger(__name__)
@@ -55,13 +62,16 @@ LOGGER = logging.getLogger(__name__)
 @functools.cache
 @otel_trace()
 def get_zarr_dataset_handle(
-    data: str, remote_dataset: str | None
+    data: str,
+    remote_dataset: str | None,
+    is_gcs: bool = False,
 ) -> xr.Dataset:
     """
     Open the zarr dataset but don't actually load the data.
     We use functools cache over this since it's a slow operation
     either to open a large file or establish the connection with S3 and read the metadata
     """
+    add_args_as_attributes_to_span()
     if not remote_dataset:
         try:
             LOGGER.debug(f"Opening local zarr dataset {data}")
@@ -69,11 +79,19 @@ def get_zarr_dataset_handle(
         except Exception as e:
             raise ProviderNoDataError(f"Failed to open {data}, {e}") from e
 
+    if is_gcs:
+        assert data, (
+            "You must provide a gcs project in the 'data' field when using the gcs filesystem"
+        )
+        fs = gcsfs.GCSFileSystem(project=data, cache_type="simple")
+        mapper = fs.get_mapper(remote_dataset, check=False)
+        return xr.open_zarr(mapper, consolidated=True, chunks="auto")
+
     fs = s3fs.S3FileSystem(
         endpoint_url=data,
         anon=True,
     )
-    mapper = fs.get_mapper(remote_dataset)
+    mapper = fs.get_mapper(remote_dataset, check=False)
     return xr.open_zarr(mapper, consolidated=True, chunks="auto")
 
 
