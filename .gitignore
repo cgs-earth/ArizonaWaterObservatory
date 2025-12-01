@@ -26,3 +26,4 @@ asu-awo*.json
 *.parquet
 
 zarr_dataset/*
+zarr.json

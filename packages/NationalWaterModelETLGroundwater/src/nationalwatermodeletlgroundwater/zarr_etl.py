@@ -18,7 +18,8 @@ import xarray as xr
 
 # %%
 # Load GeoParquet
-gdf = gpd.read_parquet("NHDPlusV21_CatchmentSP.parquet")
+parquet_file = Path(__file__).parent / "NHDPlusV21_CatchmentSP.parquet"
+gdf = gpd.read_parquet(parquet_file)
 
 # Load US states boundaries from remote GeoJSON
 arizona = gpd.read_file(
@@ -32,7 +33,7 @@ gdf = gdf.to_crs(arizona.crs)
 # Filter points/locations within Arizona
 gdf_arizona = gdf[gdf.within(arizona.unary_union)]
 
-output_file = "locations_arizona.parquet"
+output_file = Path(__file__).parent / "locations_arizona.parquet"
 
 # Save filtered GeoParquet
 gdf_arizona.to_parquet(output_file)
@@ -115,10 +116,10 @@ if os.environ.get("WRITE_TO_GCS") == "true":
 else:
     local_path = Path(__file__).parent / "zarr_dataset"
     local_path.mkdir(parents=True, exist_ok=True)
-
+    print("Writing dataset to local filesystem...")
     # Write directly using path string
     zarr_dataset_with_geom.to_zarr(
-        str(local_path), mode="w", consolidated=True
+        str(local_path), mode="w", consolidated=False
     )
 
 # %%
