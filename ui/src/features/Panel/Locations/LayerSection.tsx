@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// features/Locations/LayerSection.tsx
 import { Feature } from 'geojson';
 import { Menu } from '@mantine/core';
 import Delete from '@/assets/Delete';
@@ -49,7 +48,6 @@ export const LayerSection: React.FC<Props> = (props) => {
       </Menu.Sub.Target>
       <Menu.Sub.Dropdown className={styles.subDropdown}>
         {selectedLocations.map((feature) => (
-          // TODO: fix displayed id
           <Menu.Item
             leftSection={<MapSearch />}
             key={feature.id as string}
