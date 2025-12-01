@@ -41,7 +41,6 @@ export const ClearAll: React.FC = () => {
 
   return (
     <Button
-      my="calc(var(--default-spacing) * 2)"
       ml="var(--default-spacing)"
       mr="auto"
       size="sm"

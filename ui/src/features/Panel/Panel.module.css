@@ -63,6 +63,17 @@
   overflow-y: auto;
 }
 
+.deleteLocationsItem {
+  color: var(--error);
+  fill: var(--error);
+  stroke: var(--error);
+}
+
+.subDropdown {
+  max-height: 95vh;
+  overflow-y: auto;
+}
+
 .toggleButton {
   height: inherit;
   width: 22px;

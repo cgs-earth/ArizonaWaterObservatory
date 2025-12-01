@@ -19,13 +19,17 @@ import { Mobile } from '@/features/TopBar/Mobile';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
+import useMainStore from '@/stores/main';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { ClearAll } from './ClearAll';
+import Locations from './Locations';
 
 const Panel: React.FC = () => {
   const mobile = useMediaQuery('(max-width: 899px)');
 
   const [opened, { toggle, open, close }] = useDisclosure(true);
+
+  const hasLayers = useMainStore((state) => state.layers.length > 0);
 
   const getCollections = async () => {
     const loadingInstance = loadingManager.add('Fetching all datasets.', LoadingType.Collections);
@@ -86,8 +90,14 @@ const Panel: React.FC = () => {
                 <Datasets />
                 <Layers />
               </Box>
-              <Group justify="space-between" align="flex-start" w="100%">
+              <Group
+                justify="space-between"
+                align="flex-start"
+                w="100%"
+                my="calc(var(--default-spacing) * 2)"
+              >
                 <ClearAll />
+                {hasLayers && <Locations />}
                 <Mobile />
               </Group>
             </Stack>

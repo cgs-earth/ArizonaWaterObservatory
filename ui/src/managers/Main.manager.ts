@@ -448,7 +448,7 @@ class MainManager {
         ...feature,
         properties: {
           ...feature.properties,
-          [idStoreProperty]: feature.id,
+          [idStoreProperty]: String(feature.id),
         },
       })),
     };
@@ -627,6 +627,9 @@ class MainManager {
   public deleteLayer(layer: Layer) {
     const charts = this.store.getState().charts.filter((chart) => chart.layer !== layer.id);
     let layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
+    const locations = this.store
+      .getState()
+      .locations.filter((location) => location.layerId !== layer.id);
 
     layers = layers
       .sort((a, b) => a.position - b.position)
@@ -643,6 +646,7 @@ class MainManager {
 
     this.store.getState().setCharts(charts);
     this.store.getState().setLayers(layers);
+    this.store.getState().setLocations(locations);
   }
 
   public reorderLayers() {
@@ -1078,6 +1082,7 @@ class MainManager {
       if (features.length > 0) {
         // Hack, use the feature id to track this location, fetch id store in consuming features
         const uniqueFeatures = this.getUniqueIds(features, collectionId);
+
         uniqueFeatures.forEach((locationId) => {
           if (this.hasLocation(locationId)) {
             this.store.getState().removeLocation({

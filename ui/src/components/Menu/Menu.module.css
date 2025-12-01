@@ -11,3 +11,11 @@
 .item {
   border-radius: 0;
 }
+
+.item svg {
+  color: inherit;
+  fill: inherit;
+  stroke: inherit;
+  width: 20px;
+  height: auto;
+}
