@@ -385,6 +385,8 @@ def dataset_to_covjson(
                             # time step. Since it is a list of lists we need to
                             # flatten
                             timeseries_arr[i]
+                            if not np.isnan(timeseries_arr[i])
+                            else None
                             for timeseries_arr in timeseries_values
                         ],
                     }
