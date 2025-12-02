@@ -6,6 +6,7 @@
 import { useEffect, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Anchor, Box, Group, Image, Stack } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { useMap } from '@/contexts/MapContexts';
 import Loading from '@/features/Loading';
 import { MAP_ID } from '@/features/Map/config';
@@ -28,6 +29,8 @@ export const LayoutPage: React.FC = () => {
 
   const setShareId = useMainStore((state) => state.setShareId);
   const setConfigGenerated = useMainStore((state) => state.setConfigGenerated);
+
+  const mobile = useMediaQuery('(max-width: 899px)');
 
   const { isFetchingCollections } = useLoading();
 
@@ -121,7 +124,7 @@ export const LayoutPage: React.FC = () => {
         </Group>
       </Stack>
       <Notifications />
-      <MobileTools />
+      {mobile && <MobileTools />}
     </Box>
   );
 };
