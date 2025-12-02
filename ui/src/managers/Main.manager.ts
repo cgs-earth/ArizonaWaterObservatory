@@ -20,6 +20,7 @@ import { StoreApi, UseBoundStore } from 'zustand';
 import {
   CollectionRestrictions,
   idStoreProperty,
+  ItemsOnlyCollections,
   RestrictionType,
   StringIdentifierCollections,
 } from '@/consts/collections';
@@ -60,6 +61,7 @@ import {
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
 import { getTemporalExtent } from '@/utils/temporalExtent';
+import { getDatetime } from '@/utils/url';
 
 /**
  * MainManager is responsible for managing the core logic of the application. It handles functionality
@@ -330,11 +332,21 @@ class MainManager {
     this.map.setBearing(config.bearing);
     this.map.setPitch(config.pitch);
 
+    const dataFetches = [];
+
     await this.applySpatialFilter(config.drawnShapes);
     for (const layer of config.layers) {
       const sourceId = this.getSourceId(layer.datasourceId, layer.id);
+      this.addSource(layer.datasourceId, layer.id);
       this.addLayer(layer, sourceId);
+      dataFetches.push(
+        this.addData(layer.datasourceId, layer, {
+          filterFeatures: config.drawnShapes,
+        })
+      );
     }
+
+    await Promise.all(dataFetches);
 
     // Set locations after loading layer to reflect selected state in map
     this.store.getState().setLocations(config.locations);
@@ -403,6 +415,18 @@ class MainManager {
 
     switch (collectionType) {
       case CollectionType.EDR:
+        if (ItemsOnlyCollections.includes(collectionId)) {
+          return await this.fetchItems(collectionId, parameterNames, bbox, signal, next);
+        }
+        return await this.fetchLocations(
+          collectionId,
+          parameterNames,
+          bbox,
+          from,
+          to,
+          signal,
+          next
+        );
       case CollectionType.Features:
         return await this.fetchItems(collectionId, parameterNames, bbox, signal, next);
       case CollectionType.EDRGrid:
@@ -422,17 +446,41 @@ class MainManager {
   private async fetchLocations(
     collectionId: ICollection['id'],
     parameterNames?: string[],
-    signal?: AbortSignal
+    bbox?: BBox,
+    from?: string | null,
+    to?: string | null,
+    signal?: AbortSignal,
+    next?: string
   ): Promise<FeatureCollection> {
-    return await awoService.getLocations<FeatureCollection>(collectionId, {
-      signal,
-      params: {
-        limit: 500,
-        ...(parameterNames && parameterNames.length > 0
-          ? { 'parameter-name': parameterNames.join(',') }
-          : {}),
+    const datetime = getDatetime(from, to);
+
+    const data = await awoService.getLocations<FeatureCollection>(
+      collectionId,
+      {
+        signal,
+        params: {
+          limit: 2000,
+          bbox,
+          ...(parameterNames && parameterNames.length > 0
+            ? { 'parameter-name': parameterNames.join(',') }
+            : {}),
+          ...(datetime && {
+            datetime,
+          }),
+        },
       },
-    });
+      next
+    );
+
+    if (!data) {
+      return getDefaultGeoJSON();
+    }
+
+    if (StringIdentifierCollections.includes(collectionId)) {
+      return this.storeIdentifiers(data);
+    }
+
+    return data;
   }
 
   /**
@@ -565,7 +613,11 @@ class MainManager {
       : to.subtract(1, 'week');
   }
 
-  public async createLayer(datasourceId: ICollection['id'], signal?: AbortSignal) {
+  public async createLayer(
+    datasourceId: ICollection['id'],
+    parameters: Layer['parameters'],
+    signal?: AbortSignal
+  ) {
     const datasource = this.getDatasource(datasourceId);
 
     if (!datasource) {
@@ -598,7 +650,7 @@ class MainManager {
       datasourceId: datasource.id,
       name,
       color: this.createHexColor(),
-      parameters: [],
+      parameters,
       from: from.format('YYYY-MM-DD'),
       to: to.format('YYYY-MM-DD'),
       visible: true,
@@ -774,6 +826,33 @@ class MainManager {
     return featureCollection;
   }
 
+  private checkParameterRestrictions(
+    collectionId: ICollection['id'],
+    parameters: Layer['parameters']
+  ) {
+    const restrictions = CollectionRestrictions[collectionId];
+    if (restrictions && restrictions.length > 0) {
+      const parameterRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Parameter
+      );
+
+      if (parameterRestriction) {
+        const datasource = this.getDatasource(collectionId);
+        const hasNoParameters = parameters.length === 0;
+
+        if (hasNoParameters || parameters.length > parameterRestriction.count) {
+          let message = `Dataset: ${datasource?.title}, requires at least one and up to ${parameterRestriction.count} parameter${parameters.length - parameterRestriction.count > 1 ? 's' : ''} to be fetched at one time.`;
+          if (hasNoParameters) {
+            message += ' Please select at least one parameter.';
+          } else {
+            message += ` Please remove ${parameters.length - parameterRestriction.count} parameter${parameters.length - parameterRestriction.count > 1 ? 's' : ''}`;
+          }
+          throw new Error(message);
+        }
+      }
+    }
+  }
+
   private checkDateRestrictions(
     collectionId: ICollection['id'],
     from: Layer['from'],
@@ -932,8 +1011,11 @@ class MainManager {
     const bbox = this.getBBox(collectionId);
     const from = options?.from ?? layer.from;
     const to = options?.to ?? layer.to;
+    const parameters = options?.parameterNames ?? layer.parameters;
 
     this.checkDateRestrictions(collectionId, from, to);
+
+    this.checkParameterRestrictions(collectionId, parameters);
 
     let aggregate = getDefaultGeoJSON();
     let next: string | undefined;
@@ -948,7 +1030,7 @@ class MainManager {
         bbox,
         from,
         to,
-        options?.parameterNames ?? layer.parameters,
+        parameters,
         options?.signal,
         next
       );
@@ -1288,36 +1370,25 @@ class MainManager {
     if (opacity !== layer.opacity) {
       if (this.map) {
         const { fillLayerId, rasterLayerId } = layerIds;
-        // TODO: readd if meaningful
-        // if (this.map.getLayer(pointLayerId)) {
-        //   this.map.setPaintProperty(pointLayerId, 'circle-opacity', opacity);
-        // }
         if (this.map.getLayer(fillLayerId)) {
           this.map.setPaintProperty(fillLayerId, 'fill-opacity', opacity);
         }
-        // if (this.map.getLayer(lineLayerId)) {
-        //   this.map.setPaintProperty(lineLayerId, 'line-opacity', opacity);
-        // }
+
         if (this.map.getLayer(rasterLayerId)) {
           this.map.setPaintProperty(rasterLayerId, 'raster-opacity', opacity);
         }
       }
     }
 
-    if (!isSameArray(layer.parameters, parameters)) {
-      const drawnShapes = this.store.getState().drawnShapes;
-      await this.addData(layer.datasourceId, layer, {
-        parameterNames: parameters,
-        filterFeatures: drawnShapes,
-        from,
-        to,
-      });
-    }
-
     const datasource = this.getDatasource(layer.datasourceId);
-    const drawnShapes = this.store.getState().drawnShapes;
 
-    if (datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to)) {
+    // If the parameters have changed, or this is a grid layer and the temporal range has updated
+    // grid layers are the only instance where temporal filtering applies, requiring a new fetch
+    if (
+      !isSameArray(layer.parameters, parameters) ||
+      (datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to))
+    ) {
+      const drawnShapes = this.store.getState().drawnShapes;
       await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,

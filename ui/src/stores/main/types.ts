@@ -112,6 +112,8 @@ export enum DrawMode {
 export type ParameterGroupMembers = Record<string, string[]>;
 
 export type MainState = {
+  search: string | null;
+  setSearch: (search: MainState['search']) => void;
   provider: string | null;
   setProvider: (provider: MainState['provider']) => void;
   category: Category | null;

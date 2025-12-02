@@ -45,6 +45,9 @@ export const StringIdentifierCollections: string[] = [
   CollectionId.SNOTELEdr,
 ];
 
+// These collections have a locations edge but doesnt support bbox
+export const ItemsOnlyCollections: string[] = [CollectionId.AWDB];
+
 // Some collections support locations but the data size is too large to reasonably render
 export const DatasourceCollectionType: Record<CollectionType, string[]> = {
   [CollectionType.EDRGrid]: [CollectionId.NWMChannelRouting],
