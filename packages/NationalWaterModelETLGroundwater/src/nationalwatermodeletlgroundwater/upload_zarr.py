@@ -29,6 +29,8 @@ zarr_dataset_filtered = xr.open_zarr(
 
 print(zarr_dataset_filtered)
 
+# %%
+
 # Map OBJECTID → geometry (Shapely)
 geom_lookup = dict(
     zip(gdf_arizona["OBJECTID"], gdf_arizona["Shape"], strict=False)
@@ -79,6 +81,34 @@ zarr_dataset_filtered = zarr_dataset_filtered.assign(
     centroid_lon=("feature_id", centroid_lon),
 )
 
+# %%
+
+## Apply chunking to optimize it for reading
+## many features over relatively short times
+# Remove any existing chunk encoding
+for v in zarr_dataset_filtered.data_vars:
+    if "chunks" in zarr_dataset_filtered[v].encoding:
+        # for some reason you need to manually remove chunk metadata
+        # before rechunking otherwise there will be issues
+        del zarr_dataset_filtered[v].encoding["chunks"]
+
+# Rechunk the dataset
+full_size = zarr_dataset_filtered.sizes["feature_id"]
+
+assert full_size == 9934, full_size
+
+zarr_dataset_filtered = zarr_dataset_filtered.chunk(
+    {
+        # we want time slices that are smaller than
+        # the number of features since we usually don't request
+        # much time at once in the API; it generally has more features
+        # since we are plotting many features on the map
+        # in general there is a tradeoff; if the time is
+        # too small then it takes a long time to open the dataset
+        "time": 64 * 16,
+        "feature_id": full_size,  # all features
+    }
+)
 
 # %%
 
@@ -93,3 +123,5 @@ zarr_dataset_filtered.to_zarr(
     zarr_format=2,
 )
 print(f"Dataset written to gs://{gcs_path}")
+
+# %%

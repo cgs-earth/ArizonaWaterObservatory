@@ -55,6 +55,10 @@ mapper = fs_s3.get_mapper(remote_dataset)
 # Lazy load dataset
 zarr_dataset = xr.open_zarr(mapper, chunks="auto")
 print(zarr_dataset)
+print(
+    zarr_dataset["feature_id"].encoding["chunks"],
+    zarr_dataset["time"].encoding["chunks"],
+)
 
 # %%
 mask = np.isin(
