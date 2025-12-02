@@ -8,8 +8,6 @@ import { Box, Text, Title, Tooltip, VisuallyHidden } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import Dataset from '@/features/Panel/Datasets/Dataset';
-import { Control } from '@/features/Panel/Datasets/Dataset/Control';
-import { Header } from '@/features/Panel/Datasets/Dataset/Header';
 import Filter from '@/features/Panel/Datasets/Filter';
 import styles from '@/features/Panel/Panel.module.css';
 import { ICollection } from '@/services/edr.service';
@@ -31,18 +29,7 @@ const Datasets: React.FC = () => {
 
     filteredDatasets.forEach((dataset) => {
       accordions.push(
-        <Accordion
-          key={`datasets-accordion-parent-${dataset.id}`}
-          items={[
-            {
-              id: `datasets-accordion-${dataset.id}`,
-              title: <Header dataset={dataset} />,
-              content: <Dataset dataset={dataset} />,
-              control: <Control dataset={dataset} />,
-            },
-          ]}
-          variant={Variant.Secondary}
-        />
+        <Dataset key={`datasets-accordion-parent-${dataset.id}`} dataset={dataset} />
       );
     });
     return accordions;

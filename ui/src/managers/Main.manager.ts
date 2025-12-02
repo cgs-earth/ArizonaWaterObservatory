@@ -613,7 +613,11 @@ class MainManager {
       : to.subtract(1, 'week');
   }
 
-  public async createLayer(datasourceId: ICollection['id'], signal?: AbortSignal) {
+  public async createLayer(
+    datasourceId: ICollection['id'],
+    parameters: Layer['parameters'],
+    signal?: AbortSignal
+  ) {
     const datasource = this.getDatasource(datasourceId);
 
     if (!datasource) {
@@ -646,7 +650,7 @@ class MainManager {
       datasourceId: datasource.id,
       name,
       color: this.createHexColor(),
-      parameters: [],
+      parameters,
       from: from.format('YYYY-MM-DD'),
       to: to.format('YYYY-MM-DD'),
       visible: true,
@@ -1366,36 +1370,25 @@ class MainManager {
     if (opacity !== layer.opacity) {
       if (this.map) {
         const { fillLayerId, rasterLayerId } = layerIds;
-        // TODO: readd if meaningful
-        // if (this.map.getLayer(pointLayerId)) {
-        //   this.map.setPaintProperty(pointLayerId, 'circle-opacity', opacity);
-        // }
         if (this.map.getLayer(fillLayerId)) {
           this.map.setPaintProperty(fillLayerId, 'fill-opacity', opacity);
         }
-        // if (this.map.getLayer(lineLayerId)) {
-        //   this.map.setPaintProperty(lineLayerId, 'line-opacity', opacity);
-        // }
+
         if (this.map.getLayer(rasterLayerId)) {
           this.map.setPaintProperty(rasterLayerId, 'raster-opacity', opacity);
         }
       }
     }
 
-    if (!isSameArray(layer.parameters, parameters)) {
-      const drawnShapes = this.store.getState().drawnShapes;
-      await this.addData(layer.datasourceId, layer, {
-        parameterNames: parameters,
-        filterFeatures: drawnShapes,
-        from,
-        to,
-      });
-    }
-
     const datasource = this.getDatasource(layer.datasourceId);
-    const drawnShapes = this.store.getState().drawnShapes;
 
-    if (datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to)) {
+    // If the parameters have changed, or this is a grid layer and the temporal range has updated
+    // grid layers are the only instance where temporal filtering applies, requiring a new fetch
+    if (
+      !isSameArray(layer.parameters, parameters) ||
+      (datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to))
+    ) {
+      const drawnShapes = this.store.getState().drawnShapes;
       await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
