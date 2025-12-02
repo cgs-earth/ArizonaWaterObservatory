@@ -24,6 +24,9 @@ zarr_dataset = xarray.open_zarr(
     zarr_format=2,
     chunks="auto",
 )
+
+# %%
 assert zarr_dataset
 print(zarr_dataset)
+print(zarr_dataset["feature_id"].shape, zarr_dataset["time"].shape)
 # %%
