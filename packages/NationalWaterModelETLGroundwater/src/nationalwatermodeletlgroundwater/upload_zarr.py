@@ -13,6 +13,7 @@ from pathlib import Path
 import gcsfs
 import geopandas as gpd
 import numpy as np
+import s3fs
 from shapely import wkb
 import xarray as xr
 
@@ -28,6 +29,8 @@ zarr_dataset_filtered = xr.open_zarr(
 )
 
 print(zarr_dataset_filtered)
+
+# %%
 
 # Map OBJECTID → geometry (Shapely)
 geom_lookup = dict(
@@ -79,6 +82,42 @@ zarr_dataset_filtered = zarr_dataset_filtered.assign(
     centroid_lon=("feature_id", centroid_lon),
 )
 
+# %%
+
+#### Apply chunking to match the national water model
+#### This makes it so it has the same chunking / load
+#### performance as the original dataset
+
+remote_dataset = "CONUS/zarr/gwout.zarr/"
+fs_s3 = s3fs.S3FileSystem(
+    anon=True,
+    endpoint_url="https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com",
+)
+mapper = fs_s3.get_mapper(remote_dataset)
+
+# Lazy load dataset
+zarr_dataset = xr.open_zarr(mapper, chunks="auto")
+feature_chunk = zarr_dataset["feature_id"].encoding["chunks"]
+time_chunk = zarr_dataset["time"].encoding["chunks"]
+
+# NWM chunk sizes:
+assert time_chunk == 672
+assert feature_chunk == 30000
+
+# Apply chunking to 2-D variables
+zarr_dataset_filtered = zarr_dataset_filtered.chunk(
+    {
+        "time": time_chunk,
+        "feature_id": feature_chunk,
+    }
+)
+
+# Apply full-length chunking for 1-D per-feature variables
+full_feature_chunk = (zarr_dataset_filtered.sizes["feature_id"],)
+
+for v in ["feature_id", "geometry_wkb", "centroid_lat", "centroid_lon"]:
+    if v in zarr_dataset_filtered:
+        zarr_dataset_filtered[v].encoding["chunks"] = full_feature_chunk
 
 # %%
 
