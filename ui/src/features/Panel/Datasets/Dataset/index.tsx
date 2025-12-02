@@ -7,12 +7,12 @@ import { useEffect, useState } from 'react';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
+import { Content } from '@/features/Panel/Datasets/Dataset/Content';
 import { Control } from '@/features/Panel/Datasets/Dataset/Control';
 import { Header } from '@/features/Panel/Datasets/Dataset/Header';
 import { useLoading } from '@/hooks/useLoading';
 import { ICollection } from '@/services/edr.service';
 import { Layer } from '@/stores/main/types';
-import { Content } from './Content';
 
 type Props = {
   dataset: ICollection;

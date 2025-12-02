@@ -9,12 +9,12 @@ import { useDisclosure } from '@mantine/hooks';
 import Tune from '@/assets/Tune';
 import X from '@/assets/X';
 import TextInput from '@/components/TextInput';
+import { Body } from '@/features/Panel/Datasets/Filter/Body';
 import styles from '@/features/Panel/Datasets/Filter/Filter.module.css';
 import Modal from '@/features/Panel/Datasets/Filter/Modal';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
-import { Body } from './Body';
 
 const Filter: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
