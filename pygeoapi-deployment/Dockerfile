@@ -21,7 +21,8 @@ COPY pyproject.toml uv.lock /opt/pygeoapi/
 COPY packages /opt/pygeoapi/packages/
 # Install all local integrations
 # --inexact makes it so the deployment packages we just copied aren't removed
-RUN uv sync --all-groups --all-packages
+# --no-group makes it so etl code that isn't at runtime is skipped
+RUN uv sync --no-group etl --all-groups --all-packages
 
 COPY pygeoapi-deployment/ /opt/pygeoapi/pygeoapi-deployment/
 

@@ -8,7 +8,7 @@ check:
 	uv run ruff check && uv run pyright && cd packages/crawler && dg check defs --verbose
 
 dev:
-	uv run pygeoapi openapi generate pygeoapi.config.yml --output-file local.openapi.yml
+	test -f local.openapi.yml || uv run pygeoapi openapi generate pygeoapi.config.yml --output-file local.openapi.yml
 	PYGEOAPI_CONFIG=pygeoapi.config.yml PYGEOAPI_OPENAPI=local.openapi.yml uv run pygeoapi serve --starlette
 
 deps:

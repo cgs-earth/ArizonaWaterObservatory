@@ -40,6 +40,15 @@ dev = [
     "pytest-xdist>=3.7.0",
     "radon>=6.0.1",
 ]
+etl = [
+    "gcsfs>=2025.10.0",
+    "pyarrow>=22.0.0",
+    "ipykernel>=7.1.0",
+    "jupytext>=1.18.1",
+    "pip>=25.3",
+    "dask>=2025.11.0",
+    "numcodecs>=0.16.5",
+]
 server = [
     "gunicorn>=23.0.0",
     "pygeoapi",
@@ -48,7 +57,9 @@ server = [
 ]
 
 [tool.uv.workspace]
-members = ["packages/*"]
+members = [
+    "packages/*",
+]
 
 [tool.uv.sources]
 pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="c631bbae8611aa8a42edfdcea5416ccc045d776d" }
