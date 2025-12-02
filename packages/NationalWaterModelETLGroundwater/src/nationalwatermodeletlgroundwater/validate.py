@@ -8,15 +8,26 @@ Validate that our zarr dataset is
 present and readable from GCS
 """
 
+import time
+
 import gcsfs
 import xarray
 
 # %%
+start = time.time()
+gcs_fs = gcsfs.GCSFileSystem(
+    project="asu-awo",
+    secure_serialize=False,
+    anon=True,
+    token="anon",
+    requester_pays=False,
+)
+end = time.time()
+print(end - start)
 
-gcs_fs = gcsfs.GCSFileSystem(project="asu-awo")
 
+# %%
 gcs_path = "asu-awo-data/filtered_gwout_with_geometry.zarr"
-
 
 zarr_dataset = xarray.open_zarr(
     store=gcs_fs.get_mapper(gcs_path),

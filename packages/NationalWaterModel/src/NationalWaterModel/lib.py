@@ -89,6 +89,9 @@ def get_zarr_dataset_handle(
             chunks="auto",
             storage_options={
                 "project": data,
+                "token": "anon",
+                "requester_pays": False,
+                "anon": True,
             },
         )
 
