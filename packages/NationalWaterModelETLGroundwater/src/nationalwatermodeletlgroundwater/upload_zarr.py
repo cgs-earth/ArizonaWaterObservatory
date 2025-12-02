@@ -13,7 +13,6 @@ from pathlib import Path
 import gcsfs
 import geopandas as gpd
 import numpy as np
-import s3fs
 from shapely import wkb
 import xarray as xr
 
@@ -84,40 +83,24 @@ zarr_dataset_filtered = zarr_dataset_filtered.assign(
 
 # %%
 
-#### Apply chunking to match the national water model
-#### This makes it so it has the same chunking / load
-#### performance as the original dataset
+## Apply chunking to optimize it for reading
+## many features over relatively short times
+# Remove any existing chunk encoding
+for v in zarr_dataset_filtered.data_vars:
+    if "chunks" in zarr_dataset_filtered[v].encoding:
+        # for some reason you need to manually remove chunk metadata
+        # before rechunking otherwise there will be issues
+        del zarr_dataset_filtered[v].encoding["chunks"]
 
-remote_dataset = "CONUS/zarr/gwout.zarr/"
-fs_s3 = s3fs.S3FileSystem(
-    anon=True,
-    endpoint_url="https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com",
-)
-mapper = fs_s3.get_mapper(remote_dataset)
+# Rechunk the dataset
+full_size = zarr_dataset_filtered.sizes["feature_id"]
 
-# Lazy load dataset
-zarr_dataset = xr.open_zarr(mapper, chunks="auto")
-feature_chunk = zarr_dataset["feature_id"].encoding["chunks"]
-time_chunk = zarr_dataset["time"].encoding["chunks"]
-
-# NWM chunk sizes:
-assert time_chunk == 672
-assert feature_chunk == 30000
-
-# Apply chunking to 2-D variables
 zarr_dataset_filtered = zarr_dataset_filtered.chunk(
     {
-        "time": time_chunk,
-        "feature_id": feature_chunk,
+        "time": 64,  # small time slices
+        "feature_id": full_size,  # all features
     }
 )
-
-# Apply full-length chunking for 1-D per-feature variables
-full_feature_chunk = (zarr_dataset_filtered.sizes["feature_id"],)
-
-for v in ["feature_id", "geometry_wkb", "centroid_lat", "centroid_lon"]:
-    if v in zarr_dataset_filtered:
-        zarr_dataset_filtered[v].encoding["chunks"] = full_feature_chunk
 
 # %%
 
