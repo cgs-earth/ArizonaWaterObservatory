@@ -15,5 +15,9 @@ type Props = {
 export const Item: React.FC<Props> = (props) => {
   const { item } = props;
 
-  return <>{isMenuItem(item) ? <MenuItem item={item} /> : <ActionItem item={item} />}</>;
+  if (isMenuItem(item)) {
+    return <MenuItem item={item} />;
+  }
+
+  return <ActionItem item={item} />;
 };

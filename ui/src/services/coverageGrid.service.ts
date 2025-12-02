@@ -398,7 +398,6 @@ export class CoverageGridService {
       return this.createGridCollection(coverage);
     }
 
-    // TODO: add support for coveragecollection
     return this.createCollection(coverage);
   }
 }

@@ -11,13 +11,13 @@ import Dataset from '@/features/Panel/Datasets/Dataset';
 import { Control } from '@/features/Panel/Datasets/Dataset/Control';
 import { Header } from '@/features/Panel/Datasets/Dataset/Header';
 import Filter from '@/features/Panel/Datasets/Filter';
-import { FilterTitle } from '@/features/Panel/Datasets/Filter/Header';
 import styles from '@/features/Panel/Panel.module.css';
 import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
 import { filterCollections } from '@/utils/filterCollections';
 
 const Datasets: React.FC = () => {
+  const search = useMainStore((state) => state.search);
   const provider = useMainStore((state) => state.provider);
   const category = useMainStore((state) => state.category);
   const parameterGroupMembers = useMainStore((state) => state.parameterGroupMembers);
@@ -27,19 +27,7 @@ const Datasets: React.FC = () => {
   const [filteredDatasets, setFilteredDatasets] = useState<ICollection[]>(datasets);
 
   const accordions = useMemo(() => {
-    const accordions: ReactElement[] = [
-      <Accordion
-        key="datasets-filter-parent-accordion"
-        items={[
-          {
-            id: 'datasets-filter-accordion',
-            title: <FilterTitle />,
-            content: <Filter />,
-          },
-        ]}
-        variant={Variant.Tertiary}
-      />,
-    ];
+    const accordions: ReactElement[] = [<Filter />];
 
     filteredDatasets.forEach((dataset) => {
       accordions.push(
@@ -65,9 +53,15 @@ const Datasets: React.FC = () => {
       return;
     }
 
-    const filteredDatasets = filterCollections(datasets, provider, category, parameterGroupMembers);
+    const filteredDatasets = filterCollections(
+      datasets,
+      search,
+      provider,
+      category,
+      parameterGroupMembers
+    );
     setFilteredDatasets(filteredDatasets);
-  }, [datasets, provider, category, parameterGroupMembers]);
+  }, [datasets, search, provider, category, parameterGroupMembers]);
 
   const datasetHelpText = (
     <>
