@@ -8,7 +8,6 @@ from typing import Literal, NotRequired, TypedDict
 from com.covjson import CoverageCollectionDict, CoverageDict
 from com.env import TRACER
 from com.otel import add_args_as_attributes_to_span, otel_trace
-import gcsfs
 import numpy as np
 from pygeoapi.api import DEFAULT_STORAGE_CRS
 from pygeoapi.provider.base import (
@@ -83,9 +82,15 @@ def get_zarr_dataset_handle(
         assert data, (
             "You must provide a gcs project in the 'data' field when using the gcs filesystem"
         )
-        fs = gcsfs.GCSFileSystem(project=data, cache_type="simple")
-        mapper = fs.get_mapper(remote_dataset, check=False)
-        return xr.open_zarr(mapper, consolidated=True, chunks="auto")
+        return xr.open_zarr(
+            f"gs://{remote_dataset}",
+            consolidated=True,
+            zarr_format=2,
+            chunks="auto",
+            storage_options={
+                "project": data,
+            },
+        )
 
     fs = s3fs.S3FileSystem(
         endpoint_url=data,
