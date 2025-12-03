@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 import { ComboboxData, Divider, Group, Stack, Text, Tooltip } from '@mantine/core';
 import Delete from '@/assets/Delete';
 import Button from '@/components/Button';
-import ColorInput from '@/components/ColorInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import IconButton from '@/components/IconButton';
@@ -26,8 +25,10 @@ import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
+import { isSamePalette } from '@/utils/colors';
 import { isSameArray } from '@/utils/compareArrays';
 import { getTemporalExtent } from '@/utils/temporalExtent';
+import Color from './Color';
 
 dayjs.extend(isSameOrBefore);
 
@@ -47,6 +48,7 @@ const Layer: React.FC<Props> = (props) => {
   const [maxDate, setMaxDate] = useState<string>();
   const [opacity, setOpacity] = useState(layer.opacity);
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
+  const [paletteDefinition, setPaletteDefinition] = useState(layer.paletteDefinition);
 
   const [data, setData] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
@@ -139,7 +141,8 @@ const Layer: React.FC<Props> = (props) => {
         from,
         to,
         layer.visible,
-        opacity
+        opacity,
+        paletteDefinition
       );
       notificationManager.show(`Updated layer: ${updateName}`, NotificationType.Success);
     } catch (error) {
@@ -242,7 +245,8 @@ const Layer: React.FC<Props> = (props) => {
     color !== layer.color ||
     !isSameArray(parameters, layer.parameters) ||
     from !== layer.from ||
-    to !== layer.to;
+    to !== layer.to ||
+    !isSamePalette(paletteDefinition, layer.paletteDefinition);
 
   /**
    * This layer has validation issues or there are blocking actions
@@ -315,6 +319,14 @@ const Layer: React.FC<Props> = (props) => {
     return null;
   };
 
+  const handleColorChange = (color: LayerType['color']) => {
+    setColor(color);
+  };
+
+  const handlePaletteDefinitionChange = (paletteDefinition: LayerType['paletteDefinition']) => {
+    setPaletteDefinition(paletteDefinition);
+  };
+
   return (
     <Stack gap="xs" className={styles.accordionContent}>
       <Group justify="space-between" grow gap="calc(var(--default-spacing) * 2)">
@@ -325,14 +337,15 @@ const Layer: React.FC<Props> = (props) => {
           value={name}
           onChange={(event) => setName(event.currentTarget.value)}
         />
-        {collectionType !== CollectionType.Map && (
-          <ColorInput
-            size="xs"
-            label="Symbol Color"
-            value={color}
-            onChange={(value) => setColor(value)}
-          />
-        )}
+        <Color
+          parameters={parameters}
+          parameterOptions={data}
+          color={color}
+          handleColorChange={handleColorChange}
+          paletteDefinition={paletteDefinition}
+          handlePaletteDefinitionChange={handlePaletteDefinitionChange}
+          collectionType={collectionType}
+        />
       </Group>
       {showFeaturesMessage && (
         <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">

@@ -6,7 +6,7 @@
 import { ILink } from '@ogcapi-js/shared';
 import { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { LngLat, LngLatBoundsLike } from 'mapbox-gl';
-import { MainState } from '@/stores/main/types';
+import { Layer, MainState } from '@/stores/main/types';
 
 export const SHARE_VARIABLE = 'shareId';
 
@@ -43,6 +43,7 @@ export type SourceOptions = {
   from?: string | null;
   to?: string | null;
   noFetch?: boolean;
+  paletteDefinition?: Layer['paletteDefinition'];
 };
 
 export type ExtendedFeatureCollection = FeatureCollection & {

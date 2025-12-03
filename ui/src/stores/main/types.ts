@@ -4,6 +4,7 @@
  */
 
 import { FeatureCollection, Polygon } from 'geojson';
+import { ColorSpecification, PropertyValueSpecification } from 'mapbox-gl';
 import { BasemapId, Properties } from '@/components/Map/types';
 import { ICollection } from '@/services/edr.service';
 import { CollectionSlice } from '@/stores/main/slices/collections';
@@ -12,6 +13,7 @@ import { LayerSlice } from '@/stores/main/slices/layers';
 import { LocationSlice } from '@/stores/main/slices/locations';
 import { ShareSlice } from '@/stores/main/slices/share';
 import { SpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
+import { ColorBrewerIndex, FriendlyColorBrewerPalettes } from '@/utils/colors/types';
 
 export type ColorValueHex = `#${string}`;
 
@@ -66,11 +68,20 @@ export type Filter = {
   dateAvailable: string; // Date time?
 };
 
+// Allows for basic string colors (hex, rgba etc) or an expression
+export type Color = PropertyValueSpecification<ColorSpecification>;
+
+export type PaletteDefinition = {
+  palette: FriendlyColorBrewerPalettes;
+  count: ColorBrewerIndex;
+  parameter: string;
+};
+
 export type Layer = {
   id: string; // uuid
   datasourceId: ICollection['id'];
   name: string; // User defined
-  color: string; // User defined, restrict to 6 char code if possible
+  color: Color; // User defined, restrict to 6 char code if possible
   parameters: string[]; // Id's of parameter as returned by datasource
   from: string | null; // UTC timestamp
   to: string | null; // UTC timestamp
@@ -78,6 +89,7 @@ export type Layer = {
   locations: string[]; // locationId's
   opacity: number;
   position: number; // The order this layer is drawn relative to other user layers
+  paletteDefinition?: PaletteDefinition;
 };
 
 export type Table = {

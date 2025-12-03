@@ -25,7 +25,7 @@ const Datasets: React.FC = () => {
   const [filteredDatasets, setFilteredDatasets] = useState<ICollection[]>(datasets);
 
   const accordions = useMemo(() => {
-    const accordions: ReactElement[] = [<Filter />];
+    const accordions: ReactElement[] = [<Filter key="datasets-accordion-filter" />];
 
     filteredDatasets.forEach((dataset) => {
       accordions.push(

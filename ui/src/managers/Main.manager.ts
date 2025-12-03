@@ -47,9 +47,11 @@ import {
   Layer,
   Location,
   MainState,
+  PaletteDefinition,
   ParameterGroupMembers,
 } from '@/stores/main/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
+import { createDynamicStepExpression, isSamePalette } from '@/utils/colors';
 import { isSameArray } from '@/utils/compareArrays';
 import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
@@ -670,10 +672,53 @@ class MainManager {
     await this.addData(datasource.id, layer, {
       filterFeatures: drawnShapes,
       signal,
-      noFetch: collectionType === CollectionType.EDRGrid,
+      noFetch: collectionType === CollectionType.EDRGrid && layer.parameters.length === 0,
     });
 
     this.reorderLayers();
+  }
+
+  private styleLayer(
+    layer: Layer,
+    paletteDefinition: PaletteDefinition,
+    features: Feature<Geometry, { [paletteDefinition.parameter]: number }>[]
+  ) {
+    if (!this.map) {
+      return;
+    }
+
+    const { parameter, count, palette } = paletteDefinition;
+    const expression = createDynamicStepExpression(features, parameter, palette, count);
+
+    this.store.getState().updateLayer({
+      ...layer,
+      color: expression,
+    });
+
+    const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
+      layer.datasourceId,
+      layer.id
+    );
+
+    console.log(
+      'expression',
+      expression,
+      JSON.stringify(expression),
+      parameter,
+      count,
+      palette,
+      features
+    );
+
+    if (this.map.getLayer(pointLayerId)) {
+      this.map.setPaintProperty(pointLayerId, 'circle-color', expression);
+    }
+    if (this.map.getLayer(fillLayerId)) {
+      this.map.setPaintProperty(fillLayerId, 'fill-color', expression);
+    }
+    if (this.map.getLayer(lineLayerId)) {
+      this.map.setPaintProperty(lineLayerId, 'line-color', expression);
+    }
   }
 
   public deleteLayer(layer: Layer) {
@@ -1046,6 +1091,14 @@ class MainManager {
       next = getNextLink(page);
     } while (next);
 
+    if (options?.paletteDefinition) {
+      const features = aggregate.features as Feature<
+        Geometry,
+        { [options.paletteDefinition.parameter]: number }
+      >[];
+      this.styleLayer(layer, options.paletteDefinition, features);
+    }
+
     (aggregate as any) = undefined;
 
     return sourceId;
@@ -1338,7 +1391,8 @@ class MainManager {
     from: Layer['from'],
     to: Layer['to'],
     visible: Layer['visible'],
-    opacity: Layer['opacity']
+    opacity: Layer['opacity'],
+    paletteDefinition: Layer['paletteDefinition']
   ): Promise<void> {
     const layerIds = this.getLocationsLayerIds(layer.datasourceId, layer.id);
 
@@ -1382,18 +1436,21 @@ class MainManager {
 
     const datasource = this.getDatasource(layer.datasourceId);
 
+    const parametersChanged = !isSameArray(layer.parameters, parameters);
+    const temporalRangeChanged =
+      datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to);
+    const paletteChanged = !isSamePalette(paletteDefinition, layer.paletteDefinition);
+
     // If the parameters have changed, or this is a grid layer and the temporal range has updated
     // grid layers are the only instance where temporal filtering applies, requiring a new fetch
-    if (
-      !isSameArray(layer.parameters, parameters) ||
-      (datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to))
-    ) {
+    if (parametersChanged || temporalRangeChanged || paletteChanged) {
       const drawnShapes = this.store.getState().drawnShapes;
       await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
         from,
         to,
+        paletteDefinition,
       });
     }
 
@@ -1406,6 +1463,7 @@ class MainManager {
       to,
       visible,
       opacity,
+      paletteDefinition,
     });
   }
 
