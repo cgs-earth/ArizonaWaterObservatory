@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ComboboxData } from '@mantine/core';
+import { ComboboxData, Group } from '@mantine/core';
 import ColorInput from '@/components/ColorInput';
-import styles from '@/features/Panel/Panel.module.css';
+import { Popover } from '@/features/Panel/Layers/Layer/Color/Popover';
 import { Color as ColorType, Layer } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
-import { Popover } from './Popover';
 
 type Props = {
   parameters: string[];
@@ -31,27 +30,26 @@ const Color: React.FC<Props> = (props) => {
     collectionType,
   } = props;
 
+  const showPalette = collectionType === CollectionType.EDRGrid && parameterOptions;
+
   return (
-    <>
-      {collectionType === CollectionType.EDRGrid && parameterOptions ? (
+    <Group w={showPalette ? '100%' : 'calc(50% - (var(--default-spacing) * 2))'} align="flex-end">
+      <ColorInput
+        size="xs"
+        label="Symbol Color"
+        w={showPalette ? 'calc(50% - (var(--default-spacing) * 2))' : '100%'}
+        value={typeof color === 'string' ? color : undefined}
+        onChange={(value) => handleColorChange(value as ColorType)}
+      />
+      {collectionType === CollectionType.EDRGrid && parameterOptions && (
         <Popover
           parameters={parameters}
           parameterOptions={parameterOptions}
           paletteDefinition={paletteDefinition}
           handleChange={handlePaletteDefinitionChange}
         />
-      ) : (
-        typeof color === 'string' && (
-          <ColorInput
-            size="xs"
-            label="Symbol Color"
-            className={styles.layerInput}
-            value={color}
-            onChange={(value) => handleColorChange(value as ColorType)}
-          />
-        )
       )}
-    </>
+    </Group>
   );
 };
 

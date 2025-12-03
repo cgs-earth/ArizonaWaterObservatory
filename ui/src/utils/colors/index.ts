@@ -32,13 +32,14 @@ export const getGradient = (groups: number, palette: FriendlyColorBrewerPalettes
 const formatStepExpression = (
   property: string,
   palette: FriendlyColorBrewerPalettes,
-  values: number[]
+  values: number[],
+  index: number = 0
 ): ExpressionSpecification => {
   const colorRange = createColorRange(values.length + 1, palette);
 
   const expression: ExpressionSpecification = [
     'step',
-    ['number', ['at', 0, ['get', property]], 0],
+    ['number', ['at', index, ['get', property]], 0],
     colorRange[0], // Default Color
   ];
 
@@ -73,12 +74,13 @@ export const createDynamicStepExpression = <T>(
   features: Feature<Geometry, T>[],
   property: keyof T,
   palette: FriendlyColorBrewerPalettes,
-  groups: number
+  groups: number,
+  index: number = 0
 ): ExpressionSpecification => {
   const data = features.flatMap((feature) => {
     if (Array.isArray(feature.properties[property])) {
       // Get the earliest value
-      const value = Number(feature.properties[property][0] ?? 0);
+      const value = Number(feature.properties[property][index] ?? 0);
 
       if (isNaN(value)) {
         throw new Error(`Invalid number detected in property: ${String(property)}`);
@@ -92,7 +94,7 @@ export const createDynamicStepExpression = <T>(
 
   const thresholds = groupData(data, groups);
 
-  const expression = formatStepExpression(String(property), palette, thresholds);
+  const expression = formatStepExpression(String(property), palette, thresholds, index);
 
   return expression;
 };

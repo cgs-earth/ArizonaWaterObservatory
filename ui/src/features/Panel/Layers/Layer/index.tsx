@@ -16,6 +16,7 @@ import Select from '@/components/Select';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
+import Color from '@/features/Panel/Layers/Layer/Color';
 import styles from '@/features/Panel/Panel.module.css';
 import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { useLoading } from '@/hooks/useLoading';
@@ -28,7 +29,6 @@ import { CollectionType, getCollectionType } from '@/utils/collection';
 import { isSamePalette } from '@/utils/colors';
 import { isSameArray } from '@/utils/compareArrays';
 import { getTemporalExtent } from '@/utils/temporalExtent';
-import Color from './Color';
 
 dayjs.extend(isSameOrBefore);
 
@@ -327,11 +327,14 @@ const Layer: React.FC<Props> = (props) => {
     setPaletteDefinition(paletteDefinition);
   };
 
+  const showPalette = collectionType === CollectionType.EDRGrid && data;
+
   return (
     <Stack gap="xs" className={styles.accordionContent}>
-      <Group justify="space-between" grow gap="calc(var(--default-spacing) * 2)">
+      <Group justify="space-between" gap="calc(var(--default-spacing) * 2)">
         <TextInput
           size="xs"
+          w={showPalette ? '100%' : 'calc(49% - (var(--default-spacing) * 2))'}
           label="Layer Name"
           mr="auto"
           value={name}

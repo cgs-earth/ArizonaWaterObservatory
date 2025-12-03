@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { ColorInput, Group, Stack, Switch, Text } from '@mantine/core';
+import { Gradient } from '@/features/Panel/Layers/Layer/Color/Gradient';
 import { Grid } from '@/features/Tools/Legend/Grid';
 import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { Shapes } from '@/features/Tools/Legend/Shapes';
@@ -12,6 +13,7 @@ import styles from '@/features/Tools/Tools.module.css';
 import mainManager from '@/managers/Main.init';
 import { Layer } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
+import { createColorRange } from '@/utils/colors';
 
 type Props = {
   layer: Layer;
@@ -54,33 +56,44 @@ export const Entry: React.FC<Props> = (props) => {
         />
       )}
 
-      <Group w="100%" justify="space-between" align="flex-start">
-        <Stack justify="flex-start">
-          {showColors && (
-            <ColorInput
-              label={
-                <Text size="xs" mt={0}>
-                  Symbol Color
-                </Text>
-              }
-              value={layer.color}
-              onChange={(color) => handleColorChange(color, layer.id)}
-              className={styles.colorPicker}
-            />
-          )}
+      {layer.paletteDefinition ? (
+        <Gradient
+          label={layer.paletteDefinition.parameter}
+          colors={createColorRange(layer.paletteDefinition.count, layer.paletteDefinition.palette)}
+          left="Less"
+          right="More"
+        />
+      ) : (
+        typeof layer.color === 'string' && (
+          <Group w="100%" justify="space-between" align="flex-start">
+            <Stack justify="flex-start">
+              {showColors && (
+                <ColorInput
+                  label={
+                    <Text size="xs" mt={0}>
+                      Symbol Color
+                    </Text>
+                  }
+                  value={layer.color}
+                  onChange={(color) => handleColorChange(color, layer.id)}
+                  className={styles.colorPicker}
+                />
+              )}
 
-          <Switch
-            size="lg"
-            mb="calc(var(--default-spacing) / 2)"
-            onLabel="VISIBLE"
-            offLabel="HIDDEN"
-            checked={layer.visible}
-            onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
-          />
-        </Stack>
-        {showShapes && <Shapes color={layer.color} />}
-        {showGrid && <Grid color={layer.color} />}
-      </Group>
+              <Switch
+                size="lg"
+                mb="calc(var(--default-spacing) / 2)"
+                onLabel="VISIBLE"
+                offLabel="HIDDEN"
+                checked={layer.visible}
+                onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
+              />
+            </Stack>
+            {showShapes && <Shapes color={layer.color} />}
+            {showGrid && <Grid color={layer.color} />}
+          </Group>
+        )
+      )}
     </Stack>
   );
 };

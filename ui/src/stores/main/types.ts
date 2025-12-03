@@ -75,6 +75,7 @@ export type PaletteDefinition = {
   palette: FriendlyColorBrewerPalettes;
   count: ColorBrewerIndex;
   parameter: string;
+  index: number;
 };
 
 export type Layer = {
@@ -89,7 +90,7 @@ export type Layer = {
   locations: string[]; // locationId's
   opacity: number;
   position: number; // The order this layer is drawn relative to other user layers
-  paletteDefinition?: PaletteDefinition;
+  paletteDefinition: PaletteDefinition | null;
 };
 
 export type Table = {

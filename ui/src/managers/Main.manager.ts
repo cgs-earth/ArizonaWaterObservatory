@@ -6,7 +6,16 @@
 import dayjs from 'dayjs';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
-import { BBox, Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
+import {
+  BBox,
+  Feature,
+  FeatureCollection,
+  GeoJsonProperties,
+  Geometry,
+  MultiPolygon,
+  Point,
+  Polygon,
+} from 'geojson';
 import {
   GeoJSONFeature,
   GeoJSONSource,
@@ -398,7 +407,10 @@ class MainManager {
     return this.store.getState().hasLocation(locationId);
   }
 
-  private async fetchData(
+  private async fetchData<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
     collectionId: ICollection['id'],
     bbox?: BBox,
     from?: string | null,
@@ -406,7 +418,7 @@ class MainManager {
     parameterNames?: string[],
     signal?: AbortSignal,
     next?: string
-  ): Promise<FeatureCollection> {
+  ): Promise<FeatureCollection<T, V>> {
     const collection = this.getDatasource(collectionId);
 
     if (!collection) {
@@ -435,7 +447,15 @@ class MainManager {
         if (!bbox) {
           throw new Error('No BBox provided for Grid layer');
         }
-        return await this.fetchGrid(collectionId, bbox, from, to, parameterNames, signal);
+        // TODO: improve typing here
+        return (await this.fetchGrid(
+          collectionId,
+          bbox,
+          from,
+          to,
+          parameterNames,
+          signal
+        )) as FeatureCollection<T, V>;
     }
 
     throw new Error('Unsupported collection type');
@@ -445,7 +465,10 @@ class MainManager {
    *
    * @function
    */
-  private async fetchLocations(
+  private async fetchLocations<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
     collectionId: ICollection['id'],
     parameterNames?: string[],
     bbox?: BBox,
@@ -453,10 +476,10 @@ class MainManager {
     to?: string | null,
     signal?: AbortSignal,
     next?: string
-  ): Promise<FeatureCollection> {
+  ): Promise<FeatureCollection<T, V>> {
     const datetime = getDatetime(from, to);
 
-    const data = await awoService.getLocations<FeatureCollection>(
+    const data = await awoService.getLocations<FeatureCollection<T, V>>(
       collectionId,
       {
         signal,
@@ -475,7 +498,7 @@ class MainManager {
     );
 
     if (!data) {
-      return getDefaultGeoJSON();
+      return getDefaultGeoJSON<T, V>();
     }
 
     if (StringIdentifierCollections.includes(collectionId)) {
@@ -489,9 +512,10 @@ class MainManager {
    *
    * @function
    */
-  private storeIdentifiers(
-    featureCollection: ExtendedFeatureCollection
-  ): ExtendedFeatureCollection {
+  private storeIdentifiers<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(featureCollection: ExtendedFeatureCollection<T, V>): ExtendedFeatureCollection<T, V> {
     return {
       ...featureCollection,
       features: featureCollection.features.map((feature) => ({
@@ -508,14 +532,17 @@ class MainManager {
    *
    * @function
    */
-  private async fetchItems(
+  private async fetchItems<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
     collectionId: ICollection['id'],
     parameterNames?: string[],
     bbox?: BBox,
     signal?: AbortSignal,
     next?: string
-  ): Promise<ExtendedFeatureCollection> {
-    const data = await awoService.getItems<ExtendedFeatureCollection>(
+  ): Promise<ExtendedFeatureCollection<T, V>> {
+    const data = await awoService.getItems<ExtendedFeatureCollection<T, V>>(
       collectionId,
       {
         signal,
@@ -531,11 +558,11 @@ class MainManager {
     );
 
     if (!data) {
-      return getDefaultGeoJSON();
+      return getDefaultGeoJSON<T, V>();
     }
 
     if (StringIdentifierCollections.includes(collectionId)) {
-      return this.storeIdentifiers(data);
+      return this.storeIdentifiers<T, V>(data);
     }
 
     return data;
@@ -660,6 +687,7 @@ class MainManager {
       opacity:
         collectionType === CollectionType.Map ? DEFAULT_RASTER_OPACITY : DEFAULT_FILL_OPACITY,
       position: layers.length + 1,
+      paletteDefinition: null,
     };
 
     this.store.getState().addLayer(layer);
@@ -678,36 +706,39 @@ class MainManager {
     this.reorderLayers();
   }
 
-  private styleLayer(
+  public async styleLayer(
     layer: Layer,
     paletteDefinition: PaletteDefinition,
-    features: Feature<Geometry, { [paletteDefinition.parameter]: number }>[]
+    features?: Feature<Geometry, { [paletteDefinition.parameter]: number }>[],
+    signal?: AbortSignal
   ) {
     if (!this.map) {
       return;
     }
 
-    const { parameter, count, palette } = paletteDefinition;
-    const expression = createDynamicStepExpression(features, parameter, palette, count);
+    const defaultedfeatures =
+      features ??
+      (await this.getFeatures<Geometry, { [paletteDefinition.parameter]: number }>(layer, signal))
+        .features;
+
+    const { parameter, count, palette, index } = paletteDefinition;
+    const expression = createDynamicStepExpression(
+      defaultedfeatures,
+      parameter,
+      palette,
+      count,
+      index
+    );
 
     this.store.getState().updateLayer({
       ...layer,
       color: expression,
+      paletteDefinition,
     });
 
     const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
       layer.datasourceId,
       layer.id
-    );
-
-    console.log(
-      'expression',
-      expression,
-      JSON.stringify(expression),
-      parameter,
-      count,
-      palette,
-      features
     );
 
     if (this.map.getLayer(pointLayerId)) {
@@ -805,10 +836,13 @@ class MainManager {
     return `${collectionId}-filter`;
   }
 
-  private filterByGeometryType(
-    featureCollection: FeatureCollection<Geometry>,
+  private filterByGeometryType<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
+    featureCollection: FeatureCollection<T, V>,
     filterFeatures: Feature<Polygon | MultiPolygon>[] = []
-  ): FeatureCollection<Geometry> {
+  ): FeatureCollection<T, V> {
     return {
       type: 'FeatureCollection',
       features: featureCollection.features.filter((feature) => {
@@ -860,10 +894,13 @@ class MainManager {
     }
   };
 
-  private filterLocations(
-    featureCollection: FeatureCollection<Geometry>,
+  private filterLocations<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
+    featureCollection: FeatureCollection<T, V>,
     filterFeatures: Feature<Polygon | MultiPolygon>[] = []
-  ): FeatureCollection<Geometry> {
+  ): FeatureCollection<T, V> {
     if (filterFeatures.length > 0) {
       return this.filterByGeometryType(featureCollection, filterFeatures);
     }
@@ -1096,7 +1133,7 @@ class MainManager {
         Geometry,
         { [options.paletteDefinition.parameter]: number }
       >[];
-      this.styleLayer(layer, options.paletteDefinition, features);
+      this.styleLayer(layer, options.paletteDefinition, features, options?.signal);
     }
 
     (aggregate as any) = undefined;
@@ -1330,7 +1367,10 @@ class MainManager {
    *
    * @function
    */
-  public async getFeatures(layer: Layer, signal: AbortSignal): Promise<FeatureCollection> {
+  public async getFeatures<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(layer: Layer, signal?: AbortSignal): Promise<FeatureCollection<T, V>> {
     try {
       const sourceId = this.getSourceId(layer.datasourceId, layer.id);
 
@@ -1338,8 +1378,8 @@ class MainManager {
 
       const data = source._data;
       if (typeof data !== 'string') {
-        const featureCollection = turf.featureCollection(
-          (data as FeatureCollection).features as Feature[]
+        const featureCollection = turf.featureCollection<T, V>(
+          (data as FeatureCollection<T, V>).features as Feature<T, V>[]
         );
 
         return featureCollection;
@@ -1350,7 +1390,7 @@ class MainManager {
 
     const bbox = this.getBBox(layer.datasourceId);
 
-    const data = await this.fetchData(
+    const data = await this.fetchData<T, V>(
       layer.datasourceId,
       bbox,
       layer.from,

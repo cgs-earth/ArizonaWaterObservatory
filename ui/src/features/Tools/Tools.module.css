@@ -3,6 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.basemapWrapper {
+  width: 300px;
+  --grid-gutter: calc(var(--default-spacing) * 2);
+}
+
+.basemapSelector {
+  cursor: pointer;
+  padding: var(--default-spacing);
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.colorPicker {
+  width: 135px;
+}
+
 .container {
   min-width: 250px;
 }
@@ -11,22 +29,15 @@
   width: 95px;
 }
 
-.capitalize {
-  text-transform: capitalize;
+.dateSelectorContainer {
+  width: 250px;
 }
 
-.basemapWrapper {
-  width: 300px;
-  --grid-gutter: calc(var(--default-spacing) * 2);
-}
-
-.colorPicker {
-  width: 135px;
-}
-
-.basemapSelector {
-  cursor: pointer;
-  padding: var(--default-spacing);
+.dateSelectorButton {
+  position: absolute;
+  z-index: 1;
+  margin-top: var(--default-spacing);
+  left: var(--default-spacing);
 }
 
 /* Manual padding to handle component overflow issues */

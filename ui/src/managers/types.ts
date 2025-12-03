@@ -4,7 +4,14 @@
  */
 
 import { ILink } from '@ogcapi-js/shared';
-import { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson';
+import {
+  Feature,
+  FeatureCollection,
+  GeoJsonProperties,
+  Geometry,
+  MultiPolygon,
+  Polygon,
+} from 'geojson';
 import { LngLat, LngLatBoundsLike } from 'mapbox-gl';
 import { Layer, MainState } from '@/stores/main/types';
 
@@ -46,7 +53,10 @@ export type SourceOptions = {
   paletteDefinition?: Layer['paletteDefinition'];
 };
 
-export type ExtendedFeatureCollection = FeatureCollection & {
+export type ExtendedFeatureCollection<
+  T extends Geometry = Geometry,
+  V extends GeoJsonProperties = GeoJsonProperties,
+> = FeatureCollection<T, V> & {
   links?: ILink[];
   numberMatched?: number;
   numberReturned?: number;

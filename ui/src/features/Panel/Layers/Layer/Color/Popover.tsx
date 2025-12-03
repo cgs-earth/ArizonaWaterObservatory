@@ -3,32 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { Feature } from 'geojson';
-import { ExpressionSpecification } from 'mapbox-gl';
+import { useEffect, useState } from 'react';
 import { ComboboxData, ComboboxItem, Group, Stack, Text, Title, Tooltip } from '@mantine/core';
-import Basemap from '@/assets/Basemap';
+import Palette from '@/assets/Palette';
 import Button from '@/components/Button';
 import IconButton from '@/components/IconButton';
 import PopoverComponent from '@/components/Popover';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
+import { Gradient } from '@/features/Panel/Layers/Layer/Color/Gradient';
 import styles from '@/features/Panel/Panel.module.css';
-import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
-import notificationManager from '@/managers/Notification.init';
 import { Layer } from '@/stores/main/types';
-import { LoadingType, NotificationType } from '@/stores/session/types';
-import { createColorRange, createStaticStepExpression, groupData } from '@/utils/colors';
+import { createColorRange } from '@/utils/colors';
 import {
   ColorBrewerIndex,
   FriendlyColorBrewerPalettes,
   isValidColorBrewerIndex,
-  isValidThresholdArray,
   validColorBrewerIndex,
-  ValidThresholdArray,
 } from '@/utils/colors/types';
-import { Gradient } from './Gradient';
 
 // C:\Users\jsalman\source\ArizonaWaterObservatory\ui\src\features\Panel\Layers\Layer\Color\Popover.tsx
 
@@ -51,6 +43,9 @@ export const Popover: React.FC<Props> = (props) => {
 
   const [parameter, setParameter] = useState<string | null>(paletteDefinition?.parameter ?? null);
   const [count, setCount] = useState<ColorBrewerIndex | null>(paletteDefinition?.count ?? null);
+  const [data, setData] = useState<ComboboxData>(
+    parameterOptions.filter((option) => parameters.includes((option as ComboboxItem).value))
+  );
 
   useEffect(() => {
     if (count === null || palette === null) {
@@ -61,9 +56,23 @@ export const Popover: React.FC<Props> = (props) => {
     setColors(colors);
   }, [count, palette]);
 
+  useEffect(() => {
+    if (parameters.length === 0) {
+      setShow(false);
+    }
+  }, [parameters]);
+
+  useEffect(() => {
+    const data = parameterOptions.filter((option) =>
+      parameters.includes((option as ComboboxItem).value)
+    );
+
+    setData(data);
+  }, [parameterOptions, parameters]);
+
   const handleSave = () => {
     if (palette !== null && count !== null && parameter !== null) {
-      handleChange({ palette, count, parameter });
+      handleChange({ palette, count, parameter, index: 0 });
       setShow(false);
     }
   };
@@ -75,7 +84,27 @@ export const Popover: React.FC<Props> = (props) => {
     setShow(false);
   };
 
+  const handleGroupChange = (value: string | null) => {
+    const count = Number(value);
+    if (isValidColorBrewerIndex(count)) {
+      setCount(count);
+    }
+  };
+
+  const handleParameterChange = (value: string | null) => {
+    if (value) {
+      setParameter(value);
+    }
+  };
+
+  const handlePaletteChange = (value: string | null) => {
+    if (value) {
+      setPalette(value as FriendlyColorBrewerPalettes);
+    }
+  };
+
   const isValidPalette = palette !== null && count !== null && parameter !== null;
+  const noParameters = parameters.length === 0;
 
   return (
     <PopoverComponent
@@ -84,54 +113,50 @@ export const Popover: React.FC<Props> = (props) => {
       onChange={setShow}
       closeOnClickOutside={false}
       target={
-        <Tooltip label="Change map styling." disabled={show}>
+        <Tooltip
+          label={noParameters ? 'No parameters selected' : 'Create a dynamic visualization.'}
+          disabled={show}
+        >
           <IconButton
+            disabled={noParameters}
+            data-disabled={noParameters}
             variant={show ? Variant.Selected : Variant.Secondary}
             onClick={() => setShow(!show)}
           >
-            <Basemap />
+            <Palette />
           </IconButton>
         </Tooltip>
       }
       content={
-        <Stack gap={8} className={styles.container} align="flex-start">
+        <Stack gap="var(--default-spacing)" className={styles.container} align="flex-start">
           <Title order={5} size="h3">
             Color
           </Title>
           <Group>
-            <Stack gap={8}>
+            <Stack gap="var(--default-spacing)" w="100%">
               <Select
                 size="xs"
                 label="Groups"
+                defaultValue={String(validColorBrewerIndex[0])}
+                value={String(count)}
                 data={validColorBrewerIndex.map((index) => String(index))}
-                onChange={(value: string | null) => {
-                  const count = Number(value);
-                  if (isValidColorBrewerIndex(count)) {
-                    setCount(count);
-                  }
-                }}
+                onChange={handleGroupChange}
               />
               <Select
                 size="xs"
                 label="Parameters"
-                data={parameterOptions.filter((option) =>
-                  parameters.includes((option as ComboboxItem).value)
-                )}
-                onChange={(value: string | null) => {
-                  if (value) {
-                    setParameter(value);
-                  }
-                }}
+                defaultValue={data.length > 0 ? (data[0] as ComboboxItem)?.value : undefined}
+                value={parameter}
+                data={data}
+                onChange={handleParameterChange}
               />
               <Select
                 size="xs"
                 label="Palette"
+                defaultValue={Object.values(FriendlyColorBrewerPalettes)[0]}
+                value={palette}
                 data={Object.values(FriendlyColorBrewerPalettes)}
-                onChange={(value: string | null) => {
-                  if (value) {
-                    setPalette(value as FriendlyColorBrewerPalettes);
-                  }
-                }}
+                onChange={handlePaletteChange}
               />
             </Stack>
             {parameter && colors.length > 0 ? (
