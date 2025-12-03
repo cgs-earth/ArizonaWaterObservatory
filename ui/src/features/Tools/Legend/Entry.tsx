@@ -57,12 +57,25 @@ export const Entry: React.FC<Props> = (props) => {
       )}
 
       {layer.paletteDefinition ? (
-        <Gradient
-          label={layer.paletteDefinition.parameter}
-          colors={createColorRange(layer.paletteDefinition.count, layer.paletteDefinition.palette)}
-          left="Less"
-          right="More"
-        />
+        <>
+          <Gradient
+            label={layer.paletteDefinition.parameter}
+            colors={createColorRange(
+              layer.paletteDefinition.count,
+              layer.paletteDefinition.palette
+            )}
+            left="Less"
+            right="More"
+          />
+          <Switch
+            size="lg"
+            mb="calc(var(--default-spacing) / 2)"
+            onLabel="VISIBLE"
+            offLabel="HIDDEN"
+            checked={layer.visible}
+            onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
+          />
+        </>
       ) : (
         typeof layer.color === 'string' && (
           <Group w="100%" justify="space-between" align="flex-start">

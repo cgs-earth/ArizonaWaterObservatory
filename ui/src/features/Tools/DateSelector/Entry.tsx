@@ -143,6 +143,7 @@ export const Entry: React.FC<Props> = (props) => {
           value={String(layer.paletteDefinition.index)}
           onChange={handleChange}
           disabled={data.length === 0}
+          searchable
         />
       )}
     </>

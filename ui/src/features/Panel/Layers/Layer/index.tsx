@@ -26,7 +26,7 @@ import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
-import { isSamePalette } from '@/utils/colors';
+import { isSamePalette, isValidPalette } from '@/utils/colors';
 import { isSameArray } from '@/utils/compareArrays';
 import { getTemporalExtent } from '@/utils/temporalExtent';
 
@@ -235,6 +235,11 @@ const Layer: React.FC<Props> = (props) => {
    */
   const showOpacitySlider = [CollectionType.Map, CollectionType.EDRGrid].includes(collectionType);
 
+  const isPaletteDefinitionValid = isValidPalette(paletteDefinition);
+
+  const doesPaletteHaveParameter =
+    !paletteDefinition || parameters.includes(paletteDefinition?.parameter);
+
   /**
    * The user has modified this layer since the last save
    *
@@ -259,8 +264,9 @@ const Layer: React.FC<Props> = (props) => {
     isLoading ||
     !isValidRange ||
     isMissingParameters ||
-    isParameterSelectionOverLimit;
-
+    isParameterSelectionOverLimit ||
+    !doesPaletteHaveParameter ||
+    !isPaletteDefinitionValid;
   const getDateInputError = () => {
     // is to >= from?
     if (isValidRange) {
@@ -287,9 +293,6 @@ const Layer: React.FC<Props> = (props) => {
       return 'Please wait for spatial filter to finish loading data.';
     }
 
-    if (hasUnsavedChanges) {
-      return 'Save changes to layer.';
-    }
     if (isLoading) {
       return 'Please wait for layer update to finish.';
     }
@@ -302,6 +305,17 @@ const Layer: React.FC<Props> = (props) => {
     if (isParameterSelectionOverLimit) {
       return 'Please remove parameters.';
     }
+    if (!isPaletteDefinitionValid) {
+      return 'Please correct dynamic color settings.';
+    }
+    if (!doesPaletteHaveParameter) {
+      return 'Dynamic color settings has invalid parameter.';
+    }
+
+    if (hasUnsavedChanges) {
+      return 'Save changes to layer.';
+    }
+
     return 'Layer has not been modified.';
   };
 

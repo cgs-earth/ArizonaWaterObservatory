@@ -6,7 +6,9 @@
 import colorbrewer from 'colorbrewer';
 import { Feature, Geometry } from 'geojson';
 import { ExpressionSpecification } from 'mapbox-gl';
+import notificationManager from '@/managers/Notification.init';
 import { Layer } from '@/stores/main/types';
+import { NotificationType } from '@/stores/session/types';
 import {
   ColorBrewerIndex,
   FriendlyColorBrewerPalettes,
@@ -79,7 +81,6 @@ export const createDynamicStepExpression = <T>(
 ): ExpressionSpecification => {
   const data = features.flatMap((feature) => {
     if (Array.isArray(feature.properties[property])) {
-      // Get the earliest value
       const value = Number(feature.properties[property][index] ?? 0);
 
       if (isNaN(value)) {
@@ -94,7 +95,18 @@ export const createDynamicStepExpression = <T>(
 
   const thresholds = groupData(data, groups);
 
-  const expression = formatStepExpression(String(property), palette, thresholds, index);
+  const uniqueSortedThresholds = Array.from(new Set(thresholds)).sort((a, b) => a - b);
+
+  // If we lost thresholds due to duplicates, adjust groups accordingly
+  if (uniqueSortedThresholds.length < thresholds.length) {
+    notificationManager.show(
+      `Duplicate thresholds detected. Reducing to ${uniqueSortedThresholds.length} threshold(s)`,
+      NotificationType.Info,
+      5000
+    );
+  }
+
+  const expression = formatStepExpression(String(property), palette, uniqueSortedThresholds, index);
 
   return expression;
 };
@@ -120,5 +132,12 @@ export const isSamePalette = (
         paletteA.count === paletteB.count &&
         paletteA.palette === paletteB.palette &&
         paletteA.parameter === paletteB.parameter)
+  );
+};
+
+export const isValidPalette = (palette: Layer['paletteDefinition']): boolean => {
+  return Boolean(
+    !palette ||
+      (!isNaN(palette.count) && palette.palette.length > 0 && palette.parameter.length > 0)
   );
 };

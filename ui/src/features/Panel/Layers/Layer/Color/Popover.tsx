@@ -14,7 +14,7 @@ import { Variant } from '@/components/types';
 import { Gradient } from '@/features/Panel/Layers/Layer/Color/Gradient';
 import styles from '@/features/Panel/Panel.module.css';
 import { Layer } from '@/stores/main/types';
-import { createColorRange } from '@/utils/colors';
+import { createColorRange, isValidPalette } from '@/utils/colors';
 import {
   ColorBrewerIndex,
   FriendlyColorBrewerPalettes,
@@ -103,15 +103,22 @@ export const Popover: React.FC<Props> = (props) => {
     }
   };
 
-  const isValidPalette = palette !== null && count !== null && parameter !== null;
+  const isValid = Boolean(
+    count &&
+      parameter &&
+      palette &&
+      isValidPalette({ count, parameter, palette, index: 1 }) &&
+      parameters.includes(parameter)
+  );
   const noParameters = parameters.length === 0;
 
   return (
     <PopoverComponent
-      offset={16}
       opened={show}
       onChange={setShow}
       closeOnClickOutside={false}
+      position="right-start"
+      shadow="md"
       target={
         <Tooltip
           label={noParameters ? 'No parameters selected' : 'Create a dynamic visualization.'}
@@ -128,7 +135,12 @@ export const Popover: React.FC<Props> = (props) => {
         </Tooltip>
       }
       content={
-        <Stack gap="var(--default-spacing)" className={styles.container} align="flex-start">
+        <Stack
+          gap="var(--default-spacing)"
+          maw="250px"
+          className={styles.container}
+          align="flex-start"
+        >
           <Title order={5} size="h3">
             Color
           </Title>
@@ -166,11 +178,11 @@ export const Popover: React.FC<Props> = (props) => {
             )}
           </Group>
           <Group mt="md" justify="center">
-            <Tooltip label="Invalid palette configuration." disabled={isValidPalette}>
+            <Tooltip label="Invalid palette configuration." disabled={isValid}>
               <Button
                 size="xs"
-                disabled={!isValidPalette}
-                data-disabled={!isValidPalette}
+                disabled={!isValid}
+                data-disabled={!isValid}
                 variant={Variant.Primary}
                 onClick={() => handleSave()}
               >

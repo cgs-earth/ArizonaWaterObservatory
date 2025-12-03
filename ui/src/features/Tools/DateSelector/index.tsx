@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Divider, Stack, Title, Tooltip } from '@mantine/core';
 import Calendar from '@/assets/Calendar';
 import Button from '@/components/Button';
@@ -67,10 +67,10 @@ const DateSelector: React.FC<Props> = (props) => {
             Visualized Dates
           </Title>
           {layers.map((layer) => (
-            <>
-              <Entry key={`date-selector-${layer}`} layer={layer} />
+            <Fragment key={`date-selector-${layer}`}>
+              <Entry layer={layer} />
               <Divider />
-            </>
+            </Fragment>
           ))}
           <Button size="sm" variant={Variant.Primary} onClick={() => handleShow(false)}>
             Ok
