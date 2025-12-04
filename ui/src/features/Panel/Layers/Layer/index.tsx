@@ -130,6 +130,10 @@ const Layer: React.FC<Props> = (props) => {
     setOpacity(layer.opacity);
   }, [layer.opacity]);
 
+  useEffect(() => {
+    setPaletteDefinition(layer.paletteDefinition);
+  }, [layer.paletteDefinition]);
+
   const handleSave = async () => {
     setIsLoading(true);
     const updateName = name !== layer.name ? `${layer.name} -> ${name}` : layer.name;

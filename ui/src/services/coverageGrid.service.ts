@@ -393,7 +393,7 @@ export class CoverageGridService {
     });
 
     if (!coverage) {
-      throw new Error(`No data found.`);
+      throw new Error(`No data found. Try a different date range or parameter.`);
     }
 
     if (isCoverageJSON(coverage)) {

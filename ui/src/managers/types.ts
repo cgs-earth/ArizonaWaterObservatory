@@ -53,6 +53,12 @@ export type SourceOptions = {
   paletteDefinition?: Layer['paletteDefinition'];
 };
 
+export type StyleOptions<T extends GeoJsonProperties> = {
+  features?: Feature<Geometry, T>[];
+  signal?: AbortSignal;
+  updateStore?: boolean;
+};
+
 export type ExtendedFeatureCollection<
   T extends Geometry = Geometry,
   V extends GeoJsonProperties = GeoJsonProperties,
