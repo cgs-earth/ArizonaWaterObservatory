@@ -17,6 +17,8 @@ import awoService from '@/services/init/awo.init';
 import { isCoverageJSON } from '@/utils/isTypeObject';
 import { getDatetime } from '@/utils/url';
 
+export const DATES_PROPERTY = 'times';
+
 type Values = Record<string, (number | null)[]>;
 type Axes = {
   t: { values: string[] };
@@ -122,7 +124,7 @@ export class CoverageGridService {
       const grid = bboxPolygon([startX, startY, endX, endY], {
         id: currentId ?? id,
         properties: {
-          times,
+          [DATES_PROPERTY]: times,
           gridIdentifier: `${startX}_${startY}_${endX}_${endY}`,
           ...currentValues,
         },
@@ -196,7 +198,7 @@ export class CoverageGridService {
       const grid = bboxPolygon([startX, startY, endX, endY], {
         id: currentId ?? id,
         properties: {
-          times,
+          [DATES_PROPERTY]: times,
           gridIdentifier: `${startX}_${startY}_${endX}_${endY}`,
           ...currentValues,
         },
@@ -303,7 +305,7 @@ export class CoverageGridService {
       const pointFeature = point(
         [xValue, yValue],
         {
-          times,
+          [DATES_PROPERTY]: times,
           pointIdentifier: `${xValue}_${yValue}`,
           ...currentValues,
         },

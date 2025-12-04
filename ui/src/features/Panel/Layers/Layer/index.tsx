@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 import { ComboboxData, Divider, Group, Stack, Text, Tooltip } from '@mantine/core';
 import Delete from '@/assets/Delete';
 import Button from '@/components/Button';
-import ColorInput from '@/components/ColorInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import IconButton from '@/components/IconButton';
@@ -17,6 +16,7 @@ import Select from '@/components/Select';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
+import Color from '@/features/Panel/Layers/Layer/Color';
 import styles from '@/features/Panel/Panel.module.css';
 import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { useLoading } from '@/hooks/useLoading';
@@ -26,7 +26,9 @@ import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
+import { isSamePalette, isValidPalette } from '@/utils/colors';
 import { isSameArray } from '@/utils/compareArrays';
+import { getParameterUnit } from '@/utils/parameters';
 import { getTemporalExtent } from '@/utils/temporalExtent';
 
 dayjs.extend(isSameOrBefore);
@@ -47,6 +49,7 @@ const Layer: React.FC<Props> = (props) => {
   const [maxDate, setMaxDate] = useState<string>();
   const [opacity, setOpacity] = useState(layer.opacity);
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
+  const [paletteDefinition, setPaletteDefinition] = useState(layer.paletteDefinition);
 
   const [data, setData] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
@@ -83,10 +86,14 @@ const Layer: React.FC<Props> = (props) => {
       const paramObjects = Object.values(collection?.parameter_names ?? {});
 
       const data = paramObjects
-        .map((object) => ({
-          label: object.name,
-          value: object.id,
-        }))
+        .map((object) => {
+          const unit = getParameterUnit(object);
+
+          return {
+            label: `${object.name} (${unit})`,
+            value: object.id,
+          };
+        })
         .sort((a, b) => a.label.localeCompare(b.label));
       setData(data);
     }
@@ -139,7 +146,8 @@ const Layer: React.FC<Props> = (props) => {
         from,
         to,
         layer.visible,
-        opacity
+        opacity,
+        paletteDefinition
       );
       notificationManager.show(`Updated layer: ${updateName}`, NotificationType.Success);
     } catch (error) {
@@ -232,6 +240,11 @@ const Layer: React.FC<Props> = (props) => {
    */
   const showOpacitySlider = [CollectionType.Map, CollectionType.EDRGrid].includes(collectionType);
 
+  const isPaletteDefinitionValid = isValidPalette(paletteDefinition);
+
+  const doesPaletteHaveParameter =
+    !paletteDefinition || parameters.includes(paletteDefinition?.parameter);
+
   /**
    * The user has modified this layer since the last save
    *
@@ -242,7 +255,8 @@ const Layer: React.FC<Props> = (props) => {
     color !== layer.color ||
     !isSameArray(parameters, layer.parameters) ||
     from !== layer.from ||
-    to !== layer.to;
+    to !== layer.to ||
+    !isSamePalette(paletteDefinition, layer.paletteDefinition);
 
   /**
    * This layer has validation issues or there are blocking actions
@@ -255,8 +269,9 @@ const Layer: React.FC<Props> = (props) => {
     isLoading ||
     !isValidRange ||
     isMissingParameters ||
-    isParameterSelectionOverLimit;
-
+    isParameterSelectionOverLimit ||
+    !doesPaletteHaveParameter ||
+    !isPaletteDefinitionValid;
   const getDateInputError = () => {
     // is to >= from?
     if (isValidRange) {
@@ -283,9 +298,6 @@ const Layer: React.FC<Props> = (props) => {
       return 'Please wait for spatial filter to finish loading data.';
     }
 
-    if (hasUnsavedChanges) {
-      return 'Save changes to layer.';
-    }
     if (isLoading) {
       return 'Please wait for layer update to finish.';
     }
@@ -298,6 +310,17 @@ const Layer: React.FC<Props> = (props) => {
     if (isParameterSelectionOverLimit) {
       return 'Please remove parameters.';
     }
+    if (!isPaletteDefinitionValid) {
+      return 'Please correct dynamic color settings.';
+    }
+    if (!doesPaletteHaveParameter) {
+      return 'Dynamic color settings has invalid parameter.';
+    }
+
+    if (hasUnsavedChanges) {
+      return 'Save changes to layer.';
+    }
+
     return 'Layer has not been modified.';
   };
 
@@ -315,24 +338,37 @@ const Layer: React.FC<Props> = (props) => {
     return null;
   };
 
+  const handleColorChange = (color: LayerType['color']) => {
+    setColor(color);
+  };
+
+  const handlePaletteDefinitionChange = (paletteDefinition: LayerType['paletteDefinition']) => {
+    setPaletteDefinition(paletteDefinition);
+  };
+
+  const showPalette = collectionType === CollectionType.EDRGrid && data;
+
   return (
     <Stack gap="xs" className={styles.accordionContent}>
-      <Group justify="space-between" grow gap="calc(var(--default-spacing) * 2)">
+      <Group justify="space-between" gap="calc(var(--default-spacing) * 2)">
         <TextInput
           size="xs"
+          w={showPalette ? '100%' : 'calc(49% - (var(--default-spacing) * 2))'}
           label="Layer Name"
           mr="auto"
           value={name}
           onChange={(event) => setName(event.currentTarget.value)}
         />
-        {collectionType !== CollectionType.Map && (
-          <ColorInput
-            size="xs"
-            label="Symbol Color"
-            value={color}
-            onChange={(value) => setColor(value)}
-          />
-        )}
+        <Color
+          collectionId={layer.datasourceId}
+          parameters={parameters}
+          parameterOptions={data}
+          color={color}
+          handleColorChange={handleColorChange}
+          paletteDefinition={paletteDefinition}
+          handlePaletteDefinitionChange={handlePaletteDefinitionChange}
+          collectionType={collectionType}
+        />
       </Group>
       {showFeaturesMessage && (
         <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">

@@ -123,6 +123,22 @@
   overflow-x: hidden;
 }
 
+.gradientContainer {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.gradient {
+  width: 100%;
+  height: 34px;
+  border: 1px solid #000;
+}
+
+.gradientLabelContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
 .layerInput {
   width: calc(50% - var(--default-spacing));
 }

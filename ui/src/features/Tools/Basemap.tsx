@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Grid, Image, Overlay, Paper, Stack, Text, Title, Tooltip } from '@mantine/core';
+import { Grid, Image, Paper, Stack, Text, Title, Tooltip } from '@mantine/core';
 import Basemap from '@/assets/Basemap';
 import IconButton from '@/components/IconButton';
 import { basemaps } from '@/components/Map/consts';
@@ -14,6 +14,7 @@ import { Variant } from '@/components/types';
 import styles from '@/features/Tools/Tools.module.css';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
+import { Overlay } from '@/stores/session/types';
 
 export const BasemapSelector: React.FC = () => {
   const basemap = useMainStore((state) => state.basemap);
@@ -25,12 +26,12 @@ export const BasemapSelector: React.FC = () => {
   const [show, setShow] = useState(false);
 
   const handleShow = (show: boolean) => {
-    setOverlay(show ? Overlay.Draw : null);
+    setOverlay(show ? Overlay.Basemap : null);
     setShow(show);
   };
 
   useEffect(() => {
-    if (overlay !== Overlay.Draw) {
+    if (overlay !== Overlay.Basemap) {
       setShow(false);
     }
   }, [overlay]);

@@ -12,12 +12,12 @@ import {
 } from 'mapbox-gl';
 import { LayerType } from '@/components/Map/types';
 import { DEFAULT_FILL_OPACITY, DEFAULT_RASTER_OPACITY } from '@/features/Map/consts';
-import { Location } from '@/stores/main/types';
+import { Color, Location } from '@/stores/main/types';
 
 export const getPointLayerDefinition = (
   layerId: string,
   sourceId: string,
-  color: string
+  color: Color
 ): CircleLayerSpecification => {
   return {
     id: layerId,
@@ -35,7 +35,7 @@ export const getPointLayerDefinition = (
 export const getLineLayerDefinition = (
   layerId: string,
   sourceId: string,
-  color: string = '#000'
+  color: Color = '#000'
 ): LineLayerSpecification => {
   return {
     id: layerId,
@@ -57,7 +57,7 @@ export const getLineLayerDefinition = (
 export const getFillLayerDefinition = (
   layerId: string,
   sourceId: string,
-  color: string = '#000'
+  color: Color = '#000'
 ): FillLayerSpecification => {
   return {
     id: layerId,
@@ -86,7 +86,7 @@ export const getRasterLayerSpecification = (
 
 export const getSelectedColor = (
   locationIds: Array<Location['id']>,
-  originalColor: string = '#000'
+  originalColor: Color = '#000'
 ): ExpressionSpecification => {
   return ['case', ['in', ['id'], ['literal', locationIds]], '#FFF', originalColor];
 };
