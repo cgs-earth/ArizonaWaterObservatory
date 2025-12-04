@@ -4,7 +4,7 @@
  */
 
 import { Fragment, useEffect, useState } from 'react';
-import { Divider, Stack, Title, Tooltip } from '@mantine/core';
+import { Divider, Stack, Text, Title, Tooltip } from '@mantine/core';
 import Calendar from '@/assets/Calendar';
 import Button from '@/components/Button';
 import IconButton from '@/components/IconButton';
@@ -66,6 +66,9 @@ const DateSelector: React.FC<Props> = (props) => {
           <Title order={5} size="h3">
             Visualized Dates
           </Title>
+          <Text c="dimmed" size="sm">
+            Dates shown are UTC
+          </Text>
           {layers.map((layer) => (
             <Fragment key={`date-selector-${layer}`}>
               <Entry layer={layer} />

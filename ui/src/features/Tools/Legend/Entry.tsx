@@ -4,8 +4,9 @@
  */
 
 import { useEffect, useState } from 'react';
+import { ExpressionSpecification } from 'mapbox-gl';
 import { ColorInput, Group, Stack, Switch, Text } from '@mantine/core';
-import { Gradient } from '@/features/Panel/Layers/Layer/Color/Gradient';
+import { DetailedGradient } from '@/features/Panel/Layers/Layer/Color/DetailedGradient';
 import { Grid } from '@/features/Tools/Legend/Grid';
 import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { Shapes } from '@/features/Tools/Legend/Shapes';
@@ -13,7 +14,6 @@ import styles from '@/features/Tools/Tools.module.css';
 import mainManager from '@/managers/Main.init';
 import { Layer } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
-import { createColorRange } from '@/utils/colors';
 
 type Props = {
   layer: Layer;
@@ -56,16 +56,12 @@ export const Entry: React.FC<Props> = (props) => {
         />
       )}
 
-      {layer.paletteDefinition ? (
+      {layer.paletteDefinition && typeof layer.color !== 'string' ? (
         <>
-          <Gradient
-            label={layer.paletteDefinition.parameter}
-            colors={createColorRange(
-              layer.paletteDefinition.count,
-              layer.paletteDefinition.palette
-            )}
-            left="Less"
-            right="More"
+          <DetailedGradient
+            collectionId={layer.datasourceId}
+            color={layer.color as ExpressionSpecification}
+            paletteDefinition={layer.paletteDefinition}
           />
           <Switch
             size="lg"

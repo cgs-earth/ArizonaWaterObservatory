@@ -750,6 +750,8 @@ class MainManager {
     if (this.map.getLayer(lineLayerId)) {
       this.map.setPaintProperty(lineLayerId, 'line-color', expression);
     }
+
+    return expression;
   }
 
   public deleteLayer(layer: Layer) {
@@ -1128,12 +1130,12 @@ class MainManager {
       next = getNextLink(page);
     } while (next);
 
-    if (options?.paletteDefinition) {
+    if (layer.paletteDefinition) {
       const features = aggregate.features as Feature<
         Geometry,
-        { [options.paletteDefinition.parameter]: number }
+        { [layer.paletteDefinition.parameter]: number }
       >[];
-      this.styleLayer(layer, options.paletteDefinition, features, options?.signal);
+      this.styleLayer(layer, layer.paletteDefinition, features, options?.signal);
     }
 
     (aggregate as any) = undefined;
@@ -1483,21 +1485,28 @@ class MainManager {
 
     // If the parameters have changed, or this is a grid layer and the temporal range has updated
     // grid layers are the only instance where temporal filtering applies, requiring a new fetch
-    if (parametersChanged || temporalRangeChanged || paletteChanged) {
+    let _color = color;
+    if (parametersChanged || temporalRangeChanged) {
       const drawnShapes = this.store.getState().drawnShapes;
       await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
         from,
         to,
-        paletteDefinition,
       });
+    }
+
+    if (paletteChanged && paletteDefinition) {
+      const expression = await this.styleLayer(layer, paletteDefinition);
+      if (expression) {
+        _color = expression;
+      }
     }
 
     this.store.getState().updateLayer({
       ...layer,
       name,
-      color,
+      color: _color,
       parameters,
       from,
       to,

@@ -10,12 +10,14 @@ import { Group, Skeleton, Text, useComputedColorScheme } from '@mantine/core';
 import LineChart from '@/components/Charts/LineChart';
 import styles from '@/features/Popup/Popup.module.css';
 import loadingManager from '@/managers/Loading.init';
+import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { CoverageCollection, CoverageJSON, ICollection } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { Location } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { isCoverageCollection } from '@/utils/isTypeObject';
+import { getLabel } from '@/utils/parameters';
 import { getDatetime } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
@@ -50,6 +52,7 @@ export const Chart: React.FC<Props> = (props) => {
   const [data, setData] = useState<CoverageCollection | CoverageJSON | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [labels, setLabels] = useState<Array<{ parameter: string; label: string }>>([]);
 
   const fetchData = async () => {
     const loadingInstance = loadingManager.add(
@@ -118,6 +121,18 @@ export const Chart: React.FC<Props> = (props) => {
     };
   }, [locationId, from, to]);
 
+  useEffect(() => {
+    const collection = mainManager.getDatasource(collectionId);
+    if (collection) {
+      const labels = parameters.map((parameter) => ({
+        parameter,
+        label: getLabel(collection, parameter),
+      }));
+
+      setLabels(labels);
+    }
+  }, [parameters]);
+
   const isValid = (coverage: CoverageCollection | CoverageJSON) => {
     if (isCoverageCollection(coverage) && coverage.coverages.length === 0) {
       return false;
@@ -133,6 +148,7 @@ export const Chart: React.FC<Props> = (props) => {
           data={data}
           legend
           legendEntries={parameters}
+          prettyLabels={labels}
           theme={computedColorScheme}
           filename={`line-chart-${locationId}-${parameters.join('-')}`}
         />

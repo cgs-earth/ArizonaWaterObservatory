@@ -28,6 +28,7 @@ import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { isSamePalette, isValidPalette } from '@/utils/colors';
 import { isSameArray } from '@/utils/compareArrays';
+import { getParameterUnit } from '@/utils/parameters';
 import { getTemporalExtent } from '@/utils/temporalExtent';
 
 dayjs.extend(isSameOrBefore);
@@ -85,10 +86,14 @@ const Layer: React.FC<Props> = (props) => {
       const paramObjects = Object.values(collection?.parameter_names ?? {});
 
       const data = paramObjects
-        .map((object) => ({
-          label: object.name,
-          value: object.id,
-        }))
+        .map((object) => {
+          const unit = getParameterUnit(object);
+
+          return {
+            label: `${object.name} (${unit})`,
+            value: object.id,
+          };
+        })
         .sort((a, b) => a.label.localeCompare(b.label));
       setData(data);
     }
@@ -355,6 +360,7 @@ const Layer: React.FC<Props> = (props) => {
           onChange={(event) => setName(event.currentTarget.value)}
         />
         <Color
+          collectionId={layer.datasourceId}
           parameters={parameters}
           parameterOptions={data}
           color={color}

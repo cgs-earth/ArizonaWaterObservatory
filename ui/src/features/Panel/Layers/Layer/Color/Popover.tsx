@@ -18,6 +18,7 @@ import { createColorRange, isValidPalette } from '@/utils/colors';
 import {
   ColorBrewerIndex,
   FriendlyColorBrewerPalettes,
+  getPaletteLabel,
   isValidColorBrewerIndex,
   validColorBrewerIndex,
 } from '@/utils/colors/types';
@@ -47,6 +48,8 @@ export const Popover: React.FC<Props> = (props) => {
     parameterOptions.filter((option) => parameters.includes((option as ComboboxItem).value))
   );
 
+  const [label, setLabel] = useState(paletteDefinition?.parameter ?? '');
+
   useEffect(() => {
     if (count === null || palette === null) {
       return;
@@ -69,6 +72,18 @@ export const Popover: React.FC<Props> = (props) => {
 
     setData(data);
   }, [parameterOptions, parameters]);
+
+  useEffect(() => {
+    if (!parameter || data.length === 0) {
+      return;
+    }
+
+    const option = data.find((option) => (option as ComboboxItem).value === parameter);
+
+    if (option) {
+      setLabel((option as ComboboxItem).label);
+    }
+  }, [parameter, data]);
 
   const handleSave = () => {
     if (palette !== null && count !== null && parameter !== null) {
@@ -167,12 +182,15 @@ export const Popover: React.FC<Props> = (props) => {
                 label="Palette"
                 defaultValue={Object.values(FriendlyColorBrewerPalettes)[0]}
                 value={palette}
-                data={Object.values(FriendlyColorBrewerPalettes)}
+                data={Object.values(FriendlyColorBrewerPalettes).map((palette) => ({
+                  value: palette,
+                  label: getPaletteLabel(palette),
+                }))}
                 onChange={handlePaletteChange}
               />
             </Stack>
             {parameter && colors.length > 0 ? (
-              <Gradient label={parameter} colors={colors} left="Less" right="More" />
+              <Gradient label={label} colors={colors} left="Less" right="More" />
             ) : (
               <Text size="xs">Please select parameter, count, and palette.</Text>
             )}

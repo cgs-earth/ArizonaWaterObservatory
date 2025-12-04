@@ -10,6 +10,7 @@ import styles from '@/features/Panel/Panel.module.css';
 import { useLoading } from '@/hooks/useLoading';
 import { ICollection } from '@/services/edr.service';
 import { Layer } from '@/stores/main/types';
+import { getParameterUnit } from '@/utils/parameters';
 
 type Props = {
   dataset: ICollection;
@@ -55,10 +56,14 @@ export const Content: React.FC<Props> = (props) => {
     const paramObjects = Object.values(dataset?.parameter_names ?? {});
 
     const newData = paramObjects
-      .map((object) => ({
-        label: object.name,
-        value: object.id,
-      }))
+      .map((object) => {
+        const unit = getParameterUnit(object);
+
+        return {
+          label: `${object.name} (${unit})`,
+          value: object.id,
+        };
+      })
       .sort((a, b) => a.label.localeCompare(b.label));
     setData(newData);
   }, [isFetchingCollections, dataset]);

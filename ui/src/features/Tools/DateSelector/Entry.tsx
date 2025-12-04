@@ -4,6 +4,8 @@
  */
 
 import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import { useEffect, useRef, useState } from 'react';
 import { Map } from 'mapbox-gl';
 import { ComboboxData, Loader, Text } from '@mantine/core';
@@ -16,6 +18,9 @@ import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { Layer } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type Props = {
   layer: Layer;
@@ -43,7 +48,7 @@ export const Entry: React.FC<Props> = (props) => {
 
       const data: ComboboxData = dates.map((date, index) => ({
         value: String(index),
-        label: dayjs(date).format('MM/DD/YYYY'),
+        label: dayjs(date).format('MM/DD/YYYY h:mm A'),
       }));
 
       if (isMounted.current) {
