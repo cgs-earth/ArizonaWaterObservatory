@@ -151,7 +151,8 @@ export interface IGetCorridorParams extends IDataQueryParams {
   ['height-units']: string;
 }
 
-export type IGetLocationParams = Omit<IDataQueryParams, 'z'>;
+// Note bbox is not supported by most edr implementations
+export type IGetLocationParams = Omit<IDataQueryParams, 'z'> & { bbox?: BBox };
 
 /**
  * Determines the return type based on the format.
@@ -486,9 +487,10 @@ export class EDRService extends Service {
    */
   async getLocations<T extends JSON | GeoJSON | string = GeoJSON>(
     collectionId: string,
-    options: IServiceRequestOptions<IGetLocationParams> = DEFAULT_OPTIONS
+    options: IServiceRequestOptions<IGetLocationParams> = DEFAULT_OPTIONS,
+    next?: string
   ): Promise<T> {
-    const url: string = `${this.baseUrl}/collections/${collectionId}/locations`;
+    const url: string = next ?? `${this.baseUrl}/collections/${collectionId}/locations`;
     const params = { ...options.params };
     const result: T = await request({
       url,

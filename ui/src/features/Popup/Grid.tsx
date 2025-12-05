@@ -26,7 +26,8 @@ type Props = {
 };
 
 export const Grid: React.FC<Props> = (props) => {
-  const { location, locations, feature, parameters, handleLocationChange, handleLinkClick } = props;
+  const { location, locations, feature, layer, parameters, handleLocationChange, handleLinkClick } =
+    props;
 
   const [times, setTimes] = useState<{ value: string; label: string }[]>([]);
   const [time, setTime] = useState<{ value: string; label: string }>();
@@ -47,7 +48,7 @@ export const Grid: React.FC<Props> = (props) => {
           times.every((time) => dayjs(time).isValid())
         ) {
           setTimes(
-            times.map((time) => ({ value: time, label: dayjs(time).format('MMMM D, YYYY h:mm A') }))
+            times.map((time) => ({ value: time, label: dayjs(time).format('MM/DD/YYYY h:mm A') }))
           );
         }
       } else if (typeof feature.properties === 'string') {
@@ -63,7 +64,7 @@ export const Grid: React.FC<Props> = (props) => {
           times.every((time) => dayjs(time).isValid())
         ) {
           setTimes(
-            times.map((time) => ({ value: time, label: dayjs(time).format('MMMM D, YYYY h:mm A') }))
+            times.map((time) => ({ value: time, label: dayjs(time).format('MM/DD/YYYY h:mm A') }))
           );
         }
       }
@@ -75,7 +76,9 @@ export const Grid: React.FC<Props> = (props) => {
       return;
     }
 
-    setTime(times[0]);
+    const index = layer.paletteDefinition?.index ?? 0;
+
+    setTime(times[index]);
   }, [times]);
 
   useEffect(() => {
@@ -97,6 +100,14 @@ export const Grid: React.FC<Props> = (props) => {
       setDisplayValues(displayValues);
     }
   }, [time]);
+
+  useEffect(() => {
+    if (!layer.paletteDefinition) {
+      return;
+    }
+
+    setTime(times[layer.paletteDefinition.index]);
+  }, [layer.paletteDefinition]);
 
   return (
     <>

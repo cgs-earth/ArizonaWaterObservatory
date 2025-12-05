@@ -18,6 +18,8 @@ export enum CollectionId {
 
   ArizonaWaterWells = 'ArizonaWaterWells',
   AWDB = 'awdb-forecasts-edr',
+
+  NOAARFC = 'noaa-rfc',
 }
 
 export enum Provider {
@@ -25,6 +27,7 @@ export enum Provider {
   USDA = 'usda',
   USGS = 'usgs',
   USACE = 'usace',
+  NOAA = 'noaa',
 }
 
 export const ProviderDatasources: Record<Provider, string[]> = {
@@ -32,6 +35,7 @@ export const ProviderDatasources: Record<Provider, string[]> = {
   [Provider.USDA]: [CollectionId.SNOTELEdr],
   [Provider.USGS]: [CollectionId.Streamgages],
   [Provider.USACE]: [CollectionId.USACEEdr],
+  [Provider.NOAA]: [],
 };
 
 export const idStoreProperty = 'id_store';
@@ -43,7 +47,11 @@ export const StringIdentifierCollections: string[] = [
   CollectionId.NWMLakeOutput,
   CollectionId.Streamgages,
   CollectionId.SNOTELEdr,
+  CollectionId.NOAARFC,
 ];
+
+// These collections have a locations edge but doesnt support bbox
+export const ItemsOnlyCollections: string[] = [CollectionId.AWDB];
 
 // Some collections support locations but the data size is too large to reasonably render
 export const DatasourceCollectionType: Record<CollectionType, string[]> = {

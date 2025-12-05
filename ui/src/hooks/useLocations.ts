@@ -28,7 +28,7 @@ export const useLocations = (layer: Layer) => {
       return (location: Location, feature: Feature) => location.id === getIdStore(feature);
     }
 
-    return (location: Location, feature: Feature) => location.id === feature.id;
+    return (location: Location, feature: Feature) => location.id === String(feature.id);
   };
 
   // Get all non-selected locations, rendered or not on map

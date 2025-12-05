@@ -3,6 +3,69 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.filterBodyControl,
+.actionIcon {
+  stroke: var(--asu-gray-1);
+  fill: var(--asu-gray-1);
+}
+
+.filterBodyControl {
+  width: 36px;
+  height: 36px;
+  transition: transform var(--accordion-transition-duration, 200ms) ease;
+}
+
+.filterBodyControl > svg,
+.actionIcon > svg {
+  width: 100%;
+  height: auto;
+}
+
+.actionIcon:hover:not(:disabled),
+.actionIcon:focus:not(:disabled),
+.actionIcon:active:not(:disabled) {
+  stroke: var(--asu-gray-2);
+  fill: var(--asu-gray-2);
+}
+
+.clearSection {
+  width: 24px;
+}
+
+.filterBodyControlButton {
+  width: 100%;
+  padding: var(--default-spacing);
+}
+
+.filterBodyControlButton:hover:not(:disabled),
+.filterBodyControlButton:focus:not(:disabled),
+.filterBodyControlButton:active:not(:disabled) {
+  background: var(--mantine-color-default-hover);
+}
+
+.filterBodyControlButton:disabled {
+  cursor: unset;
+  color: var(--mantine-color-dimmed);
+}
+
+.filterBodyControlButton:disabled .filterBodyControl > svg {
+  stroke: var(--mantine-color-dimmed);
+  fill: var(--mantine-color-dimmed);
+}
+
+.filterWrapper {
+  width: 100%;
+  border-left: 0.5rem solid var(--asu-color-tertiary);
+}
+
+.filterTextWrapper {
+  width: 100%;
+}
+
+.filterTextWrapper > *:first-child {
+  width: 86%;
+}
+
 .filterTitleWrapper > svg {
   width: 16px;
   height: auto;
@@ -12,9 +75,12 @@
   padding: calc(var(--default-spacing) * 2);
 }
 
-.filterBody {
-  padding: calc(var(--default-spacing) * 2);
+.filterBodyWrapper {
   border-bottom: 0.5rem solid var(--asu-color-tertiary);
+}
+
+.filterBody {
+  padding: calc(var(--default-spacing));
 }
 
 .filterModalButton {
@@ -30,4 +96,12 @@
 
 .filterSelect {
   min-width: 265px;
+}
+
+.rotate180 {
+  transform: rotate(180deg);
+}
+
+.searchInput {
+  font-size: 0.94rem;
 }

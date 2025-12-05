@@ -3,15 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FeatureCollection, Geometry } from 'geojson';
+import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 
 export const DEFAULT_GEOJSON: FeatureCollection = {
   type: 'FeatureCollection',
   features: [],
 };
 
-export const getDefaultGeoJSON = <T extends Geometry>() => {
-  const DEFAULT_GEOJSON: FeatureCollection<T> = {
+export const getDefaultGeoJSON = <
+  T extends Geometry = Geometry,
+  V extends GeoJsonProperties = GeoJsonProperties,
+>() => {
+  const DEFAULT_GEOJSON: FeatureCollection<T, V> = {
     type: 'FeatureCollection',
     features: [],
   };

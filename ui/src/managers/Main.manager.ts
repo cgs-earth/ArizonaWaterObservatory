@@ -6,7 +6,16 @@
 import dayjs from 'dayjs';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
-import { BBox, Feature, FeatureCollection, Geometry, MultiPolygon, Point, Polygon } from 'geojson';
+import {
+  BBox,
+  Feature,
+  FeatureCollection,
+  GeoJsonProperties,
+  Geometry,
+  MultiPolygon,
+  Point,
+  Polygon,
+} from 'geojson';
 import {
   GeoJSONFeature,
   GeoJSONSource,
@@ -20,6 +29,7 @@ import { StoreApi, UseBoundStore } from 'zustand';
 import {
   CollectionRestrictions,
   idStoreProperty,
+  ItemsOnlyCollections,
   RestrictionType,
   StringIdentifierCollections,
 } from '@/consts/collections';
@@ -31,12 +41,14 @@ import {
   drawLayers,
 } from '@/features/Map/consts';
 import { getNextLink } from '@/managers/Main.utils';
+import notificationManager from '@/managers/Notification.init';
 import {
   Config,
   ExtendedFeatureCollection,
   GetConfigResponse,
   PostConfigResponse,
   SourceOptions,
+  StyleOptions,
 } from '@/managers/types';
 import { CoverageGridService } from '@/services/coverageGrid.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
@@ -46,9 +58,13 @@ import {
   Layer,
   Location,
   MainState,
+  PaletteDefinition,
   ParameterGroupMembers,
 } from '@/stores/main/types';
+import { NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
+import { createDynamicStepExpression, isSamePalette } from '@/utils/colors';
+import { isValidColorBrewerIndex } from '@/utils/colors/types';
 import { isSameArray } from '@/utils/compareArrays';
 import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
@@ -60,6 +76,7 @@ import {
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
 import { getTemporalExtent } from '@/utils/temporalExtent';
+import { getDatetime } from '@/utils/url';
 
 /**
  * MainManager is responsible for managing the core logic of the application. It handles functionality
@@ -330,11 +347,21 @@ class MainManager {
     this.map.setBearing(config.bearing);
     this.map.setPitch(config.pitch);
 
+    const dataFetches = [];
+
     await this.applySpatialFilter(config.drawnShapes);
     for (const layer of config.layers) {
       const sourceId = this.getSourceId(layer.datasourceId, layer.id);
+      this.addSource(layer.datasourceId, layer.id);
       this.addLayer(layer, sourceId);
+      dataFetches.push(
+        this.addData(layer.datasourceId, layer, {
+          filterFeatures: config.drawnShapes,
+        })
+      );
     }
+
+    await Promise.all(dataFetches);
 
     // Set locations after loading layer to reflect selected state in map
     this.store.getState().setLocations(config.locations);
@@ -384,7 +411,10 @@ class MainManager {
     return this.store.getState().hasLocation(locationId);
   }
 
-  private async fetchData(
+  private async fetchData<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
     collectionId: ICollection['id'],
     bbox?: BBox,
     from?: string | null,
@@ -392,7 +422,7 @@ class MainManager {
     parameterNames?: string[],
     signal?: AbortSignal,
     next?: string
-  ): Promise<FeatureCollection> {
+  ): Promise<FeatureCollection<T, V>> {
     const collection = this.getDatasource(collectionId);
 
     if (!collection) {
@@ -403,13 +433,33 @@ class MainManager {
 
     switch (collectionType) {
       case CollectionType.EDR:
+        if (ItemsOnlyCollections.includes(collectionId)) {
+          return await this.fetchItems(collectionId, parameterNames, bbox, signal, next);
+        }
+        return await this.fetchLocations(
+          collectionId,
+          parameterNames,
+          bbox,
+          from,
+          to,
+          signal,
+          next
+        );
       case CollectionType.Features:
         return await this.fetchItems(collectionId, parameterNames, bbox, signal, next);
       case CollectionType.EDRGrid:
         if (!bbox) {
           throw new Error('No BBox provided for Grid layer');
         }
-        return await this.fetchGrid(collectionId, bbox, from, to, parameterNames, signal);
+        // TODO: improve typing here
+        return (await this.fetchGrid(
+          collectionId,
+          bbox,
+          from,
+          to,
+          parameterNames,
+          signal
+        )) as FeatureCollection<T, V>;
     }
 
     throw new Error('Unsupported collection type');
@@ -419,36 +469,64 @@ class MainManager {
    *
    * @function
    */
-  private async fetchLocations(
+  private async fetchLocations<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
     collectionId: ICollection['id'],
     parameterNames?: string[],
-    signal?: AbortSignal
-  ): Promise<FeatureCollection> {
-    return await awoService.getLocations<FeatureCollection>(collectionId, {
-      signal,
-      params: {
-        limit: 500,
-        ...(parameterNames && parameterNames.length > 0
-          ? { 'parameter-name': parameterNames.join(',') }
-          : {}),
+    bbox?: BBox,
+    from?: string | null,
+    to?: string | null,
+    signal?: AbortSignal,
+    next?: string
+  ): Promise<FeatureCollection<T, V>> {
+    const datetime = getDatetime(from, to);
+
+    const data = await awoService.getLocations<FeatureCollection<T, V>>(
+      collectionId,
+      {
+        signal,
+        params: {
+          limit: 2000,
+          bbox,
+          ...(parameterNames && parameterNames.length > 0
+            ? { 'parameter-name': parameterNames.join(',') }
+            : {}),
+          ...(datetime && {
+            datetime,
+          }),
+        },
       },
-    });
+      next
+    );
+
+    if (!data) {
+      return getDefaultGeoJSON<T, V>();
+    }
+
+    if (StringIdentifierCollections.includes(collectionId)) {
+      return this.storeIdentifiers(data);
+    }
+
+    return data;
   }
 
   /**
    *
    * @function
    */
-  private storeIdentifiers(
-    featureCollection: ExtendedFeatureCollection
-  ): ExtendedFeatureCollection {
+  private storeIdentifiers<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(featureCollection: ExtendedFeatureCollection<T, V>): ExtendedFeatureCollection<T, V> {
     return {
       ...featureCollection,
       features: featureCollection.features.map((feature) => ({
         ...feature,
         properties: {
           ...feature.properties,
-          [idStoreProperty]: feature.id,
+          [idStoreProperty]: String(feature.id),
         },
       })),
     };
@@ -458,14 +536,17 @@ class MainManager {
    *
    * @function
    */
-  private async fetchItems(
+  private async fetchItems<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
     collectionId: ICollection['id'],
     parameterNames?: string[],
     bbox?: BBox,
     signal?: AbortSignal,
     next?: string
-  ): Promise<ExtendedFeatureCollection> {
-    const data = await awoService.getItems<ExtendedFeatureCollection>(
+  ): Promise<ExtendedFeatureCollection<T, V>> {
+    const data = await awoService.getItems<ExtendedFeatureCollection<T, V>>(
       collectionId,
       {
         signal,
@@ -481,11 +562,11 @@ class MainManager {
     );
 
     if (!data) {
-      return getDefaultGeoJSON();
+      return getDefaultGeoJSON<T, V>();
     }
 
     if (StringIdentifierCollections.includes(collectionId)) {
-      return this.storeIdentifiers(data);
+      return this.storeIdentifiers<T, V>(data);
     }
 
     return data;
@@ -565,7 +646,11 @@ class MainManager {
       : to.subtract(1, 'week');
   }
 
-  public async createLayer(datasourceId: ICollection['id'], signal?: AbortSignal) {
+  public async createLayer(
+    datasourceId: ICollection['id'],
+    parameters: Layer['parameters'],
+    signal?: AbortSignal
+  ) {
     const datasource = this.getDatasource(datasourceId);
 
     if (!datasource) {
@@ -598,7 +683,7 @@ class MainManager {
       datasourceId: datasource.id,
       name,
       color: this.createHexColor(),
-      parameters: [],
+      parameters,
       from: from.format('YYYY-MM-DD'),
       to: to.format('YYYY-MM-DD'),
       visible: true,
@@ -606,6 +691,7 @@ class MainManager {
       opacity:
         collectionType === CollectionType.Map ? DEFAULT_RASTER_OPACITY : DEFAULT_FILL_OPACITY,
       position: layers.length + 1,
+      paletteDefinition: null,
     };
 
     this.store.getState().addLayer(layer);
@@ -618,15 +704,71 @@ class MainManager {
     await this.addData(datasource.id, layer, {
       filterFeatures: drawnShapes,
       signal,
-      noFetch: collectionType === CollectionType.EDRGrid,
+      noFetch: collectionType === CollectionType.EDRGrid && layer.parameters.length === 0,
     });
 
     this.reorderLayers();
   }
 
+  public async styleLayer(
+    layer: Layer,
+    paletteDefinition: PaletteDefinition,
+    {
+      features,
+      signal,
+      updateStore = true,
+    }: StyleOptions<{ [paletteDefinition.parameter]: number }>
+  ) {
+    if (!this.map) {
+      return;
+    }
+
+    const defaultedfeatures =
+      features ??
+      (await this.getFeatures<Geometry, { [paletteDefinition.parameter]: number }>(layer, signal))
+        .features;
+
+    const { parameter, count, palette, index } = paletteDefinition;
+    const expression = createDynamicStepExpression(
+      defaultedfeatures,
+      parameter,
+      palette,
+      count,
+      index
+    );
+
+    if (updateStore) {
+      this.store.getState().updateLayer({
+        ...layer,
+        color: expression,
+        paletteDefinition,
+      });
+    }
+
+    const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
+      layer.datasourceId,
+      layer.id
+    );
+
+    if (this.map.getLayer(pointLayerId)) {
+      this.map.setPaintProperty(pointLayerId, 'circle-color', expression);
+    }
+    if (this.map.getLayer(fillLayerId)) {
+      this.map.setPaintProperty(fillLayerId, 'fill-color', expression);
+    }
+    if (this.map.getLayer(lineLayerId)) {
+      this.map.setPaintProperty(lineLayerId, 'line-color', expression);
+    }
+
+    return expression;
+  }
+
   public deleteLayer(layer: Layer) {
     const charts = this.store.getState().charts.filter((chart) => chart.layer !== layer.id);
     let layers = this.store.getState().layers.filter((_layer) => _layer.id !== layer.id);
+    const locations = this.store
+      .getState()
+      .locations.filter((location) => location.layerId !== layer.id);
 
     layers = layers
       .sort((a, b) => a.position - b.position)
@@ -643,6 +785,7 @@ class MainManager {
 
     this.store.getState().setCharts(charts);
     this.store.getState().setLayers(layers);
+    this.store.getState().setLocations(locations);
   }
 
   public reorderLayers() {
@@ -704,10 +847,13 @@ class MainManager {
     return `${collectionId}-filter`;
   }
 
-  private filterByGeometryType(
-    featureCollection: FeatureCollection<Geometry>,
+  private filterByGeometryType<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
+    featureCollection: FeatureCollection<T, V>,
     filterFeatures: Feature<Polygon | MultiPolygon>[] = []
-  ): FeatureCollection<Geometry> {
+  ): FeatureCollection<T, V> {
     return {
       type: 'FeatureCollection',
       features: featureCollection.features.filter((feature) => {
@@ -759,15 +905,45 @@ class MainManager {
     }
   };
 
-  private filterLocations(
-    featureCollection: FeatureCollection<Geometry>,
+  private filterLocations<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(
+    featureCollection: FeatureCollection<T, V>,
     filterFeatures: Feature<Polygon | MultiPolygon>[] = []
-  ): FeatureCollection<Geometry> {
+  ): FeatureCollection<T, V> {
     if (filterFeatures.length > 0) {
       return this.filterByGeometryType(featureCollection, filterFeatures);
     }
 
     return featureCollection;
+  }
+
+  private checkParameterRestrictions(
+    collectionId: ICollection['id'],
+    parameters: Layer['parameters']
+  ) {
+    const restrictions = CollectionRestrictions[collectionId];
+    if (restrictions && restrictions.length > 0) {
+      const parameterRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.Parameter
+      );
+
+      if (parameterRestriction) {
+        const datasource = this.getDatasource(collectionId);
+        const hasNoParameters = parameters.length === 0;
+
+        if (hasNoParameters || parameters.length > parameterRestriction.count) {
+          let message = `Dataset: ${datasource?.title}, requires at least one and up to ${parameterRestriction.count} parameter${parameters.length - parameterRestriction.count > 1 ? 's' : ''} to be fetched at one time.`;
+          if (hasNoParameters) {
+            message += ' Please select at least one parameter.';
+          } else {
+            message += ` Please remove ${parameters.length - parameterRestriction.count} parameter${parameters.length - parameterRestriction.count > 1 ? 's' : ''}`;
+          }
+          throw new Error(message);
+        }
+      }
+    }
   }
 
   private checkDateRestrictions(
@@ -928,8 +1104,11 @@ class MainManager {
     const bbox = this.getBBox(collectionId);
     const from = options?.from ?? layer.from;
     const to = options?.to ?? layer.to;
+    const parameters = options?.parameterNames ?? layer.parameters;
 
     this.checkDateRestrictions(collectionId, from, to);
+
+    this.checkParameterRestrictions(collectionId, parameters);
 
     let aggregate = getDefaultGeoJSON();
     let next: string | undefined;
@@ -944,7 +1123,7 @@ class MainManager {
         bbox,
         from,
         to,
-        options?.parameterNames ?? layer.parameters,
+        parameters,
         options?.signal,
         next
       );
@@ -959,6 +1138,14 @@ class MainManager {
       (filtered as any) = undefined;
       next = getNextLink(page);
     } while (next);
+
+    if (layer.paletteDefinition) {
+      const features = aggregate.features as Feature<
+        Geometry,
+        { [layer.paletteDefinition.parameter]: number }
+      >[];
+      this.styleLayer(layer, layer.paletteDefinition, { features, signal: options?.signal });
+    }
 
     (aggregate as any) = undefined;
 
@@ -1078,6 +1265,7 @@ class MainManager {
       if (features.length > 0) {
         // Hack, use the feature id to track this location, fetch id store in consuming features
         const uniqueFeatures = this.getUniqueIds(features, collectionId);
+
         uniqueFeatures.forEach((locationId) => {
           if (this.hasLocation(locationId)) {
             this.store.getState().removeLocation({
@@ -1190,7 +1378,10 @@ class MainManager {
    *
    * @function
    */
-  public async getFeatures(layer: Layer, signal: AbortSignal): Promise<FeatureCollection> {
+  public async getFeatures<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(layer: Layer, signal?: AbortSignal): Promise<FeatureCollection<T, V>> {
     try {
       const sourceId = this.getSourceId(layer.datasourceId, layer.id);
 
@@ -1198,8 +1389,8 @@ class MainManager {
 
       const data = source._data;
       if (typeof data !== 'string') {
-        const featureCollection = turf.featureCollection(
-          (data as FeatureCollection).features as Feature[]
+        const featureCollection = turf.featureCollection<T, V>(
+          (data as FeatureCollection<T, V>).features as Feature<T, V>[]
         );
 
         return featureCollection;
@@ -1210,7 +1401,7 @@ class MainManager {
 
     const bbox = this.getBBox(layer.datasourceId);
 
-    const data = await this.fetchData(
+    const data = await this.fetchData<T, V>(
       layer.datasourceId,
       bbox,
       layer.from,
@@ -1251,7 +1442,8 @@ class MainManager {
     from: Layer['from'],
     to: Layer['to'],
     visible: Layer['visible'],
-    opacity: Layer['opacity']
+    opacity: Layer['opacity'],
+    paletteDefinition: Layer['paletteDefinition']
   ): Promise<void> {
     const layerIds = this.getLocationsLayerIds(layer.datasourceId, layer.id);
 
@@ -1283,23 +1475,27 @@ class MainManager {
     if (opacity !== layer.opacity) {
       if (this.map) {
         const { fillLayerId, rasterLayerId } = layerIds;
-        // TODO: readd if meaningful
-        // if (this.map.getLayer(pointLayerId)) {
-        //   this.map.setPaintProperty(pointLayerId, 'circle-opacity', opacity);
-        // }
         if (this.map.getLayer(fillLayerId)) {
           this.map.setPaintProperty(fillLayerId, 'fill-opacity', opacity);
         }
-        // if (this.map.getLayer(lineLayerId)) {
-        //   this.map.setPaintProperty(lineLayerId, 'line-opacity', opacity);
-        // }
+
         if (this.map.getLayer(rasterLayerId)) {
           this.map.setPaintProperty(rasterLayerId, 'raster-opacity', opacity);
         }
       }
     }
 
-    if (!isSameArray(layer.parameters, parameters)) {
+    const datasource = this.getDatasource(layer.datasourceId);
+
+    const parametersChanged = !isSameArray(layer.parameters, parameters);
+    const temporalRangeChanged =
+      datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to);
+    const paletteChanged = !isSamePalette(paletteDefinition, layer.paletteDefinition);
+
+    // If the parameters have changed, or this is a grid layer and the temporal range has updated
+    // grid layers are the only instance where temporal filtering applies, requiring a new fetch
+    let _color = color;
+    if (parametersChanged || temporalRangeChanged) {
       const drawnShapes = this.store.getState().drawnShapes;
       await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
@@ -1309,27 +1505,40 @@ class MainManager {
       });
     }
 
-    const datasource = this.getDatasource(layer.datasourceId);
-    const drawnShapes = this.store.getState().drawnShapes;
+    let correctedPaletteDefinition = paletteDefinition;
+    if (paletteChanged && paletteDefinition) {
+      const expression = await this.styleLayer(layer, paletteDefinition, { updateStore: false });
+      if (expression) {
+        _color = expression;
 
-    if (datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to)) {
-      await this.addData(layer.datasourceId, layer, {
-        parameterNames: parameters,
-        filterFeatures: drawnShapes,
-        from,
-        to,
-      });
+        if (expression.length !== paletteDefinition.count * 2 + 3) {
+          const count = (expression.length - 3) / 2;
+
+          if (isValidColorBrewerIndex(count)) {
+            correctedPaletteDefinition = {
+              ...paletteDefinition,
+              count,
+            };
+            notificationManager.show(
+              `Duplicate thresholds detected. Reducing to ${count} threshold(s)`,
+              NotificationType.Info,
+              5000
+            );
+          }
+        }
+      }
     }
 
     this.store.getState().updateLayer({
       ...layer,
       name,
-      color,
+      color: _color,
       parameters,
       from,
       to,
       visible,
       opacity,
+      paletteDefinition: correctedPaletteDefinition,
     });
   }
 

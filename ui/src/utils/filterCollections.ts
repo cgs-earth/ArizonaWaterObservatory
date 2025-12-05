@@ -9,11 +9,29 @@ import { getProvider } from '@/utils/provider';
 
 export const filterCollections = (
   collections: MainState['collections'],
+  search: MainState['search'],
   provider: MainState['provider'],
   category: MainState['category'],
   parameterGroupMembers: MainState['parameterGroupMembers']
 ) => {
   const filterFunctions: Array<(collection: ICollection) => boolean> = [];
+  if (search) {
+    const lower = search.toLowerCase();
+
+    // Does collection match the search term on the collection title, parameters or unit?
+    const filterFunction = (collection: ICollection) => {
+      const parameters = Object.values(collection.parameter_names ?? {});
+      return (
+        (collection.title ?? '').toLowerCase().includes(lower) ||
+        parameters.some(
+          (parameter) =>
+            parameter.name.toLowerCase().includes(lower) ||
+            (parameter.unit?.symbol?.value ?? '').toLowerCase().includes(lower)
+        )
+      );
+    };
+    filterFunctions.push(filterFunction);
+  }
   if (category) {
     const categoryMembers = parameterGroupMembers[category.value];
     filterFunctions.push((collection) => categoryMembers.includes(collection.id));

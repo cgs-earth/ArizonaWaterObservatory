@@ -4,8 +4,8 @@
  */
 
 import { Box, Grid, Group, Paper, Text } from '@mantine/core';
+import { contacts } from '@/features/TopBar/Info/consts';
 import styles from '@/features/TopBar/TopBar.module.css';
-import { contacts } from './consts';
 
 export const Contact: React.FC = () => {
   return (

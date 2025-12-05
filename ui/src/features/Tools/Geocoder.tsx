@@ -8,6 +8,9 @@ import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
 import styles from '@/features/Tools/Tools.module.css';
 
+// IMPORTANT NOTE: geocoder can only support one mounted instance
+// if changing screen size between mobile and desktop, the geocoder mounted
+// second will not function
 export const Geocoder: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -23,6 +26,7 @@ export const Geocoder: React.FC = () => {
 
     return () => {
       if (ref.current) {
+        ref.current.innerHTML = '';
         ref.current = null;
       }
     };

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Group, Stack, Title } from '@mantine/core';
 import Button from '@/components/Button';
 import ModalComponent from '@/components/Modal';
@@ -40,6 +40,15 @@ const Modal: React.FC<Props> = (props) => {
     setLocalCategory(category);
     onClose();
   };
+
+  // Provider has been changed outside of this modal, reflect the latest
+  useEffect(() => {
+    setLocalProvider(provider);
+  }, [provider]);
+
+  useEffect(() => {
+    setLocalCategory(category);
+  }, [category]);
 
   return (
     <ModalComponent size="auto" opened={open} onClose={onClose}>

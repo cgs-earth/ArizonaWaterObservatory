@@ -16,6 +16,8 @@ import { MainState } from '@/stores/main/types';
 
 const useMainStore = create<MainState>()(
   immer((set, get, store) => ({
+    search: null,
+    setSearch: (search) => set({ search, configGenerated: false }),
     provider: null,
     setProvider: (provider) => set({ provider, configGenerated: false }),
     category: null,

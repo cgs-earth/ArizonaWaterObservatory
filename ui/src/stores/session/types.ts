@@ -38,6 +38,7 @@ export enum Overlay {
   Info = 'info',
   Warning = 'warning',
   Download = 'download',
+  Date = 'date',
 }
 
 export type Notification = {
