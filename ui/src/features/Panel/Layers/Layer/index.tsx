@@ -18,6 +18,7 @@ import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import Color from '@/features/Panel/Layers/Layer/Color';
+import { DetailedGradient } from '@/features/Panel/Layers/Layer/Color/DetailedGradient';
 import styles from '@/features/Panel/Panel.module.css';
 import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { useLoading } from '@/hooks/useLoading';
@@ -31,7 +32,6 @@ import { isSamePalette, isValidPalette } from '@/utils/colors';
 import { isSameArray } from '@/utils/compareArrays';
 import { getParameterUnit } from '@/utils/parameters';
 import { getTemporalExtent } from '@/utils/temporalExtent';
-import { DetailedGradient } from './Color/DetailedGradient';
 
 dayjs.extend(isSameOrBefore);
 
