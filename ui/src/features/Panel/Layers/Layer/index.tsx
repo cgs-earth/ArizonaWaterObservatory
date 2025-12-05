@@ -174,6 +174,7 @@ const Layer: React.FC<Props> = (props) => {
     setFrom(layer.from);
     setTo(layer.to);
     setOpacity(layer.opacity);
+    setPaletteDefinition(layer.paletteDefinition);
   };
 
   const handleDelete = () => {
@@ -346,6 +347,7 @@ const Layer: React.FC<Props> = (props) => {
 
   const handleColorChange = (color: LayerType['color']) => {
     setColor(color);
+    setPaletteDefinition(null);
   };
 
   const handlePaletteDefinitionChange = (paletteDefinition: LayerType['paletteDefinition']) => {
@@ -377,7 +379,8 @@ const Layer: React.FC<Props> = (props) => {
       </Group>
       {layer.paletteDefinition &&
         isValidPalette(layer.paletteDefinition) &&
-        typeof layer.color !== 'string' && (
+        typeof layer.color !== 'string' &&
+        typeof color !== 'string' && (
           <DetailedGradient
             collectionId={layer.datasourceId}
             color={layer.color as ExpressionSpecification}

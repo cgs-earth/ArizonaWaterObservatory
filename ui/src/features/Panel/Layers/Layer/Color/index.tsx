@@ -38,7 +38,7 @@ const Color: React.FC<Props> = (props) => {
         size="xs"
         label="Symbol Color"
         w={showPalette ? 'calc(50% - (var(--default-spacing) * 2))' : '100%'}
-        value={typeof color === 'string' ? color : ''}
+        value={typeof color === 'string' && !paletteDefinition ? color : ''}
         onChange={(value) => handleColorChange(value as ColorType)}
       />
       {collectionType === CollectionType.EDRGrid && parameterOptions && (

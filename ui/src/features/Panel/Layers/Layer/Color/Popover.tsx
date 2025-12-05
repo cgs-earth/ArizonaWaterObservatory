@@ -85,6 +85,12 @@ export const Popover: React.FC<Props> = (props) => {
     }
   }, [parameter, data]);
 
+  useEffect(() => {
+    setPalette(paletteDefinition?.palette ?? null);
+    setParameter(paletteDefinition?.parameter ?? null);
+    setCount(paletteDefinition?.count ?? null);
+  }, [paletteDefinition]);
+
   const handleSave = () => {
     if (palette !== null && count !== null && parameter !== null) {
       handleChange({ palette, count, parameter, index: 0 });
