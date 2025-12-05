@@ -6,6 +6,7 @@
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useEffect, useState } from 'react';
+import { ExpressionSpecification } from 'mapbox-gl';
 import { ComboboxData, Divider, Group, Stack, Text, Tooltip } from '@mantine/core';
 import Delete from '@/assets/Delete';
 import Button from '@/components/Button';
@@ -30,6 +31,7 @@ import { isSamePalette, isValidPalette } from '@/utils/colors';
 import { isSameArray } from '@/utils/compareArrays';
 import { getParameterUnit } from '@/utils/parameters';
 import { getTemporalExtent } from '@/utils/temporalExtent';
+import { DetailedGradient } from './Color/DetailedGradient';
 
 dayjs.extend(isSameOrBefore);
 
@@ -364,7 +366,6 @@ const Layer: React.FC<Props> = (props) => {
           onChange={(event) => setName(event.currentTarget.value)}
         />
         <Color
-          collectionId={layer.datasourceId}
           parameters={parameters}
           parameterOptions={data}
           color={color}
@@ -374,6 +375,15 @@ const Layer: React.FC<Props> = (props) => {
           collectionType={collectionType}
         />
       </Group>
+      {layer.paletteDefinition &&
+        isValidPalette(layer.paletteDefinition) &&
+        typeof layer.color !== 'string' && (
+          <DetailedGradient
+            collectionId={layer.datasourceId}
+            color={layer.color as ExpressionSpecification}
+            paletteDefinition={layer.paletteDefinition}
+          />
+        )}
       {showFeaturesMessage && (
         <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">
           This is a features layer which contains no parameter values. Rendered data is a standard

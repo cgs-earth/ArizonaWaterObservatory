@@ -3,17 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExpressionSpecification } from 'mapbox-gl';
 import { ComboboxData, Group } from '@mantine/core';
 import ColorInput from '@/components/ColorInput';
-import { DetailedGradient } from '@/features/Panel/Layers/Layer/Color/DetailedGradient';
 import { Popover } from '@/features/Panel/Layers/Layer/Color/Popover';
 import { Color as ColorType, Layer } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
-import { isValidPalette } from '@/utils/colors';
 
 type Props = {
-  collectionId: Layer['datasourceId'];
   parameters: string[];
   parameterOptions: ComboboxData | undefined;
   paletteDefinition: Layer['paletteDefinition'];
@@ -25,7 +21,6 @@ type Props = {
 
 const Color: React.FC<Props> = (props) => {
   const {
-    collectionId,
     parameters,
     parameterOptions,
     paletteDefinition,
@@ -43,7 +38,7 @@ const Color: React.FC<Props> = (props) => {
         size="xs"
         label="Symbol Color"
         w={showPalette ? 'calc(50% - (var(--default-spacing) * 2))' : '100%'}
-        value={typeof color === 'string' ? color : undefined}
+        value={typeof color === 'string' ? color : ''}
         onChange={(value) => handleColorChange(value as ColorType)}
       />
       {collectionType === CollectionType.EDRGrid && parameterOptions && (
@@ -52,13 +47,6 @@ const Color: React.FC<Props> = (props) => {
           parameterOptions={parameterOptions}
           paletteDefinition={paletteDefinition}
           handleChange={handlePaletteDefinitionChange}
-        />
-      )}
-      {paletteDefinition && isValidPalette(paletteDefinition) && typeof color !== 'string' && (
-        <DetailedGradient
-          collectionId={collectionId}
-          color={color as ExpressionSpecification}
-          paletteDefinition={paletteDefinition}
         />
       )}
     </Group>
