@@ -14,7 +14,7 @@ import { Variant } from '@/components/types';
 import { Gradient } from '@/features/Panel/Layers/Layer/Color/Gradient';
 import styles from '@/features/Panel/Panel.module.css';
 import { Layer } from '@/stores/main/types';
-import { createColorRange, isValidPalette } from '@/utils/colors';
+import { createColorRange, isSamePalette, isValidPalette } from '@/utils/colors';
 import {
   ColorBrewerIndex,
   FriendlyColorBrewerPalettes,
@@ -84,6 +84,12 @@ export const Popover: React.FC<Props> = (props) => {
       setLabel((option as ComboboxItem).label);
     }
   }, [parameter, data]);
+
+  useEffect(() => {
+    setPalette(paletteDefinition?.palette ?? null);
+    setParameter(paletteDefinition?.parameter ?? null);
+    setCount(paletteDefinition?.count ?? null);
+  }, [paletteDefinition]);
 
   const handleSave = () => {
     if (palette !== null && count !== null && parameter !== null) {
@@ -164,6 +170,7 @@ export const Popover: React.FC<Props> = (props) => {
               <Select
                 size="xs"
                 label="Groups"
+                placeholder="Select the number of threshholds"
                 defaultValue={String(validColorBrewerIndex[0])}
                 value={String(count)}
                 data={validColorBrewerIndex.map((index) => String(index))}
@@ -172,6 +179,7 @@ export const Popover: React.FC<Props> = (props) => {
               <Select
                 size="xs"
                 label="Parameters"
+                placeholder="Select the parameter to visualize"
                 defaultValue={data.length > 0 ? (data[0] as ComboboxItem)?.value : undefined}
                 value={parameter}
                 data={data}
@@ -180,6 +188,7 @@ export const Popover: React.FC<Props> = (props) => {
               <Select
                 size="xs"
                 label="Palette"
+                placeholder="Select the color palette to apply"
                 defaultValue={Object.values(FriendlyColorBrewerPalettes)[0]}
                 value={palette}
                 data={Object.values(FriendlyColorBrewerPalettes).map((palette) => ({
@@ -213,6 +222,18 @@ export const Popover: React.FC<Props> = (props) => {
               </Button>
             </Tooltip>
           </Group>
+          {count &&
+            parameter &&
+            palette &&
+            isValidPalette({ count, parameter, palette, index: 1 }) &&
+            !isSamePalette(
+              { count, parameter, palette, index: paletteDefinition?.index || 0 },
+              paletteDefinition
+            ) && (
+              <Text size="xs" c="red">
+                Unsaved changes!
+              </Text>
+            )}
         </Stack>
       }
     />

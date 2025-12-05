@@ -6,6 +6,7 @@
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useEffect, useState } from 'react';
+import { ExpressionSpecification } from 'mapbox-gl';
 import { ComboboxData, Divider, Group, Stack, Text, Tooltip } from '@mantine/core';
 import Delete from '@/assets/Delete';
 import Button from '@/components/Button';
@@ -17,6 +18,7 @@ import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import Color from '@/features/Panel/Layers/Layer/Color';
+import { DetailedGradient } from '@/features/Panel/Layers/Layer/Color/DetailedGradient';
 import styles from '@/features/Panel/Panel.module.css';
 import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { useLoading } from '@/hooks/useLoading';
@@ -130,6 +132,10 @@ const Layer: React.FC<Props> = (props) => {
     setOpacity(layer.opacity);
   }, [layer.opacity]);
 
+  useEffect(() => {
+    setPaletteDefinition(layer.paletteDefinition);
+  }, [layer.paletteDefinition]);
+
   const handleSave = async () => {
     setIsLoading(true);
     const updateName = name !== layer.name ? `${layer.name} -> ${name}` : layer.name;
@@ -168,6 +174,7 @@ const Layer: React.FC<Props> = (props) => {
     setFrom(layer.from);
     setTo(layer.to);
     setOpacity(layer.opacity);
+    setPaletteDefinition(layer.paletteDefinition);
   };
 
   const handleDelete = () => {
@@ -340,6 +347,7 @@ const Layer: React.FC<Props> = (props) => {
 
   const handleColorChange = (color: LayerType['color']) => {
     setColor(color);
+    setPaletteDefinition(null);
   };
 
   const handlePaletteDefinitionChange = (paletteDefinition: LayerType['paletteDefinition']) => {
@@ -360,7 +368,6 @@ const Layer: React.FC<Props> = (props) => {
           onChange={(event) => setName(event.currentTarget.value)}
         />
         <Color
-          collectionId={layer.datasourceId}
           parameters={parameters}
           parameterOptions={data}
           color={color}
@@ -370,6 +377,16 @@ const Layer: React.FC<Props> = (props) => {
           collectionType={collectionType}
         />
       </Group>
+      {layer.paletteDefinition &&
+        isValidPalette(layer.paletteDefinition) &&
+        typeof layer.color !== 'string' &&
+        typeof color !== 'string' && (
+          <DetailedGradient
+            collectionId={layer.datasourceId}
+            color={layer.color as ExpressionSpecification}
+            paletteDefinition={layer.paletteDefinition}
+          />
+        )}
       {showFeaturesMessage && (
         <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">
           This is a features layer which contains no parameter values. Rendered data is a standard

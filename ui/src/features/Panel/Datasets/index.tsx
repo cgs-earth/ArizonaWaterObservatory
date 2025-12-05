@@ -47,6 +47,7 @@ const Datasets: React.FC = () => {
       category,
       parameterGroupMembers
     );
+
     setFilteredDatasets(filteredDatasets);
   }, [datasets, search, provider, category, parameterGroupMembers]);
 

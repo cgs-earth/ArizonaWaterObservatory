@@ -41,12 +41,14 @@ import {
   drawLayers,
 } from '@/features/Map/consts';
 import { getNextLink } from '@/managers/Main.utils';
+import notificationManager from '@/managers/Notification.init';
 import {
   Config,
   ExtendedFeatureCollection,
   GetConfigResponse,
   PostConfigResponse,
   SourceOptions,
+  StyleOptions,
 } from '@/managers/types';
 import { CoverageGridService } from '@/services/coverageGrid.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
@@ -59,8 +61,10 @@ import {
   PaletteDefinition,
   ParameterGroupMembers,
 } from '@/stores/main/types';
+import { NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
 import { createDynamicStepExpression, isSamePalette } from '@/utils/colors';
+import { isValidColorBrewerIndex } from '@/utils/colors/types';
 import { isSameArray } from '@/utils/compareArrays';
 import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
@@ -709,8 +713,11 @@ class MainManager {
   public async styleLayer(
     layer: Layer,
     paletteDefinition: PaletteDefinition,
-    features?: Feature<Geometry, { [paletteDefinition.parameter]: number }>[],
-    signal?: AbortSignal
+    {
+      features,
+      signal,
+      updateStore = true,
+    }: StyleOptions<{ [paletteDefinition.parameter]: number }>
   ) {
     if (!this.map) {
       return;
@@ -730,11 +737,13 @@ class MainManager {
       index
     );
 
-    this.store.getState().updateLayer({
-      ...layer,
-      color: expression,
-      paletteDefinition,
-    });
+    if (updateStore) {
+      this.store.getState().updateLayer({
+        ...layer,
+        color: expression,
+        paletteDefinition,
+      });
+    }
 
     const { pointLayerId, fillLayerId, lineLayerId } = this.getLocationsLayerIds(
       layer.datasourceId,
@@ -1135,7 +1144,7 @@ class MainManager {
         Geometry,
         { [layer.paletteDefinition.parameter]: number }
       >[];
-      this.styleLayer(layer, layer.paletteDefinition, features, options?.signal);
+      this.styleLayer(layer, layer.paletteDefinition, { features, signal: options?.signal });
     }
 
     (aggregate as any) = undefined;
@@ -1496,10 +1505,27 @@ class MainManager {
       });
     }
 
+    let correctedPaletteDefinition = paletteDefinition;
     if (paletteChanged && paletteDefinition) {
-      const expression = await this.styleLayer(layer, paletteDefinition);
+      const expression = await this.styleLayer(layer, paletteDefinition, { updateStore: false });
       if (expression) {
         _color = expression;
+
+        if (expression.length !== paletteDefinition.count * 2 + 3) {
+          const count = (expression.length - 3) / 2;
+
+          if (isValidColorBrewerIndex(count)) {
+            correctedPaletteDefinition = {
+              ...paletteDefinition,
+              count,
+            };
+            notificationManager.show(
+              `Duplicate thresholds detected. Reducing to ${count} threshold(s)`,
+              NotificationType.Info,
+              5000
+            );
+          }
+        }
       }
     }
 
@@ -1512,7 +1538,7 @@ class MainManager {
       to,
       visible,
       opacity,
-      paletteDefinition,
+      paletteDefinition: correctedPaletteDefinition,
     });
   }
 

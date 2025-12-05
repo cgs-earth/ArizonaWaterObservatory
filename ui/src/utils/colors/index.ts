@@ -6,9 +6,7 @@
 import colorbrewer from 'colorbrewer';
 import { Feature, Geometry } from 'geojson';
 import { ExpressionSpecification } from 'mapbox-gl';
-import notificationManager from '@/managers/Notification.init';
 import { Layer } from '@/stores/main/types';
-import { NotificationType } from '@/stores/session/types';
 import {
   ColorBrewerIndex,
   FriendlyColorBrewerPalettes,
@@ -98,12 +96,20 @@ export const createDynamicStepExpression = <T>(
   const uniqueSortedThresholds = Array.from(new Set(thresholds)).sort((a, b) => a - b);
 
   // If we lost thresholds due to duplicates, adjust groups accordingly
-  if (uniqueSortedThresholds.length < thresholds.length) {
-    notificationManager.show(
-      `Duplicate thresholds detected. Reducing to ${uniqueSortedThresholds.length} threshold(s)`,
-      NotificationType.Info,
-      5000
-    );
+
+  if (uniqueSortedThresholds.length === 2) {
+    const initial = uniqueSortedThresholds[0];
+    const temp = uniqueSortedThresholds[1];
+
+    uniqueSortedThresholds[1] = initial + temp / initial;
+    uniqueSortedThresholds[2] = temp;
+  }
+
+  if (uniqueSortedThresholds.length === 1) {
+    const temp = uniqueSortedThresholds[0];
+    uniqueSortedThresholds[0] = temp - 1;
+    uniqueSortedThresholds[1] = temp;
+    uniqueSortedThresholds[2] = temp + 1;
   }
 
   const expression = formatStepExpression(String(property), palette, uniqueSortedThresholds, index);

@@ -89,7 +89,7 @@ export const Entry: React.FC<Props> = (props) => {
         controller.current = new AbortController();
       }
 
-      void mainManager.styleLayer(layer, paletteDefinition, undefined, controller.current.signal);
+      void mainManager.styleLayer(layer, paletteDefinition, { signal: controller.current.signal });
     } catch (err) {
       const error = err as Error;
       if ((error?.message ?? '').length > 0 && error?.name !== 'AbortError') {
