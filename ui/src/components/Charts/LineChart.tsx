@@ -17,6 +17,7 @@ import {
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import styles from '@/components/Charts/Charts.module.css';
+import { EChartsSeries, PrettyLabel } from '@/components/Charts/types';
 import { coverageJSONToSeries } from '@/components/Charts/utils';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
 import { isCoverageCollection } from '@/utils/isTypeObject';
@@ -37,26 +38,55 @@ type Props = {
   title?: string;
   legend?: boolean;
   filename?: string;
+  prettyLabels?: PrettyLabel[];
   theme?: 'light' | 'dark';
   legendEntries?: string[];
 };
 
 const LineChart = (props: Props) => {
-  const { title, data, legend = false, filename, theme = 'light', legendEntries = [] } = props;
+  const {
+    title,
+    data,
+    legend = false,
+    filename,
+    prettyLabels = [],
+    theme = 'light',
+    legendEntries = [],
+  } = props;
 
   const option: echarts.EChartsCoreOption = useMemo(() => {
     const dates = isCoverageCollection(data)
       ? (data.coverages[0]?.domain.axes.t as { values: string[] }).values
       : (data.domain.axes.t as { values: string[] }).values;
 
-    const series = coverageJSONToSeries(data);
+    let series = coverageJSONToSeries(data);
+
+    if (prettyLabels.length > 0 && prettyLabels.length === series.length) {
+      series = series.map((entry) => ({
+        ...series,
+        type: entry.type,
+        stack: entry.stack,
+        data: entry.data,
+        name:
+          prettyLabels.find((prettyLabel) => prettyLabel.parameter === entry.name)?.label ??
+          entry.name,
+      })) as EChartsSeries[];
+    }
 
     return {
       title: title ? { text: title } : undefined,
       tooltip: {
         trigger: 'axis',
       },
-      legend: legend ? { data: legendEntries, top: 'bottom' } : undefined,
+      legend: legend
+        ? {
+            data:
+              prettyLabels.length > 0
+                ? prettyLabels.map((prettyLabel) => prettyLabel.label)
+                : legendEntries,
+            top: 'bottom',
+          }
+        : undefined,
       toolbox: {
         feature: {
           saveAsImage: {

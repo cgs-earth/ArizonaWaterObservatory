@@ -4,7 +4,7 @@
  */
 
 import { GeoJsonProperties } from 'geojson';
-import { Series } from '@/components/Charts/types';
+import { EChartsSeries, Series } from '@/components/Charts/types';
 import notificationManager from '@/managers/Notification.init';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
 import { NotificationType } from '@/stores/session/types';
@@ -35,13 +35,6 @@ export const aggregateProperties = <T extends GeoJsonProperties>(
   });
 
   return aggregatedProperties;
-};
-
-type EChartsSeries = {
-  name: string;
-  type: 'line';
-  stack: string;
-  data: number[];
 };
 
 export const coverageJSONToSeries = (

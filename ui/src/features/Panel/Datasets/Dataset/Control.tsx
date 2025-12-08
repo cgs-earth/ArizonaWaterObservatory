@@ -15,15 +15,18 @@ import notificationManager from '@/managers/Notification.init';
 import warningManager from '@/managers/Warning.init';
 import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
+import { Layer } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 
 type Props = {
   dataset: ICollection;
+  parameters: Layer['parameters'];
+  isParameterSelectionOverLimit: boolean;
 };
 
 export const Control: React.FC<Props> = (props) => {
-  const { dataset } = props;
+  const { dataset, parameters, isParameterSelectionOverLimit } = props;
 
   const layerCount = useMainStore((state) => state.layers.length);
 
@@ -75,7 +78,7 @@ export const Control: React.FC<Props> = (props) => {
         }
       }
 
-      await mainManager.createLayer(id, controller.current.signal);
+      await mainManager.createLayer(id, parameters, controller.current.signal);
       notificationManager.show(`Added layer for: ${name}`, NotificationType.Success);
     } catch (error) {
       if ((error as Error)?.message) {
@@ -102,7 +105,8 @@ export const Control: React.FC<Props> = (props) => {
   }, []);
 
   const atLayerLimit = layerCount === 10;
-  const isControlDisabled = atLayerLimit || isLoading || isLoadingGeography;
+  const isControlDisabled =
+    atLayerLimit || isLoading || isLoadingGeography || isParameterSelectionOverLimit;
 
   const getTooltipLabel = () => {
     if (atLayerLimit) {
@@ -115,6 +119,10 @@ export const Control: React.FC<Props> = (props) => {
 
     if (isLoadingGeography) {
       return 'Please wait until spatial filters are applied.';
+    }
+
+    if (isParameterSelectionOverLimit) {
+      return 'Please remove parameters over limit.';
     }
 
     return 'Add an instance of this dataset as an interactive layer';

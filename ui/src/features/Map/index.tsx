@@ -226,7 +226,7 @@ const MainMap: React.FC<Props> = (props) => {
         map.setLayoutProperty(lineLayerId, 'line-sort-key', getSortKey(locationIds));
       }
     });
-  }, [locations]);
+  }, [locations, layers]);
 
   useEffect(() => {
     if (!geocoder || !map) {

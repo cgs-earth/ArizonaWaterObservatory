@@ -9,8 +9,6 @@ import LegendIcon from '@/assets/Legend';
 import IconButton from '@/components/IconButton';
 import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
-import { useMap } from '@/contexts/MapContexts';
-import { MAP_ID } from '@/features/Map/config';
 import { Entry } from '@/features/Tools/Legend/Entry';
 import styles from '@/features/Tools/Tools.module.css';
 import mainManager from '@/managers/Main.init';
@@ -20,8 +18,6 @@ import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 
 const Legend: React.FC = () => {
-  const { map } = useMap(MAP_ID);
-
   const layers = useMainStore((state) => state.layers);
 
   const overlay = useSessionStore((state) => state.overlay);
@@ -43,7 +39,8 @@ const Legend: React.FC = () => {
         layer.from,
         layer.to,
         layer.visible,
-        layer.opacity
+        layer.opacity,
+        layer.paletteDefinition
       );
     }
   };
@@ -60,19 +57,9 @@ const Legend: React.FC = () => {
         layer.from,
         layer.to,
         visible,
-        layer.opacity
+        layer.opacity,
+        layer.paletteDefinition
       );
-
-      if (map) {
-        const layerIds = Object.values(
-          mainManager.getLocationsLayerIds(layer.datasourceId, layerId)
-        );
-        for (const layerId of layerIds) {
-          if (map.getLayer(layerId)) {
-            map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
-          }
-        }
-      }
     }
   };
 
@@ -88,7 +75,8 @@ const Legend: React.FC = () => {
         layer.from,
         layer.to,
         layer.visible,
-        opacity
+        opacity,
+        layer.paletteDefinition
       );
     }
   };
