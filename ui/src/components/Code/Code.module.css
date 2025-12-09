@@ -82,6 +82,7 @@
   width: 2.5rem;
   height: 2.5rem;
 }
+
 .button svg[data-identifier='code-copy-svg'] {
   fill: var(--mantine-color-black);
 }
