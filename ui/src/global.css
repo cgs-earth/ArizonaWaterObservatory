@@ -31,7 +31,7 @@
 
   --error: #f00;
 
-  --default-spacing: 8px;
+  --default-spacing: 0.5rem; /* 16px * 0.5 = 8px */
   --mobile-width: 899px;
 }
 
