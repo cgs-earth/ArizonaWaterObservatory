@@ -54,7 +54,25 @@ div.mapboxgl-popup-content {
 }
 
 button.mapboxgl-popup-close-button {
-  font-size: 30px;
+  font-size: 1.875rem;
   right: 0px;
   top: var(--default-spacing);
 }
+
+@media screen and (max-width: 1280px) {
+  :root {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  :root {
+    font-size: 12px;
+  }
+}
+
+/* @media screen and (max-width: 768px) {
+  :root {
+    font-size: 10px;
+  }
+} */
