@@ -51,7 +51,7 @@ export const StringIdentifierCollections: string[] = [
 ];
 
 // These collections have a locations edge but doesnt support bbox
-export const ItemsOnlyCollections: string[] = [CollectionId.AWDB];
+export const ItemsOnlyCollections: string[] = [];
 
 // Some collections support locations but the data size is too large to reasonably render
 export const DatasourceCollectionType: Record<CollectionType, string[]> = {
