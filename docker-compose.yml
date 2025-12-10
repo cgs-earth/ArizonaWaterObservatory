@@ -3,6 +3,8 @@
 
 # A docker compose file for spinning up local infrastructure with or without dockerized pygeoapi
 # To spin up pygeoapi use the --profile production flag otherwise run with uv for hot reloading
+
+# this docker compose is not used for production, only for development
 services:
   pygeoapi:
     build:
@@ -31,6 +33,8 @@ services:
     volumes:
       - redis_data:/data
 
+  # this is not needed in production, solely used for visualizing
+  # traces and debugging performance issues
   jaeger:
     image: jaegertracing/all-in-one
     ports:
