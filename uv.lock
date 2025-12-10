@@ -262,7 +262,7 @@ requires-dist = [
     { name = "pgedr", git = "https://github.com/internetofwater/pgedr.git?rev=eb6c86dc410bdfdd214c8cb8aa4a67943ae2968a" },
     { name = "redis", specifier = ">=6.2.0" },
     { name = "rioxarray", specifier = ">=0.19.0" },
-    { name = "rise", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&branch=main" },
+    { name = "rise", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&rev=ea033b10dc2a8bff20179227c7198205875b3c95" },
     { name = "s3fs", specifier = ">=2025.9.0" },
     { name = "snotel", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&branch=main" },
     { name = "usace", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&branch=main" },
@@ -2976,7 +2976,7 @@ wheels = [
 [[package]]
 name = "rise"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&branch=main#e54db81f966f9db1007cce99967cfc5353815fac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&rev=ea033b10dc2a8bff20179227c7198205875b3c95#ea033b10dc2a8bff20179227c7198205875b3c95" }
 
 [[package]]
 name = "rpds-py"

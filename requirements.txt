@@ -1558,7 +1558,7 @@ rioxarray==0.20.0 \
     --hash=sha256:197b0638146dfc6093ef52f8bf8afb42757ca16bc2e0d87b6282ce54170c9799 \
     --hash=sha256:8bfc7e979edc7e30b4671d638a9be0e5a7d673dab2ea88e2445d3c7745599c02
     # via arizonawaterobservatory
-rise @ git+https://github.com/internetofwater/Western-Water-Datahub.git@e54db81f966f9db1007cce99967cfc5353815fac#subdirectory=packages/rise
+rise @ git+https://github.com/internetofwater/Western-Water-Datahub.git@ea033b10dc2a8bff20179227c7198205875b3c95#subdirectory=packages/rise
     # via arizonawaterobservatory
 rpds-py==0.30.0 \
     --hash=sha256:0a59119fc6e3f460315fe9d08149f8102aa322299deaa5cab5b40092345c2136 \
