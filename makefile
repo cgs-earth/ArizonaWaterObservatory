@@ -34,3 +34,10 @@ clean:
 
 build:
 	docker compose build pygeoapi
+
+# For adwr we ocassionally update the data. since it is not a crawl
+# and is a manual download we also have to do a manual update with a command
+# like this and put it in the yml
+adwr_wells_temporal_extent:
+	psql "host=127.0.0.1 port=5432 dbname=edr user=postgres" -t -A -c \
+	"SELECT TO_CHAR(MIN(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS earliest_observation_utc, TO_CHAR(MAX(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS latest_observation_utc FROM edr_quickstart.observations;"

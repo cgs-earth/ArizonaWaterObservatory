@@ -616,6 +616,14 @@ resources:
       spatial:
         bbox: [-180, -90, 180, 90]
         crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+      #   SELECT 
+      #   TO_CHAR(MIN(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS earliest_observation_utc,
+      #   TO_CHAR(MAX(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS latest_observation_utc
+      #   FROM edr_quickstart.observations;
+      temporal:
+        begin: 1902-03-31T00:00:00Z 
+        end: 2025-09-09T06:00:00Z
+        trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
     providers:
       - type: feature
         name: PostgreSQL
