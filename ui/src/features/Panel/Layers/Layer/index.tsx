@@ -223,11 +223,13 @@ const Layer: React.FC<Props> = (props) => {
   const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
 
   /**
-   * This dataset supports date ranges
+   * This dataset supports time series for parameters
    *
    * @constant
    */
-  const showDateInputs = [CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType);
+  const hasScientificMeasurements = [CollectionType.EDR, CollectionType.EDRGrid].includes(
+    collectionType
+  );
   /**
    * This is a features dataset, show additional message
    *
@@ -246,6 +248,12 @@ const Layer: React.FC<Props> = (props) => {
    * @constant
    */
   const showOpacitySlider = [CollectionType.Map, CollectionType.EDRGrid].includes(collectionType);
+  /**
+   * A raster layer can't be colorized
+   *
+   * @constant
+   */
+  const showColorInput = collectionType !== CollectionType.Map;
 
   const isPaletteDefinitionValid = isValidPalette(paletteDefinition);
 
@@ -263,6 +271,7 @@ const Layer: React.FC<Props> = (props) => {
     !isSameArray(parameters, layer.parameters) ||
     from !== layer.from ||
     to !== layer.to ||
+    opacity !== layer.opacity ||
     !isSamePalette(paletteDefinition, layer.paletteDefinition);
 
   /**
@@ -361,21 +370,23 @@ const Layer: React.FC<Props> = (props) => {
       <Group justify="space-between" gap="calc(var(--default-spacing) * 2)">
         <TextInput
           size="xs"
-          w={showPalette ? '100%' : 'calc(49% - (var(--default-spacing) * 2))'}
+          w={showPalette || !showColorInput ? '100%' : 'calc(49% - (var(--default-spacing) * 2))'}
           label="Layer Name"
           mr="auto"
           value={name}
           onChange={(event) => setName(event.currentTarget.value)}
         />
-        <Color
-          parameters={parameters}
-          parameterOptions={data}
-          color={color}
-          handleColorChange={handleColorChange}
-          paletteDefinition={paletteDefinition}
-          handlePaletteDefinitionChange={handlePaletteDefinitionChange}
-          collectionType={collectionType}
-        />
+        {showColorInput && (
+          <Color
+            parameters={parameters}
+            parameterOptions={data}
+            color={color}
+            handleColorChange={handleColorChange}
+            paletteDefinition={paletteDefinition}
+            handlePaletteDefinitionChange={handlePaletteDefinitionChange}
+            collectionType={collectionType}
+          />
+        )}
       </Group>
       {layer.paletteDefinition &&
         isValidPalette(layer.paletteDefinition) &&
@@ -393,7 +404,7 @@ const Layer: React.FC<Props> = (props) => {
           feature collection with accessible properties and no underlying data.
         </Text>
       )}
-      {showDateInputs && (
+      {hasScientificMeasurements && (
         <>
           <Divider />
           <Group justify="space-between">

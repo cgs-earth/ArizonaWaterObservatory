@@ -21,6 +21,7 @@ import {
   GeoJSONSource,
   Map,
   MapMouseEvent,
+  MapTouchEvent,
   Popup,
   RasterTileSource,
 } from 'mapbox-gl';
@@ -324,19 +325,22 @@ class MainManager {
    *
    * @function
    */
+
   public async loadConfig(config: Config): Promise<boolean> {
-    if (!this.map || !this.draw || !this.isValidConfig(config).valid) {
+    const validity = this.isValidConfig(config);
+    if (!this.map || !this.draw || !validity.valid) {
       return false;
     }
 
-    this.store.getState().setLayers(config.layers);
-    this.store.getState().setProvider(config.provider);
-    this.store.getState().setCategory(config.category);
-    this.store.getState().setCollection(config.collection);
-    this.store.getState().setCharts(config.charts);
-    this.store.getState().setDrawnShapes(config.drawnShapes);
-    this.store.getState().setBasemap(config.basemap);
+    const store = this.store.getState();
+    store.setLayers(config.layers);
+    store.setProvider(config.provider);
+    store.setCategory(config.category);
+    store.setCollection(config.collection);
+    store.setCharts(config.charts);
+    store.setDrawnShapes(config.drawnShapes);
 
+    // Rehydrate drawn shapes
     for (const shape of config.drawnShapes) {
       this.draw.add(shape);
     }
@@ -345,25 +349,55 @@ class MainManager {
     this.map.setCenter(config.center);
     this.map.setBearing(config.bearing);
     this.map.setPitch(config.pitch);
+    store.setBasemap(config.basemap);
 
-    const dataFetches = [];
+    // Wait for idle after loading basemap to prevent conflicts with
+    // style.load
+    await new Promise<void>((resolve, reject) => {
+      // Safety timeout
+      const timeoutMs = 15000;
+      const timer = setTimeout(() => {
+        reject(new Error(`Configuration load timed out waiting for 'idle' after ${timeoutMs}ms`));
+      }, timeoutMs);
 
-    await this.applySpatialFilter(config.drawnShapes);
-    for (const layer of config.layers) {
-      const sourceId = this.getSourceId(layer.datasourceId, layer.id);
-      this.addSource(layer.datasourceId, layer.id);
-      this.addLayer(layer, sourceId);
-      dataFetches.push(
-        this.addData(layer.datasourceId, layer, {
-          filterFeatures: config.drawnShapes,
-        })
-      );
-    }
+      this.map!.once('idle', async () => {
+        try {
+          const dataFetches: Promise<void>[] = [];
 
-    await Promise.all(dataFetches);
+          for (const layer of config.layers) {
+            const sourceId = this.getSourceId(layer.datasourceId, layer.id);
+            this.addSource(layer.datasourceId, layer.id);
+            this.addLayer(layer, sourceId);
 
-    // Set locations after loading layer to reflect selected state in map
-    this.store.getState().setLocations(config.locations);
+            // Use applySpatialFilter, this will factor in drawn shapes but fallback
+            // to addData if none exists
+            dataFetches.push(this.applySpatialFilter(config.drawnShapes));
+          }
+
+          // Fetch concurrently
+          await Promise.all(dataFetches);
+
+          // Set locations after layers are present so the map can reflect selected state
+          store.setLocations(config.locations);
+
+          // Assert layer order
+          this.reorderLayers();
+
+          clearTimeout(timer);
+          resolve();
+        } catch (err) {
+          clearTimeout(timer);
+          reject(
+            err instanceof Error
+              ? err
+              : new Error('Unknown error occurred while loading configuration')
+          );
+        }
+      });
+
+      // Force an idle to handle edge case where basemap sets quickly
+      this.map!.triggerRepaint();
+    });
 
     return true;
   }
@@ -1235,11 +1269,11 @@ class MainManager {
     }
   }
 
-  private getClickEventHandler(
+  private getClickEventHandler<T extends MapMouseEvent | MapTouchEvent>(
     mapLayerId: string,
     layerId: string,
     collectionId: ICollection['id']
-  ): (e: MapMouseEvent) => void {
+  ): (e: T) => void {
     return (e) => {
       e.originalEvent.preventDefault();
 
@@ -1319,19 +1353,37 @@ class MainManager {
         this.map.on(
           'click',
           pointLayerId,
-          this.getClickEventHandler(pointLayerId, layer.id, layer.datasourceId)
+          this.getClickEventHandler<MapMouseEvent>(pointLayerId, layer.id, layer.datasourceId)
         );
 
         this.map.on(
           'click',
           fillLayerId,
-          this.getClickEventHandler(fillLayerId, layer.id, layer.datasourceId)
+          this.getClickEventHandler<MapMouseEvent>(fillLayerId, layer.id, layer.datasourceId)
         );
 
         this.map.on(
           'click',
           lineLayerId,
-          this.getClickEventHandler(lineLayerId, layer.id, layer.datasourceId)
+          this.getClickEventHandler<MapMouseEvent>(lineLayerId, layer.id, layer.datasourceId)
+        );
+
+        this.map.on(
+          'touchend',
+          pointLayerId,
+          this.getClickEventHandler<MapTouchEvent>(pointLayerId, layer.id, layer.datasourceId)
+        );
+
+        this.map.on(
+          'touchend',
+          fillLayerId,
+          this.getClickEventHandler<MapTouchEvent>(fillLayerId, layer.id, layer.datasourceId)
+        );
+
+        this.map.on(
+          'touchend',
+          lineLayerId,
+          this.getClickEventHandler<MapTouchEvent>(lineLayerId, layer.id, layer.datasourceId)
         );
 
         this.map.on(
@@ -1458,9 +1510,15 @@ class MainManager {
 
     if (opacity !== layer.opacity) {
       if (this.map) {
-        const { fillLayerId, rasterLayerId } = layerIds;
+        const { fillLayerId, lineLayerId, rasterLayerId } = layerIds;
         if (this.map.getLayer(fillLayerId)) {
-          this.map.setPaintProperty(fillLayerId, 'fill-opacity', opacity);
+          let fillOpacity = opacity;
+          fillOpacity = Math.max(0, opacity * DEFAULT_FILL_OPACITY);
+          this.map.setPaintProperty(fillLayerId, 'fill-opacity', fillOpacity);
+        }
+
+        if (this.map.getLayer(lineLayerId)) {
+          this.map.setPaintProperty(lineLayerId, 'line-opacity', opacity);
         }
 
         if (this.map.getLayer(rasterLayerId)) {

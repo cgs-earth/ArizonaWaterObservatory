@@ -20,6 +20,7 @@ export enum CollectionId {
   AWDB = 'awdb-forecasts-edr',
 
   NOAARFC = 'noaa-rfc',
+  PRISM = 'usgs-prism',
 }
 
 export enum Provider {
@@ -166,6 +167,13 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       type: RestrictionType.Parameter,
       count: 1,
       message: 'Select only one parameter.',
+    },
+  ],
+  [CollectionId.PRISM]: [
+    {
+      type: RestrictionType.Day,
+      days: 1095,
+      message: 'Select a date range no greater than three years.',
     },
   ],
 };

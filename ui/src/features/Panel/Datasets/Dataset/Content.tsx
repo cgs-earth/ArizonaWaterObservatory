@@ -10,6 +10,7 @@ import styles from '@/features/Panel/Panel.module.css';
 import { useLoading } from '@/hooks/useLoading';
 import { ICollection } from '@/services/edr.service';
 import { Layer } from '@/stores/main/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getParameterUnit } from '@/utils/parameters';
 
 type Props = {
@@ -34,6 +35,7 @@ export const Content: React.FC<Props> = (props) => {
   const [datasetLink, setDatasetLink] = useState('');
   const [sourceLink, setSourceLink] = useState('');
   const [documentationLink, setDocumentationLink] = useState('');
+  const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
   const { isFetchingCollections } = useLoading();
 
@@ -52,6 +54,9 @@ export const Content: React.FC<Props> = (props) => {
     setDatasetLink(datasetLink);
     setSourceLink(sourceLink);
     setDocumentationLink(documentationLink);
+
+    const collectionType = getCollectionType(dataset);
+    setCollectionType(collectionType);
 
     const paramObjects = Object.values(dataset?.parameter_names ?? {});
 
@@ -89,23 +94,28 @@ export const Content: React.FC<Props> = (props) => {
   return (
     <Stack gap="var(--default-spacing)" className={styles.accordionContent}>
       <Text size="sm">This dataset {dataset.description}</Text>
-      <Select
-        size="sm"
-        label="Default Parameters"
-        description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters."
-        placeholder="Select a Parameter"
-        multiple
-        clearable
-        searchable
-        data={data}
-        value={parameters}
-        onChange={handleParametersChange}
-        error={getParameterError()}
-      />
-      <Text size="xs" c="dimmed">
-        These will be the default parameters for all layers created from this dataset. Parameters
-        can be further customized for each layer instance within that layer's controls.
-      </Text>
+      {[CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType) && (
+        <>
+          <Select
+            size="sm"
+            label="Default Parameters"
+            description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters."
+            placeholder="Select a Parameter"
+            multiple
+            clearable
+            searchable
+            data={data}
+            value={parameters}
+            onChange={handleParametersChange}
+            error={getParameterError()}
+          />
+          <Text size="xs" c="dimmed">
+            These will be the default parameters for all layers created from this dataset.
+            Parameters can be further customized for each layer instance within that layer's
+            controls.
+          </Text>
+        </>
+      )}
 
       <Group align="center" mt="var(--default-spacing)" gap="calc(var(--default-spacing) / 2)">
         {links.map(({ label, href, title }, index) => (
