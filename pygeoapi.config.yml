@@ -621,8 +621,9 @@ resources:
       #   TO_CHAR(MAX(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS latest_observation_utc
       #   FROM edr_quickstart.observations;
       temporal:
-        start: 1902-03-31T00:00:00Z 
+        begin: 1902-03-31T00:00:00Z 
         end: 2025-09-09T06:00:00Z
+        trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
     providers:
       - type: feature
         name: PostgreSQL
