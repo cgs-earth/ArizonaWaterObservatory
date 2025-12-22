@@ -76,7 +76,6 @@ import {
 } from '@/utils/layerDefinitions';
 import { getProvider } from '@/utils/provider';
 import { getTemporalExtent } from '@/utils/temporalExtent';
-import { getDatetime } from '@/utils/url';
 
 /**
  * MainManager is responsible for managing the core logic of the application. It handles functionality
@@ -436,15 +435,7 @@ class MainManager {
         if (ItemsOnlyCollections.includes(collectionId)) {
           return await this.fetchItems(collectionId, parameterNames, bbox, signal, next);
         }
-        return await this.fetchLocations(
-          collectionId,
-          parameterNames,
-          bbox,
-          from,
-          to,
-          signal,
-          next
-        );
+        return await this.fetchLocations(collectionId, parameterNames, bbox, signal, next);
       case CollectionType.Features:
         return await this.fetchItems(collectionId, parameterNames, bbox, signal, next);
       case CollectionType.EDRGrid:
@@ -476,13 +467,9 @@ class MainManager {
     collectionId: ICollection['id'],
     parameterNames?: string[],
     bbox?: BBox,
-    from?: string | null,
-    to?: string | null,
     signal?: AbortSignal,
     next?: string
   ): Promise<FeatureCollection<T, V>> {
-    const datetime = getDatetime(from, to);
-
     const data = await awoService.getLocations<FeatureCollection<T, V>>(
       collectionId,
       {
@@ -493,9 +480,6 @@ class MainManager {
           ...(parameterNames && parameterNames.length > 0
             ? { 'parameter-name': parameterNames.join(',') }
             : {}),
-          ...(datetime && {
-            datetime,
-          }),
         },
       },
       next
