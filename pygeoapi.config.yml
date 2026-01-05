@@ -746,6 +746,45 @@ resources:
         data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Groundwater_Basin/FeatureServer/0
         id_field: OBJECTID
 
+
+  rise-edr:
+    type: collection
+    title: USBR Reclamation Information Sharing Environment
+    description: contains information about USBR projects in the western United States such as dams, reservoirs, and powerplants. 
+    provider-name:
+      - BOR
+      - USBR
+    keywords:
+      - EDR
+      - RISE
+      - USBR
+    templates:
+      path: pygeoapi-deployment/templates/jsonld/rise-edr
+    links:
+      - type: application/html
+        rel: documentation
+        title: RISE API Documentation
+        href: https://data.usbr.gov/
+        hreflang: en-US
+      - type: application/html
+        rel: canonical
+        title: RISE API
+        href: https://data.usbr.gov/rise-api
+        hreflang: en-US
+    extents:
+      spatial:
+        bbox: [-123.60518, 28.4667, -95.875, 48.8283]
+        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+    providers:
+      - type: edr
+        name: rise.rise_edr.RiseEDRProvider
+        data: https://data.usbr.gov/
+        title_field: name
+      - type: feature
+        name: rise.rise.RiseProvider
+        data: https://data.usbr.gov/
+        title_field: name
+
   config-store:
       type: process
       processor:
