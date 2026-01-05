@@ -27,3 +27,7 @@ asu-awo*.json
 
 zarr_dataset/
 zarr.json
+
+*.7z
+
+*.gdb/
