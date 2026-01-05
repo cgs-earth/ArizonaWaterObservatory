@@ -68,7 +68,7 @@ pgedr = {git = "https://github.com/internetofwater/pgedr.git", rev="eb6c86dc410b
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
-rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise" , rev="ea033b10dc2a8bff20179227c7198205875b3c95" }
+rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise" , rev="main" }
 snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/snotel" , branch="main" }
 awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , branch="main" }
 awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
