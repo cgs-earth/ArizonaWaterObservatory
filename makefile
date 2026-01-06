@@ -35,6 +35,15 @@ clean:
 build:
 	docker compose build pygeoapi
 
+# To pull the latest groundwater data and restore it into the db
+# you can run the following
+restore_db_dump_locally:
+	./db/restore.sh
+
+# If you wish to query the production db you can use the following
+proxy_db:
+	cloud-sql-proxy asu-awo:us-south1:postgis --port=5432
+
 # For adwr we ocassionally update the data. since it is not a crawl
 # and is a manual download we also have to do a manual update with a command
 # like this and put it in the yml
