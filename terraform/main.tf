@@ -6,6 +6,32 @@ provider "google" {
   region  = var.region
 }
 
+terraform {
+  required_providers {
+    # must have a newish version of the google provider
+    # in order to set the max instances on the cloud run instance
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 7.9"
+    }
+  }
+}
+
+resource "google_redis_instance" "redis" {
+  name = "redis"
+  location_id = var.region
+  # minimum memory
+  memory_size_gb = 1
+  replica_count = 0
+  deletion_protection = false
+  connect_mode = "DIRECT_PEERING"
+  lifecycle {
+    prevent_destroy = false
+  }
+  tier = "BASIC"
+}
+
+
 # Cloud SQL Instance
 resource "google_sql_database_instance" "postgis" {
   name             = var.instance_name
@@ -28,7 +54,9 @@ resource "google_sql_database_instance" "postgis" {
 
     availability_type = "ZONAL"
     disk_autoresize   = false
+    # smallest size possible
     disk_size         = 10
+    # cheapest persistent disk type
     disk_type         = "PD_HDD"
   }
 
@@ -107,6 +135,119 @@ resource "google_cloud_run_v2_job" "groundwatersqldumpjob" {
     }
   }
   deletion_protection = false
+}
+
+# The bucket used for storing job results
+resource "google_storage_bucket" "bucket" {
+  name = "asu-awo-data"
+  location = var.region
+  force_destroy = true
+  storage_class = "STANDARD"
+}
+
+resource "google_cloud_run_v2_service" "pygeoapi" {
+  name = "pygeoapi"
+  location = var.region
+  deletion_protection = false 
+
+  ingress = "INGRESS_TRAFFIC_ALL"
+
+  scaling {
+    max_instance_count = 8
+    min_instance_count = 1
+    scaling_mode       = "AUTOMATIC"
+  }
+
+  template {
+
+    volumes {
+      name = "job-store"
+      gcs {
+        bucket = "${google_storage_bucket.bucket.name}/job_results"
+      }
+    }
+
+    containers {
+      image = "ghcr.io/cgs-earth/asu-awo-pygeoapi:latest"
+      ports {
+        container_port = 80
+      }
+      volume_mounts {
+        name       = "job-store"
+        mount_path = "/job_results"
+      }
+
+      # ideally this would be set here; however, that would make
+      # the cloud run service dependent on itself which terraform
+      # does not allow; thus this needs to be set manually after deployment
+      
+      # env {
+      #   name= "PYGEOAPI_URL"
+      #   value = google_cloud_run_v2_service.pygeoapi.uri
+      # }
+
+      env {
+        name = "PYGEOAPI_JOB_RESULT_DIR"
+        value = "/job_results"
+      }
+
+      env {
+        name = "TF_VAR_POSTGRES_HOST"
+        value = "/cloudsql/${google_sql_database_instance.postgis.connection_name}"
+      }
+
+      env {
+        name = "TF_VAR_POSTGRES_USER"
+        value = var.POSTGRES_USER
+      }
+
+      env {
+        name = "TF_VAR_POSTGRES_PASSWORD"
+        value = var.POSTGRES_PASSWORD
+      }
+
+      env {
+        name = "TF_VAR_POSTGRES_DB"
+        value = var.POSTGRES_DB
+      }
+
+      env {
+        name = "OTEL_SERVICE_NAME"
+        # todo switch this to terraform provisioned value
+        value = "awo"
+      }
+
+      env {
+        name = "REDIS_HOST"
+        value = google_redis_instance.redis.host
+      }
+
+      resources {
+        limits = {
+          cpu = "3"
+          memory = "7GiB"
+        }
+        cpu_idle = false
+      }
+    }
+  }
+
+  traffic {
+    # all traffic should go to the latest version
+    percent = 100
+    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+  }
+
+}
+
+# make pygeoapi publicly accessible
+resource "google_cloud_run_service_iam_binding" "pygeoapi_public" {
+  location = google_cloud_run_v2_service.pygeoapi.location
+  service  = google_cloud_run_v2_service.pygeoapi.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
 }
 
 resource "null_resource" "run_groundwater_sql_dump_job" {
