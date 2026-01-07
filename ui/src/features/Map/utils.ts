@@ -170,3 +170,19 @@ export const drawnFeatureContainsExtent = (
 
   return false;
 };
+
+export const loadImages = (map: Map) => {
+  // if (!map.hasImage('default')) {
+  //   map.loadImage('/map-icons/default.png', (error, image) => {
+  //     if (error) {
+  //       throw error;
+  //     }
+  //     if (!image) {
+  //       throw new Error('Image not found: default.png');
+  //     }
+  //     map.addImage('default', image);
+  //   });
+  // }
+
+  map.triggerRepaint();
+};

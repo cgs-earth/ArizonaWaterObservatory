@@ -9,15 +9,18 @@ import { Popover as _Popover, PopoverDropdown, PopoverProps, PopoverTarget } fro
 type Props = PopoverProps & {
   target: ReactNode;
   content: ReactNode;
+  unmountOnExit?: boolean;
 };
 
 const Popover: React.FC<Props> = (props) => {
-  const { target, content, ...popoverProps } = props;
+  const { target, content, unmountOnExit = false, ...popoverProps } = props;
+
+  const shouldRender = popoverProps.opened || !unmountOnExit;
 
   return (
     <_Popover withArrow={false} {...popoverProps}>
       <PopoverTarget>{target}</PopoverTarget>
-      <PopoverDropdown>{content}</PopoverDropdown>
+      {shouldRender && <PopoverDropdown>{content}</PopoverDropdown>}
     </_Popover>
   );
 };
