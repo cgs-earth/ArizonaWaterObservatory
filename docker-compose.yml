@@ -26,6 +26,29 @@ services:
     profiles:
       - production
 
+  database:
+    image: postgis/postgis:17-3.6-alpine
+    platform: linux/amd64
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changeMe
+      POSTGRES_DB: edr
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - awo_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: >
+        CMD-SHELL
+        pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+      interval: 10s
+      timeout: 8s
+      retries: 5
+
   redis:
     image: redislabs/redismod
     ports:
@@ -55,4 +78,5 @@ services:
       - ui
 
 volumes:
-  redis_data:
+  redis_data: 
+  awo_postgres_data:
