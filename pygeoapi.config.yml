@@ -246,7 +246,7 @@ resources:
     description: provides a subset of the USACE Corps Water Management System (CWMS) API specifically focused on water control management data
     provider-name:  
       - US Army Corps of Engineers
-    link:
+    links:
       - type: application/html
         rel: canonical 
         title: Data source
