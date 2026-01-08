@@ -185,7 +185,9 @@ resources:
   National_Water_Model_Groundwater_Output:
     type: collection
     title: National Water Model Groundwater Output
-    description: provides data on the flux of water that moves from the modeled groundwater system into the surface water system or out of the groundwater storage component.
+    # the original dataset has no geometry, the description describes how the geometry was added
+    # the etl for this is coming from the `NationalWaterModelETLGroundwater` folder in packages/
+    description: provides data on the flux of water that moves from the modeled groundwater system into the surface water system or out of the groundwater storage component. The geometry for each item is the centroid of the associated NHD Plus catchment. 
     keywords: ["NWM"]
     extents:
       spatial:
