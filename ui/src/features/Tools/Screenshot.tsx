@@ -16,14 +16,14 @@ import Popover from '@/components/Popover';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
-import { MAP_ID } from '@/features/Map/config';
-import { loadImages } from '@/features/Map/utils';
 import styles from '@/features/Tools/Tools.module.css';
 import notificationManager from '@/managers/Notification.init';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { NotificationType, Overlay } from '@/stores/session/types';
 import { handleCreateMapImage } from '@/utils/screenshot';
+import { MAP_ID } from '../Map/config';
+import { loadImages } from '../Map/utils';
 
 export const Screenshot: React.FC = () => {
   const overlay = useSessionStore((state) => state.overlay);

@@ -84,6 +84,15 @@
   margin-top: var(--default-spacing);
 }
 
+.screenshotLoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  height: 100px;
+}
+
 .screenshotWrapper {
   max-width: 12.5rem;
 }
