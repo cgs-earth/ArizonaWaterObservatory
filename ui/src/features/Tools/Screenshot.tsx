@@ -18,6 +18,7 @@ import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
 import styles from '@/features/Tools/Tools.module.css';
 import notificationManager from '@/managers/Notification.init';
+import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { NotificationType, Overlay } from '@/stores/session/types';
 import { handleCreateMapImage } from '@/utils/screenshot';
@@ -27,6 +28,8 @@ import { loadImages } from '../Map/utils';
 export const Screenshot: React.FC = () => {
   const overlay = useSessionStore((state) => state.overlay);
   const setOverlay = useSessionStore((state) => state.setOverlay);
+
+  const hasLayers = useMainStore((state) => state.layers.length > 0);
 
   const [src, setSrc] = useState<string>('');
   const [name, setName] = useState<string>(
@@ -188,7 +191,7 @@ export const Screenshot: React.FC = () => {
       downloadDataUrl(src, `${name}.jpg`);
 
       const legend = document.getElementById('legend');
-      if (!legend) {
+      if (!legend || !hasLayers) {
         return;
       }
 
@@ -233,7 +236,7 @@ export const Screenshot: React.FC = () => {
       closeOnClickOutside={false}
       unmountOnExit
       target={
-        <Tooltip label="Change map styling." disabled={show}>
+        <Tooltip label="Download a screenshot of the map." disabled={show}>
           <IconButton
             variant={show ? Variant.Selected : Variant.Secondary}
             onClick={() => handleShow(!show)}
@@ -243,7 +246,7 @@ export const Screenshot: React.FC = () => {
         </Tooltip>
       }
       content={
-        <Stack gap={8} align="flex-start" className={styles.screenshotWrapper}>
+        <Stack gap="var(--default-spacing)" align="flex-start" className={styles.screenshotWrapper}>
           <Title order={5} size="h3">
             Screenshot
           </Title>
@@ -264,14 +267,16 @@ export const Screenshot: React.FC = () => {
               )}
 
               <TextInput
-                size="sm"
+                size="xs"
                 label="File Name"
+                w="100%"
                 value={name}
                 onChange={(event) => setName(event.currentTarget.value)}
               />
               <NumberInput
                 size="xs"
                 label="Width"
+                w="100%"
                 min={464}
                 max={3000}
                 value={width}
@@ -280,6 +285,7 @@ export const Screenshot: React.FC = () => {
               <NumberInput
                 size="xs"
                 label="Height"
+                w="100%"
                 value={height}
                 min={82}
                 max={2000}

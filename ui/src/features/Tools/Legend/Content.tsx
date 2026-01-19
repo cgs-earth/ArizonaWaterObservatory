@@ -13,10 +13,11 @@ type Props = {
   layers: MainState['layers'];
   showControls?: boolean;
   className?: string;
+  direction?: 'row' | 'column';
 };
 
 export const Content: React.FC<Props> = (props) => {
-  const { layers, showControls = true, className } = props;
+  const { layers, showControls = true, className, direction = 'row' } = props;
 
   const handleColorChange = (color: Layer['color'], layerId: Layer['id']) => {
     const layer = mainManager.getLayer(layerId);
@@ -82,6 +83,7 @@ export const Content: React.FC<Props> = (props) => {
             handleVisibilityChange={handleVisibilityChange}
             handleOpacityChange={handleOpacityChange}
             showControls={showControls}
+            direction={direction}
           />
           {index < layers.length - 1 && <Divider />}
         </Fragment>

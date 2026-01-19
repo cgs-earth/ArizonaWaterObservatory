@@ -23,12 +23,16 @@ export const ScreenshotUtility: React.FC<Props> = (props) => {
   const { layers } = props;
 
   return (
-    <Box style={{ height: 0, width: 0, overflow: 'hidden' }} mt="calc(var(--default-spacing) * -1)">
+    <Box
+      style={{ height: 0, width: 0, overflow: 'hidden' }}
+      ml="calc(var(--default-spacing) * -2)"
+      mt="calc(var(--default-spacing) * -2)"
+    >
       <Box className={styles.hiddenLegend} id="legend">
         <Title order={3} className={styles.mapToolTitle}>
           Legend
         </Title>
-        <Content layers={layers} showControls={false} />
+        <Content layers={layers} showControls={false} direction="column" />
       </Box>
       {/* These are used for attribution in the primary screenshot */}
       <img src="/mapbox-logo-black.png" id="mapbox-logo" alt="" aria-hidden />

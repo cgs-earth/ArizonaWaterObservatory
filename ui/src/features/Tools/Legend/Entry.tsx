@@ -21,6 +21,7 @@ type Props = {
   handleVisibilityChange: (visible: boolean, layerId: Layer['id']) => void;
   handleOpacityChange: (opacity: Layer['opacity'], layerId: Layer['id']) => void;
   showControls?: boolean;
+  direction?: 'row' | 'column';
 };
 
 export const Entry: React.FC<Props> = (props) => {
@@ -30,6 +31,7 @@ export const Entry: React.FC<Props> = (props) => {
     handleVisibilityChange,
     handleOpacityChange,
     showControls = true,
+    direction,
   } = props;
 
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
@@ -85,33 +87,37 @@ export const Entry: React.FC<Props> = (props) => {
       ) : (
         typeof layer.color === 'string' && (
           <Group w="100%" justify="space-between" align="flex-start">
-            <Stack justify="flex-start">
-              {showColors && (
-                <ColorInput
-                  label={
-                    <Text size="xs" mt={0}>
-                      Symbol Color
-                    </Text>
-                  }
-                  value={layer.color}
-                  onChange={(color) => handleColorChange(color, layer.id)}
-                  className={styles.colorPicker}
-                />
-              )}
+            {showColors ||
+              (showControls && (
+                <Stack justify="flex-start">
+                  {showColors && (
+                    <ColorInput
+                      label={
+                        <Text size="xs" mt={0}>
+                          Symbol Color
+                        </Text>
+                      }
+                      value={layer.color}
+                      onChange={(color) => handleColorChange(color, layer.id)}
+                      className={styles.colorPicker}
+                    />
+                  )}
 
-              {showControls && (
-                <Switch
-                  size="lg"
-                  mb="calc(var(--default-spacing) / 2)"
-                  onLabel="VISIBLE"
-                  offLabel="HIDDEN"
-                  checked={layer.visible}
-                  onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
-                />
-              )}
-            </Stack>
-            {showShapes && <Shapes color={layer.color} />}
-            {showGrid && <Grid color={layer.color} />}
+                  {showControls && (
+                    <Switch
+                      size="lg"
+                      mb="calc(var(--default-spacing) / 2)"
+                      onLabel="VISIBLE"
+                      offLabel="HIDDEN"
+                      checked={layer.visible}
+                      onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
+                    />
+                  )}
+                </Stack>
+              ))}
+
+            {showShapes && <Shapes layerId={layer.id} color={layer.color} direction={direction} />}
+            {showGrid && <Grid layerId={layer.id} color={layer.color} direction={direction} />}
           </Group>
         )
       )}
