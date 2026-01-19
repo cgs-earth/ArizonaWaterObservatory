@@ -10,11 +10,13 @@ import { FAQ } from '@/features/Tools/FAQ';
 import { Geocoder } from '@/features/Tools/Geocoder';
 import { Glossary } from '@/features/Tools/Glossary';
 import Legend from '@/features/Tools/Legend';
+import { Screenshot } from '@/features/Tools/Screenshot';
 import { Warnings } from '@/features/Tools/Warnings';
 
 const Tools: React.FC = () => {
   return (
     <Group>
+      <Screenshot />
       <FAQ />
       <Glossary />
       <Legend />
