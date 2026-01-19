@@ -4,9 +4,9 @@
  */
 
 import { Box, Title } from '@mantine/core';
+import { Content } from '@/features/Tools/Legend/Content';
 import styles from '@/features/Tools/Tools.module.css';
 import { MainState } from '@/stores/main/types';
-import { Content } from './Content';
 
 type Props = {
   layers: MainState['layers'];

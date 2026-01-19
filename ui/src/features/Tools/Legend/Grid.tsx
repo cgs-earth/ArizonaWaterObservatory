@@ -28,7 +28,6 @@ export const Grid: React.FC<Props> = (props) => {
   const textAlign = isRow ? undefined : 'center';
 
   const iconGap = isRow ? 'var(--default-spacing)' : 'calc(var(--default-spacing) * 6.75)';
-  // const labelGap = isRow ? 'var(--default-spacing)' : 'calc(var(--default-spacing) * 6)';
 
   const labels = ['Grid Spaces', 'Selected Grid Spaces'];
 

@@ -23,12 +23,10 @@ const createMapImage = <T extends boolean>(
     map.once('render', () => {
       const canvas = map.getCanvas();
 
+      // Defined in ScreenshotUtility.tsx
       const mapboxLogo = document.getElementById('mapbox-logo') as HTMLImageElement | null;
-      // mapboxLogo.src = '/mapbox-logo-black.png';
       const asuLogo = document.getElementById('asu-logo') as HTMLImageElement | null;
-      // asuLogo.src = '/ASU-logo.png';
       const cgsLogo = document.getElementById('cgs-logo') as HTMLImageElement | null;
-      // cgsLogo.src = '/poweredbycgs_v2.png';
 
       const newCanvas = document.createElement('canvas');
       newCanvas.width = width;
