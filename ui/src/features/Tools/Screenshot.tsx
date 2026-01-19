@@ -20,6 +20,7 @@ import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 import { handleCreateMapImage } from '@/utils/screenshot';
 import { MAP_ID } from '../Map/config';
+import { loadImages } from '../Map/utils';
 
 export const Screenshot: React.FC = () => {
   const overlay = useSessionStore((state) => state.overlay);
@@ -37,6 +38,9 @@ export const Screenshot: React.FC = () => {
 
   const { map } = useMap(MAP_ID);
 
+  const cloneMap = useRef<Map>(null);
+  const container = useRef<HTMLDivElement>(null);
+
   const isMovingRef = useRef(false);
   const isMounted = useRef(true);
   const updateSource = (src: string) => {
@@ -51,26 +55,37 @@ export const Screenshot: React.FC = () => {
     }
   };
 
-  const handleScreenshot = async (map: Map, width: number, height: number) => {
-    handleCreateMapImage(
-      map,
-      map.getCenter(),
-      import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
-      width,
-      height,
-      false,
-      updateSource,
-      updateLoading
-    );
+  const handleScreenshot = async (
+    originalMap: Map,
+    cloneMap: Map,
+    container: HTMLDivElement,
+    width: number,
+    height: number
+  ) => {
+    container.style.width = `${width}px`;
+    container.style.height = `${height}px`;
+
+    cloneMap.resize();
+    cloneMap.setStyle(originalMap.getStyle());
+    cloneMap.setCenter(originalMap.getCenter());
+    cloneMap.setZoom(originalMap.getZoom());
+    cloneMap.setBearing(originalMap.getBearing());
+    cloneMap.setPitch(originalMap.getPitch());
+
+    handleCreateMapImage(cloneMap, width, height, false, updateSource, updateLoading);
   };
 
-  const debouncedScreenshot = useMemo(
-    () =>
-      debounce(() => {
-        handleScreenshot(map!, width, height);
-      }, 150),
-    [map, width, height]
-  );
+  useEffect(() => {
+    return () => {
+      if (cloneMap.current) {
+        cloneMap.current.remove();
+      }
+
+      if (container.current) {
+        container.current.remove();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!map) {
@@ -82,16 +97,45 @@ export const Screenshot: React.FC = () => {
     setWidth(width);
     setHeight(height);
 
-    void handleScreenshot(map, width, height);
+    container.current = document.createElement('div');
+    container.current.style.width = `${width}px`;
+    container.current.style.height = `${height}px`;
+    document.body.appendChild(container.current);
+    cloneMap.current = new Map({
+      accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
+      container: container.current,
+      center: map.getCenter(),
+      style: map.getStyle(),
+      zoom: map.getZoom(),
+      bearing: map.getBearing(),
+      pitch: map.getPitch(),
+    });
+
+    loadImages(cloneMap.current);
+    cloneMap.current.once('load', () => {
+      void handleScreenshot(map, cloneMap.current!, container.current!, width, height);
+    });
   }, [map]);
 
+  const debouncedScreenshot = useMemo(
+    () =>
+      debounce(() => {
+        if (!map || !cloneMap.current || !container.current) {
+          return;
+        }
+
+        handleScreenshot(map!, cloneMap.current, container.current, width, height);
+      }, 150),
+    [map, cloneMap.current, container.current, width, height]
+  );
+
   useEffect(() => {
-    if (!map || isMovingRef.current) {
+    if (!map || isMovingRef.current || !cloneMap.current || !container.current) {
       return;
     }
 
     if (show) {
-      void handleScreenshot(map, width, height);
+      void handleScreenshot(map, cloneMap.current, container.current, width, height);
     }
 
     const onMove = () => {

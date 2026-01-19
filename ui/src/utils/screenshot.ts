@@ -86,24 +86,31 @@ const duplicateMapInstance = (
  */
 const handleMapLoad = <T extends boolean>(
   map: Map,
-  container: HTMLDivElement,
+  container: HTMLDivElement | null = null,
   width: number,
   height: number,
   toBlob: T,
   updateMapImage: (src: T extends true ? Blob | null : string) => void,
-  updateLoading: (loading: boolean) => void
+  updateLoading: (loading: boolean) => void,
+  destroy: boolean = false
 ): void => {
   void createMapImage(map, width, height, toBlob).then((data) => {
     updateMapImage(data as T extends true ? Blob | null : string);
 
-    map.remove(); // removes WebGL + listeners
-    container.remove(); // removes DOM node → prevents memory leak
+    if (destroy) {
+      map.remove(); // removes WebGL + listeners
+
+      if (container) {
+        container.remove(); // removes DOM node → prevents memory leak
+      }
+    }
+
     updateLoading(false);
   });
 };
 
 /**
- * Creates an image from a Mapbox map instance.
+ * Creates an image from an existing Mapbox map instance.
  *
  * @function
  * @param {Map} map - The original Mapbox map instance.
@@ -113,6 +120,27 @@ const handleMapLoad = <T extends boolean>(
  * @param {Dispatch<SetStateAction<T | null>>} setMapImage - A state setter function for the map image.
  */
 export const handleCreateMapImage = <T extends boolean>(
+  map: Map,
+  width: number,
+  height: number,
+  toBlob: T,
+  updateMapImage: (src: T extends true ? Blob | null : string) => void,
+  updateLoading: (loading: boolean) => void
+): void => {
+  handleMapLoad(map, null, width, height, toBlob, updateMapImage, updateLoading);
+};
+
+/**
+ * Clones the provided map instance and generates an image from it.
+ *
+ * @function
+ * @param {Map} map - The original Mapbox map instance.
+ * @param {LngLatLike} center - The center coordinates for the new map.
+ * @param {string} accessToken - The Mapbox access token.
+ * @param {boolean} cancel - A flag indicating the calling component has unmounted.
+ * @param {Dispatch<SetStateAction<T | null>>} setMapImage - A state setter function for the map image.
+ */
+export const handleCloneCreateMapImage = <T extends boolean>(
   map: Map,
   center: LngLatLike,
   accessToken: string,
