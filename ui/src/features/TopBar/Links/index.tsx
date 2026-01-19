@@ -59,7 +59,6 @@ const Links: React.FC = () => {
   }, [layers]);
 
   const handleClick = () => {
-    open();
     setOverlay(Overlay.Links);
   };
 
