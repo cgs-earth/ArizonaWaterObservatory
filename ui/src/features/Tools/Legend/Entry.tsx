@@ -20,10 +20,17 @@ type Props = {
   handleColorChange: (color: Layer['color'], layerId: Layer['id']) => void;
   handleVisibilityChange: (visible: boolean, layerId: Layer['id']) => void;
   handleOpacityChange: (opacity: Layer['opacity'], layerId: Layer['id']) => void;
+  showControls?: boolean;
 };
 
 export const Entry: React.FC<Props> = (props) => {
-  const { layer, handleColorChange, handleVisibilityChange, handleOpacityChange } = props;
+  const {
+    layer,
+    handleColorChange,
+    handleVisibilityChange,
+    handleOpacityChange,
+    showControls = true,
+  } = props;
 
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
@@ -36,12 +43,13 @@ export const Entry: React.FC<Props> = (props) => {
     }
   }, [layer]);
 
-  const showColors = [CollectionType.EDR, CollectionType.EDRGrid, CollectionType.Features].includes(
-    collectionType
-  );
+  const showColors =
+    showControls &&
+    [CollectionType.EDR, CollectionType.EDRGrid, CollectionType.Features].includes(collectionType);
   const showShapes = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
   const showGrid = [CollectionType.EDRGrid].includes(collectionType);
-  const showOpacity = [CollectionType.EDRGrid, CollectionType.Map].includes(collectionType);
+  const showOpacity =
+    showControls && [CollectionType.EDRGrid, CollectionType.Map].includes(collectionType);
 
   return (
     <Stack w="100%" gap="xs" className={styles.legendEntry}>
@@ -63,14 +71,16 @@ export const Entry: React.FC<Props> = (props) => {
             color={layer.color as ExpressionSpecification}
             paletteDefinition={layer.paletteDefinition}
           />
-          <Switch
-            size="lg"
-            mb="calc(var(--default-spacing) / 2)"
-            onLabel="VISIBLE"
-            offLabel="HIDDEN"
-            checked={layer.visible}
-            onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
-          />
+          {showControls && (
+            <Switch
+              size="lg"
+              mb="calc(var(--default-spacing) / 2)"
+              onLabel="VISIBLE"
+              offLabel="HIDDEN"
+              checked={layer.visible}
+              onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
+            />
+          )}
         </>
       ) : (
         typeof layer.color === 'string' && (
@@ -89,14 +99,16 @@ export const Entry: React.FC<Props> = (props) => {
                 />
               )}
 
-              <Switch
-                size="lg"
-                mb="calc(var(--default-spacing) / 2)"
-                onLabel="VISIBLE"
-                offLabel="HIDDEN"
-                checked={layer.visible}
-                onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
-              />
+              {showControls && (
+                <Switch
+                  size="lg"
+                  mb="calc(var(--default-spacing) / 2)"
+                  onLabel="VISIBLE"
+                  offLabel="HIDDEN"
+                  checked={layer.visible}
+                  onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
+                />
+              )}
             </Stack>
             {showShapes && <Shapes color={layer.color} />}
             {showGrid && <Grid color={layer.color} />}

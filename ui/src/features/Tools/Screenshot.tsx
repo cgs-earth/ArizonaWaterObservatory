@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { toJpeg } from 'html-to-image';
 import debounce from 'lodash.debounce';
 import { Map } from 'mapbox-gl';
 import { Box, Image, Loader, Stack, Title, Tooltip } from '@mantine/core';
@@ -16,8 +17,9 @@ import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
 import styles from '@/features/Tools/Tools.module.css';
+import notificationManager from '@/managers/Notification.init';
 import useSessionStore from '@/stores/session';
-import { Overlay } from '@/stores/session/types';
+import { NotificationType, Overlay } from '@/stores/session/types';
 import { handleCreateMapImage } from '@/utils/screenshot';
 import { MAP_ID } from '../Map/config';
 import { loadImages } from '../Map/utils';
@@ -172,11 +174,34 @@ export const Screenshot: React.FC = () => {
     };
   }, []);
 
-  const downloadImage = () => {
-    const link = document.createElement('a');
-    link.href = src;
-    link.download = `${name}.jpg`;
-    link.click();
+  const downloadDataUrl = (dataUrl: string, filename: string) => {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  const downloadImage = async () => {
+    try {
+      downloadDataUrl(src, `${name}.jpg`);
+
+      const legend = document.getElementById('legend');
+      if (!legend) {
+        return;
+      }
+
+      // ensure it's rendered
+      await new Promise(requestAnimationFrame);
+
+      const dataUrl = await toJpeg(legend, {
+        style: { display: 'block' },
+      });
+      downloadDataUrl(dataUrl, `${name}-legend.jpg`);
+    } catch (err) {
+      notificationManager.show((err as Error).message, NotificationType.Error, 10000);
+    }
   };
 
   const handleShow = (show: boolean) => {
@@ -218,7 +243,7 @@ export const Screenshot: React.FC = () => {
         </Tooltip>
       }
       content={
-        <Stack gap={8} align="flex-start">
+        <Stack gap={8} align="flex-start" className={styles.screenshotWrapper}>
           <Title order={5} size="h3">
             Screenshot
           </Title>
@@ -247,6 +272,8 @@ export const Screenshot: React.FC = () => {
               <NumberInput
                 size="xs"
                 label="Width"
+                min={464}
+                max={3000}
                 value={width}
                 onChange={(value) => debouncedHandleWidthChange(Number(value))}
               />
@@ -254,6 +281,8 @@ export const Screenshot: React.FC = () => {
                 size="xs"
                 label="Height"
                 value={height}
+                min={82}
+                max={2000}
                 onChange={(value) => debouncedHandleHeightChange(Number(value))}
               />
               <Button variant={Variant.Primary} onClick={downloadImage} disabled={loading}>

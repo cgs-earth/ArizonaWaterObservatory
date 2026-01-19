@@ -23,12 +23,45 @@ const createMapImage = <T extends boolean>(
     map.once('render', () => {
       const canvas = map.getCanvas();
 
+      const mapboxLogo = document.getElementById('mapbox-logo') as HTMLImageElement | null;
+      // mapboxLogo.src = '/mapbox-logo-black.png';
+      const asuLogo = document.getElementById('asu-logo') as HTMLImageElement | null;
+      // asuLogo.src = '/ASU-logo.png';
+      const cgsLogo = document.getElementById('cgs-logo') as HTMLImageElement | null;
+      // cgsLogo.src = '/poweredbycgs_v2.png';
+
       const newCanvas = document.createElement('canvas');
       newCanvas.width = width;
       newCanvas.height = height;
       const context = newCanvas.getContext('2d');
       if (context) {
         context.drawImage(canvas, 0, 0, newCanvas.width, newCanvas.height);
+        context.globalAlpha = 0.7; // 70% opacity
+        // positioned at start + 20 pixels, canvas height - 45 units
+        // width 133px, height 30px
+        if (mapboxLogo) {
+          context.drawImage(mapboxLogo, 0 + 20, height - 45, 133, 30);
+        }
+
+        if (asuLogo) {
+          context.drawImage(asuLogo, width - 290, height - 55, 88.9, 50);
+        }
+        context.globalAlpha = 0.85; // 85% opacity
+        if (cgsLogo) {
+          context.drawImage(cgsLogo, width - 200, height - 50, 181.2, 40);
+        }
+        context.globalAlpha = 1; // reset
+
+        context.globalAlpha = 0.8;
+        context.fillStyle = '#000';
+        context.shadowColor = 'rgba(255,255,255,0.9)';
+        context.shadowBlur = 4;
+        context.font = '12px sans-serif';
+        context.textAlign = 'right';
+        context.textBaseline = 'top';
+        context.fillText('© Mapbox, © OpenStreetMap', width - 10, 10);
+        context.globalAlpha = 1;
+
         if (toBlob) {
           newCanvas.toBlob((blob) => {
             resolve(blob as T extends true ? Blob | null : string);
@@ -43,7 +76,7 @@ const createMapImage = <T extends boolean>(
     map.setBearing(map.getBearing()); // trigger render
   });
 };
-``;
+
 /**
  * Duplicates a Mapbox map instance with a specified center and aspect ratio.
  *

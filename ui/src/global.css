@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+html {
+  overflow: hidden;
+}
+
 :root {
   --asu-gold: #ffc627;
   --asu-maroon: #8c1d40;
