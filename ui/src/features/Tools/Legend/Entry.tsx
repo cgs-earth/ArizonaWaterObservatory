@@ -87,34 +87,33 @@ export const Entry: React.FC<Props> = (props) => {
       ) : (
         typeof layer.color === 'string' && (
           <Group w="100%" justify="space-between" align="flex-start">
-            {showColors ||
-              (showControls && (
-                <Stack justify="flex-start">
-                  {showColors && (
-                    <ColorInput
-                      label={
-                        <Text size="xs" mt={0}>
-                          Symbol Color
-                        </Text>
-                      }
-                      value={layer.color}
-                      onChange={(color) => handleColorChange(color, layer.id)}
-                      className={styles.colorPicker}
-                    />
-                  )}
+            {(showColors || showControls) && (
+              <Stack justify="flex-start">
+                {showColors && (
+                  <ColorInput
+                    label={
+                      <Text size="xs" mt={0}>
+                        Symbol Color
+                      </Text>
+                    }
+                    value={layer.color}
+                    onChange={(color) => handleColorChange(color, layer.id)}
+                    className={styles.colorPicker}
+                  />
+                )}
 
-                  {showControls && (
-                    <Switch
-                      size="lg"
-                      mb="calc(var(--default-spacing) / 2)"
-                      onLabel="VISIBLE"
-                      offLabel="HIDDEN"
-                      checked={layer.visible}
-                      onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
-                    />
-                  )}
-                </Stack>
-              ))}
+                {showControls && (
+                  <Switch
+                    size="lg"
+                    mb="calc(var(--default-spacing) / 2)"
+                    onLabel="VISIBLE"
+                    offLabel="HIDDEN"
+                    checked={layer.visible}
+                    onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
+                  />
+                )}
+              </Stack>
+            )}
 
             {showShapes && <Shapes layerId={layer.id} color={layer.color} direction={direction} />}
             {showGrid && <Grid layerId={layer.id} color={layer.color} direction={direction} />}

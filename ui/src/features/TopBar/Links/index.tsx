@@ -58,6 +58,10 @@ const Links: React.FC = () => {
     setIsEnabled(isEnabled);
   }, [layers]);
 
+  const handleClick = () => {
+    setOverlay(Overlay.Links);
+  };
+
   const helpText = (
     <>
       <Text size="sm">Access the API links used to fetch data for each location.</Text>
@@ -74,7 +78,7 @@ const Links: React.FC = () => {
           data-disabled={!isEnabled}
           size="sm"
           variant={opened ? Variant.Selected : Variant.Secondary}
-          onClick={open}
+          onClick={handleClick}
         >
           Links
         </Button>
