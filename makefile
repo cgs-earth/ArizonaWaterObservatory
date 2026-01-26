@@ -32,9 +32,6 @@ clean:
 	rm -rf .logs_queue
 	rm -rf .venv/
 
-build:
-	docker compose build pygeoapi
-
 # To pull the latest groundwater data and restore it into the db
 # you can run the following
 restore_db_dump_locally:

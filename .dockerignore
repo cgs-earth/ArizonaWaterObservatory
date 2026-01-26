@@ -4,3 +4,10 @@
 **/zarr/
 **/*.zarr/
 **/*.nc
+*.dump
+node_modules/
+zarr*/
+*.parquet
+*.7z
+zarr_dataset/
+*.gdb
