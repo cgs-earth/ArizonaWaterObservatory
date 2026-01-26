@@ -156,6 +156,12 @@ def project_dataset(
         return dataset.assign_coords({x_field: x_proj, y_field: y_proj})
 
     else:
+        # There are special cases of certain datasets in the national water model
+        # where there are multiple soil layers. We need to select the first one
+        # otherwise the reproject will fail due to excessive number of dimensions
+        if "soil_layers_stag" in dataset.dims:
+            dataset = dataset.isel(soil_layers_stag=0)
+
         # if the dataset is raster we need to reproject it. raster datasets
         # a non linear crs are non trivial to reproject so it is easiest to just
         # use rio.reproject
