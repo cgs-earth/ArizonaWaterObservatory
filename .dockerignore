@@ -1,13 +1,20 @@
+# Unlike .gitignore, .dockerignore only ignores directories relative to the root 
+# unless you prepend ** to explicitly state you want a recursive ignore
+
 **/.venv/
 **/.tmp_dagster*/
 **/downloads/
 **/zarr/
 **/*.zarr/
 **/*.nc
-*.dump
-node_modules/
-zarr*/
-*.parquet
-*.7z
-zarr_dataset/
-*.gdb
+**/*.dump
+**/node_modules/
+**/zarr*/
+**/*.parquet
+**/*.7z
+**/zarr_dataset/
+**.*.gdb
+**/*.gdbtable
+db/
+**/NHDPlusNationalData
+terraform/
