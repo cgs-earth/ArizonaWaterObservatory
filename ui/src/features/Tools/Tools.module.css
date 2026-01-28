@@ -29,6 +29,11 @@
   width: 5.9375rem;
 }
 
+.drawContainer {
+  min-width: 22rem;
+  max-width: 22rem;
+}
+
 .dateSelectorContainer {
   width: 15.625rem;
 }

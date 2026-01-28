@@ -12,7 +12,8 @@ import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { Shapes } from '@/features/Tools/Legend/Shapes';
 import styles from '@/features/Tools/Tools.module.css';
 import mainManager from '@/managers/Main.init';
-import { Layer } from '@/stores/main/types';
+import useMainStore from '@/stores/main';
+import { DrawMode, Layer } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 
 type Props = {
@@ -35,6 +36,8 @@ export const Entry: React.FC<Props> = (props) => {
   } = props;
 
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
+
+  const drawMode = useMainStore((store) => store.drawMode);
 
   useEffect(() => {
     const collection = mainManager.getDatasource(layer.datasourceId);
@@ -80,6 +83,7 @@ export const Entry: React.FC<Props> = (props) => {
               onLabel="VISIBLE"
               offLabel="HIDDEN"
               checked={layer.visible}
+              disabled={drawMode === DrawMode.Polygon}
               onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
             />
           )}
@@ -109,6 +113,7 @@ export const Entry: React.FC<Props> = (props) => {
                     onLabel="VISIBLE"
                     offLabel="HIDDEN"
                     checked={layer.visible}
+                    disabled={drawMode === DrawMode.Polygon}
                     onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
                   />
                 )}
