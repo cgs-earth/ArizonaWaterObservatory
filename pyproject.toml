@@ -51,10 +51,10 @@ etl = [
     "numcodecs>=0.16.5",
 ]
 server = [
-    "flask-cors>=6.0.2",
-    "gevent>=1.4.0",
-    "gunicorn<24",
+    "gunicorn>=23.0.0",
     "pygeoapi",
+    "starlette>=0.47.0",
+    "uvicorn>=0.34.3",
 ]
 
 [tool.uv.workspace]

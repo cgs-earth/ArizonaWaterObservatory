@@ -13,13 +13,13 @@ services:
     ports:
       - 5005:80
     env_file:
-      - .env
+      - .env.example
     environment:
       - REDIS_HOST=redis
       - PYGEOAPI_URL=http://localhost:5005
       - COLLECTOR_ENDPOINT=jaeger
       - OTEL_SDK_DISABLED=${OTEL_SDK_DISABLED:-false}
-      - TF_VAR_POSTGRES_HOST=database
+      - POSTGRES_HOST=database
     depends_on:
       - redis
       - database
