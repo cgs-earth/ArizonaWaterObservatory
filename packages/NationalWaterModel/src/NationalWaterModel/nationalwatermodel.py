@@ -11,8 +11,8 @@ from com.geojson.helpers import (
 )
 from com.otel import otel_trace
 from com.protocols.providers import OAFProviderProtocol
+from pygeoapi.crs import crs_transform
 from pygeoapi.provider.base import BaseProvider
-from pygeoapi.util import crs_transform
 import pyproj
 import xarray as xr
 

@@ -11,10 +11,9 @@ from com.geojson.helpers import (
 )
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
-from pygeoapi.crs import DEFAULT_CRS
+from pygeoapi.crs import DEFAULT_CRS, transform_bbox
 from pygeoapi.provider.base import ProviderQueryError
 from pygeoapi.provider.base_edr import BaseEDRProvider
-from pygeoapi.util import transform_bbox
 import pyproj
 import xarray as xr
 
@@ -121,7 +120,9 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
                 "datetime is required to prevent overfetching"
             )
         if bbox:
-            bbox = transform_bbox(bbox, DEFAULT_CRS, self.storage_crs)
+            bbox = transform_bbox(
+                bbox, DEFAULT_CRS, self.storage_crs.to_string()
+            )
 
         loaded_data = fetch_data(
             unopened_dataset=self.zarr_dataset,
