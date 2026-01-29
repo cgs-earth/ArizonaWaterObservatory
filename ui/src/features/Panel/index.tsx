@@ -122,8 +122,15 @@ const Panel: React.FC = () => {
               </ActionIcon>
               <Header />
               <Box className={styles.accordions}>
-                <Tabs defaultValue="datasets" color="var(--asu-color-primary)">
-                  <Tabs.List className={styles.tabsList}>
+                <Tabs
+                  classNames={{
+                    tab: styles.tab,
+                    list: styles.tabsList,
+                  }}
+                  defaultValue="datasets"
+                  color="var(--asu-color-primary)"
+                >
+                  <Tabs.List>
                     <Tabs.Tab value="datasets">
                       <Tooltip label={datasetsHelpText} openDelay={500} zIndex={302}>
                         <Title order={2} size={mobile ? 'h4' : 'h3'} className={styles.title}>
@@ -139,7 +146,9 @@ const Panel: React.FC = () => {
                           </Title>
                           {layerCount > 0 && (
                             <Box className={styles.indicator}>
-                              <Text size="sm">{layerCount}</Text>
+                              <Text size="sm" fw={700}>
+                                {layerCount}
+                              </Text>
                             </Box>
                           )}
                         </Group>

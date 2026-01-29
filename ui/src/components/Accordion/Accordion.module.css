@@ -42,7 +42,6 @@
 
 .chevron {
   width: 2.25rem;
-  margin-right: var(--default-spacing);
 }
 
 .chevron > svg {

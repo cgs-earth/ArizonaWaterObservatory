@@ -142,7 +142,7 @@ export const Control: React.FC<Props> = (props) => {
         variant="transparent"
         title="Add Layer"
         classNames={{ root: styles.actionIconRoot, icon: styles.actionIcon }}
-        className={hasLayers ? styles.hasLayers : undefined}
+        className={`${styles.datasetControl} ${hasLayers ? styles.hasLayers : ''}`}
         disabled={isControlDisabled}
         data-disabled={isControlDisabled}
         onClick={() => handleClick(dataset.title ?? dataset.id, dataset.id)}
