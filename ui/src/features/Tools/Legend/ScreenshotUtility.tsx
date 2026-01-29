@@ -12,13 +12,6 @@ type Props = {
   layers: MainState['layers'];
 };
 
-const mapboxLogo = document.createElement('img');
-mapboxLogo.src = '/mapbox-logo-black.png';
-const asuLogo = document.createElement('img');
-asuLogo.src = '/ASU-logo.png';
-const cgsLogo = document.createElement('img');
-cgsLogo.src = '/poweredbycgs_v2.png';
-
 export const ScreenshotUtility: React.FC<Props> = (props) => {
   const { layers } = props;
 

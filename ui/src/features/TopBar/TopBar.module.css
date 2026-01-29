@@ -52,12 +52,20 @@
   background-color: var(--mantine-color-gray-1);
 }
 
+.fullWidth {
+  width: 100%;
+}
+
 .glossaryWrapper {
   width: calc(100% - 50px);
 }
 
 .toolTip {
   width: 30em;
+}
+
+.header {
+  padding: var(--default-spacing);
 }
 
 .helpTitle {

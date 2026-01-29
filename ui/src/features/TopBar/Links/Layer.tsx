@@ -16,6 +16,8 @@ import { ICollection } from '@/services/edr.service';
 import { Layer as LayerType, Location } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getProvider } from '@/utils/provider';
+import { buildCubeUrl, buildItemsUrl, buildLocationsUrl } from '@/utils/url';
+import { Header } from './Header';
 
 type Props = {
   layer: LayerType;
@@ -30,6 +32,7 @@ export const Layer: React.FC<Props> = (props) => {
   const [dataset, setDataset] = useState<ICollection>();
   const [provider, setProvider] = useState<string>('');
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
+  const [url, setUrl] = useState('');
 
   const [isEnabled, setIsEnabled] = useState(false);
 
@@ -58,6 +61,33 @@ export const Layer: React.FC<Props> = (props) => {
     const newProvider = getProvider(dataset.id);
     setProvider(newProvider);
   }, [dataset]);
+
+  useEffect(() => {
+    if (!dataset) {
+      return;
+    }
+
+    let url = '';
+    if (collectionType === CollectionType.EDR) {
+      url = buildLocationsUrl(dataset.id, layer.parameters);
+    } else if (collectionType === CollectionType.EDRGrid) {
+      const bbox = mainManager.getBBox(dataset.id);
+      url = buildCubeUrl(
+        dataset.id,
+        layer.parameters,
+        layer.from,
+        layer.to,
+        false,
+        true,
+        undefined,
+        bbox
+      );
+    } else if (collectionType === CollectionType.Features) {
+      url = buildItemsUrl(dataset.id);
+    }
+
+    setUrl(url);
+  }, [dataset, collectionType]);
 
   useEffect(() => {
     const datasource = mainManager.getDatasource(layer.datasourceId);
@@ -108,112 +138,120 @@ export const Layer: React.FC<Props> = (props) => {
   }
 
   return (
-    <Accordion
-      defaultValue={`links-${linkLocation?.layerId}-accordion`}
-      items={[
-        {
-          id: `links-${layer.id}-accordion`,
+    <>
+      <Accordion
+        defaultValue={`links-${linkLocation?.layerId}-accordion`}
+        items={[
+          {
+            id: `links-${layer.id}-accordion`,
 
-          title: (
-            <Box className={styles.accordionHeader}>
-              <Group gap="xs">
-                {provider.length > 0 && (
-                  <Text size="sm" fw={700}>
-                    {provider}
-                  </Text>
-                )}
-                <Text size="sm">{dataset?.title}</Text>
-              </Group>
-              {alternateLink ? (
-                <Anchor
-                  title="This dataset in the API"
-                  href={alternateLink}
-                  target="_blank"
-                  className={styles.link}
-                >
+            title: (
+              <Box className={styles.accordionHeader}>
+                <Group gap="xs">
+                  {provider.length > 0 && (
+                    <Text size="sm" fw={700}>
+                      {provider}
+                    </Text>
+                  )}
+                  <Text size="sm">{dataset?.title}</Text>
+                </Group>
+                {alternateLink ? (
+                  <Anchor
+                    title="This dataset in the API"
+                    href={alternateLink}
+                    target="_blank"
+                    className={styles.link}
+                  >
+                    <Title order={5} size="h3">
+                      {layer.name}
+                    </Title>
+                  </Anchor>
+                ) : (
                   <Title order={5} size="h3">
                     {layer.name}
                   </Title>
-                </Anchor>
-              ) : (
-                <Title order={5} size="h3">
-                  {layer.name}
-                </Title>
-              )}
-            </Box>
-          ),
-          control: [CollectionType.EDR, CollectionType.Features].includes(collectionType) ? (
-            <Download collectionId={layer.datasourceId} />
-          ) : null,
-          content: (
-            <Box className={styles.accordionBody}>
-              {!isEnabled || (!hasSelectedLocations && !hasOtherLocations) ? (
-                <Group justify="center" align="center" className={styles.noParameterMessage}>
-                  <Text size="md">
-                    {!isEnabled
-                      ? 'Select at least one parameter for this layer to access links.'
-                      : 'No locations found.'}
-                  </Text>
-                </Group>
-              ) : (
-                <>
-                  {selectedLocations.length > 0 && (
-                    <Accordion
-                      defaultValue={`links-${linkLocation?.layerId}-selected-accordion`}
-                      items={[
-                        {
-                          id: `links-${layer.id}-selected-accordion`,
-                          title: (
-                            <Title order={6} size="h4" className={styles.accordionHeader}>
-                              {otherLocations.length > 0 && 'Selected '}
-                              {getLabel(collectionType)}s
-                            </Title>
-                          ),
-                          content: (
-                            <LayerBlock
-                              linkLocation={linkLocation}
-                              locations={selectedLocations}
-                              layer={layer}
-                              collection={dataset}
-                              collectionType={collectionType}
-                            />
-                          ),
-                        },
-                      ]}
-                      variant={Variant.Secondary}
-                    />
-                  )}
-                  {otherLocations.length > 0 && (
-                    <Accordion
-                      items={[
-                        {
-                          id: `links-${layer.id}-other-accordion`,
-                          title: (
-                            <Title order={6} size="h4" className={styles.accordionHeader}>
-                              {selectedLocations.length > 0 && 'Other '}
-                              {getLabel(collectionType)}s
-                            </Title>
-                          ),
-                          content: (
-                            <LayerBlock
-                              locations={otherLocations}
-                              layer={layer}
-                              collection={dataset}
-                              collectionType={collectionType}
-                            />
-                          ),
-                        },
-                      ]}
-                      variant={Variant.Secondary}
-                    />
-                  )}
-                </>
-              )}
-            </Box>
-          ),
-        },
-      ]}
-      variant={Variant.Primary}
-    />
+                )}
+              </Box>
+            ),
+            control: [CollectionType.EDR, CollectionType.Features].includes(collectionType) ? (
+              <Download collectionId={layer.datasourceId} />
+            ) : null,
+            content: (
+              <Box className={styles.accordionBody}>
+                <Header
+                  url={url}
+                  isLoading={false}
+                  collectionType={collectionType}
+                  onGetAllCSV={() => null}
+                />
+                {!isEnabled || (!hasSelectedLocations && !hasOtherLocations) ? (
+                  <Group justify="center" align="center" className={styles.noParameterMessage}>
+                    <Text size="md">
+                      {!isEnabled
+                        ? 'Select at least one parameter for this layer to access links.'
+                        : 'No locations found.'}
+                    </Text>
+                  </Group>
+                ) : (
+                  <>
+                    {selectedLocations.length > 0 && (
+                      <Accordion
+                        defaultValue={`links-${linkLocation?.layerId}-selected-accordion`}
+                        items={[
+                          {
+                            id: `links-${layer.id}-selected-accordion`,
+                            title: (
+                              <Title order={6} size="h4" className={styles.accordionHeader}>
+                                {otherLocations.length > 0 && 'Selected '}
+                                {getLabel(collectionType)}s
+                              </Title>
+                            ),
+                            content: (
+                              <LayerBlock
+                                linkLocation={linkLocation}
+                                locations={selectedLocations}
+                                layer={layer}
+                                collection={dataset}
+                                collectionType={collectionType}
+                              />
+                            ),
+                          },
+                        ]}
+                        variant={Variant.Secondary}
+                      />
+                    )}
+                    {otherLocations.length > 0 && (
+                      <Accordion
+                        items={[
+                          {
+                            id: `links-${layer.id}-other-accordion`,
+                            title: (
+                              <Title order={6} size="h4" className={styles.accordionHeader}>
+                                {selectedLocations.length > 0 && 'Other '}
+                                {getLabel(collectionType)}s
+                              </Title>
+                            ),
+                            content: (
+                              <LayerBlock
+                                locations={otherLocations}
+                                layer={layer}
+                                collection={dataset}
+                                collectionType={collectionType}
+                              />
+                            ),
+                          },
+                        ]}
+                        variant={Variant.Secondary}
+                      />
+                    )}
+                  </>
+                )}
+              </Box>
+            ),
+          },
+        ]}
+        variant={Variant.Primary}
+      />
+    </>
   );
 };

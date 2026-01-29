@@ -51,6 +51,19 @@ export const buildLocationUrl = (
   return url.toString();
 };
 
+export const buildLocationsUrl = (
+  collectionId: ICollection['id'],
+  parameters: string[]
+): string => {
+  const url = new URL(`${import.meta.env.VITE_AWO_SOURCE}/collections/${collectionId}/locations`);
+
+  if (parameters.length > 0) {
+    url.searchParams.set('parameter-name', parameters.join(','));
+  }
+
+  return url.toString();
+};
+
 export const buildItemUrl = (
   collectionId: ICollection['id'],
   locationId: Location['id'],
@@ -91,19 +104,24 @@ const normalizeBBox = (bbox: BBox) => {
 
 export const buildCubeUrl = (
   collectionId: ICollection['id'],
-  feature: Feature,
   parameters: string[],
   from: string | null,
   to: string | null,
   csv: boolean = false,
-  format: boolean = true
+  format: boolean = true,
+  feature?: Feature,
+  bbox?: BBox
 ): string => {
-  if (!feature.bbox) {
+  if (!(feature && feature.bbox) && !bbox) {
     return '';
   }
 
   const url = new URL(`${import.meta.env.VITE_AWO_SOURCE}/collections/${collectionId}/cube`);
-  url.searchParams.set('bbox', normalizeBBox(feature.bbox).join(','));
+  const queryBbox = bbox ? bbox : feature && feature.bbox ? normalizeBBox(feature.bbox) : null;
+
+  if (queryBbox) {
+    url.searchParams.set('bbox', queryBbox.join(','));
+  }
 
   if (format) {
     url.searchParams.set('f', csv ? 'csv' : 'json');

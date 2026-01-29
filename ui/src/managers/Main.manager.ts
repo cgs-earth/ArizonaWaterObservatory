@@ -71,6 +71,7 @@ import { isSameArray } from '@/utils/compareArrays';
 import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
 import { isTopLayer } from '@/utils/isTopLayer';
+import { joinSentence } from '@/utils/joinSentence';
 import {
   getFillLayerDefinition,
   getLineLayerDefinition,
@@ -1043,7 +1044,7 @@ class MainManager {
     }
   }
 
-  private getBBox(collectionId: ICollection['id']): BBox {
+  public getBBox(collectionId: ICollection['id']): BBox {
     const drawnShapes = this.store.getState().drawnShapes;
 
     if (drawnShapes.length === 0) {
@@ -1098,6 +1099,58 @@ class MainManager {
     }
 
     return sourceId;
+  }
+
+  private getNoDataMessage(
+    name: string,
+    parameterCount: number,
+    collectionId: ICollection['id']
+  ): string {
+    const datasource = this.getDatasource(collectionId);
+    if (!datasource) {
+      return `No data found for layer: ${name}.`;
+    }
+
+    const collectionType = getCollectionType(datasource);
+    const hasDrawnShapes = this.store.getState().drawnShapes.length > 0;
+
+    const suggestions: string[] = [];
+
+    const isEDR = collectionType === CollectionType.EDR;
+    const isEDRGrid = collectionType === CollectionType.EDRGrid;
+    const isFeatures = collectionType === CollectionType.Features;
+
+    if (isEDR || isEDRGrid) {
+      if (parameterCount > 0) {
+        suggestions.push('Try a different parameter');
+      }
+
+      if (isEDRGrid) {
+        suggestions.push(suggestions.length > 0 ? 'date range' : 'Try a different date range');
+
+        if (hasDrawnShapes) {
+          suggestions.push('modify your area of interest');
+        }
+      }
+
+      if (isEDR && hasDrawnShapes) {
+        suggestions.push(
+          suggestions.length > 0
+            ? 'modify your area of interest'
+            : 'Try a different area of interest'
+        );
+      }
+    }
+
+    if (isFeatures && hasDrawnShapes) {
+      suggestions.push('Modify your area of interest');
+    }
+
+    const suggestionText = joinSentence(suggestions, 'or');
+
+    return suggestionText
+      ? `No data found for layer: ${name}. ${suggestionText}.`
+      : 'No data found.';
   }
 
   /**
@@ -1160,6 +1213,12 @@ class MainManager {
       (filtered as any) = undefined;
       next = getNextLink(page);
     } while (next);
+
+    if (aggregate.features.length === 0) {
+      const message = this.getNoDataMessage(layer.name, parameters.length, collectionId);
+
+      notificationManager.show(message, NotificationType.Info, 10000);
+    }
 
     if (layer.paletteDefinition) {
       const features = aggregate.features as Feature<
