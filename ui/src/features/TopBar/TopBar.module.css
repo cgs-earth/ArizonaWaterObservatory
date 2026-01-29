@@ -34,6 +34,10 @@
   padding: calc(var(--default-spacing) * 2);
 }
 
+.tab {
+  border-width: 0 0 0.25rem;
+}
+
 .tabs {
   width: 100%;
 }

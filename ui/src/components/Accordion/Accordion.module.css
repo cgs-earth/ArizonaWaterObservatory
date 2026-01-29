@@ -41,17 +41,12 @@
 }
 
 .chevron {
-  width: 20px;
-  margin-right: var(--default-spacing);
-
-  &[data-rotate] {
-    transform: rotate(45deg);
-  }
+  width: 2.25rem;
 }
 
 .chevron > svg {
-  width: 20px;
-  height: 20px;
+  width: 2.25rem;
+  height: auto;
 }
 
 :where([data-mantine-color-scheme='light']) .chevron > svg {
