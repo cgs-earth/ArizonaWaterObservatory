@@ -239,34 +239,6 @@ export const Draw: React.FC = () => {
                     <Text size="sm">{hide ? 'Show' : 'Hide'}</Text>
                   </Button>
                 )}
-                <Button
-                  size="sm"
-                  className={styles.drawButton}
-                  variant={drawMode === DrawMode.Measure ? Variant.Selected : Variant.Secondary}
-                  onClick={handleMeasure}
-                >
-                  <Text size="sm">{drawMode === DrawMode.Measure ? 'Cancel' : 'Measure'}</Text>
-                </Button>
-              </Group>
-              <Text size="xs" c="dimmed">
-                Visible layers will be toggled off while the draw tool is active. Finish drawing or
-                cancel to toggle layers back on.
-              </Text>
-              <Collapse in={drawMode === DrawMode.Measure}>
-                <RadioGroup
-                  name="measure-unit"
-                  label="Unit of Measure"
-                  value={unit}
-                  onChange={(value) => setUnit(value as MeasureUnit)}
-                >
-                  <Group mt={0}>
-                    <Radio value="miles" label="Miles" />
-                    <Radio value="feet" label="Feet" />
-                    <Radio value="kilometers" label="Kilometers" />
-                  </Group>
-                </RadioGroup>
-              </Collapse>
-              <Group>
                 <Tooltip
                   label={
                     drawnShapes.length === 0
@@ -285,6 +257,16 @@ export const Draw: React.FC = () => {
                     <Text size="sm">Apply</Text>
                   </Button>
                 </Tooltip>
+              </Group>
+              <Text size="xs" c="dimmed">
+                Visible layers will be toggled off while the draw tool is active. Finish drawing,
+                click "Cancel", or press the "Esc" key to toggle layers back on.
+              </Text>
+              <Text size="xs" c="dimmed">
+                Use the "Apply" button to apply any newly drawn shapes to existing layers.
+              </Text>
+
+              <Group>
                 <Button
                   size="sm"
                   className={styles.drawButton}
@@ -293,10 +275,29 @@ export const Draw: React.FC = () => {
                 >
                   <Text size="sm">Clear All</Text>
                 </Button>
+                <Button
+                  size="sm"
+                  className={styles.drawButton}
+                  variant={drawMode === DrawMode.Measure ? Variant.Selected : Variant.Secondary}
+                  onClick={handleMeasure}
+                >
+                  <Text size="sm">{drawMode === DrawMode.Measure ? 'Cancel' : 'Measure'}</Text>
+                </Button>
               </Group>
-              <Text size="xs" c="dimmed">
-                Use the "Apply" button to apply any newly drawn shapes to existing layers.
-              </Text>
+              <Collapse in={drawMode === DrawMode.Measure}>
+                <RadioGroup
+                  name="measure-unit"
+                  label="Unit of Measure"
+                  value={unit}
+                  onChange={(value) => setUnit(value as MeasureUnit)}
+                >
+                  <Group mt={0}>
+                    <Radio value="miles" label="Miles" />
+                    <Radio value="feet" label="Feet" />
+                    <Radio value="kilometers" label="Kilometers" />
+                  </Group>
+                </RadioGroup>
+              </Collapse>
             </Stack>
           }
         />
