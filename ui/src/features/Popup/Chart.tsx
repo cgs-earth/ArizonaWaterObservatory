@@ -155,7 +155,7 @@ export const Chart: React.FC<Props> = (props) => {
       ) : (
         !error && (
           <Group justify="center" align="center" className={styles.chartNoData}>
-            <Text>No Data found for {parameters.join(', ')}</Text>
+            <Text>No Data found for {parameters.join(', ')}. Try a different date range.</Text>
           </Group>
         )
       )}
