@@ -63,16 +63,17 @@ members = [
 ]
 
 [tool.uv.sources]
-pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="d13874427c64ad0e69f12fc2be329dbcf5c85401" }
+# latest tmp-awo branch with fsspec fix
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="5001dd0e62e5f5032094c78c659c5fc9c3d33fd5" }
 pgedr = {git = "https://github.com/internetofwater/pgedr.git", rev="eb6c86dc410bdfdd214c8cb8aa4a67943ae2968a"}
 # it appears that to get the latest code you need to specify the HEAD branch of each package
-usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
-com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
-rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise" , rev="main" }
-snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/snotel" , branch="main" }
-awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , branch="main" }
-awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
-noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
+usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", rev="37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", rev="37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+rise = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/rise" , rev="37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/snotel" , rev="37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , rev="37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", rev="37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , rev="37333b14595d925d72f6ca71c6cee8a99557ad6a" }
 nationalwatermodel = { workspace = true }
 config-store = { workspace = true }
 

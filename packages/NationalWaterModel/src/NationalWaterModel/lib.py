@@ -6,16 +6,17 @@ import logging
 from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
-from com.env import TRACER
+from com.env import TRACER, wwdh_event_loop
 from com.otel import add_args_as_attributes_to_span, otel_trace
 import numpy as np
 from pygeoapi.api import DEFAULT_STORAGE_CRS
+from pygeoapi.crs import get_crs
 from pygeoapi.provider.base import (
     ProviderInvalidDataError,
     ProviderNoDataError,
     ProviderQueryError,
 )
-from pygeoapi.util import DATETIME_FORMAT, get_crs_from_uri
+from pygeoapi.util import DATETIME_FORMAT
 import pyproj
 import s3fs
 import xarray as xr
@@ -96,8 +97,7 @@ def get_zarr_dataset_handle(
         )
 
     fs = s3fs.S3FileSystem(
-        endpoint_url=data,
-        anon=True,
+        endpoint_url=data, anon=True, asynchronous=True, loop=wwdh_event_loop
     )
     mapper = fs.get_mapper(remote_dataset, check=False)
     return xr.open_zarr(mapper, consolidated=True, chunks="auto")
@@ -129,7 +129,7 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
                     f"Failed to parse storage crs: {spatial_ref}"
                 ) from e
 
-    return get_crs_from_uri(DEFAULT_STORAGE_CRS)
+    return get_crs(DEFAULT_STORAGE_CRS)
 
 
 @otel_trace()

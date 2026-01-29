@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.13'",
@@ -232,9 +232,9 @@ server = [
 [package.metadata]
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.12.12" },
-    { name = "awdb-com", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&branch=main" },
-    { name = "awdb-forecasts", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&branch=main" },
-    { name = "com", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&branch=main" },
+    { name = "awdb-com", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a" },
+    { name = "awdb-forecasts", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a" },
+    { name = "com", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a" },
     { name = "config-store", editable = "packages/config_store" },
     { name = "covjson-pydantic", specifier = ">=0.7.0" },
     { name = "gcsfs", specifier = ">=2025.10.0" },
@@ -242,17 +242,17 @@ requires-dist = [
     { name = "geopandas", specifier = ">=1.1.1" },
     { name = "nationalwatermodel", editable = "packages/NationalWaterModel" },
     { name = "netcdf4", specifier = ">=1.7.2" },
-    { name = "noaa-rfc", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fnoaa_rfc&branch=main" },
+    { name = "noaa-rfc", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fnoaa_rfc&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a" },
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.35.0" },
     { name = "opentelemetry-instrumentation-aiohttp-client", specifier = ">=0.56b0" },
     { name = "orjson", specifier = ">=3.11.0" },
     { name = "pgedr", git = "https://github.com/internetofwater/pgedr.git?rev=eb6c86dc410bdfdd214c8cb8aa4a67943ae2968a" },
     { name = "redis", specifier = ">=6.2.0" },
     { name = "rioxarray", specifier = ">=0.19.0" },
-    { name = "rise", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&rev=main" },
+    { name = "rise", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a" },
     { name = "s3fs", specifier = ">=2025.9.0" },
-    { name = "snotel", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&branch=main" },
-    { name = "usace", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&branch=main" },
+    { name = "snotel", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a" },
+    { name = "usace", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a" },
     { name = "xarray", specifier = ">=2025.4.0" },
     { name = "zarr", specifier = ">=2.18.7" },
 ]
@@ -277,7 +277,7 @@ server = [
     { name = "flask-cors", specifier = ">=6.0.2" },
     { name = "gevent", specifier = ">=1.4.0" },
     { name = "gunicorn", specifier = "<24" },
-    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=d13874427c64ad0e69f12fc2be329dbcf5c85401" },
+    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=5001dd0e62e5f5032094c78c659c5fc9c3d33fd5" },
 ]
 
 [[package]]
@@ -301,12 +301,12 @@ wheels = [
 [[package]]
 name = "awdb-com"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&branch=main#e54db81f966f9db1007cce99967cfc5353815fac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
 
 [[package]]
 name = "awdb-forecasts"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&branch=main#e54db81f966f9db1007cce99967cfc5353815fac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
 
 [[package]]
 name = "babel"
@@ -567,7 +567,7 @@ wheels = [
 [[package]]
 name = "com"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&branch=main#e54db81f966f9db1007cce99967cfc5353815fac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
 
 [[package]]
 name = "comm"
@@ -1702,7 +1702,7 @@ wheels = [
 [[package]]
 name = "noaa-rfc"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fnoaa_rfc&branch=main#e54db81f966f9db1007cce99967cfc5353815fac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fnoaa_rfc&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
 
 [[package]]
 name = "nodeenv"
@@ -2487,8 +2487,8 @@ wheels = [
 
 [[package]]
 name = "pygeoapi"
-version = "0.22.dev0"
-source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=d13874427c64ad0e69f12fc2be329dbcf5c85401#d13874427c64ad0e69f12fc2be329dbcf5c85401" }
+version = "0.23.dev0"
+source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=5001dd0e62e5f5032094c78c659c5fc9c3d33fd5#5001dd0e62e5f5032094c78c659c5fc9c3d33fd5" }
 dependencies = [
     { name = "babel" },
     { name = "click" },
@@ -3014,7 +3014,7 @@ wheels = [
 [[package]]
 name = "rise"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&rev=main#ef929d9a0f318ffcc74b9fafa516cd64321b2472" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
 
 [[package]]
 name = "rpds-py"
@@ -3186,7 +3186,7 @@ wheels = [
 [[package]]
 name = "snotel"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&branch=main#e54db81f966f9db1007cce99967cfc5353815fac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
 
 [[package]]
 name = "sqlalchemy"
@@ -3331,7 +3331,7 @@ wheels = [
 [[package]]
 name = "usace"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&branch=main#e54db81f966f9db1007cce99967cfc5353815fac" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&rev=37333b14595d925d72f6ca71c6cee8a99557ad6a#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
 
 [[package]]
 name = "wcwidth"
