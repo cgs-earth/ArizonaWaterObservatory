@@ -96,14 +96,6 @@ resources:
         end: 2023-02-01T00:00:00Z
         trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
     providers:
-      - &nwm-edr
-        type: edr
-        name: NationalWaterModel.EDRProvider
-        data: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com
-        remote_dataset: CONUS/zarr/chrtout.zarr/
-        x_field: longitude
-        y_field: latitude
-        time_field: time
       - &nwm-feature
         type: feature
         name: NationalWaterModel.FeatureProvider
@@ -113,6 +105,14 @@ resources:
         y_field: latitude
         time_field: time
         title_field: id
+      - &nwm-edr
+        type: edr
+        name: NationalWaterModel.EDRProvider
+        data: https://noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com
+        remote_dataset: CONUS/zarr/chrtout.zarr/
+        x_field: longitude
+        y_field: latitude
+        time_field: time
 
   National_Water_Model_Land_Data_Assimilation_System_Output:
     type: collection
@@ -175,10 +175,10 @@ resources:
         rel: documentation
         title: Documentation
         href: https://registry.opendata.aws/nwm-archive/
-    providers:  
-      - <<: *nwm-edr
-        remote_dataset: CONUS/zarr/lakeout.zarr
+    providers:
       - <<: *nwm-feature
+        remote_dataset: CONUS/zarr/lakeout.zarr
+      - <<: *nwm-edr
         remote_dataset: CONUS/zarr/lakeout.zarr
   
   ## This is currently commented out since it relies on adding extra geometry metadata; currently it has no geometry
@@ -198,8 +198,8 @@ resources:
         end: 2023-02-01T00:00:00Z
         trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
     providers:
-      - type: edr
-        name: NationalWaterModel.EDRProvider
+      - type: feature
+        name: NationalWaterModel.FeatureProvider
         is_gcs: true 
         data: asu-awo
         remote_dataset: asu-awo-data/filtered_gwout_with_geometry.zarr
@@ -207,8 +207,8 @@ resources:
         y_field: centroid_lat
         wkb_field: geometry_wkb
         time_field: time
-      - type: feature
-        name: NationalWaterModel.FeatureProvider
+      - type: edr
+        name: NationalWaterModel.EDRProvider
         is_gcs: true 
         data: asu-awo
         remote_dataset: asu-awo-data/filtered_gwout_with_geometry.zarr
@@ -264,16 +264,16 @@ resources:
     keywords:
       - open data
     providers:
-      - &default-edr
-        type: edr
-        name: usace.usace_edr.USACEEDRProvider
-        data: https://water.usace.army.mil/
       - &default-feature
         type: feature
         name: usace.usace.USACEProvider
         data: https://water.usace.army.mil/
         entity: Observation
         title_field: name
+      - &default-edr
+        type: edr
+        name: usace.usace_edr.USACEEDRProvider
+        data: https://water.usace.army.mil/
 
   snotel-edr:
     type: collection
