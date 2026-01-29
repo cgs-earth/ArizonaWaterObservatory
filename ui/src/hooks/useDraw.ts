@@ -10,15 +10,18 @@ import { Feature, MultiPolygon, Polygon } from 'geojson';
 import debounce from 'lodash.debounce';
 import { Map } from 'mapbox-gl';
 import { v6 } from 'uuid';
+import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import { DrawMode } from '@/stores/main/types';
 
 export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
   const [loaded, setLoaded] = useState(false);
 
-  const setDrawMode = useMainStore((store) => store.setDrawMode);
+  const setDrawMode = useMainStore((state) => state.setDrawMode);
 
-  const addDrawnShape = useMainStore((store) => store.addDrawnShape);
+  const addDrawnShape = useMainStore((state) => state.addDrawnShape);
+
+  const layers = useMainStore((state) => state.layers);
 
   const combineFeatures = (feature: Feature<Polygon | MultiPolygon>) => {
     if (!draw || !feature) {
@@ -37,6 +40,7 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
     const validFeature = buffer(feature, 0);
 
     if (validFeature) {
+      // Mark all overlapping features
       polygonFeatures.forEach((existingFeature) => {
         if (existingFeature.id !== feature.id && booleanIntersects(existingFeature, feature)) {
           overlappingFeatures.push(existingFeature);
@@ -47,8 +51,10 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
       const removeDrawnShape = useMainStore.getState().removeDrawnShape;
 
       if (overlappingFeatures.length > 0) {
+        // Set to current drawn feature
         let combined = feature;
 
+        // Combine all overlapping features into one feature
         overlappingFeatures.forEach((feature) => {
           const unionShape = union(featureCollection<Polygon | MultiPolygon>([combined, feature]));
           if (unionShape) {
@@ -56,6 +62,7 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
           }
         });
 
+        // Delete original, un-combined features
         const idsToDelete = overlappingFeatures.map((f) => String(f.id));
         draw.delete(idsToDelete);
         idsToDelete.forEach((id) => {
@@ -63,6 +70,8 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
             removeDrawnShape(id);
           }
         });
+
+        // Set id of new combined feature
         const newId = v6();
         combined.id = newId;
         if (!combined.properties) {
@@ -76,9 +85,12 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
           removeDrawnShape(previousId);
         }
 
+        // Delete current feature
         draw.delete(previousId);
+        // Add combined shape to map
         draw.add(combined);
 
+        // Add combined shape to global state
         addDrawnShape(combined);
       } else {
         const id = feature.id ?? feature.properties?.id;
@@ -126,6 +138,18 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
       if (mode === 'draw_polygon') {
         setDrawMode(DrawMode.Polygon);
       } else {
+        // Reactivate drawn layers
+        for (const layer of layers) {
+          if (layer.visible) {
+            const { pointLayerId, fillLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+              layer.datasourceId,
+              layer.id
+            );
+            [pointLayerId, fillLayerId, lineLayerId].forEach((layerId) => {
+              map.setLayoutProperty(layerId, 'visibility', 'visible');
+            });
+          }
+        }
         setDrawMode(null);
       }
     });

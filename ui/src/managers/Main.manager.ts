@@ -41,6 +41,7 @@ import {
   DEFAULT_RASTER_OPACITY,
   drawLayers,
 } from '@/features/Map/consts';
+import { drawnFeatureContainsExtent } from '@/features/Map/utils';
 import { getNextLink } from '@/managers/Main.utils';
 import notificationManager from '@/managers/Notification.init';
 import {
@@ -69,6 +70,7 @@ import { isValidColorBrewerIndex } from '@/utils/colors/types';
 import { isSameArray } from '@/utils/compareArrays';
 import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
+import { isTopLayer } from '@/utils/isTopLayer';
 import {
   getFillLayerDefinition,
   getLineLayerDefinition,
@@ -813,6 +815,7 @@ class MainManager {
 
     const layers = [...this.store.getState().layers].sort((a, b) => a.position - b.position);
     let lastLayer = '';
+
     for (const layer of layers) {
       const { rasterLayerId, fillLayerId, lineLayerId, pointLayerId } = this.getLocationsLayerIds(
         layer.datasourceId,
@@ -829,6 +832,7 @@ class MainManager {
         }
       }
     }
+
     drawLayers.forEach((layerId) => this.map!.moveLayer(layerId));
   }
 
@@ -1275,39 +1279,87 @@ class MainManager {
     collectionId: ICollection['id']
   ): (e: T) => void {
     return (e) => {
-      e.originalEvent.preventDefault();
+      if (e.originalEvent.cancelBubble) {
+        return;
+      }
 
-      const features = this.map!.queryRenderedFeatures(e.point, {
-        layers: [mapLayerId],
-      });
-      if (features.length > 0) {
-        // Hack, use the feature id to track this location, fetch id store in consuming features
-        const uniqueFeatures = this.getUniqueIds(features, collectionId);
+      const drawnFeatures = this.map!.queryRenderedFeatures(e.point, { layers: drawLayers });
 
-        uniqueFeatures.forEach((locationId) => {
-          if (this.hasLocation(locationId)) {
-            this.store.getState().removeLocation({
-              id: locationId,
-              layerId,
-            });
-          } else {
-            this.store.getState().addLocation({
-              id: locationId,
-              layerId,
-            });
-          }
+      // Check if the edges of the drawn feature are visible
+      const drawnFeature = drawnFeatures[0];
+
+      const includeDrawLayers =
+        drawnFeatures.length > 0 &&
+        !drawnFeatureContainsExtent(drawnFeature, this.draw!, this.map!);
+
+      if (!isTopLayer(layerId, collectionId, this.map!, e.point, includeDrawLayers)) {
+        return;
+      }
+
+      const drawMode = this.store.getState().drawMode;
+
+      const drawInactive = drawMode === null;
+
+      if (drawInactive && !e.originalEvent.defaultPrevented) {
+        e.originalEvent.preventDefault();
+        e.originalEvent.cancelBubble = true;
+
+        const features = this.map!.queryRenderedFeatures(e.point, {
+          layers: [mapLayerId],
         });
+        if (features.length > 0) {
+          // Hack, use the feature id to track this location, fetch id store in consuming features
+          const uniqueFeatures = this.getUniqueIds(features, collectionId);
+
+          uniqueFeatures.forEach((locationId) => {
+            if (this.hasLocation(locationId)) {
+              this.store.getState().removeLocation({
+                id: locationId,
+                layerId,
+              });
+            } else {
+              this.store.getState().addLocation({
+                id: locationId,
+                layerId,
+              });
+            }
+          });
+        }
       }
     };
   }
 
   private getHoverEventHandler(
     name: string,
+    layerId: Layer['id'],
     collectionId: ICollection['id'],
     upperLabel: string,
     lowerLabel: string
   ): (e: MapMouseEvent) => void {
     return (e) => {
+      const drawMode = this.store.getState().drawMode;
+
+      const drawActive = drawMode !== null;
+
+      const drawnFeatures = this.map!.queryRenderedFeatures(e.point, { layers: drawLayers });
+
+      // Check if the edges of the drawn feature are visible
+      const drawnFeature = drawnFeatures[0];
+
+      const includeDrawLayers =
+        drawnFeatures.length > 0 &&
+        !drawnFeatureContainsExtent(drawnFeature, this.draw!, this.map!);
+
+      // As layers can be added in any order, and reordered, perform manual check to ensure popup shows
+      // for top layer in visual order
+      if (!isTopLayer(layerId, collectionId, this.map!, e.point, includeDrawLayers)) {
+        return;
+      }
+
+      if (drawActive) {
+        return;
+      }
+
       this.map!.getCanvas().style.cursor = 'pointer';
       const { features } = e;
       if (features && features.length > 0) {
@@ -1389,12 +1441,24 @@ class MainManager {
         this.map.on(
           'mouseenter',
           [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(layer.name, layer.datasourceId, upperLabel, lowerLabel)
+          this.getHoverEventHandler(
+            layer.name,
+            layer.id,
+            layer.datasourceId,
+            upperLabel,
+            lowerLabel
+          )
         );
         this.map.on(
           'mousemove',
           [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(layer.name, layer.datasourceId, upperLabel, lowerLabel)
+          this.getHoverEventHandler(
+            layer.name,
+            layer.id,
+            layer.datasourceId,
+            upperLabel,
+            lowerLabel
+          )
         );
         this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
           this.map!.getCanvas().style.cursor = '';
@@ -1407,6 +1471,10 @@ class MainManager {
           this.map!.moveLayer(geoFilterLayerId, layerId)
         );
       }
+
+      drawLayers.forEach((layerId) => {
+        this.map!.moveLayer(layerId);
+      });
     }
   }
 

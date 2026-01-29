@@ -24,12 +24,16 @@ import { DrawMode } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { MeasureUnit } from '@/stores/session/slices/measure';
 import { LoadingType, NotificationType, Overlay } from '@/stores/session/types';
+import { drawLayers } from '../Map/consts';
 
 export const Draw: React.FC = () => {
   const [show, setShow] = useState(false);
 
+  const [hide, setHide] = useState(false);
+
   const { map, draw, hoverPopup } = useMap(MAP_ID);
 
+  const layers = useMainStore((store) => store.layers);
   const drawMode = useMainStore((store) => store.drawMode);
   const setDrawMode = useMainStore((store) => store.setDrawMode);
   const drawnShapes = useMainStore((store) => store.drawnShapes);
@@ -74,7 +78,7 @@ export const Draw: React.FC = () => {
   };
 
   const handlePolygon = () => {
-    if (!draw) {
+    if (!draw || !map) {
       return;
     }
 
@@ -82,6 +86,20 @@ export const Draw: React.FC = () => {
       setDrawMode(null);
       draw.changeMode('simple_select');
     } else {
+      // Deactivate visible layers to prevent conflicts with draw tool
+      for (const layer of layers) {
+        if (layer.visible) {
+          const { pointLayerId, fillLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+            layer.datasourceId,
+            layer.id
+          );
+          [pointLayerId, fillLayerId, lineLayerId].forEach((layerId) => {
+            map.setLayoutProperty(layerId, 'visibility', 'none');
+          });
+        }
+      }
+      setHide(false);
+
       // Set manually, modechange wont detect a manual change
       setDrawMode(DrawMode.Polygon);
       draw.changeMode('draw_polygon');
@@ -136,14 +154,39 @@ export const Draw: React.FC = () => {
       if (draw) {
         draw.changeMode('simple_select');
       }
+      if (map) {
+        // Reactivate visible layers
+        for (const layer of layers) {
+          if (layer.visible) {
+            const { pointLayerId, fillLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+              layer.datasourceId,
+              layer.id
+            );
+            [pointLayerId, fillLayerId, lineLayerId].forEach((layerId) => {
+              map.setLayoutProperty(layerId, 'visibility', 'visible');
+            });
+          }
+        }
+      }
     }
   }, [drawMode]);
 
   useEffect(() => {
     if (overlay !== Overlay.Draw) {
       setShow(false);
+      setDrawMode(null);
     }
   }, [overlay]);
+
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+
+    drawLayers.forEach((layerId) => {
+      map.setLayoutProperty(layerId, 'visibility', hide ? 'none' : 'visible');
+    });
+  }, [hide]);
 
   return (
     <>
@@ -168,7 +211,11 @@ export const Draw: React.FC = () => {
             </Tooltip>
           }
           content={
-            <Stack gap="var(--default-spacing)" className={styles.container} align="flex-start">
+            <Stack
+              gap="calc(var(--default-spacing) / 2)"
+              className={styles.drawContainer}
+              align="flex-start"
+            >
               <Title order={5} size="h3">
                 Draw Tools
               </Title>
@@ -180,6 +227,53 @@ export const Draw: React.FC = () => {
                   onClick={handlePolygon}
                 >
                   <Text size="sm">{drawMode === DrawMode.Polygon ? 'Cancel' : 'Draw'}</Text>
+                </Button>
+                {drawnShapes.length > 0 && (
+                  <Button
+                    size="sm"
+                    className={styles.drawButton}
+                    variant={hide ? Variant.Selected : Variant.Secondary}
+                    disabled={drawMode !== null}
+                    onClick={() => setHide(!hide)}
+                  >
+                    <Text size="sm">{hide ? 'Show' : 'Hide'}</Text>
+                  </Button>
+                )}
+                <Tooltip
+                  label={
+                    drawnShapes.length === 0
+                      ? 'Draw or select shapes to restrict shown locations'
+                      : 'Apply shapes to shown locations'
+                  }
+                >
+                  <Button
+                    size="sm"
+                    className={styles.drawButton}
+                    variant={Variant.Primary}
+                    onClick={handleApply}
+                    disabled={drawnShapes.length === 0}
+                    data-disabled={drawnShapes.length === 0}
+                  >
+                    <Text size="sm">Apply</Text>
+                  </Button>
+                </Tooltip>
+              </Group>
+              <Text size="xs" c="dimmed">
+                Visible layers will be toggled off while the draw tool is active. Finish drawing,
+                click "Cancel", or press the "Esc" key to toggle layers back on.
+              </Text>
+              <Text size="xs" c="dimmed">
+                Use the "Apply" button to apply any newly drawn shapes to existing layers.
+              </Text>
+
+              <Group>
+                <Button
+                  size="sm"
+                  className={styles.drawButton}
+                  variant={Variant.Tertiary}
+                  onClick={handleTrash}
+                >
+                  <Text size="sm">Clear All</Text>
                 </Button>
                 <Button
                   size="sm"
@@ -204,34 +298,6 @@ export const Draw: React.FC = () => {
                   </Group>
                 </RadioGroup>
               </Collapse>
-              <Group mt="md">
-                <Tooltip
-                  label={
-                    drawnShapes.length === 0
-                      ? 'Draw or select shapes to restrict shown locations'
-                      : 'Apply shapes to shown locations'
-                  }
-                >
-                  <Button
-                    size="sm"
-                    className={styles.drawButton}
-                    variant={Variant.Primary}
-                    onClick={handleApply}
-                    disabled={drawnShapes.length === 0}
-                    data-disabled={drawnShapes.length === 0}
-                  >
-                    <Text size="sm">Apply</Text>
-                  </Button>
-                </Tooltip>
-                <Button
-                  size="sm"
-                  className={styles.drawButton}
-                  variant={Variant.Tertiary}
-                  onClick={handleTrash}
-                >
-                  <Text size="sm">Clear All</Text>
-                </Button>
-              </Group>
             </Stack>
           }
         />

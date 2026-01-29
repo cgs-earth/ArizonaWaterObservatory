@@ -9,6 +9,8 @@ import { Root } from 'react-dom/client';
 import { CustomListenerFunction, LayerType, MainLayerDefinition } from '@/components/Map/types';
 import { SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent, getMessage } from '@/features/Map/utils';
+import { getLocationsLayerIds } from '@/managers/Main.utils';
+import useMainStore from '@/stores/main';
 
 export const MAP_ID = 'main-map';
 
@@ -194,7 +196,27 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
 
               const message = getMessage(id, active, mode);
               if (message.length > 0) {
-                const html = `<strong style="color:black;">${message}</strong>`;
+                let html = `<strong style="color:black;">${message}</strong>`;
+                if (mode !== 'draw_polygon' && !active) {
+                  const allLayers = useMainStore.getState().layers;
+                  if (allLayers.length > 0) {
+                    const allLayers = useMainStore.getState().layers.flatMap((layer) => {
+                      const { pointLayerId, fillLayerId, lineLayerId } = getLocationsLayerIds(
+                        layer.datasourceId,
+                        layer.id
+                      );
+                      return [pointLayerId, fillLayerId, lineLayerId];
+                    });
+
+                    const layerFeatures = map.queryRenderedFeatures(e.point, {
+                      layers: allLayers,
+                    });
+
+                    if (layerFeatures.length > 0) {
+                      html += `<br/><br/><strong style="color:black;">Zoom in past drawn feature borders, or hide drawn shape, to interact with underlying features.</strong>`;
+                    }
+                  }
+                }
                 hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
               }
             }
@@ -309,7 +331,27 @@ export const getLayerMouseMoveFunction = (id: LayerId | SubLayerId): CustomListe
 
               const message = getMessage(id, active, mode);
               if (message.length > 0) {
-                const html = `<strong style="color:black;">${message}</strong>`;
+                let html = `<strong style="color:black;">${message}</strong>`;
+                if (mode !== 'draw_polygon' && !active) {
+                  const allLayers = useMainStore.getState().layers;
+                  if (allLayers.length > 0) {
+                    const allLayers = useMainStore.getState().layers.flatMap((layer) => {
+                      const { pointLayerId, fillLayerId, lineLayerId } = getLocationsLayerIds(
+                        layer.datasourceId,
+                        layer.id
+                      );
+                      return [pointLayerId, fillLayerId, lineLayerId];
+                    });
+
+                    const layerFeatures = map.queryRenderedFeatures(e.point, {
+                      layers: allLayers,
+                    });
+
+                    if (layerFeatures.length > 0) {
+                      html += `<br/><br/><strong style="color:black;">Zoom in past drawn feature borders, or hide drawn shape, to interact with underlying features.</strong>`;
+                    }
+                  }
+                }
                 hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
               }
             }
