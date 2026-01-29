@@ -32,6 +32,9 @@ dependencies = [
     "geopandas>=1.1.1",
     "pgedr",
     "gcsfs>=2025.10.0",
+    "boto3>=1.41.5",
+    "uvicorn>=0.40.0",
+    "starlette>=0.52.1",
 ]
 
 [dependency-groups]
