@@ -441,6 +441,7 @@ resources:
           mimetype: application/zip
         options:
           s3:
+            asynchronous: true
             anon: true
             requester_pays: false
             client_kwargs:
