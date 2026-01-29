@@ -6,7 +6,7 @@ import logging
 from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
-from com.env import TRACER
+from com.env import TRACER, wwdh_event_loop
 from com.otel import add_args_as_attributes_to_span, otel_trace
 import numpy as np
 from pygeoapi.api import DEFAULT_STORAGE_CRS
@@ -96,8 +96,7 @@ def get_zarr_dataset_handle(
         )
 
     fs = s3fs.S3FileSystem(
-        endpoint_url=data,
-        anon=True,
+        endpoint_url=data, anon=True, asynchronous=True, loop=wwdh_event_loop
     )
     mapper = fs.get_mapper(remote_dataset, check=False)
     return xr.open_zarr(mapper, consolidated=True, chunks="auto")

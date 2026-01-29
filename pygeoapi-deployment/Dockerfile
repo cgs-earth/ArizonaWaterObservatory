@@ -26,7 +26,7 @@ RUN uv sync --no-group etl --all-groups --all-packages
 
 COPY pygeoapi-deployment/ /opt/pygeoapi/pygeoapi-deployment/
 
-COPY pygeoapi.config.yml /opt/pygeoapi/pygeoapi.config.yml
+COPY pygeoapi.config.yml /opt/pygeoapi/local.config.yml
 
 # Set up environment
 ENV PATH="/opt/pygeoapi/.venv/bin:$PATH"
