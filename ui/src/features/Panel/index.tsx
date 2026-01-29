@@ -4,7 +4,18 @@
  */
 
 import { useEffect } from 'react';
-import { ActionIcon, Box, Collapse, Group, Overlay, Stack } from '@mantine/core';
+import {
+  ActionIcon,
+  Box,
+  Collapse,
+  Group,
+  Overlay,
+  Stack,
+  Tabs,
+  Text,
+  Title,
+  Tooltip,
+} from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import Menu from '@/assets/Menu';
 import X from '@/assets/X';
@@ -29,7 +40,8 @@ const Panel: React.FC = () => {
 
   const [opened, { toggle, open, close }] = useDisclosure(true);
 
-  const hasLayers = useMainStore((state) => state.layers.length > 0);
+  const layerCount = useMainStore((state) => state.layers.length);
+  const hasLayers = layerCount > 0;
 
   const getCollections = async () => {
     const loadingInstance = loadingManager.add('Fetching all datasets.', LoadingType.Collections);
@@ -55,6 +67,29 @@ const Panel: React.FC = () => {
       open();
     }
   }, [mobile, open]);
+
+  const datasetsHelpText = (
+    <>
+      <Text size="sm">Datasets are collections of scientific measurements.</Text>
+      <br />
+      <Text size="sm">
+        Click the "+" button to create a layer from a dataset and start interacting <br /> with the
+        data on the map or in application tools.
+      </Text>
+    </>
+  );
+
+  const layerHelpText = (
+    <>
+      <Text size="sm">Layers are customizable instances of a dataset.</Text>
+      <br />
+      <Text size="sm">
+        Add one or more instances of a dataset, then <br />
+        customize it here. Filter locations by parameter, relabel/recolor the layer,
+        <br /> and set a default date range for data exports.
+      </Text>
+    </>
+  );
 
   return (
     <>
@@ -87,8 +122,37 @@ const Panel: React.FC = () => {
               </ActionIcon>
               <Header />
               <Box className={styles.accordions}>
-                <Datasets />
-                <Layers />
+                <Tabs defaultValue="datasets" color="var(--asu-color-primary)">
+                  <Tabs.List className={styles.tabsList}>
+                    <Tabs.Tab value="datasets">
+                      <Tooltip label={datasetsHelpText} openDelay={500} zIndex={302}>
+                        <Title order={2} size={mobile ? 'h4' : 'h3'} className={styles.title}>
+                          Datasets
+                        </Title>
+                      </Tooltip>
+                    </Tabs.Tab>
+                    <Tabs.Tab value="layers" disabled={!hasLayers}>
+                      <Tooltip label={layerHelpText} openDelay={500} zIndex={302}>
+                        <Group gap="var(--default-spacing)">
+                          <Title order={2} size={mobile ? 'h4' : 'h3'} className={styles.title}>
+                            Layers
+                          </Title>
+                          {layerCount > 0 && (
+                            <Box className={styles.indicator}>
+                              <Text size="sm">{layerCount}</Text>
+                            </Box>
+                          )}
+                        </Group>
+                      </Tooltip>
+                    </Tabs.Tab>
+                  </Tabs.List>
+                  <Tabs.Panel value="datasets">
+                    <Datasets />
+                  </Tabs.Panel>
+                  <Tabs.Panel value="layers">
+                    <Layers />
+                  </Tabs.Panel>
+                </Tabs>
               </Box>
               <Group
                 justify="space-between"

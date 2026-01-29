@@ -63,7 +63,7 @@ const Filter: React.FC = () => {
                 }
               : {})}
           />
-          <Tooltip label="Configure filters">
+          <Tooltip label="Configure filters" zIndex={302}>
             <ActionIcon
               variant="transparent"
               size="lg"

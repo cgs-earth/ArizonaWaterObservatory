@@ -12,7 +12,7 @@ import {
   AccordionProps,
   Center,
 } from '@mantine/core';
-import Plus from '@/assets/Plus';
+import Chevron from '@/assets/Chevron';
 import styles from '@/components/Accordion/Accordion.module.css';
 import { Item } from '@/components/Accordion/Accordion.types';
 import { Variant } from '@/components/types';
@@ -57,7 +57,7 @@ const Accordion: React.FC<Props> = (props) => {
         content: styles.content,
         chevron: styles.chevron,
       }}
-      chevron={<Plus />}
+      chevron={<Chevron />}
     >
       {items.map((item) => (
         <AccordionItem key={item.id} value={item.id} ref={item.ref}>
