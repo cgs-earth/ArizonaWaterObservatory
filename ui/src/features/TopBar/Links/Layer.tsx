@@ -8,6 +8,7 @@ import { Anchor, Box, Group, Text, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import { Download } from '@/features/TopBar/Links/Download';
+import { Header } from '@/features/TopBar/Links/Header';
 import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { useLocations } from '@/hooks/useLocations';
@@ -17,7 +18,6 @@ import { Layer as LayerType, Location } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getProvider } from '@/utils/provider';
 import { buildCubeUrl, buildItemsUrl, buildLocationsUrl } from '@/utils/url';
-import { Header } from './Header';
 
 type Props = {
   layer: LayerType;
