@@ -9,12 +9,12 @@ import LegendIcon from '@/assets/Legend';
 import IconButton from '@/components/IconButton';
 import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
+import { Content } from '@/features/Tools/Legend/Content';
+import { ScreenshotUtility } from '@/features/Tools/Legend/ScreenshotUtility';
 import styles from '@/features/Tools/Tools.module.css';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
-import { Content } from './Content';
-import { ScreenshotUtility } from './ScreenshotUtility';
 
 const Legend: React.FC = () => {
   const layers = useMainStore((state) => state.layers);

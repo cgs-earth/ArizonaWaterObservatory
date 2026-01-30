@@ -13,6 +13,7 @@ import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
+import { drawLayers } from '@/features/Map/consts';
 import styles from '@/features/Tools/Tools.module.css';
 import { useDraw } from '@/hooks/useDraw';
 import { useMeasure } from '@/hooks/useMeasure';
@@ -24,7 +25,6 @@ import { DrawMode } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { MeasureUnit } from '@/stores/session/slices/measure';
 import { LoadingType, NotificationType, Overlay } from '@/stores/session/types';
-import { drawLayers } from '../Map/consts';
 
 export const Draw: React.FC = () => {
   const [show, setShow] = useState(false);

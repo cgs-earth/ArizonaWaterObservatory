@@ -80,7 +80,7 @@ const Links: React.FC = () => {
           variant={opened ? Variant.Selected : Variant.Secondary}
           onClick={handleClick}
         >
-          Links
+          Export
         </Button>
       </Tooltip>
       <Modal size="1222px" opened={opened} onClose={close}>

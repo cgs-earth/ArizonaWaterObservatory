@@ -71,12 +71,12 @@ export const Warning: React.FC<Props> = (props) => {
 
   return (
     <Modal size="lg" opened={opened} onClose={handleClose} centered>
-      <Stack className={styles.warningBody} align="center" gap="var(--default-spacing)">
+      <Stack className={styles.warningBody} gap="var(--default-spacing)">
         <Text size="lg" mr="auto" fw={700}>
           Notice
         </Text>
         <Text size="md">
-          This dataset has UI-only restrictions to allow this data to render in browser:
+          This dataset has restrictions to allow this data to render in browser:
         </Text>
         {content}
         <Group justify="space-between" w="100%">
@@ -90,6 +90,9 @@ export const Warning: React.FC<Props> = (props) => {
             label="Don't show again"
           />
         </Group>
+        <Text size="xs" c="dimmed" my="calc(var(--default-spacing) / -2)">
+          This dataset can be interacted with via the API without restrictions.
+        </Text>
       </Stack>
     </Modal>
   );
