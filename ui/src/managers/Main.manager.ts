@@ -932,14 +932,17 @@ class MainManager {
     T extends Geometry = Geometry,
     V extends GeoJsonProperties = GeoJsonProperties,
   >(
+    collectionId: ICollection['id'],
     featureCollection: FeatureCollection<T, V>,
     filterFeatures: Feature<Polygon | MultiPolygon>[] = []
   ): FeatureCollection<T, V> {
-    if (filterFeatures.length > 0) {
-      return this.filterByGeometryType(featureCollection, filterFeatures);
+    let filter = filterFeatures;
+    if (filter.length === 0) {
+      const bbox = this.getBBox(collectionId);
+      const bboxPolygon = turf.bboxPolygon(bbox);
+      filter = [bboxPolygon];
     }
-
-    return featureCollection;
+    return this.filterByGeometryType(featureCollection, filter);
   }
 
   private checkParameterRestrictions(
@@ -1203,7 +1206,7 @@ class MainManager {
         next
       );
 
-      let filtered = this.filterLocations(page, options?.filterFeatures);
+      let filtered = this.filterLocations(collectionId, page, options?.filterFeatures);
       this.clearInvalidLocations(layer.id, collectionId, filtered);
       if (Array.isArray(filtered.features)) {
         aggregate.features.push(...filtered.features);
@@ -1574,7 +1577,7 @@ class MainManager {
     );
 
     const drawnShapes = this.store.getState().drawnShapes;
-    const filteredData = this.filterLocations(data, drawnShapes);
+    const filteredData = this.filterLocations(layer.datasourceId, data, drawnShapes);
 
     return filteredData;
   }

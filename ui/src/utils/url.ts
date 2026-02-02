@@ -53,12 +53,17 @@ export const buildLocationUrl = (
 
 export const buildLocationsUrl = (
   collectionId: ICollection['id'],
-  parameters: string[]
+  parameters: string[],
+  bbox?: BBox
 ): string => {
   const url = new URL(`${import.meta.env.VITE_AWO_SOURCE}/collections/${collectionId}/locations`);
 
   if (parameters.length > 0) {
     url.searchParams.set('parameter-name', parameters.join(','));
+  }
+
+  if (bbox) {
+    url.searchParams.set('bbox', bbox.join(','));
   }
 
   return url.toString();
