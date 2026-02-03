@@ -55,6 +55,8 @@ server = [
     "gevent>=1.4.0",
     "gunicorn<24",
     "pygeoapi",
+    "starlette>=0.52.1",
+    "uvicorn>=0.40.0",
 ]
 
 [tool.uv.workspace]
