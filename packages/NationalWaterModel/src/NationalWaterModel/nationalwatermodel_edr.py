@@ -163,9 +163,6 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             self.y_field,
         )
 
-        parameter_name = select_properties[0]
-        parameter_unit = self.fields[parameter_name]["x-ogc-unit"]
-
         if not location_id:
             return dataset_to_geojson(
                 dataset=projected_dataset,
@@ -174,6 +171,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
                 itemId=None,
                 limit=limit,
             )
+        parameter_name = select_properties[0]
+        parameter_unit = self.fields[parameter_name]["x-ogc-unit"]
 
         return dataset_to_covjson(
             dataset=projected_dataset,
