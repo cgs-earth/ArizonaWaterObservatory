@@ -18,6 +18,7 @@ import xarray as xr
 
 from .lib import (
     ProviderSchema,
+    dataset_to_geojson,
     fetch_data,
     get_crs_from_dataset,
     get_zarr_dataset_handle,
@@ -75,7 +76,9 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         latestValueInDataset = "2023-01-01"
         result = fetch_data(
             bbox=bbox,
-            timeseries_properties_to_fetch=[],
+            timeseries_properties_to_fetch=[]
+            if not select_properties
+            else select_properties,
             datetime_filter=latestValueInDataset
             if not datetime_
             else datetime_,
@@ -97,56 +100,13 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             raster=False,
         )
 
-        features: list[GeojsonFeatureDict] = []
-        x_values = result[self.x_field].values
-        y_values = result[self.y_field].values
-
-        for i, id in enumerate(
-            result["feature_id"].values if not itemId else [itemId]
-        ):
-            other_properties = {}
-            if result.coords:
-                # the coords contain extra metadata properties about the feature
-                for prop in result.coords:
-                    other_properties["id"] = str(id)
-
-                    if (
-                        prop == self.x_field
-                        or prop == self.y_field
-                        or prop == "feature_id"
-                        or prop == "time"
-                    ):
-                        continue
-
-                    other_properties[prop] = str(
-                        result.coords[prop].values[i]
-                        if not itemId
-                        else result.coords[prop].values
-                    )
-            feature: GeojsonFeatureDict = {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [
-                        float(x_values[i] if not itemId else x_values),
-                        float(y_values[i] if not itemId else y_values),
-                    ],
-                },
-                "id": str(id),
-                "properties": other_properties,
-            }
-            if itemId:
-                return feature
-
-            features.append(feature)
-            if i > limit:
-                break
-
-        geojsonResponse: GeojsonFeatureCollectionDict = {
-            "type": "FeatureCollection",
-            "features": features,
-        }
-        return geojsonResponse
+        return dataset_to_geojson(
+            result,
+            self.x_field,
+            self.y_field,
+            itemId,
+            limit,
+        )
 
     @crs_transform
     def query(self, **kwargs):
