@@ -9,7 +9,7 @@ check:
 
 dev:
 	test -f local.openapi.yml || uv run pygeoapi openapi generate pygeoapi.config.yml --output-file local.openapi.yml
-	PYGEOAPI_CONFIG=pygeoapi.config.yml PYGEOAPI_OPENAPI=local.openapi.yml uv run pygeoapi serve
+	PYGEOAPI_CONFIG=pygeoapi.config.yml PYGEOAPI_OPENAPI=local.openapi.yml uv run pygeoapi serve --starlette
 
 deps:
 	# Using uv, install all Python dependencies needed for local development and spin up necessary docker services
@@ -47,3 +47,12 @@ proxy_db:
 adwr_wells_temporal_extent:
 	psql "host=127.0.0.1 port=5432 dbname=edr user=postgres" -t -A -c \
 	"SELECT TO_CHAR(MIN(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS earliest_observation_utc, TO_CHAR(MAX(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS latest_observation_utc FROM edr_quickstart.observations;"
+
+# Syncing ensures that all project dependencies are installed and up-to-date with the lockfile.
+# The lockfile doesn't change when the remote repository is updated so this command should not 
+# alter other dependencies; note that we technically only need to upgrade one package since they are
+# all in the same repo; however, all are listed here for clarity
+pull_git_deps:
+	@for dep in usace rise com snotel awdb_com awdb_forecasts noa_rfc; do \
+		uv sync --upgrade --upgrade-package "$$dep"; \
+	done
