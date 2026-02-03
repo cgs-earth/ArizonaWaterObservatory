@@ -7,6 +7,10 @@ from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
 from com.env import TRACER
+from com.geojson.helpers import (
+    GeojsonFeatureCollectionDict,
+    GeojsonFeatureDict,
+)
 from com.otel import add_args_as_attributes_to_span, otel_trace
 import numpy as np
 from pygeoapi.api import DEFAULT_STORAGE_CRS
@@ -522,3 +526,61 @@ def dataset_to_covjson(
                 },
             },
         }
+
+
+def dataset_to_geojson(
+    dataset: xr.Dataset,
+    x_field: str | None,
+    y_field: str | None,
+    itemId: str | None,
+    limit: int,
+) -> GeojsonFeatureCollectionDict | GeojsonFeatureDict:
+    features: list[GeojsonFeatureDict] = []
+    x_values = dataset[x_field].values
+    y_values = dataset[y_field].values
+
+    for i, id in enumerate(
+        dataset["feature_id"].values if not itemId else [itemId]
+    ):
+        other_properties = {}
+        if dataset.coords:
+            # the coords contain extra metadata properties about the feature
+            for prop in dataset.coords:
+                other_properties["id"] = str(id)
+
+                if (
+                    prop == x_field
+                    or prop == y_field
+                    or prop == "feature_id"
+                    or prop == "time"
+                ):
+                    continue
+
+                other_properties[prop] = str(
+                    dataset.coords[prop].values[i]
+                    if not itemId
+                    else dataset.coords[prop].values
+                )
+        feature: GeojsonFeatureDict = {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    float(x_values[i] if not itemId else x_values),
+                    float(y_values[i] if not itemId else y_values),
+                ],
+            },
+            "id": str(id),
+            "properties": other_properties,
+        }
+        if itemId:
+            return feature
+
+        features.append(feature)
+        if i > limit:
+            break
+    geojsonResponse: GeojsonFeatureCollectionDict = {
+        "type": "FeatureCollection",
+        "features": features,
+    }
+    return geojsonResponse

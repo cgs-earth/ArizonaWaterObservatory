@@ -23,7 +23,12 @@ from NationalWaterModel.lib import (
     fetch_data,
 )
 
-from .lib import get_crs_from_dataset, get_zarr_dataset_handle, project_dataset
+from .lib import (
+    dataset_to_geojson,
+    get_crs_from_dataset,
+    get_zarr_dataset_handle,
+    project_dataset,
+)
 from .nationalwatermodel import (
     ProviderSchema,
 )
@@ -111,15 +116,30 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         """
         Extract data from location
         """
+        if location_id:
+            if not select_properties or len(select_properties) > 1:
+                raise ProviderQueryError(
+                    f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
+                )
+            if not datetime_:
+                raise ProviderQueryError(
+                    "datetime is required to prevent overfetching"
+                )
+        else:
+            if datetime_:
+                raise ProviderQueryError(
+                    "datetime is not supported without location_id as you cannot filter geojson temporally"
+                )
+            # zarr has to fetch some data; if the user is requesting locations/ which is the geojson
+            # representation without timeseries data, we just use the latest date as a dummy time with which
+            # to retrieve some data
+            datetime_ = "2023-01-01"
+            # it is okay if we don't pass in select_properties
+            # since we are just getting the geojson
+            select_properties = (
+                [] if not select_properties else select_properties
+            )
 
-        if not select_properties or len(select_properties) > 1:
-            raise ProviderQueryError(
-                f"Only one property at a time is supported to prevent overfetching, but got {select_properties}"
-            )
-        if not datetime_:
-            raise ProviderQueryError(
-                "datetime is required to prevent overfetching"
-            )
         if bbox:
             bbox = transform_bbox(bbox, DEFAULT_CRS, self.storage_crs)
 
@@ -145,6 +165,15 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         parameter_name = select_properties[0]
         parameter_unit = self.fields[parameter_name]["x-ogc-unit"]
+
+        if not location_id:
+            return dataset_to_geojson(
+                dataset=projected_dataset,
+                x_field=self.x_field,
+                y_field=self.y_field,
+                itemId=None,
+                limit=limit,
+            )
 
         return dataset_to_covjson(
             dataset=projected_dataset,
