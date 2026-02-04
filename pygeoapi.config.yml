@@ -696,9 +696,9 @@ resources:
         data: https://services3.arcgis.com/0OPQIK59PJJqLK0A/arcgis/rest/services/Aquifers_USGS_West/FeatureServer/0
         id_field: OBJECTID
 
-  Active_Managment_Areas_2025:
+  Active_Management_Areas_2025:
     type: collection
-    title: Kyl Center for Water Policy Arizona Water Active Managment Areas
+    title: Kyl Center for Water Policy Arizona Water Active Management Areas
     description: contains designated groundwater-management zones where water withdrawals are under regulatory oversight to address overdraft and ensure long-term sustainability
     provider-name:
       - Kyl Center for Water Policy
@@ -707,7 +707,7 @@ resources:
     links:
       - type: application/html
         rel: canonical
-        title: Active Managment Areas
+        title: Active Management Areas
         href: https://services3.arcgis.com/0OPQIK59PJJqLK0A/ArcGIS/rest/services/Active_Managment_Areas_2025/FeatureServer/0
       - type: application/html
         rel: documentation
