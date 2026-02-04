@@ -698,10 +698,10 @@ resources:
 
   Active_Management_Areas_2025:
     type: collection
-    title: Kyl Center for Water Policy Arizona Water Active Management Areas
+    title: Arizona Department of Water Resources Active Management Areas
     description: contains designated groundwater-management zones where water withdrawals are under regulatory oversight to address overdraft and ensure long-term sustainability
     provider-name:
-      - Kyl Center for Water Policy
+      - Arizona Department of Water Resources
     keywords:
       - management
     links:
