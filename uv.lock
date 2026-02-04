@@ -328,12 +328,12 @@ wheels = [
 [[package]]
 name = "awdb-com"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&branch=main#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_com&branch=main#6dca728e80dc3c269c7eb2fe6304f77b450cd1e9" }
 
 [[package]]
 name = "awdb-forecasts"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&branch=main#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fawdb_forecasts&branch=main#6dca728e80dc3c269c7eb2fe6304f77b450cd1e9" }
 
 [[package]]
 name = "babel"
@@ -573,7 +573,7 @@ wheels = [
 [[package]]
 name = "com"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&branch=main#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fcom&branch=main#6dca728e80dc3c269c7eb2fe6304f77b450cd1e9" }
 
 [[package]]
 name = "comm"
@@ -1787,7 +1787,7 @@ wheels = [
 [[package]]
 name = "noaa-rfc"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fnoaa_rfc&branch=main#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fnoaa_rfc&branch=main#6dca728e80dc3c269c7eb2fe6304f77b450cd1e9" }
 
 [[package]]
 name = "nodeenv"
@@ -3136,7 +3136,7 @@ wheels = [
 [[package]]
 name = "rise"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&rev=main#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&rev=main#6dca728e80dc3c269c7eb2fe6304f77b450cd1e9" }
 
 [[package]]
 name = "rpds-py"
@@ -3308,7 +3308,7 @@ wheels = [
 [[package]]
 name = "snotel"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&branch=main#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fsnotel&branch=main#6dca728e80dc3c269c7eb2fe6304f77b450cd1e9" }
 
 [[package]]
 name = "sqlalchemy"
@@ -3479,7 +3479,7 @@ wheels = [
 [[package]]
 name = "usace"
 version = "0.1.0"
-source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&branch=main#37333b14595d925d72f6ca71c6cee8a99557ad6a" }
+source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&branch=main#6dca728e80dc3c269c7eb2fe6304f77b450cd1e9" }
 
 [[package]]
 name = "uvicorn"
