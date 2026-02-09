@@ -57,6 +57,10 @@ div.mapboxgl-popup-content {
   padding: var(--default-spacing);
 }
 
+input.mapboxgl-ctrl-geocoder--input {
+  user-select: none;
+}
+
 button.mapboxgl-popup-close-button {
   font-size: 1.875rem;
   right: 0px;

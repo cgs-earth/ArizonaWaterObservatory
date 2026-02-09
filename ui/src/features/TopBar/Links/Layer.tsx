@@ -69,7 +69,8 @@ export const Layer: React.FC<Props> = (props) => {
 
     let url = '';
     if (collectionType === CollectionType.EDR) {
-      url = buildLocationsUrl(dataset.id, layer.parameters);
+      const bbox = mainManager.getBBox(dataset.id);
+      url = buildLocationsUrl(dataset.id, layer.parameters, bbox);
     } else if (collectionType === CollectionType.EDRGrid) {
       const bbox = mainManager.getBBox(dataset.id);
       url = buildCubeUrl(

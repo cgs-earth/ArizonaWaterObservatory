@@ -125,9 +125,9 @@ export const Location: React.FC<Props> = (props) => {
               </Button>
             </Tooltip>
           ) : (
-            <Tooltip label="Select one or more parameters in the layer controls to access links modal.">
+            <Tooltip label="Select one or more parameters in the layer controls to access the Export modal.">
               <Button size="xs" variant={Variant.Primary} disabled data-disabled>
-                Link
+                Export
               </Button>
             </Tooltip>
           )}

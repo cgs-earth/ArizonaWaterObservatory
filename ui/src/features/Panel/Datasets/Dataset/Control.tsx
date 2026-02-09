@@ -50,7 +50,10 @@ export const Control: React.FC<Props> = (props) => {
 
       const collectionType = getCollectionType(dataset);
 
-      if (collectionType === CollectionType.EDRGrid) {
+      if (
+        collectionType === CollectionType.EDRGrid &&
+        !restrictions.some((restriction) => restriction.type === RestrictionType.ParameterFirst)
+      ) {
         restrictions.push({
           type: RestrictionType.ParameterFirst,
           message: 'Select at least one parameter before any spatial data can be rendered.',
