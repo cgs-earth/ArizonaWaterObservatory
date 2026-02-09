@@ -1500,28 +1500,30 @@ class MainManager {
           this.getClickEventHandler<MapTouchEvent>(lineLayerId, layer.id, layer.datasourceId)
         );
 
-        this.map.on(
-          'mouseenter',
-          [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(
-            layer.name,
-            layer.id,
-            layer.datasourceId,
-            upperLabel,
-            lowerLabel
-          )
-        );
-        this.map.on(
-          'mousemove',
-          [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(
-            layer.name,
-            layer.id,
-            layer.datasourceId,
-            upperLabel,
-            lowerLabel
-          )
-        );
+        if (collectionType !== CollectionType.Map) {
+          this.map.on(
+            'mouseenter',
+            [pointLayerId, fillLayerId, lineLayerId],
+            this.getHoverEventHandler(
+              layer.name,
+              layer.id,
+              layer.datasourceId,
+              upperLabel,
+              lowerLabel
+            )
+          );
+          this.map.on(
+            'mousemove',
+            [pointLayerId, fillLayerId, lineLayerId],
+            this.getHoverEventHandler(
+              layer.name,
+              layer.id,
+              layer.datasourceId,
+              upperLabel,
+              lowerLabel
+            )
+          );
+        }
         this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
           this.map!.getCanvas().style.cursor = '';
           this.hoverPopup!.remove();

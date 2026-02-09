@@ -25,11 +25,26 @@ export const isTopLayer = (
   );
 
   const allLayers = useMainStore.getState().layers.flatMap((layer) => {
+    const layers = [];
     const { pointLayerId, fillLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
       layer.datasourceId,
       layer.id
     );
-    return [pointLayerId, fillLayerId, lineLayerId];
+
+    // queryRenderedFeatures errors if the layer is not present
+    if (map.getLayer(pointLayerId)) {
+      layers.push(pointLayerId);
+    }
+
+    if (map.getLayer(fillLayerId)) {
+      layers.push(fillLayerId);
+    }
+
+    if (map.getLayer(lineLayerId)) {
+      layers.push(lineLayerId);
+    }
+
+    return layers;
   });
 
   // If draw layers should be included, add them to the list
