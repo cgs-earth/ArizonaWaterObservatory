@@ -13,8 +13,11 @@ import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { useLocations } from '@/hooks/useLocations';
 import mainManager from '@/managers/Main.init';
+import notificationManager from '@/managers/Notification.init';
 import { ICollection } from '@/services/edr.service';
 import { Layer as LayerType, Location } from '@/stores/main/types';
+import useSessionStore from '@/stores/session';
+import { NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getProvider } from '@/utils/provider';
 import { buildCubeUrl, buildItemsUrl, buildLocationsUrl } from '@/utils/url';
@@ -28,6 +31,8 @@ export const Layer: React.FC<Props> = (props) => {
   const { layer, linkLocation } = props;
 
   const { selectedLocations, otherLocations } = useLocations(layer);
+
+  const hasNotification = useSessionStore((state) => state.hasNotification);
 
   const [dataset, setDataset] = useState<ICollection>();
   const [provider, setProvider] = useState<string>('');
@@ -48,8 +53,6 @@ export const Layer: React.FC<Props> = (props) => {
 
     if (newDataset) {
       setDataset(newDataset);
-      const collectionType = getCollectionType(newDataset);
-      setCollectionType(collectionType);
     }
   }, [layer]);
 
@@ -60,6 +63,8 @@ export const Layer: React.FC<Props> = (props) => {
 
     const newProvider = getProvider(dataset.id);
     setProvider(newProvider);
+    const collectionType = getCollectionType(dataset);
+    setCollectionType(collectionType);
   }, [dataset]);
 
   useEffect(() => {
@@ -67,28 +72,37 @@ export const Layer: React.FC<Props> = (props) => {
       return;
     }
 
-    let url = '';
-    if (collectionType === CollectionType.EDR) {
-      const bbox = mainManager.getBBox(dataset.id);
-      url = buildLocationsUrl(dataset.id, layer.parameters, bbox);
-    } else if (collectionType === CollectionType.EDRGrid) {
-      const bbox = mainManager.getBBox(dataset.id);
-      url = buildCubeUrl(
-        dataset.id,
-        layer.parameters,
-        layer.from,
-        layer.to,
-        false,
-        true,
-        undefined,
-        bbox
-      );
-    } else if (collectionType === CollectionType.Features) {
-      url = buildItemsUrl(dataset.id);
-    }
+    try {
+      let url = '';
+      if (collectionType === CollectionType.EDR) {
+        const bbox = mainManager.getBBox(dataset.id);
+        url = buildLocationsUrl(dataset.id, layer.parameters, bbox);
+      } else if (collectionType === CollectionType.EDRGrid) {
+        const bbox = mainManager.getBBox(dataset.id);
+        url = buildCubeUrl(
+          dataset.id,
+          layer.parameters,
+          layer.from,
+          layer.to,
+          false,
+          true,
+          undefined,
+          bbox
+        );
+      } else if (collectionType === CollectionType.Features) {
+        url = buildItemsUrl(dataset.id);
+      }
 
-    setUrl(url);
-  }, [dataset, collectionType]);
+      setUrl(url);
+    } catch (error) {
+      console.error(error);
+      // TODO: determine cause of duplicates
+      const message = `Unable to create base URL for layer: ${layer.name}. Skipping this entry in the Export modal.`;
+      if (!hasNotification(message)) {
+        notificationManager.show(message, NotificationType.Error, 10000);
+      }
+    }
+  }, [collectionType]);
 
   useEffect(() => {
     const datasource = mainManager.getDatasource(layer.datasourceId);
@@ -134,7 +148,7 @@ export const Layer: React.FC<Props> = (props) => {
   const hasOtherLocations = otherLocations.length > 0;
 
   // This is a raster layer with no underlying data
-  if (collectionType === CollectionType.Map) {
+  if (collectionType === CollectionType.Map || url.length === 0) {
     return null;
   }
 

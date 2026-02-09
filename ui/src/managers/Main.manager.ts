@@ -1047,11 +1047,17 @@ class MainManager {
     }
   }
 
-  public getBBox(collectionId: ICollection['id']): BBox {
+  // TODO: revisit approach to errors
+  public getBBox(collectionId: ICollection['id'], canThrowErrors: boolean = true): BBox {
     const drawnShapes = this.store.getState().drawnShapes;
 
     if (drawnShapes.length === 0) {
-      this.checkCollectionBBoxRestrictions(collectionId, turf.area(turf.bboxPolygon(DEFAULT_BBOX)));
+      if (canThrowErrors) {
+        this.checkCollectionBBoxRestrictions(
+          collectionId,
+          turf.area(turf.bboxPolygon(DEFAULT_BBOX))
+        );
+      }
       return DEFAULT_BBOX;
     }
 
@@ -1059,7 +1065,9 @@ class MainManager {
 
     const userBBox = turf.bbox(featureCollection);
 
-    this.validateBBox(userBBox, collectionId);
+    if (canThrowErrors) {
+      this.validateBBox(userBBox, collectionId);
+    }
 
     return userBBox;
   }
