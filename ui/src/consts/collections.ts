@@ -33,7 +33,7 @@ export enum Provider {
 }
 
 export const ProviderDatasources: Record<Provider, string[]> = {
-  [Provider.USBR]: [CollectionId.RISEEdr],
+  [Provider.USBR]: [],
   [Provider.USDA]: [CollectionId.SNOTELEdr],
   [Provider.USGS]: [CollectionId.Streamgages],
   [Provider.USACE]: [CollectionId.USACEEdr],

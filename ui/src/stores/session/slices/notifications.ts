@@ -10,6 +10,7 @@ export interface NotificationsSlice {
   notifications: Notification[];
   addNotification: (notification: Notification) => void;
   removeNotification: (id: string) => void;
+  hasNotification: (text: string) => boolean;
 }
 
 export const createNotificationsSlice: StateCreator<
@@ -17,7 +18,7 @@ export const createNotificationsSlice: StateCreator<
   [['zustand/immer', never]],
   [],
   NotificationsSlice
-> = (set, _get) => ({
+> = (set, get) => ({
   notifications: [],
   addNotification: (notification) =>
     set((state) => ({
@@ -27,4 +28,6 @@ export const createNotificationsSlice: StateCreator<
     set((state) => ({
       notifications: state.notifications.filter((notification) => notification.id !== id),
     })),
+  hasNotification: (text) =>
+    get().notifications.some((notification) => notification.message.includes(text)),
 });
