@@ -172,9 +172,9 @@ export const Grid: React.FC<Props> = (props) => {
           )}
         </Group>
         <Box component="span" className={styles.linkButtonWrapper}>
-          <Tooltip label="Open this location in the Links modal.">
+          <Tooltip label="Open this location in the Export modal.">
             <Button size="xs" onClick={handleLinkClick} variant={Variant.Primary}>
-              Link
+              Export
             </Button>
           </Tooltip>
         </Box>

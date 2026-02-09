@@ -46,9 +46,9 @@ export const Item: React.FC<Props> = (props) => {
           />
         )}
         <Box component="span" className={styles.linkButtonWrapper}>
-          <Tooltip label="Open this item in the Links modal.">
+          <Tooltip label="Open this item in the Export modal.">
             <Button size="xs" onClick={handleLinkClick} variant={Variant.Primary}>
-              Link
+              Export
             </Button>
           </Tooltip>
         </Box>

@@ -3,27 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatePickerInput, DatePickerInputProps } from '@mantine/dates';
+import { DateInput as DateInputComponent, DateInputProps } from '@mantine/dates';
 import styles from '@/components/DateInput/DateInput.module.css';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
-import { getSimplePresetDates } from '@/components/DateInput/utils';
 
-type Props = DatePickerInputProps & {
+// import { getSimplePresetDates } from '@/components/DateInput/utils';
+
+type Props = DateInputProps & {
   simplePresets?: DatePreset[];
 };
 
 const DateInput: React.FC<Props> = (props) => {
-  const { simplePresets, presets, ...datePickerProps } = props;
+  const { simplePresets, ...datePickerProps } = props;
 
-  const simplePresetDates = simplePresets ? getSimplePresetDates(simplePresets) : [];
+  // Retaining this for future reference, remove when custom presets get implemented
+  // const simplePresetDates = simplePresets ? getSimplePresetDates(simplePresets) : [];
 
   return (
-    <DatePickerInput
+    <DateInputComponent
       classNames={{ input: styles.input }}
       size="md"
       radius={0}
       valueFormat="MM/DD/YYYY"
-      presets={[...(presets ?? []), ...simplePresetDates]}
+      // presets={[...(presets ?? []), ...simplePresetDates]}
       {...datePickerProps}
     />
   );
