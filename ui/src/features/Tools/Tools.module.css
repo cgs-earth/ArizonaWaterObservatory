@@ -18,19 +18,24 @@
 }
 
 .colorPicker {
-  width: 135px;
+  width: 8.4375rem;
 }
 
 .container {
-  min-width: 250px;
+  min-width: 15.625rem;
 }
 
 .drawButton {
-  width: 95px;
+  width: 5.9375rem;
+}
+
+.drawContainer {
+  min-width: 22rem;
+  max-width: 22rem;
 }
 
 .dateSelectorContainer {
-  width: 250px;
+  width: 15.625rem;
 }
 
 .dateSelectorButton {
@@ -40,13 +45,24 @@
   left: var(--default-spacing);
 }
 
+.hiddenLegend {
+  display: block;
+  width: 19.875rem;
+  background-color: var(--mantine-color-body);
+  padding: var(--default-spacing);
+
+  .wrapper {
+    max-width: unset;
+  }
+}
+
 /* Manual padding to handle component overflow issues */
 .legendContent {
   padding: unset;
 }
 
 .legendWrapper {
-  width: 350px;
+  width: 21.875rem;
 }
 
 .legendWrapper > * {
@@ -65,12 +81,25 @@
 }
 
 .legendContainer {
-  max-height: calc(100vh - 155px);
+  max-height: calc(100vh - 9.6875rem);
   overflow-y: auto;
 }
 
 .legendTitle {
   margin-top: var(--default-spacing);
+}
+
+.screenshotLoaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+  height: 100px;
+}
+
+.screenshotWrapper {
+  max-width: 12.5rem;
 }
 
 .warningBody {
@@ -110,6 +139,16 @@
   top: var(--default-spacing);
   width: 84px;
   display: none;
+}
+
+.row {
+  flex-direction: row;
+  gap: var(--default-spacing);
+}
+
+.column {
+  flex-direction: column;
+  gap: var(--default-spacing);
 }
 
 @media screen and (max-width: 899px) {

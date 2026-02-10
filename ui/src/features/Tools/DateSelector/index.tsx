@@ -34,16 +34,18 @@ const DateSelector: React.FC<Props> = (props) => {
   };
 
   useEffect(() => {
-    if (overlay !== Overlay.Date) {
-      setShow(false);
-    }
+    setOverlay(Overlay.Date);
+  }, []);
+
+  useEffect(() => {
+    setShow(overlay === Overlay.Date);
   }, [overlay]);
 
   return (
     <Popover
       opened={show}
       onChange={setShow}
-      position="bottom-start"
+      position="right-start"
       closeOnClickOutside={false}
       target={
         <Tooltip label="Change visualized dates." disabled={show}>

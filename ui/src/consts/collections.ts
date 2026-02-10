@@ -15,6 +15,7 @@ export enum CollectionId {
   NWMAssimilationSystem = 'National_Water_Model_Land_Data_Assimilation_System_Output',
   NWMReachToReach = 'National_Water_Data_Reach_to_Reach_Routing_Output',
   NWMLakeOutput = 'National_Water_Model_Lakeout',
+  NWMGroundwaterOutput = 'National_Water_Model_Groundwater_Output',
 
   ArizonaWaterWells = 'ArizonaWaterWells',
   AWDB = 'awdb-forecasts-edr',
@@ -32,7 +33,7 @@ export enum Provider {
 }
 
 export const ProviderDatasources: Record<Provider, string[]> = {
-  [Provider.USBR]: [CollectionId.RISEEdr],
+  [Provider.USBR]: [],
   [Provider.USDA]: [CollectionId.SNOTELEdr],
   [Provider.USGS]: [CollectionId.Streamgages],
   [Provider.USACE]: [CollectionId.USACEEdr],
@@ -56,7 +57,13 @@ export const ItemsOnlyCollections: string[] = [];
 
 // Some collections support locations but the data size is too large to reasonably render
 export const DatasourceCollectionType: Record<CollectionType, string[]> = {
-  [CollectionType.EDRGrid]: [CollectionId.NWMChannelRouting],
+  [CollectionType.EDRGrid]: [
+    CollectionId.NWMChannelRouting,
+    CollectionId.NWMAssimilationSystem,
+    CollectionId.NWMReachToReach,
+    CollectionId.NWMLakeOutput,
+    CollectionId.NWMGroundwaterOutput,
+  ],
   [CollectionType.EDR]: [],
   [CollectionType.Features]: [],
   [CollectionType.Map]: [],
@@ -107,11 +114,11 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
     },
   ],
   [CollectionId.NWMAssimilationSystem]: [
-    {
-      type: RestrictionType.Size,
-      size: 41900000000,
-      message: "Draw a polygon that's roughly 1/8th of Arizona.",
-    },
+    // {
+    //   type: RestrictionType.Size,
+    //   size: 41900000000,
+    //   message: "Draw a polygon that's roughly 1/8th of Arizona.",
+    // },
     {
       type: RestrictionType.Day,
       days: 1,
@@ -150,6 +157,18 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       type: RestrictionType.Day,
       days: 1,
       message: 'Select a date range no greater than one day.',
+    },
+    {
+      type: RestrictionType.Parameter,
+      count: 1,
+      message: 'Select only one parameter.',
+    },
+  ],
+  [CollectionId.NWMGroundwaterOutput]: [
+    {
+      type: RestrictionType.Day,
+      days: 7,
+      message: 'Select a date range no greater than one week.',
     },
     {
       type: RestrictionType.Parameter,

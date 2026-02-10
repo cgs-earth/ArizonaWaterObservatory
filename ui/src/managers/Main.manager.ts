@@ -41,6 +41,7 @@ import {
   DEFAULT_RASTER_OPACITY,
   drawLayers,
 } from '@/features/Map/consts';
+import { drawnFeatureContainsExtent } from '@/features/Map/utils';
 import { getNextLink } from '@/managers/Main.utils';
 import notificationManager from '@/managers/Notification.init';
 import {
@@ -69,6 +70,8 @@ import { isValidColorBrewerIndex } from '@/utils/colors/types';
 import { isSameArray } from '@/utils/compareArrays';
 import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
+import { isTopLayer } from '@/utils/isTopLayer';
+import { joinSentence } from '@/utils/joinSentence';
 import {
   getFillLayerDefinition,
   getLineLayerDefinition,
@@ -813,6 +816,7 @@ class MainManager {
 
     const layers = [...this.store.getState().layers].sort((a, b) => a.position - b.position);
     let lastLayer = '';
+
     for (const layer of layers) {
       const { rasterLayerId, fillLayerId, lineLayerId, pointLayerId } = this.getLocationsLayerIds(
         layer.datasourceId,
@@ -829,6 +833,7 @@ class MainManager {
         }
       }
     }
+
     drawLayers.forEach((layerId) => this.map!.moveLayer(layerId));
   }
 
@@ -927,14 +932,17 @@ class MainManager {
     T extends Geometry = Geometry,
     V extends GeoJsonProperties = GeoJsonProperties,
   >(
+    collectionId: ICollection['id'],
     featureCollection: FeatureCollection<T, V>,
     filterFeatures: Feature<Polygon | MultiPolygon>[] = []
   ): FeatureCollection<T, V> {
-    if (filterFeatures.length > 0) {
-      return this.filterByGeometryType(featureCollection, filterFeatures);
+    let filter = filterFeatures;
+    if (filter.length === 0) {
+      const bbox = this.getBBox(collectionId);
+      const bboxPolygon = turf.bboxPolygon(bbox);
+      filter = [bboxPolygon];
     }
-
-    return featureCollection;
+    return this.filterByGeometryType(featureCollection, filter);
   }
 
   private checkParameterRestrictions(
@@ -1039,11 +1047,17 @@ class MainManager {
     }
   }
 
-  private getBBox(collectionId: ICollection['id']): BBox {
+  // TODO: revisit approach to errors
+  public getBBox(collectionId: ICollection['id'], canThrowErrors: boolean = true): BBox {
     const drawnShapes = this.store.getState().drawnShapes;
 
     if (drawnShapes.length === 0) {
-      this.checkCollectionBBoxRestrictions(collectionId, turf.area(turf.bboxPolygon(DEFAULT_BBOX)));
+      if (canThrowErrors) {
+        this.checkCollectionBBoxRestrictions(
+          collectionId,
+          turf.area(turf.bboxPolygon(DEFAULT_BBOX))
+        );
+      }
       return DEFAULT_BBOX;
     }
 
@@ -1051,7 +1065,9 @@ class MainManager {
 
     const userBBox = turf.bbox(featureCollection);
 
-    this.validateBBox(userBBox, collectionId);
+    if (canThrowErrors) {
+      this.validateBBox(userBBox, collectionId);
+    }
 
     return userBBox;
   }
@@ -1094,6 +1110,58 @@ class MainManager {
     }
 
     return sourceId;
+  }
+
+  private getNoDataMessage(
+    name: string,
+    parameterCount: number,
+    collectionId: ICollection['id']
+  ): string {
+    const datasource = this.getDatasource(collectionId);
+    if (!datasource) {
+      return `No data found for layer: ${name}.`;
+    }
+
+    const collectionType = getCollectionType(datasource);
+    const hasDrawnShapes = this.store.getState().drawnShapes.length > 0;
+
+    const suggestions: string[] = [];
+
+    const isEDR = collectionType === CollectionType.EDR;
+    const isEDRGrid = collectionType === CollectionType.EDRGrid;
+    const isFeatures = collectionType === CollectionType.Features;
+
+    if (isEDR || isEDRGrid) {
+      if (parameterCount > 0) {
+        suggestions.push('Try a different parameter');
+      }
+
+      if (isEDRGrid) {
+        suggestions.push(suggestions.length > 0 ? 'date range' : 'Try a different date range');
+
+        if (hasDrawnShapes) {
+          suggestions.push('modify your area of interest');
+        }
+      }
+
+      if (isEDR && hasDrawnShapes) {
+        suggestions.push(
+          suggestions.length > 0
+            ? 'modify your area of interest'
+            : 'Try a different area of interest'
+        );
+      }
+    }
+
+    if (isFeatures && hasDrawnShapes) {
+      suggestions.push('Modify your area of interest');
+    }
+
+    const suggestionText = joinSentence(suggestions, 'or');
+
+    return suggestionText
+      ? `No data found for layer: ${name}. ${suggestionText}.`
+      : 'No data found.';
   }
 
   /**
@@ -1146,7 +1214,7 @@ class MainManager {
         next
       );
 
-      let filtered = this.filterLocations(page, options?.filterFeatures);
+      let filtered = this.filterLocations(collectionId, page, options?.filterFeatures);
       this.clearInvalidLocations(layer.id, collectionId, filtered);
       if (Array.isArray(filtered.features)) {
         aggregate.features.push(...filtered.features);
@@ -1156,6 +1224,12 @@ class MainManager {
       (filtered as any) = undefined;
       next = getNextLink(page);
     } while (next);
+
+    if (aggregate.features.length === 0) {
+      const message = this.getNoDataMessage(layer.name, parameters.length, collectionId);
+
+      notificationManager.show(message, NotificationType.Info, 10000);
+    }
 
     if (layer.paletteDefinition) {
       const features = aggregate.features as Feature<
@@ -1275,39 +1349,87 @@ class MainManager {
     collectionId: ICollection['id']
   ): (e: T) => void {
     return (e) => {
-      e.originalEvent.preventDefault();
+      if (e.originalEvent.cancelBubble) {
+        return;
+      }
 
-      const features = this.map!.queryRenderedFeatures(e.point, {
-        layers: [mapLayerId],
-      });
-      if (features.length > 0) {
-        // Hack, use the feature id to track this location, fetch id store in consuming features
-        const uniqueFeatures = this.getUniqueIds(features, collectionId);
+      const drawnFeatures = this.map!.queryRenderedFeatures(e.point, { layers: drawLayers });
 
-        uniqueFeatures.forEach((locationId) => {
-          if (this.hasLocation(locationId)) {
-            this.store.getState().removeLocation({
-              id: locationId,
-              layerId,
-            });
-          } else {
-            this.store.getState().addLocation({
-              id: locationId,
-              layerId,
-            });
-          }
+      // Check if the edges of the drawn feature are visible
+      const drawnFeature = drawnFeatures[0];
+
+      const includeDrawLayers =
+        drawnFeatures.length > 0 &&
+        !drawnFeatureContainsExtent(drawnFeature, this.draw!, this.map!);
+
+      if (!isTopLayer(layerId, collectionId, this.map!, e.point, includeDrawLayers)) {
+        return;
+      }
+
+      const drawMode = this.store.getState().drawMode;
+
+      const drawInactive = drawMode === null;
+
+      if (drawInactive && !e.originalEvent.defaultPrevented) {
+        e.originalEvent.preventDefault();
+        e.originalEvent.cancelBubble = true;
+
+        const features = this.map!.queryRenderedFeatures(e.point, {
+          layers: [mapLayerId],
         });
+        if (features.length > 0) {
+          // Hack, use the feature id to track this location, fetch id store in consuming features
+          const uniqueFeatures = this.getUniqueIds(features, collectionId);
+
+          uniqueFeatures.forEach((locationId) => {
+            if (this.hasLocation(locationId)) {
+              this.store.getState().removeLocation({
+                id: locationId,
+                layerId,
+              });
+            } else {
+              this.store.getState().addLocation({
+                id: locationId,
+                layerId,
+              });
+            }
+          });
+        }
       }
     };
   }
 
   private getHoverEventHandler(
     name: string,
+    layerId: Layer['id'],
     collectionId: ICollection['id'],
     upperLabel: string,
     lowerLabel: string
   ): (e: MapMouseEvent) => void {
     return (e) => {
+      const drawMode = this.store.getState().drawMode;
+
+      const drawActive = drawMode !== null;
+
+      const drawnFeatures = this.map!.queryRenderedFeatures(e.point, { layers: drawLayers });
+
+      // Check if the edges of the drawn feature are visible
+      const drawnFeature = drawnFeatures[0];
+
+      const includeDrawLayers =
+        drawnFeatures.length > 0 &&
+        !drawnFeatureContainsExtent(drawnFeature, this.draw!, this.map!);
+
+      // As layers can be added in any order, and reordered, perform manual check to ensure popup shows
+      // for top layer in visual order
+      if (!isTopLayer(layerId, collectionId, this.map!, e.point, includeDrawLayers)) {
+        return;
+      }
+
+      if (drawActive) {
+        return;
+      }
+
       this.map!.getCanvas().style.cursor = 'pointer';
       const { features } = e;
       if (features && features.length > 0) {
@@ -1386,16 +1508,30 @@ class MainManager {
           this.getClickEventHandler<MapTouchEvent>(lineLayerId, layer.id, layer.datasourceId)
         );
 
-        this.map.on(
-          'mouseenter',
-          [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(layer.name, layer.datasourceId, upperLabel, lowerLabel)
-        );
-        this.map.on(
-          'mousemove',
-          [pointLayerId, fillLayerId, lineLayerId],
-          this.getHoverEventHandler(layer.name, layer.datasourceId, upperLabel, lowerLabel)
-        );
+        if (collectionType !== CollectionType.Map) {
+          this.map.on(
+            'mouseenter',
+            [pointLayerId, fillLayerId, lineLayerId],
+            this.getHoverEventHandler(
+              layer.name,
+              layer.id,
+              layer.datasourceId,
+              upperLabel,
+              lowerLabel
+            )
+          );
+          this.map.on(
+            'mousemove',
+            [pointLayerId, fillLayerId, lineLayerId],
+            this.getHoverEventHandler(
+              layer.name,
+              layer.id,
+              layer.datasourceId,
+              upperLabel,
+              lowerLabel
+            )
+          );
+        }
         this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
           this.map!.getCanvas().style.cursor = '';
           this.hoverPopup!.remove();
@@ -1407,6 +1543,10 @@ class MainManager {
           this.map!.moveLayer(geoFilterLayerId, layerId)
         );
       }
+
+      drawLayers.forEach((layerId) => {
+        this.map!.moveLayer(layerId);
+      });
     }
   }
 
@@ -1447,7 +1587,7 @@ class MainManager {
     );
 
     const drawnShapes = this.store.getState().drawnShapes;
-    const filteredData = this.filterLocations(data, drawnShapes);
+    const filteredData = this.filterLocations(layer.datasourceId, data, drawnShapes);
 
     return filteredData;
   }

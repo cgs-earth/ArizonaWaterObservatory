@@ -3,49 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.headerWrapper {
-  padding: var(--default-spacing);
-}
-
-.title {
-  text-align: center;
-}
-
-.panelWrapper {
-  height: 100%;
-  max-height: 100%;
-
-  overflow: hidden;
-}
-
-.panelContent {
-  z-index: 199;
-}
-
-.panelCollapse {
-  width: 100%;
-}
-
-.panelOpen {
-  width: 25rem;
-}
-
-.panelClosed {
-  width: 0px;
-  max-width: 0px;
-}
-
-.panelBody {
-  flex-grow: 0;
-
-  overflow: hidden;
-}
-
-.panelGroup {
-  height: inherit;
-  width: 100%;
-}
-
 .accordions {
   width: 100%;
   max-height: calc(100vh - 220px);
@@ -63,43 +20,10 @@
   overflow-y: auto;
 }
 
-.deleteLocationsItem {
-  color: var(--error);
-  fill: var(--error);
-  stroke: var(--error);
-}
-
-.subDropdown {
-  max-height: 95vh;
-  overflow-y: auto;
-}
-
-.toggleButton {
-  height: inherit;
-  width: 22px;
-}
-
-.toggleButton svg {
-  width: 20px;
-  height: 20px;
-}
-
-.toggleClosed svg {
-  transform: rotateY(180deg);
-}
-
-.fallbackWrapper {
-  padding: calc(var(--default-spacing) * 4);
-}
-
-.logo {
-  width: 150px;
-  height: 50px; /* TODO: height auto */
-  background-color: pink; /* REMOVE AFTER WE GET THE LOGO */
-}
-
 .actionIconRoot {
-  margin-right: var(--default-spacing);
+  margin-left: calc(var(--default-spacing) / 2);
+  margin-right: calc(var(--default-spacing) / 2);
+  padding: 1px;
 }
 
 .actionIcon {
@@ -123,6 +47,25 @@
   overflow-x: hidden;
 }
 
+.datasetControl {
+  width: 2.8125rem;
+  height: auto;
+}
+
+.datasetControl svg {
+  width: 200rem;
+}
+
+.datePicker {
+  width: calc(50% - var(--default-spacing));
+}
+
+.deleteLocationsItem {
+  color: var(--error);
+  fill: var(--error);
+  stroke: var(--error);
+}
+
 .gradientContainer {
   width: 100%;
   margin: 0 auto;
@@ -139,11 +82,28 @@
   justify-content: space-between;
 }
 
-.layerInput {
-  width: calc(50% - var(--default-spacing));
+.hasLayers:not(:disabled) {
+  background: var(--asu-green);
 }
 
-.datePicker {
+.headerWrapper {
+  padding: var(--default-spacing);
+  background: var(--mantine-color-body);
+  z-index: 200; /* Accordion icons will show over */
+}
+
+.fallbackWrapper {
+  padding: calc(var(--default-spacing) * 4);
+}
+
+.indicator {
+  background: var(--asu-green);
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 3px;
+}
+
+.layerInput {
   width: calc(50% - var(--default-spacing));
 }
 
@@ -164,6 +124,75 @@
   margin-right: unset;
   display: none;
   z-index: 1;
+}
+
+.panelBody {
+  flex-grow: 0;
+
+  overflow: hidden;
+}
+
+.panelCollapse {
+  width: 100%;
+}
+
+.panelContent {
+  z-index: 199;
+}
+
+.panelClosed {
+  width: 0px;
+  max-width: 0px;
+}
+
+.panelGroup {
+  height: inherit;
+  width: 100%;
+}
+
+.panelOpen {
+  width: 25rem;
+}
+
+.panelWrapper {
+  height: 100%;
+  max-height: 100%;
+
+  overflow: hidden;
+}
+
+.subDropdown {
+  max-height: 95vh;
+  overflow-y: auto;
+}
+
+.tab {
+  border-width: 0 0 0.25rem;
+}
+
+.tabsList {
+  position: sticky;
+  top: 0;
+  background: var(--mantine-color-body);
+  z-index: 200; /* Accordion icons will show over */
+}
+
+.title {
+  text-align: center;
+}
+
+.toggleButton {
+  height: inherit;
+  width: 22px;
+}
+
+.toggleButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.toggleClosed svg {
+  transform: rotateY(180deg);
 }
 
 @media screen and (max-width: 899px) {

@@ -17,10 +17,10 @@ export enum NotificationType {
 }
 
 export enum LoadingType {
-  Locations = 'locations',
   Collections = 'collections',
-  Geography = 'geography',
   Data = 'data',
+  Geography = 'geography',
+  Locations = 'locations',
   Share = 'share',
 }
 
@@ -29,16 +29,17 @@ export enum Tool {
 }
 
 export enum Overlay {
-  Filter = 'filter',
-  Links = 'links',
-  Share = 'share',
-  Draw = 'draw',
   Basemap = 'basemap',
-  Legend = 'legend',
-  Info = 'info',
-  Warning = 'warning',
-  Download = 'download',
   Date = 'date',
+  Draw = 'draw',
+  Download = 'download',
+  Filter = 'filter',
+  Info = 'info',
+  Legend = 'legend',
+  Links = 'links',
+  Screenshot = 'screenshot',
+  Share = 'share',
+  Warning = 'warning',
 }
 
 export type Notification = {
@@ -67,9 +68,9 @@ export type LegendEntry = {
 };
 export enum HelpTab {
   About = 'about',
+  Contact = 'contact',
   FAQ = 'FAQ',
   Glossary = 'glossary',
-  Contact = 'contact',
 }
 
 export type SessionState = {

@@ -18,6 +18,7 @@ import useMainStore from '@/stores/main';
 import { Location } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
+import { isTopLayer } from '@/utils/isTopLayer';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;
@@ -66,6 +67,17 @@ const MainMap: React.FC<Props> = (props) => {
 
     mainManager.setMap(map);
 
+    map.on('mousedown', () => {
+      if (
+        window &&
+        window.getSelection &&
+        window.getSelection() &&
+        window.getSelection()?.removeAllRanges
+      ) {
+        window.getSelection()!.removeAllRanges();
+      }
+    });
+
     if (initialMapLoad.current) {
       map.resize();
       map.fitBounds(
@@ -111,7 +123,7 @@ const MainMap: React.FC<Props> = (props) => {
   }, [shouldResize]);
 
   useEffect(() => {
-    if (!map || !persistentPopup || !hoverPopup || !root || !container) {
+    if (!map || !persistentPopup || !hoverPopup || !root || !container || !draw) {
       return;
     }
 
@@ -127,6 +139,18 @@ const MainMap: React.FC<Props> = (props) => {
       allIds.push(fillLayerId);
       if (!layerPopupListeners[layer.id]) {
         map.on('dblclick', [pointLayerId, lineLayerId, fillLayerId], (e) => {
+          const drawnFeatures = map.queryRenderedFeatures(e.point, { layers: drawLayers });
+
+          // Check if the edges of the drawn feature are visible
+          const drawnFeature = drawnFeatures[0];
+
+          const includeDrawLayers =
+            drawnFeatures.length > 0 && !drawnFeatureContainsExtent(drawnFeature, draw, map);
+
+          if (!isTopLayer(layer.id, layer.datasourceId, map, e.point, includeDrawLayers)) {
+            return;
+          }
+
           const features = e.features;
           if (features && features.length > 0) {
             hoverPopup.remove();
@@ -176,7 +200,7 @@ const MainMap: React.FC<Props> = (props) => {
 
     // Simple blocker to prevent draw layer selection through other features
     const blockDrawEvents = (e: MapMouseEvent) => {
-      const features = map.queryRenderedFeatures(e.point, { layers: allIds });
+      // const features = map.queryRenderedFeatures(e.point, { layers: allIds });
       const drawnFeatures = map.queryRenderedFeatures(e.point, { layers: drawLayers });
 
       // Check if the edges of the drawn feature are visible
@@ -187,11 +211,11 @@ const MainMap: React.FC<Props> = (props) => {
         draw.changeMode('simple_select', { featureIds: [] });
       }
 
-      if (features.length) {
-        e.originalEvent.preventDefault();
-        e.originalEvent.stopPropagation();
-        draw.changeMode('simple_select', { featureIds: [] });
-      }
+      // if (features.length) {
+      //   e.originalEvent.preventDefault();
+      //   e.originalEvent.stopPropagation();
+      //   draw.changeMode('simple_select', { featureIds: [] });
+      // }
     };
 
     map.on('mousedown', drawLayers, blockDrawEvents);

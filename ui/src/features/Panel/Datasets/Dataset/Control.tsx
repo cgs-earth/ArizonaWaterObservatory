@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ActionIcon, List, Tooltip } from '@mantine/core';
-import Map from '@/assets/Map';
+import AddLocation from '@/assets/AddLocation';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import styles from '@/features/Panel/Panel.module.css';
 import { useLoading } from '@/hooks/useLoading';
@@ -34,6 +34,8 @@ export const Control: React.FC<Props> = (props) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const [hasLayers, setHasLayers] = useState(false);
+
   const controller = useRef<AbortController | null>(null);
   const isMounted = useRef(false);
 
@@ -48,7 +50,10 @@ export const Control: React.FC<Props> = (props) => {
 
       const collectionType = getCollectionType(dataset);
 
-      if (collectionType === CollectionType.EDRGrid) {
+      if (
+        collectionType === CollectionType.EDRGrid &&
+        !restrictions.some((restriction) => restriction.type === RestrictionType.ParameterFirst)
+      ) {
         restrictions.push({
           type: RestrictionType.ParameterFirst,
           message: 'Select at least one parameter before any spatial data can be rendered.',
@@ -104,6 +109,11 @@ export const Control: React.FC<Props> = (props) => {
     };
   }, []);
 
+  useEffect(() => {
+    const hasLayers = mainManager.getDatasourceCount(dataset.id) > 0;
+    setHasLayers(hasLayers);
+  }, [layerCount]);
+
   const atLayerLimit = layerCount === 10;
   const isControlDisabled =
     atLayerLimit || isLoading || isLoadingGeography || isParameterSelectionOverLimit;
@@ -135,11 +145,12 @@ export const Control: React.FC<Props> = (props) => {
         variant="transparent"
         title="Add Layer"
         classNames={{ root: styles.actionIconRoot, icon: styles.actionIcon }}
+        className={`${styles.datasetControl} ${hasLayers ? styles.hasLayers : ''}`}
         disabled={isControlDisabled}
         data-disabled={isControlDisabled}
         onClick={() => handleClick(dataset.title ?? dataset.id, dataset.id)}
       >
-        <Map />
+        <AddLocation />
       </ActionIcon>
     </Tooltip>
   );

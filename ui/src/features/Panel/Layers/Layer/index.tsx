@@ -399,7 +399,7 @@ const Layer: React.FC<Props> = (props) => {
           />
         )}
       {showFeaturesMessage && (
-        <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">
+        <Text size="xs" mt={-4} c="dimmed">
           This is a features layer which contains no parameter values. Rendered data is a standard
           feature collection with accessible properties and no underlying data.
         </Text>
@@ -449,11 +449,21 @@ const Layer: React.FC<Props> = (props) => {
               error={getDateInputError()}
             />
           </Group>
+          {collectionType === CollectionType.EDR && (
+            <>
+              <Text size="xs" mt={-4} c="dimmed">
+                This date range is used to fetch timeseries for populating the chart at each
+                location. This date range has no impact on what locations are shown on the map.
+              </Text>
+              <Divider />
+            </>
+          )}
           {showDateRangeWarning && (
             <>
-              <Text size="xs" mt={-4} c="var(--mantine-color-dimmed)">
-                If no data renders after the layer is finished updating, increase the date range to
-                find more data.
+              <Text size="xs" mt={-4} c="dimmed">
+                This date range is used for fetching data and rendering features on the map. If no
+                data renders after the layer is finished updating, increase the date range to find
+                more data.
               </Text>
               <Divider />
             </>

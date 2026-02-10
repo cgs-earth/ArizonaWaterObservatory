@@ -3,17 +3,16 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { Fragment, useEffect, useRef, useState } from 'react';
-import { Box, Divider, Stack, Title, Tooltip } from '@mantine/core';
+import { useEffect, useRef, useState } from 'react';
+import { Stack, Title, Tooltip } from '@mantine/core';
 import LegendIcon from '@/assets/Legend';
 import IconButton from '@/components/IconButton';
 import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
-import { Entry } from '@/features/Tools/Legend/Entry';
+import { Content } from '@/features/Tools/Legend/Content';
+import { ScreenshotUtility } from '@/features/Tools/Legend/ScreenshotUtility';
 import styles from '@/features/Tools/Tools.module.css';
-import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
-import { Layer } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 
@@ -26,60 +25,6 @@ const Legend: React.FC = () => {
   const firstLayer = useRef(true);
 
   const [show, setShow] = useState(false);
-
-  const handleColorChange = (color: Layer['color'], layerId: Layer['id']) => {
-    const layer = mainManager.getLayer(layerId);
-
-    if (layer) {
-      void mainManager.updateLayer(
-        layer,
-        layer.name,
-        color,
-        layer.parameters,
-        layer.from,
-        layer.to,
-        layer.visible,
-        layer.opacity,
-        layer.paletteDefinition
-      );
-    }
-  };
-
-  const handleVisibilityChange = (visible: boolean, layerId: Layer['id']) => {
-    const layer = mainManager.getLayer(layerId);
-
-    if (layer) {
-      void mainManager.updateLayer(
-        layer,
-        layer.name,
-        layer.color,
-        layer.parameters,
-        layer.from,
-        layer.to,
-        visible,
-        layer.opacity,
-        layer.paletteDefinition
-      );
-    }
-  };
-
-  const handleOpacityChange = (opacity: number, layerId: Layer['id']) => {
-    const layer = mainManager.getLayer(layerId);
-
-    if (layer) {
-      void mainManager.updateLayer(
-        layer,
-        layer.name,
-        layer.color,
-        layer.parameters,
-        layer.from,
-        layer.to,
-        layer.visible,
-        opacity,
-        layer.paletteDefinition
-      );
-    }
-  };
 
   const handleShow = (show: boolean) => {
     setOverlay(show ? Overlay.Legend : null);
@@ -107,52 +52,43 @@ const Legend: React.FC = () => {
   });
 
   return (
-    <Popover
-      offset={16}
-      opened={show}
-      onChange={setShow}
-      closeOnClickOutside={false}
-      classNames={{ dropdown: styles.legendContent }}
-      position="bottom-start"
-      target={
-        <Tooltip
-          label={layers.length > 0 ? 'View map legend.' : 'No layers added to legend.'}
-          disabled={show}
-        >
-          <IconButton
-            disabled={layers.length === 0}
-            data-disabled={layers.length === 0}
-            variant={show ? Variant.Selected : Variant.Secondary}
-            onClick={() => handleShow(!show)}
+    <>
+      <Popover
+        offset={16}
+        opened={show}
+        onChange={setShow}
+        closeOnClickOutside={false}
+        classNames={{ dropdown: styles.legendContent }}
+        position="bottom-start"
+        target={
+          <Tooltip
+            label={layers.length > 0 ? 'View map legend.' : 'No layers added to legend.'}
+            disabled={show}
           >
-            <LegendIcon />
-          </IconButton>
-        </Tooltip>
-      }
-      content={
-        <Stack
-          gap="var(--default-spacing)"
-          className={`${styles.container} ${styles.legendWrapper}`}
-        >
-          <Title order={5} size="h3" className={styles.legendTitle}>
-            Legend
-          </Title>
-          <Box className={styles.legendContainer}>
-            {layers.map((layer, index) => (
-              <Fragment key={`legend-entry-${layer.id}`}>
-                <Entry
-                  layer={layer}
-                  handleColorChange={handleColorChange}
-                  handleVisibilityChange={handleVisibilityChange}
-                  handleOpacityChange={handleOpacityChange}
-                />
-                {index < layers.length - 1 && <Divider />}
-              </Fragment>
-            ))}
-          </Box>
-        </Stack>
-      }
-    />
+            <IconButton
+              disabled={layers.length === 0}
+              data-disabled={layers.length === 0}
+              variant={show ? Variant.Selected : Variant.Secondary}
+              onClick={() => handleShow(!show)}
+            >
+              <LegendIcon />
+            </IconButton>
+          </Tooltip>
+        }
+        content={
+          <Stack
+            gap="var(--default-spacing)"
+            className={`${styles.container} ${styles.legendWrapper}`}
+          >
+            <Title order={5} size="h3" className={styles.legendTitle}>
+              Legend
+            </Title>
+            <Content layers={layers} showControls className={styles.legendContainer} />
+          </Stack>
+        }
+      />
+      <ScreenshotUtility layers={layers} />
+    </>
   );
 };
 

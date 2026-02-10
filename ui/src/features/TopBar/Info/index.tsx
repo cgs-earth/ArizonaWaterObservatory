@@ -72,10 +72,14 @@ const Info: React.FC = () => {
         <Tabs
           value={helpTab}
           color="var(--asu-color-primary)"
+          classNames={{
+            tab: styles.tab,
+            list: styles.tabsList,
+          }}
           className={`${styles.modalBody} ${styles.tabs}`}
           onChange={(tab) => setHelpTab(tab as HelpTab)}
         >
-          <Tabs.List className={styles.tabsList} grow>
+          <Tabs.List grow>
             <Tabs.Tab value={HelpTab.About}>
               <Text size="md" fw={700}>
                 About

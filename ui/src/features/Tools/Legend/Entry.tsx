@@ -12,7 +12,8 @@ import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { Shapes } from '@/features/Tools/Legend/Shapes';
 import styles from '@/features/Tools/Tools.module.css';
 import mainManager from '@/managers/Main.init';
-import { Layer } from '@/stores/main/types';
+import useMainStore from '@/stores/main';
+import { DrawMode, Layer } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 
 type Props = {
@@ -20,12 +21,23 @@ type Props = {
   handleColorChange: (color: Layer['color'], layerId: Layer['id']) => void;
   handleVisibilityChange: (visible: boolean, layerId: Layer['id']) => void;
   handleOpacityChange: (opacity: Layer['opacity'], layerId: Layer['id']) => void;
+  showControls?: boolean;
+  direction?: 'row' | 'column';
 };
 
 export const Entry: React.FC<Props> = (props) => {
-  const { layer, handleColorChange, handleVisibilityChange, handleOpacityChange } = props;
+  const {
+    layer,
+    handleColorChange,
+    handleVisibilityChange,
+    handleOpacityChange,
+    showControls = true,
+    direction,
+  } = props;
 
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
+
+  const drawMode = useMainStore((store) => store.drawMode);
 
   useEffect(() => {
     const collection = mainManager.getDatasource(layer.datasourceId);
@@ -36,12 +48,13 @@ export const Entry: React.FC<Props> = (props) => {
     }
   }, [layer]);
 
-  const showColors = [CollectionType.EDR, CollectionType.EDRGrid, CollectionType.Features].includes(
-    collectionType
-  );
+  const showColors =
+    showControls &&
+    [CollectionType.EDR, CollectionType.EDRGrid, CollectionType.Features].includes(collectionType);
   const showShapes = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
   const showGrid = [CollectionType.EDRGrid].includes(collectionType);
-  const showOpacity = [CollectionType.EDRGrid, CollectionType.Map].includes(collectionType);
+  const showOpacity =
+    showControls && [CollectionType.EDRGrid, CollectionType.Map].includes(collectionType);
 
   return (
     <Stack w="100%" gap="xs" className={styles.legendEntry}>
@@ -63,43 +76,52 @@ export const Entry: React.FC<Props> = (props) => {
             color={layer.color as ExpressionSpecification}
             paletteDefinition={layer.paletteDefinition}
           />
-          <Switch
-            size="lg"
-            mb="calc(var(--default-spacing) / 2)"
-            onLabel="VISIBLE"
-            offLabel="HIDDEN"
-            checked={layer.visible}
-            onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
-          />
+          {showControls && (
+            <Switch
+              size="lg"
+              mb="calc(var(--default-spacing) / 2)"
+              onLabel="VISIBLE"
+              offLabel="HIDDEN"
+              checked={layer.visible}
+              disabled={drawMode === DrawMode.Polygon}
+              onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
+            />
+          )}
         </>
       ) : (
         typeof layer.color === 'string' && (
           <Group w="100%" justify="space-between" align="flex-start">
-            <Stack justify="flex-start">
-              {showColors && (
-                <ColorInput
-                  label={
-                    <Text size="xs" mt={0}>
-                      Symbol Color
-                    </Text>
-                  }
-                  value={layer.color}
-                  onChange={(color) => handleColorChange(color, layer.id)}
-                  className={styles.colorPicker}
-                />
-              )}
+            {(showColors || showControls) && (
+              <Stack justify="flex-start">
+                {showColors && (
+                  <ColorInput
+                    label={
+                      <Text size="xs" mt={0}>
+                        Symbol Color
+                      </Text>
+                    }
+                    value={layer.color}
+                    onChange={(color) => handleColorChange(color, layer.id)}
+                    className={styles.colorPicker}
+                  />
+                )}
 
-              <Switch
-                size="lg"
-                mb="calc(var(--default-spacing) / 2)"
-                onLabel="VISIBLE"
-                offLabel="HIDDEN"
-                checked={layer.visible}
-                onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
-              />
-            </Stack>
-            {showShapes && <Shapes color={layer.color} />}
-            {showGrid && <Grid color={layer.color} />}
+                {showControls && (
+                  <Switch
+                    size="lg"
+                    mb="calc(var(--default-spacing) / 2)"
+                    onLabel="VISIBLE"
+                    offLabel="HIDDEN"
+                    checked={layer.visible}
+                    disabled={drawMode === DrawMode.Polygon}
+                    onChange={(event) => handleVisibilityChange(event.target.checked, layer.id)}
+                  />
+                )}
+              </Stack>
+            )}
+
+            {showShapes && <Shapes layerId={layer.id} color={layer.color} direction={direction} />}
+            {showGrid && <Grid layerId={layer.id} color={layer.color} direction={direction} />}
           </Group>
         )
       )}
