@@ -91,5 +91,6 @@ def test_national_water_model_multipointseries_single_datetime_and_single_point(
 
 
 def test_elevation_coord_isnt_queryable():
+    """elevation is a coordinate and not a timeseries variable so it should be filtered out"""
     fields = channelRoutingOutProvider.get_fields()
     assert "elevation" not in fields
