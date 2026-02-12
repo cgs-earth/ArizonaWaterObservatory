@@ -76,9 +76,21 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
     def get_fields(self) -> EDRFieldsMapping:
         """Get the list of all parameters (i.e. fields) that the user can filter by"""
         if not self._fields:
+            # we have to filter by both coords and variables since some coords (i.e. elevation) are sometimes listed
+            # as variables in zarr; i.e. such coords are arrays but not really dataset params that make sense to query by
+            #  (i.e. a coord like elevation is typically 1:1 for each feature)
+            coords = list(self.zarr_dataset.coords)
             for var, meta in self.zarr_dataset.variables.items():
                 var = str(var)
-                if var in (self.x_field, self.y_field, self.time_field):
+                if (
+                    var
+                    in (
+                        self.x_field,
+                        self.y_field,
+                        self.time_field,
+                    )
+                    or var in coords
+                ):
                     continue
 
                 if meta.attrs.get("units") is None:

@@ -88,3 +88,9 @@ def test_national_water_model_multipointseries_single_datetime_and_single_point(
     assert isinstance(res, dict) and "coverages" in res
     numCoverages = len(res["coverages"])
     assert numCoverages == 1, f"Expected 1 coverage, got {numCoverages}"
+
+
+def test_elevation_coord_isnt_queryable():
+    """elevation is a coordinate and not a timeseries variable so it should be filtered out"""
+    fields = channelRoutingOutProvider.get_fields()
+    assert "elevation" not in fields
