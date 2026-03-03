@@ -1231,14 +1231,6 @@ class MainManager {
       notificationManager.show(message, NotificationType.Info, 10000);
     }
 
-    if (layer.paletteDefinition) {
-      const features = aggregate.features as Feature<
-        Geometry,
-        { [layer.paletteDefinition.parameter]: number }
-      >[];
-      this.styleLayer(layer, layer.paletteDefinition, { features, signal: options?.signal });
-    }
-
     (aggregate as any) = undefined;
 
     return sourceId;
@@ -1677,13 +1669,14 @@ class MainManager {
     // If the parameters have changed, or this is a grid layer and the temporal range has updated
     // grid layers are the only instance where temporal filtering applies, requiring a new fetch
     let _color = color;
-    if (parametersChanged || temporalRangeChanged) {
+    if (parametersChanged || temporalRangeChanged || paletteChanged) {
       const drawnShapes = this.store.getState().drawnShapes;
       await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
         from,
         to,
+        paletteDefinition,
       });
     }
 
