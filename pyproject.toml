@@ -65,7 +65,8 @@ members = [
 ]
 
 [tool.uv.sources]
-pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="d13874427c64ad0e69f12fc2be329dbcf5c85401" }
+# use dev branch which shares the same features across usbr and asu to keep consistency
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="c116205654703d65c9247fdcd6257c4cd8c7c6c9" }
 pgedr = {git = "https://github.com/internetofwater/pgedr.git", rev="eb6c86dc410bdfdd214c8cb8aa4a67943ae2968a"}
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }

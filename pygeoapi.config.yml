@@ -74,6 +74,8 @@ resources:
     keywords: ["NWM"]
     provider-name:  
       - NOAA
+    formatters:
+      - name: formatters.CSVFormatter
     links:
       - type: application/html
         rel: methodology
@@ -166,6 +168,8 @@ resources:
     description: provides simulated water levels, storage, and outflows for lakes and reservoirs across the U.S. It delivers time-series data that supports monitoring, forecasting, and management of lake and reservoir conditions within the hydrologic network.
     keywords: ["NWM"]
     extents: *nwm-extents
+    formatters:
+      - name: formatters.CSVFormatter
     links:
       - type: application/html
         rel: canonical 
@@ -206,6 +210,8 @@ resources:
         rel: documentation
         title: Documentation
         href: https://registry.opendata.aws/nwm-archive/
+    formatters:
+      - name: formatters.CSVFormatter
     providers:
       - type: edr
         name: NationalWaterModel.EDRProvider
@@ -272,6 +278,8 @@ resources:
         crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
     keywords:
       - open data
+    formatters:
+      - name: formatters.CSVFormatter
     providers:
       - &default-edr
         type: edr
@@ -296,6 +304,8 @@ resources:
       - SNOTEL
       - NRCS
       - USDA
+    formatters:
+      - name: formatters.CSVFormatter
     links:
       - type: application/html
         rel: documentation
@@ -363,6 +373,8 @@ resources:
       - USDA
     provider-name:
       - US Department of Agriculture
+    formatters:
+      - name: formatters.CSVFormatter
     extents: &default-extent
       spatial:
         bbox: [-164.92472, 32.92342, -103.78758, 70.28062]
@@ -386,7 +398,6 @@ resources:
         name: awdb_forecasts.awdb_forecasts.AwdbForecastsProvider
         data: https://wcc.sc.egov.usda.gov/awdbRestApi/v3/api-docs
         title_field: name
-
 
   noaa-rfc:
     type: collection
@@ -413,8 +424,7 @@ resources:
       - type: application/html
         rel: canonical
         title: Northwest River Forecast Center Data Source
-        href: https://www.nwrfc.noaa.gov/rfc/
-        
+        href: https://www.nwrfc.noaa.gov/rfc/ 
     extents: *default-extent
     providers:
       - type: feature
@@ -602,6 +612,8 @@ resources:
     description: consists of field-verified data regarding wells and springs collected by personnel from the Hydrology Division's Basic Data Section, the U.S. Geological Survey and other co-operating agencies. This collection contains additional info joined from the Arizona Wells 55 Registry to enrich well metadata.
     provider-name:
       - Arizona Department of Water Resources
+    formatters:
+      - name: formatters.CSVFormatter
     links:
       - type: application/html
         rel: canonical
@@ -770,6 +782,8 @@ resources:
       - EDR
       - RISE
       - USBR
+    formatters:
+      - name: formatters.CSVFormatter
     templates:
       path: pygeoapi-deployment/templates/jsonld/rise-edr
     links:
