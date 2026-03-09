@@ -43,7 +43,9 @@ export const Popover: React.FC<Props> = (props) => {
   const [colors, setColors] = useState<string[]>([]);
 
   const [parameter, setParameter] = useState<string | null>(paletteDefinition?.parameter ?? null);
-  const [count, setCount] = useState<ColorBrewerIndex | null>(paletteDefinition?.count ?? null);
+  const [count, setCount] = useState<ColorBrewerIndex | null>(
+    paletteDefinition?.originalCount ?? null
+  );
   const [data, setData] = useState<ComboboxData>(
     parameterOptions.filter((option) => parameters.includes((option as ComboboxItem).value))
   );
@@ -88,12 +90,18 @@ export const Popover: React.FC<Props> = (props) => {
   useEffect(() => {
     setPalette(paletteDefinition?.palette ?? null);
     setParameter(paletteDefinition?.parameter ?? null);
-    setCount(paletteDefinition?.count ?? null);
+    setCount(paletteDefinition?.originalCount ?? null);
   }, [paletteDefinition]);
 
   const handleSave = () => {
     if (palette !== null && count !== null && parameter !== null) {
-      handleChange({ palette, count, parameter, index: 0 });
+      handleChange({
+        palette,
+        actualCount: count,
+        originalCount: paletteDefinition?.originalCount ?? count,
+        parameter,
+        index: 0,
+      });
       setShow(false);
     }
   };
@@ -101,7 +109,7 @@ export const Popover: React.FC<Props> = (props) => {
   const handleCancel = () => {
     setPalette(paletteDefinition?.palette ?? null);
     setParameter(paletteDefinition?.parameter ?? null);
-    setCount(paletteDefinition?.count ?? null);
+    setCount(paletteDefinition?.originalCount ?? null);
     setShow(false);
   };
 
@@ -128,7 +136,7 @@ export const Popover: React.FC<Props> = (props) => {
     count &&
       parameter &&
       palette &&
-      isValidPalette({ count, parameter, palette, index: 1 }) &&
+      isValidPalette({ actualCount: count, parameter, palette, originalCount: count, index: 1 }) &&
       parameters.includes(parameter)
   );
   const noParameters = parameters.length === 0;
@@ -225,9 +233,21 @@ export const Popover: React.FC<Props> = (props) => {
           {count &&
             parameter &&
             palette &&
-            isValidPalette({ count, parameter, palette, index: 1 }) &&
+            isValidPalette({
+              actualCount: count,
+              parameter,
+              palette,
+              originalCount: count,
+              index: 1,
+            }) &&
             !isSamePalette(
-              { count, parameter, palette, index: paletteDefinition?.index || 0 },
+              {
+                actualCount: count,
+                parameter,
+                palette,
+                originalCount: count,
+                index: paletteDefinition?.index || 0,
+              },
               paletteDefinition
             ) && (
               <Text size="xs" c="red">

@@ -11,6 +11,9 @@ import { Layer, PaletteDefinition } from '@/stores/main/types';
 import { createColorRange } from '@/utils/colors';
 import { getLabel } from '@/utils/parameters';
 
+const LEFT_DEFAULT = 'Less';
+const RIGHT_DEFAULT = 'More';
+
 type Props = {
   collectionId: Layer['datasourceId'];
   color: ExpressionSpecification;
@@ -21,8 +24,8 @@ export const DetailedGradient: React.FC<Props> = (props) => {
   const { collectionId, color, paletteDefinition } = props;
 
   const [label, setLabel] = useState<string>(paletteDefinition?.parameter ?? '');
-  const [left, setLeft] = useState('Less');
-  const [right, setRight] = useState('More');
+  const [left, setLeft] = useState(LEFT_DEFAULT);
+  const [right, setRight] = useState(RIGHT_DEFAULT);
 
   useEffect(() => {
     // Get values from expression, example:
@@ -41,15 +44,19 @@ export const DetailedGradient: React.FC<Props> = (props) => {
     // ];
 
     const min = color[3];
-    if (min && typeof min === 'number') {
+    if (typeof min === 'number') {
       const left = `< ${min.toFixed(2)}`;
       setLeft(left);
+    } else {
+      setLeft(LEFT_DEFAULT);
     }
 
     const max = color[color.length - 2];
-    if (max && typeof max === 'number') {
+    if (typeof max === 'number') {
       const right = `>= ${max.toFixed(2)}`;
       setRight(right);
+    } else {
+      setRight(RIGHT_DEFAULT);
     }
   }, [color]);
 
@@ -67,7 +74,7 @@ export const DetailedGradient: React.FC<Props> = (props) => {
   return (
     <Gradient
       label={label}
-      colors={createColorRange(paletteDefinition.count, paletteDefinition.palette)}
+      colors={createColorRange(paletteDefinition.actualCount, paletteDefinition.palette)}
       left={left}
       right={right}
     />
