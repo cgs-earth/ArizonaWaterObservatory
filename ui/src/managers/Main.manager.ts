@@ -754,7 +754,7 @@ class MainManager {
       (await this.getFeatures<Geometry, { [paletteDefinition.parameter]: number }>(layer, signal))
         .features;
 
-    const { parameter, originalCount, actualCount: count, palette, index } = paletteDefinition;
+    const { parameter, originalCount, actualCount, palette, index } = paletteDefinition;
     const expression = createDynamicStepExpression(
       defaultedfeatures,
       parameter,
@@ -769,7 +769,7 @@ class MainManager {
       if (expression.length !== originalCount * 2 + 3) {
         newCount = ((expression.length - 3) / 2) as ColorBrewerIndex;
 
-        if (isValidColorBrewerIndex(newCount) && newCount !== count) {
+        if (isValidColorBrewerIndex(newCount) && newCount !== actualCount) {
           notificationManager.show(
             `Duplicate thresholds detected. Reducing to ${newCount} threshold(s)`,
             NotificationType.Info,
