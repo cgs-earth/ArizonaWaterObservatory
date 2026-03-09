@@ -34,7 +34,8 @@ ENV PATH="/opt/pygeoapi/.venv/bin:$PATH"
 # AWO uses a custom event loop; we define the
 # import path here
 ENV PYGEOAPI_CUSTOM_EVENT_LOOP_MODULE=com.env
-ENV PYGEOAPI_CUSTOM_EVENT_LOOP_GETTER=get_loop
+ENV PYGEOAPI_CUSTOM_EVENT_LOOP_GETTER=get_loop\
+ENV PYGEOAPI_CACHE_PLUGINS=true
 
 # Entrypoint for running the app
 ENTRYPOINT [ "/opt/pygeoapi/pygeoapi-deployment/entrypoint.sh" ]
