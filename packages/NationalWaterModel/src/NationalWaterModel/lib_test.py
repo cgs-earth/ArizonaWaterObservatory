@@ -1,9 +1,8 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: Apache-2.0
 
-from pygeoapi.crs import DEFAULT_CRS
+from pygeoapi.crs import DEFAULT_CRS, transform_bbox
 from pygeoapi.provider.base import ProviderNoDataError, ProviderQueryError
-from pygeoapi.util import transform_bbox
 import pyproj
 import pytest
 
@@ -180,7 +179,7 @@ def test_raster_with_range():
     small_arizona_bbox = [-112.5, 31.7, -111.7, 32.0]
     crs = get_crs_from_dataset(route_to_route_provider.zarr_dataset)
     result = fetch_data(
-        bbox=transform_bbox(small_arizona_bbox, DEFAULT_CRS, crs),
+        bbox=transform_bbox(small_arizona_bbox, DEFAULT_CRS, crs),  # pyright: ignore[reportArgumentType]
         timeseries_properties_to_fetch=["sfcheadsubrt"],
         time_field="time",
         datetime_filter="2020-01-01/2020-01-02",

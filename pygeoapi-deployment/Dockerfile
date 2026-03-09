@@ -27,6 +27,7 @@ RUN uv sync --no-group etl --all-groups --all-packages
 COPY pygeoapi-deployment/ /opt/pygeoapi/pygeoapi-deployment/
 
 COPY pygeoapi.config.yml /opt/pygeoapi/pygeoapi.config.yml
+COPY pygeoapi-deployment/templates/ /opt/pygeoapi/.venv/lib/python3.12/site-packages/pygeoapi/templates/
 
 # Set up environment
 ENV PATH="/opt/pygeoapi/.venv/bin:$PATH"
@@ -34,7 +35,7 @@ ENV PATH="/opt/pygeoapi/.venv/bin:$PATH"
 # AWO uses a custom event loop; we define the
 # import path here
 ENV PYGEOAPI_CUSTOM_EVENT_LOOP_MODULE=com.env
-ENV PYGEOAPI_CUSTOM_EVENT_LOOP_GETTER=get_loop\
+ENV PYGEOAPI_CUSTOM_EVENT_LOOP_GETTER=get_loop
 ENV PYGEOAPI_CACHE_PLUGINS=true
 
 # Entrypoint for running the app

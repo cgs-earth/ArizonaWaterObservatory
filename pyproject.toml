@@ -22,7 +22,7 @@ dependencies = [
     "awdb_forecasts",
     "noaa_rfc",
     "aiohttp>=3.12.12",
-    "xarray>=2025.4.0",
+    "xarray==2025.11.0",
     "zarr>=2.18.7",
     "netcdf4>=1.7.2",
     "s3fs>=2025.9.0",
@@ -30,8 +30,9 @@ dependencies = [
     "config-store",
     "rioxarray>=0.19.0",
     "geopandas>=1.1.1",
-    "pgedr",
     "gcsfs>=2025.10.0",
+    "formatters",
+    # "pgedr==0.2.0"    
 ]
 
 [dependency-groups]
@@ -67,7 +68,6 @@ members = [
 [tool.uv.sources]
 # use dev branch which shares the same features across usbr and asu to keep consistency
 pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="c116205654703d65c9247fdcd6257c4cd8c7c6c9" }
-pgedr = {git = "https://github.com/internetofwater/pgedr.git", rev="eb6c86dc410bdfdd214c8cb8aa4a67943ae2968a"}
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
@@ -76,6 +76,7 @@ snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git",
 awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , branch="main" }
 awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
 noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
+formatters = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/formatters" , rev="70396a4f583aa8949b78612f4223cf1dd4f8bfd3" }
 nationalwatermodel = { workspace = true }
 config-store = { workspace = true }
 
