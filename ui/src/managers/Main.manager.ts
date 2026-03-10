@@ -1608,28 +1608,50 @@ class MainManager {
     const layers = this.store.getState().layers;
 
     const chunkSize = 5;
-    const results = [];
+    const results: PromiseSettledResult<Layer['id']>[] = [];
+
     for (let i = 0; i < layers.length; i += chunkSize) {
       const chunk = layers.slice(i, i + chunkSize);
-      results.push(
-        ...(await Promise.allSettled(
-          chunk.map(async (layer) => {
-            const collectionId = layer.datasourceId;
-            return this.addData(collectionId, layer, {
-              filterFeatures: drawnShapes,
-            });
-          })
-        ))
-      );
-    }
 
-    for (let i = 0; i < results.length; i += chunkSize) {
-      const result = results[i];
-      if (result.status === 'fulfilled') {
-        // addData returns the layerId
-        const layer = this.getLayer(result.value);
-        if (layer && layer.paletteDefinition) {
-          void this.styleLayer(layer, layer.paletteDefinition, {});
+      const settled = await Promise.allSettled(
+        chunk.map(async (layer) => {
+          const collectionId = layer.datasourceId;
+          // addData should return the layerId
+          return this.addData(collectionId, layer, {
+            filterFeatures: drawnShapes,
+          });
+        })
+      );
+
+      results.push(...settled);
+
+      await Promise.all(
+        settled
+          .map((result) => {
+            if (result.status === 'rejected') {
+              return null;
+            }
+
+            const layerId = result.value;
+            const layer = this.getLayer(layerId);
+            if (!layer || !layer.paletteDefinition) {
+              return null;
+            }
+
+            return this.styleLayer(layer, layer.paletteDefinition);
+          })
+          // Filter null results (status === 'rejected')
+          .filter(Boolean) as Promise<void>[]
+      );
+
+      for (const result of settled) {
+        if (result.status === 'rejected') {
+          notificationManager.show(
+            'An error occurred while applying a spatial filter, check the console for more details.',
+            NotificationType.Error,
+            10000
+          );
+          console.error('applySpatialFilter: addData failed:', result.reason);
         }
       }
     }
