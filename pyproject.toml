@@ -40,6 +40,7 @@ dependencies = [
     # gdal version on macos packaged by homebrew and is easier to test with locally than downgrading
     # the system gdal version
     "gdal>=3.12,<3.13 ; platform_system != 'Linux'",
+    "pygeoapi-plugins>=0.5.0",
 ]
 
 [dependency-groups]
@@ -56,7 +57,7 @@ etl = [
     "jupytext>=1.18.1",
     "pip>=25.3",
     "dask>=2025.11.0",
-    "numcodecs",
+    "numcodecs", # this should not be pinned to a specific version to avoid changing the zarr version dependency which is critical for national water model to work properly
 ]
 server = [
     "flask-cors>=6.0.2",

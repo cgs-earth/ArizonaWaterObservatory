@@ -19,6 +19,8 @@ CONTAINER_NAME=${CONTAINER_NAME:=pygeoapi}
 CONTAINER_HOST=${CONTAINER_HOST:=0.0.0.0}
 CONTAINER_PORT=${CONTAINER_PORT:=80}
 WSGI_APP=${WSGI_APP:=pygeoapi.flask_app:APP}
+# it is important to have a  relatively larger value for wsgi workers otherwise too few workers
+# will cause the server to block since flask does not internally support async
 WSGI_WORKERS=${WSGI_WORKERS:=9}
 WSGI_WORKER_TIMEOUT=${WSGI_WORKER_TIMEOUT:=6000}
 WSGI_WORKER_CLASS=${WSGI_WORKER_CLASS:=gevent}
@@ -38,8 +40,6 @@ function error() {
 cd ${PYGEOAPI_HOME}
 
 echo "Trying to generate openapi.yml"
-export PYGEOAPI_CUSTOM_EVENT_LOOP_MODULE
-export PYGEOAPI_CUSTOM_EVENT_LOOP_GETTER
 pygeoapi openapi generate ${PYGEOAPI_CONFIG} --output-file ${PYGEOAPI_OPENAPI}
 
 [[ $? -ne 0 ]] && error "openapi.yml could not be generated ERROR"

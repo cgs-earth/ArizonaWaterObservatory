@@ -1372,7 +1372,9 @@ pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@1e18b26c09b72c871
 pygeoapi-plugins==0.5.0 \
     --hash=sha256:0cadfde1864a3369bb31d610f0ba9e6d8b0bd6a82c3351f59812dfb5f6cdbe97 \
     --hash=sha256:6379e5ee16e7b34416b805df8c46f0fe7872fbb776c68dfdf1a641c83d25852f
-    # via pygeoapi
+    # via
+    #   arizonawaterobservatory
+    #   pygeoapi
 pygeofilter==0.3.3 \
     --hash=sha256:8b9fec05ba144943a1e415b6ac3752ad6011f44aad7d1bb27e7ef48b073460bd \
     --hash=sha256:e719fcb929c6b60bca99de0cfde5f95bc3245cab50516c103dae1d4f12c4c7b6
