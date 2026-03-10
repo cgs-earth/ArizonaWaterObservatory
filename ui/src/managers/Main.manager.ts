@@ -1611,7 +1611,6 @@ class MainManager {
     to: Layer['to'],
     visible: Layer['visible'],
     opacity: Layer['opacity'],
-    paletteDefinition: Layer['paletteDefinition']
     paletteDefinition: Layer['paletteDefinition'],
     collectionType: CollectionType
   ): Promise<void> {
