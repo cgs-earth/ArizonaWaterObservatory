@@ -33,9 +33,10 @@ dependencies = [
     "gcsfs>=2025.10.0",
     "formatters",
     "pgedr==0.2.0",
-    # on linux use gdal 3.10 since that is the latest
+    # on linux use anywhere between gdal 3.8 which appears to be the latest on github actions workflow runnings and 
+    # gdal 3.10 since that is the latest
     # gdal version packaged for debian trixie
-    "gdal>=3.10,<3.11 ; platform_system == 'Linux'",
+    "gdal>=3.8,<3.11 ; platform_system == 'Linux'",
     # on all other platforms use gdal 3.12 since that is the latest
     # gdal version on macos packaged by homebrew and is easier to test with locally than downgrading
     # the system gdal version

@@ -257,7 +257,7 @@ requires-dist = [
     { name = "formatters", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fformatters&rev=70396a4f583aa8949b78612f4223cf1dd4f8bfd3" },
     { name = "gcsfs", specifier = ">=2025.10.0" },
     { name = "gdal", marker = "sys_platform != 'linux'", specifier = ">=3.12,<3.13" },
-    { name = "gdal", marker = "sys_platform == 'linux'", specifier = ">=3.10,<3.11" },
+    { name = "gdal", marker = "sys_platform == 'linux'", specifier = ">=3.8,<3.11" },
     { name = "geojson-pydantic", specifier = ">=2.0.0" },
     { name = "geopandas", specifier = ">=1.1.1" },
     { name = "nationalwatermodel", editable = "packages/NationalWaterModel" },
