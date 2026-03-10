@@ -10,20 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v27
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable
-
-      - name: Install GDAL 3.10 via Nix
-        run: nix-env -iA nixpkgs.gdal
-
-      - name: Export GDAL paths
-        run: |
-          GDAL_PREFIX=$(nix-env --query --out-path gdal | awk '{print $2}')
-          echo "GDAL_CONFIG=$GDAL_PREFIX/bin/gdal-config" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=$GDAL_PREFIX/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -32,6 +18,13 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v5
+
+      - name: Install GDAL 3.10 from UbuntuGIS
+        run: |
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+          sudo apt-get update
+          sudo apt-get install -y libgdal-dev
+          gdal-config --version
 
       - name: Install the project
         run: uv sync --all-extras --dev --all-packages --all-groups
