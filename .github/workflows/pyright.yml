@@ -5,34 +5,27 @@ name: Pyright Type Checks
 
 on:
   push:
-  workflow_dispatch: # Allows manual triggering of the workflow
+  workflow_dispatch:
 
 jobs:
   pyright:
     runs-on: ubuntu-latest
 
-    container:
-      image: debian:trixie
-      
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
         with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-
-      - name: "Install gdal"
+      - name: Run checks in Nix shell
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libgdal-dev
+          nix develop --extra-experimental-features "nix-command flakes" \
+            github:NixOS/nixpkgs/nixpkgs-unstable \
+            --command bash -c '
+              nix-env -iA nixpkgs.gdal_3_10 nixpkgs.python311 nixpkgs.nodejs nixpkgs.uv
 
-      - name: Install the project
-        run: uv sync --all-extras --dev --all-packages --all-groups
-
-      - name: Run type checks
-        run: uv run pyright
+              uv sync --all-extras --dev --all-packages --all-groups
+              uv run pyright
+            '
