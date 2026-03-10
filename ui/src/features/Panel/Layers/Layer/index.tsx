@@ -155,7 +155,6 @@ const Layer: React.FC<Props> = (props) => {
         opacity,
         paletteDefinition
       );
-
       notificationManager.show(`Updated layer: ${updateName}`, NotificationType.Success);
     } catch (error) {
       if ((error as Error)?.message) {
