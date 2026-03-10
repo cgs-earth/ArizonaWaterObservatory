@@ -13,8 +13,7 @@ from com.geojson.helpers import (
 )
 from com.otel import add_args_as_attributes_to_span, otel_trace
 import numpy as np
-from pygeoapi.api import DEFAULT_STORAGE_CRS
-from pygeoapi.crs import get_crs
+from pygeoapi.crs import DEFAULT_STORAGE_CRS, get_crs
 from pygeoapi.provider.base import (
     ProviderInvalidDataError,
     ProviderNoDataError,

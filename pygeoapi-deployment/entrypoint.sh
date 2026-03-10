@@ -38,6 +38,8 @@ function error() {
 cd ${PYGEOAPI_HOME}
 
 echo "Trying to generate openapi.yml"
+export PYGEOAPI_CUSTOM_EVENT_LOOP_MODULE
+export PYGEOAPI_CUSTOM_EVENT_LOOP_GETTER
 pygeoapi openapi generate ${PYGEOAPI_CONFIG} --output-file ${PYGEOAPI_OPENAPI}
 
 [[ $? -ne 0 ]] && error "openapi.yml could not be generated ERROR"

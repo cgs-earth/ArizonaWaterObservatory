@@ -1,7 +1,7 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: MIT
 
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.12-trixie-slim AS builder
 
 # Copy from the cache into container and the use system Python interpreter
 # Set no cache to true so we don't use the uv cache but instead use the docker layer cache
