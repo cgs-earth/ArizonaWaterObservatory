@@ -8,6 +8,7 @@ import { Box, Divider } from '@mantine/core';
 import { Entry } from '@/features/Tools/Legend/Entry';
 import mainManager from '@/managers/Main.init';
 import { Layer, MainState } from '@/stores/main/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
 
 type Props = {
   layers: MainState['layers'];
@@ -23,17 +24,23 @@ export const Content: React.FC<Props> = (props) => {
     const layer = mainManager.getLayer(layerId);
 
     if (layer) {
-      void mainManager.updateLayer(
-        layer,
-        layer.name,
-        color,
-        layer.parameters,
-        layer.from,
-        layer.to,
-        layer.visible,
-        layer.opacity,
-        layer.paletteDefinition
-      );
+      const datasource = mainManager.getDatasource(layer.datasourceId);
+      if (datasource) {
+        const collectionType = getCollectionType(datasource);
+
+        void mainManager.updateLayer(
+          layer,
+          layer.name,
+          color,
+          layer.parameters,
+          layer.from,
+          layer.to,
+          layer.visible,
+          layer.opacity,
+          layer.paletteDefinition,
+          collectionType
+        );
+      }
     }
   };
 
@@ -41,17 +48,23 @@ export const Content: React.FC<Props> = (props) => {
     const layer = mainManager.getLayer(layerId);
 
     if (layer) {
-      void mainManager.updateLayer(
-        layer,
-        layer.name,
-        layer.color,
-        layer.parameters,
-        layer.from,
-        layer.to,
-        visible,
-        layer.opacity,
-        layer.paletteDefinition
-      );
+      const datasource = mainManager.getDatasource(layer.datasourceId);
+      if (datasource) {
+        const collectionType = getCollectionType(datasource);
+
+        void mainManager.updateLayer(
+          layer,
+          layer.name,
+          layer.color,
+          layer.parameters,
+          layer.from,
+          layer.to,
+          visible,
+          layer.opacity,
+          layer.paletteDefinition,
+          collectionType
+        );
+      }
     }
   };
 
@@ -59,17 +72,23 @@ export const Content: React.FC<Props> = (props) => {
     const layer = mainManager.getLayer(layerId);
 
     if (layer) {
-      void mainManager.updateLayer(
-        layer,
-        layer.name,
-        layer.color,
-        layer.parameters,
-        layer.from,
-        layer.to,
-        layer.visible,
-        opacity,
-        layer.paletteDefinition
-      );
+      const datasource = mainManager.getDatasource(layer.datasourceId);
+      if (datasource) {
+        const collectionType = getCollectionType(datasource);
+
+        void mainManager.updateLayer(
+          layer,
+          layer.name,
+          layer.color,
+          layer.parameters,
+          layer.from,
+          layer.to,
+          layer.visible,
+          opacity,
+          layer.paletteDefinition,
+          collectionType
+        );
+      }
     }
   };
 

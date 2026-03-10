@@ -1612,6 +1612,8 @@ class MainManager {
     visible: Layer['visible'],
     opacity: Layer['opacity'],
     paletteDefinition: Layer['paletteDefinition']
+    paletteDefinition: Layer['paletteDefinition'],
+    collectionType: CollectionType
   ): Promise<void> {
     const layerIds = this.getLocationsLayerIds(layer.datasourceId, layer.id);
 
@@ -1715,6 +1717,26 @@ class MainManager {
       opacity,
       paletteDefinition: correctedPaletteDefinition,
     });
+
+    if (this.map && collectionType !== CollectionType.Map) {
+      const { pointLayerId, fillLayerId, lineLayerId } = layerIds;
+      const { upperLabel, lowerLabel } = this.getLabels(collectionType);
+
+      this.map.on(
+        'mouseenter',
+        [pointLayerId, fillLayerId, lineLayerId],
+        this.getHoverEventHandler(name, layer.id, layer.datasourceId, upperLabel, lowerLabel)
+      );
+      this.map.on(
+        'mousemove',
+        [pointLayerId, fillLayerId, lineLayerId],
+        this.getHoverEventHandler(name, layer.id, layer.datasourceId, upperLabel, lowerLabel)
+      );
+      this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
+        this.map!.getCanvas().style.cursor = '';
+        this.hoverPopup!.remove();
+      });
+    }
   }
 
   private createParameterGroupMembers(parameterGroups: ParameterGroup[]): void {
