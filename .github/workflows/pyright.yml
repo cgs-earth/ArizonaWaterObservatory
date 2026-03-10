@@ -10,6 +10,10 @@ on:
 jobs:
   pyright:
     runs-on: ubuntu-latest
+
+    container:
+      image: debian:trixie
+      
     steps:
       - uses: actions/checkout@v4
 
