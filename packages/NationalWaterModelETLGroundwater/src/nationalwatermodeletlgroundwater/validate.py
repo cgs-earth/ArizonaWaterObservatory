@@ -33,7 +33,7 @@ zarr_dataset = xarray.open_zarr(
     store=gcs_fs.get_mapper(gcs_path),
     consolidated=True,
     zarr_format=2,
-    chunks="auto",  # pyright: ignore[reportArgumentType]
+    chunks="auto",
 )
 
 # %%

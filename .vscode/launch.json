@@ -20,6 +20,9 @@
       "jinja": true
     },
     {
+      // this will not work currently since we have removed
+      // starlette from deployment; however it is here for historical reasons
+      // if we ever add back starlette at some point in the future
       "name": "Python Debugger: Starlette",
       "type": "debugpy",
       "request": "launch",

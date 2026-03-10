@@ -152,7 +152,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             )
 
         if bbox:
-            bbox = transform_bbox(bbox, DEFAULT_CRS, self.storage_crs)  # pyright: ignore[reportArgumentType]
+            bbox = transform_bbox(bbox, DEFAULT_CRS, self.storage_crs)
 
         loaded_data = fetch_data(
             unopened_dataset=self.zarr_dataset,
@@ -223,7 +223,7 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
         if not bbox:
             raise ValueError("bbox is required to prevent overfetching")
 
-        bbox = transform_bbox(bbox, DEFAULT_CRS, self.storage_crs)  # pyright: ignore[reportArgumentType]
+        bbox = transform_bbox(bbox, DEFAULT_CRS, self.storage_crs)
 
         if z:
             raise NotImplementedError("Elevation filtering not implemented")

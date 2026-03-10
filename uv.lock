@@ -177,19 +177,6 @@ wheels = [
 ]
 
 [[package]]
-name = "anyio"
-version = "4.12.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "idna" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/96/f0/5eb65b2bb0d09ac6776f2eb54adee6abe8228ea05b20a5ad0e4945de8aac/anyio-4.12.1.tar.gz", hash = "sha256:41cfcc3a4c85d3f05c932da7c26d0201ac36f72abd4435ba90d0464a3ffed703", size = 228685, upload-time = "2026-01-06T11:45:21.246Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/38/0e/27be9fdef66e72d64c0cdc3cc2823101b80585f8119b5c112c2e8f5f7dab/anyio-4.12.1-py3-none-any.whl", hash = "sha256:d405828884fc140aa80a3c667b8beed277f1dfedec42ba031bd6ac3db606ab6c", size = 113592, upload-time = "2026-01-06T11:45:19.497Z" },
-]
-
-[[package]]
 name = "appnope"
 version = "0.1.4"
 source = { registry = "https://pypi.org/simple" }
@@ -219,6 +206,7 @@ dependencies = [
     { name = "opentelemetry-exporter-otlp" },
     { name = "opentelemetry-instrumentation-aiohttp-client" },
     { name = "orjson" },
+    { name = "pgedr" },
     { name = "redis" },
     { name = "rioxarray" },
     { name = "rise" },
@@ -250,8 +238,6 @@ server = [
     { name = "gevent" },
     { name = "gunicorn" },
     { name = "pygeoapi" },
-    { name = "starlette" },
-    { name = "uvicorn" },
 ]
 
 [package.metadata]
@@ -272,6 +258,7 @@ requires-dist = [
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.35.0" },
     { name = "opentelemetry-instrumentation-aiohttp-client", specifier = ">=0.56b0" },
     { name = "orjson", specifier = ">=3.11.0" },
+    { name = "pgedr", specifier = "==0.2.0" },
     { name = "redis", specifier = ">=6.2.0" },
     { name = "rioxarray", specifier = ">=0.19.0" },
     { name = "rise", git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Frise&rev=main" },
@@ -302,9 +289,7 @@ server = [
     { name = "flask-cors", specifier = ">=6.0.2" },
     { name = "gevent", specifier = ">=1.4.0" },
     { name = "gunicorn", specifier = "<24" },
-    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=c116205654703d65c9247fdcd6257c4cd8c7c6c9" },
-    { name = "starlette", specifier = ">=0.52.1" },
-    { name = "uvicorn", specifier = ">=0.40.0" },
+    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=1e18b26c09b72c871b1dc4747ad039509354f1d6" },
 ]
 
 [[package]]
@@ -1285,15 +1270,6 @@ wheels = [
 ]
 
 [[package]]
-name = "h11"
-version = "0.16.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/01/ee/02a2c011bdab74c6fb3c75474d40b3052059d95df7e73351460c8588d963/h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1", size = 101250, upload-time = "2025-04-24T03:35:25.427Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86", size = 37515, upload-time = "2025-04-24T03:35:24.344Z" },
-]
-
-[[package]]
 name = "idna"
 version = "3.11"
 source = { registry = "https://pypi.org/simple" }
@@ -2217,6 +2193,23 @@ wheels = [
 ]
 
 [[package]]
+name = "pgedr"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "geoalchemy2" },
+    { name = "psycopg2" },
+    { name = "pydantic" },
+    { name = "pygeoapi" },
+    { name = "pymysql" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9f/38/b09c2d6e5cdb7fb11a8565373a8dbb092df912e0ed022ac3339f27a8cff5/pgedr-0.2.0.tar.gz", hash = "sha256:d5bd2ac669f88aea157383e73475ffde300957a25917a80997818a105f9bb85f", size = 19347, upload-time = "2026-03-09T16:50:21.69Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b4/31/9ee73082d38244d87fbcb7cc70dcab889ff3317a51fc59356cb726731a36/pgedr-0.2.0-py3-none-any.whl", hash = "sha256:af1748c5dc1342abb90d296d9b98b85cfc63bcd89f75c7fff4093fc0b94148dd", size = 17178, upload-time = "2026-03-09T16:50:20.471Z" },
+]
+
+[[package]]
 name = "pip"
 version = "26.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2584,8 +2577,8 @@ wheels = [
 
 [[package]]
 name = "pygeoapi"
-version = "0.23.dev0"
-source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=c116205654703d65c9247fdcd6257c4cd8c7c6c9#c116205654703d65c9247fdcd6257c4cd8c7c6c9" }
+version = "0.24.dev0"
+source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=1e18b26c09b72c871b1dc4747ad039509354f1d6#1e18b26c09b72c871b1dc4747ad039509354f1d6" }
 dependencies = [
     { name = "babel" },
     { name = "click" },
@@ -2671,6 +2664,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887", size = 4968631, upload-time = "2025-06-21T13:39:12.283Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b", size = 1225217, upload-time = "2025-06-21T13:39:07.939Z" },
+]
+
+[[package]]
+name = "pymysql"
+version = "1.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f5/ae/1fe3fcd9f959efa0ebe200b8de88b5a5ce3e767e38c7ac32fb179f16a388/pymysql-1.1.2.tar.gz", hash = "sha256:4961d3e165614ae65014e361811a724e2044ad3ea3739de9903ae7c21f539f03", size = 48258, upload-time = "2025-08-24T12:55:55.146Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/4c/ad33b92b9864cbde84f259d5df035a6447f91891f5be77788e2a3892bce3/pymysql-1.1.2-py3-none-any.whl", hash = "sha256:e6b1d89711dd51f8f74b1631fe08f039e7d76cf67a42a323d3178f0f25762ed9", size = 45300, upload-time = "2025-08-24T12:55:53.394Z" },
 ]
 
 [[package]]
@@ -3410,19 +3412,6 @@ wheels = [
 ]
 
 [[package]]
-name = "starlette"
-version = "0.52.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "anyio" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c4/68/79977123bb7be889ad680d79a40f339082c1978b5cfcf62c2d8d196873ac/starlette-0.52.1.tar.gz", hash = "sha256:834edd1b0a23167694292e94f597773bc3f89f362be6effee198165a35d62933", size = 2653702, upload-time = "2026-01-18T13:34:11.062Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/0d/13d1d239a25cbfb19e740db83143e95c772a1fe10202dda4b76792b114dd/starlette-0.52.1-py3-none-any.whl", hash = "sha256:0029d43eb3d273bc4f83a08720b4912ea4b071087a3b48db01b7c839f7954d74", size = 74272, upload-time = "2026-01-18T13:34:09.188Z" },
-]
-
-[[package]]
 name = "tinydb"
 version = "4.8.2"
 source = { registry = "https://pypi.org/simple" }
@@ -3523,19 +3512,6 @@ wheels = [
 name = "usace"
 version = "0.1.0"
 source = { git = "https://github.com/internetofwater/Western-Water-Datahub.git?subdirectory=packages%2Fusace&branch=main#c0855995b34d4b947d2217b3bb7fcae43b34edc9" }
-
-[[package]]
-name = "uvicorn"
-version = "0.41.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "click" },
-    { name = "h11" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/32/ce/eeb58ae4ac36fe09e3842eb02e0eb676bf2c53ae062b98f1b2531673efdd/uvicorn-0.41.0.tar.gz", hash = "sha256:09d11cf7008da33113824ee5a1c6422d89fbc2ff476540d69a34c87fab8b571a", size = 82633, upload-time = "2026-02-16T23:07:24.1Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/e4/d04a086285c20886c0daad0e026f250869201013d18f81d9ff5eada73a88/uvicorn-0.41.0-py3-none-any.whl", hash = "sha256:29e35b1d2c36a04b9e180d4007ede3bcb32a85fbdfd6c6aeb3f26839de088187", size = 68783, upload-time = "2026-02-16T23:07:22.357Z" },
-]
 
 [[package]]
 name = "wcwidth"

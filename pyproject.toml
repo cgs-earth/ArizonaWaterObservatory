@@ -22,7 +22,7 @@ dependencies = [
     "awdb_forecasts",
     "noaa_rfc",
     "aiohttp>=3.12.12",
-    "xarray==2025.11.0",
+    "xarray==2025.11.0", # this should be pinned and be very carefully changed since it has lots of internal complexity which can change query behavior significantly
     "zarr>=2.18.7",
     "netcdf4>=1.7.2",
     "s3fs>=2025.9.0",
@@ -32,7 +32,7 @@ dependencies = [
     "geopandas>=1.1.1",
     "gcsfs>=2025.10.0",
     "formatters",
-    # "pgedr==0.2.0"    
+    "pgedr==0.2.0"    
 ]
 
 [dependency-groups]
@@ -56,8 +56,6 @@ server = [
     "gevent>=1.4.0",
     "gunicorn<24",
     "pygeoapi",
-    "starlette>=0.52.1",
-    "uvicorn>=0.40.0",
 ]
 
 [tool.uv.workspace]
@@ -67,7 +65,8 @@ members = [
 
 [tool.uv.sources]
 # use dev branch which shares the same features across usbr and asu to keep consistency
-pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="c116205654703d65c9247fdcd6257c4cd8c7c6c9" }
+# this is rebased to be at least 0.23.0 for pygeoapi
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="1e18b26c09b72c871b1dc4747ad039509354f1d6" }
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }

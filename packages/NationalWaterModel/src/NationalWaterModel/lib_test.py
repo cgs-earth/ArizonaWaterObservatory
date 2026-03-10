@@ -179,7 +179,7 @@ def test_raster_with_range():
     small_arizona_bbox = [-112.5, 31.7, -111.7, 32.0]
     crs = get_crs_from_dataset(route_to_route_provider.zarr_dataset)
     result = fetch_data(
-        bbox=transform_bbox(small_arizona_bbox, DEFAULT_CRS, crs),  # pyright: ignore[reportArgumentType]
+        bbox=transform_bbox(small_arizona_bbox, DEFAULT_CRS, crs),
         timeseries_properties_to_fetch=["sfcheadsubrt"],
         time_field="time",
         datetime_filter="2020-01-01/2020-01-02",
