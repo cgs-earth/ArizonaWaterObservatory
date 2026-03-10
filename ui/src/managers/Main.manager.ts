@@ -1392,7 +1392,6 @@ class MainManager {
   }
 
   private getHoverEventHandler(
-    name: string,
     layerId: Layer['id'],
     collectionId: ICollection['id'],
     upperLabel: string,
@@ -1424,11 +1423,12 @@ class MainManager {
 
       this.map!.getCanvas().style.cursor = 'pointer';
       const { features } = e;
-      if (features && features.length > 0) {
+      const layer = this.getLayer(layerId);
+      if (features && features.length > 0 && layer) {
         const uniqueFeatures = this.getUniqueIds(features, collectionId);
         const html = `
             <span style="color:black;">
-              <strong>${name}</strong><br/>
+              <strong>${layer.name}</strong><br/>
               ${uniqueFeatures.map((locationId) => `<strong>${upperLabel} Id: </strong>${locationId}`).join('<br/>')}
               <div style="margin-top: 16px;display:flex;flex-direction:column;justify-content:center;align-items:center">
                 <p style="margin: 0;">Click to select the ${lowerLabel}.</p>
@@ -1504,24 +1504,12 @@ class MainManager {
           this.map.on(
             'mouseenter',
             [pointLayerId, fillLayerId, lineLayerId],
-            this.getHoverEventHandler(
-              layer.name,
-              layer.id,
-              layer.datasourceId,
-              upperLabel,
-              lowerLabel
-            )
+            this.getHoverEventHandler(layer.id, layer.datasourceId, upperLabel, lowerLabel)
           );
           this.map.on(
             'mousemove',
             [pointLayerId, fillLayerId, lineLayerId],
-            this.getHoverEventHandler(
-              layer.name,
-              layer.id,
-              layer.datasourceId,
-              upperLabel,
-              lowerLabel
-            )
+            this.getHoverEventHandler(layer.id, layer.datasourceId, upperLabel, lowerLabel)
           );
         }
         this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
@@ -1611,8 +1599,7 @@ class MainManager {
     to: Layer['to'],
     visible: Layer['visible'],
     opacity: Layer['opacity'],
-    paletteDefinition: Layer['paletteDefinition'],
-    collectionType: CollectionType
+    paletteDefinition: Layer['paletteDefinition']
   ): Promise<void> {
     const layerIds = this.getLocationsLayerIds(layer.datasourceId, layer.id);
 
@@ -1716,26 +1703,6 @@ class MainManager {
       opacity,
       paletteDefinition: correctedPaletteDefinition,
     });
-
-    if (this.map && collectionType !== CollectionType.Map) {
-      const { pointLayerId, fillLayerId, lineLayerId } = layerIds;
-      const { upperLabel, lowerLabel } = this.getLabels(collectionType);
-
-      this.map.on(
-        'mouseenter',
-        [pointLayerId, fillLayerId, lineLayerId],
-        this.getHoverEventHandler(name, layer.id, layer.datasourceId, upperLabel, lowerLabel)
-      );
-      this.map.on(
-        'mousemove',
-        [pointLayerId, fillLayerId, lineLayerId],
-        this.getHoverEventHandler(name, layer.id, layer.datasourceId, upperLabel, lowerLabel)
-      );
-      this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
-        this.map!.getCanvas().style.cursor = '';
-        this.hoverPopup!.remove();
-      });
-    }
   }
 
   private createParameterGroupMembers(parameterGroups: ParameterGroup[]): void {

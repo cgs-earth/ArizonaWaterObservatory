@@ -143,35 +143,28 @@ const Layer: React.FC<Props> = (props) => {
       `Updating layer: ${updateName}`,
       LoadingType.Locations
     );
+    try {
+      await mainManager.updateLayer(
+        layer,
+        name,
+        color,
+        parameters,
+        from,
+        to,
+        layer.visible,
+        opacity,
+        paletteDefinition
+      );
 
-    const datasource = mainManager.getDatasource(layer.datasourceId);
-    if (datasource) {
-      const collectionType = getCollectionType(datasource);
-
-      try {
-        await mainManager.updateLayer(
-          layer,
-          name,
-          color,
-          parameters,
-          from,
-          to,
-          layer.visible,
-          opacity,
-          paletteDefinition,
-          collectionType
-        );
-
-        notificationManager.show(`Updated layer: ${updateName}`, NotificationType.Success);
-      } catch (error) {
-        if ((error as Error)?.message) {
-          const _error = error as Error;
-          notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
-        }
-      } finally {
-        loadingManager.remove(loadingInstance);
-        setIsLoading(false);
+      notificationManager.show(`Updated layer: ${updateName}`, NotificationType.Success);
+    } catch (error) {
+      if ((error as Error)?.message) {
+        const _error = error as Error;
+        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
       }
+    } finally {
+      loadingManager.remove(loadingInstance);
+      setIsLoading(false);
     }
   };
 
