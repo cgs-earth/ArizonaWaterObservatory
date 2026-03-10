@@ -9,7 +9,7 @@ on:
 
 jobs:
   pyright:
-    runs-on: ubuntu-latest
+    runs-on: debian-13
     steps:
       - uses: actions/checkout@v4
 
@@ -21,6 +21,11 @@ jobs:
 
       - name: "Set up Python"
         uses: actions/setup-python@v5
+
+      - name: "Install gdal"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdal-dev
 
       - name: Install the project
         run: uv sync --all-extras --dev --all-packages --all-groups
