@@ -135,7 +135,7 @@ export const isSamePalette = (
     (!paletteA && !paletteB) ||
       (paletteA &&
         paletteB &&
-        paletteA.count === paletteB.count &&
+        paletteA.originalCount === paletteB.originalCount &&
         paletteA.palette === paletteB.palette &&
         paletteA.parameter === paletteB.parameter)
   );
@@ -144,6 +144,9 @@ export const isSamePalette = (
 export const isValidPalette = (palette: Layer['paletteDefinition']): boolean => {
   return Boolean(
     !palette ||
-      (!isNaN(palette.count) && palette.palette.length > 0 && palette.parameter.length > 0)
+      (!isNaN(palette.actualCount) &&
+        !isNaN(palette.originalCount) &&
+        palette.palette.length > 0 &&
+        palette.parameter.length > 0)
   );
 };

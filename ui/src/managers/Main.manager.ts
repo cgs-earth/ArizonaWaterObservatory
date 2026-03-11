@@ -42,7 +42,7 @@ import {
   drawLayers,
 } from '@/features/Map/consts';
 import { drawnFeatureContainsExtent } from '@/features/Map/utils';
-import { getNextLink } from '@/managers/Main.utils';
+import { getNextLink, stringifyBBox } from '@/managers/Main.utils';
 import notificationManager from '@/managers/Notification.init';
 import {
   Config,
@@ -66,7 +66,7 @@ import {
 import { NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
 import { createDynamicStepExpression, isSamePalette } from '@/utils/colors';
-import { isValidColorBrewerIndex } from '@/utils/colors/types';
+import { ColorBrewerIndex, isValidColorBrewerIndex } from '@/utils/colors/types';
 import { isSameArray } from '@/utils/compareArrays';
 import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
@@ -699,6 +699,8 @@ class MainManager {
     const to = this.getTo(datasource);
     const from = this.getFrom(datasourceId, collectionType, to);
 
+    const currentBBox = stringifyBBox(this.getBBox(datasourceId));
+
     const layer: Layer = {
       id: this.createUUID(),
       datasourceId: datasource.id,
@@ -713,6 +715,7 @@ class MainManager {
         collectionType === CollectionType.Map ? DEFAULT_RASTER_OPACITY : DEFAULT_FILL_OPACITY,
       position: layers.length + 1,
       paletteDefinition: null,
+      bbox: currentBBox,
     };
 
     this.store.getState().addLayer(layer);
@@ -738,7 +741,9 @@ class MainManager {
       features,
       signal,
       updateStore = true,
-    }: StyleOptions<{ [paletteDefinition.parameter]: number }>
+    }: StyleOptions<{ [paletteDefinition.parameter]: number }> = {} as StyleOptions<{
+      [paletteDefinition.parameter]: number;
+    }>
   ) {
     if (!this.map) {
       return;
@@ -749,20 +754,36 @@ class MainManager {
       (await this.getFeatures<Geometry, { [paletteDefinition.parameter]: number }>(layer, signal))
         .features;
 
-    const { parameter, count, palette, index } = paletteDefinition;
+    const { parameter, originalCount, actualCount, palette, index } = paletteDefinition;
     const expression = createDynamicStepExpression(
       defaultedfeatures,
       parameter,
       palette,
-      count,
+      originalCount, // Always try to maximize the number of groups
       index
     );
 
     if (updateStore) {
+      let newCount: ColorBrewerIndex = originalCount;
+
+      if (expression.length !== originalCount * 2 + 3) {
+        newCount = ((expression.length - 3) / 2) as ColorBrewerIndex;
+
+        if (isValidColorBrewerIndex(newCount) && newCount !== actualCount) {
+          notificationManager.show(
+            `Duplicate thresholds detected. Reducing to ${newCount} threshold(s)`,
+            NotificationType.Info,
+            5000
+          );
+        }
+      }
       this.store.getState().updateLayer({
         ...layer,
         color: expression,
-        paletteDefinition,
+        paletteDefinition: {
+          ...paletteDefinition,
+          actualCount: newCount,
+        },
       });
     }
 
@@ -1074,7 +1095,6 @@ class MainManager {
 
   private async addData(collectionId: ICollection['id'], layer: Layer, options?: SourceOptions) {
     const datasource = this.getDatasource(collectionId);
-    const sourceId = this.getSourceId(collectionId, layer.id);
 
     if (datasource) {
       const collectionType = getCollectionType(datasource);
@@ -1088,7 +1108,7 @@ class MainManager {
       }
     }
 
-    return sourceId;
+    return layer.id;
   }
 
   private addSource(collectionId: ICollection['id'], layerId: Layer['id']) {
@@ -1576,17 +1596,52 @@ class MainManager {
     const layers = this.store.getState().layers;
 
     const chunkSize = 5;
+    const results: PromiseSettledResult<Layer['id']>[] = [];
 
     for (let i = 0; i < layers.length; i += chunkSize) {
       const chunk = layers.slice(i, i + chunkSize);
-      await Promise.all(
+
+      const settled = await Promise.allSettled(
         chunk.map(async (layer) => {
           const collectionId = layer.datasourceId;
-          return await this.addData(collectionId, layer, {
+          // addData should return the layerId
+          return this.addData(collectionId, layer, {
             filterFeatures: drawnShapes,
           });
         })
       );
+
+      results.push(...settled);
+
+      await Promise.all(
+        settled
+          .map((result) => {
+            if (result.status === 'rejected') {
+              return null;
+            }
+
+            const layerId = result.value;
+            const layer = this.getLayer(layerId);
+            if (!layer || !layer.paletteDefinition) {
+              return null;
+            }
+
+            return this.styleLayer(layer, layer.paletteDefinition);
+          })
+          // Filter null results (status === 'rejected')
+          .filter(Boolean) as Promise<void>[]
+      );
+
+      for (const result of settled) {
+        if (result.status === 'rejected') {
+          notificationManager.show(
+            'An error occurred while applying a spatial filter, check the console for more details.',
+            NotificationType.Error,
+            10000
+          );
+          console.error('applySpatialFilter: addData failed:', result.reason);
+        }
+      }
     }
   }
 
@@ -1652,7 +1707,13 @@ class MainManager {
     const parametersChanged = !isSameArray(layer.parameters, parameters);
     const temporalRangeChanged =
       datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to);
+
+    const currentBBox = stringifyBBox(this.getBBox(layer.datasourceId));
     const paletteChanged = !isSamePalette(paletteDefinition, layer.paletteDefinition);
+    const repalette =
+      paletteChanged ||
+      currentBBox !== layer.bbox ||
+      (paletteDefinition && paletteDefinition.actualCount !== paletteDefinition.originalCount);
 
     // If the parameters have changed, or this is a grid layer and the temporal range has updated
     // grid layers are the only instance where temporal filtering applies, requiring a new fetch
@@ -1669,24 +1730,31 @@ class MainManager {
     }
 
     let correctedPaletteDefinition = paletteDefinition;
-    if (paletteChanged && paletteDefinition) {
+    if (repalette && paletteDefinition) {
+      correctedPaletteDefinition = {
+        ...paletteDefinition,
+        actualCount: paletteDefinition.originalCount,
+      };
+
       const expression = await this.styleLayer(layer, paletteDefinition, { updateStore: false });
       if (expression) {
         _color = expression;
 
-        if (expression.length !== paletteDefinition.count * 2 + 3) {
-          const count = (expression.length - 3) / 2;
+        if (expression.length !== paletteDefinition.originalCount * 2 + 3) {
+          const newCount = (expression.length - 3) / 2;
 
-          if (isValidColorBrewerIndex(count)) {
+          if (isValidColorBrewerIndex(newCount)) {
             correctedPaletteDefinition = {
-              ...paletteDefinition,
-              count,
+              ...correctedPaletteDefinition,
+              actualCount: newCount,
             };
-            notificationManager.show(
-              `Duplicate thresholds detected. Reducing to ${count} threshold(s)`,
-              NotificationType.Info,
-              5000
-            );
+            if (paletteDefinition.actualCount !== newCount) {
+              notificationManager.show(
+                `Duplicate thresholds detected. Reducing to ${newCount} threshold(s)`,
+                NotificationType.Info,
+                5000
+              );
+            }
           }
         }
       }
@@ -1702,6 +1770,7 @@ class MainManager {
       visible,
       opacity,
       paletteDefinition: correctedPaletteDefinition,
+      bbox: currentBBox,
     });
   }
 
