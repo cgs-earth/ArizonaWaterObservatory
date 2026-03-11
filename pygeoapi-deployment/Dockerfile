@@ -1,7 +1,7 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: MIT
 
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.12-trixie-slim AS builder
 
 # Copy from the cache into container and the use system Python interpreter
 # Set no cache to true so we don't use the uv cache but instead use the docker layer cache
@@ -27,9 +27,16 @@ RUN uv sync --no-group etl --all-groups --all-packages
 COPY pygeoapi-deployment/ /opt/pygeoapi/pygeoapi-deployment/
 
 COPY pygeoapi.config.yml /opt/pygeoapi/pygeoapi.config.yml
+COPY pygeoapi-deployment/templates/ /opt/pygeoapi/.venv/lib/python3.12/site-packages/pygeoapi/templates/
 
 # Set up environment
 ENV PATH="/opt/pygeoapi/.venv/bin:$PATH"
+
+# AWO uses a custom event loop; we define the
+# import path here
+ENV PYGEOAPI_CUSTOM_EVENT_LOOP_MODULE=com.env
+ENV PYGEOAPI_CUSTOM_EVENT_LOOP_GETTER=get_loop
+ENV PYGEOAPI_CACHE_PLUGINS=true
 
 # Entrypoint for running the app
 ENTRYPOINT [ "/opt/pygeoapi/pygeoapi-deployment/entrypoint.sh" ]
