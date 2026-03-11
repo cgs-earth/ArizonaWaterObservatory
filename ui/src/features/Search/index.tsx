@@ -11,18 +11,27 @@ import { Entry } from '@/features/Search/Entry';
 import styles from '@/features/Search/Search.module.css';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
+import { Layer } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 
-const Search: React.FC = () => {
-  const layers = useMainStore((state) => state.layers).filter(
-    (layer) =>
-      layer.loaded &&
-      [CollectionType.EDR, CollectionType.Features].includes(
-        getCollectionType(mainManager.getDatasource(layer.datasourceId)!)
-      )
-  );
+type Props = {
+  layerId?: Layer['id'];
+};
+
+const Search: React.FC<Props> = (props) => {
+  const { layerId } = props;
+
+  const layers = useMainStore((state) => state.layers)
+    .filter((layer) => !layerId || layer.id === layerId)
+    .filter(
+      (layer) =>
+        layer.loaded &&
+        [CollectionType.EDR, CollectionType.Features].includes(
+          getCollectionType(mainManager.getDatasource(layer.datasourceId)!)
+        )
+    );
 
   const overlay = useSessionStore((state) => state.overlay);
   const setOverlay = useSessionStore((state) => state.setOverlay);
