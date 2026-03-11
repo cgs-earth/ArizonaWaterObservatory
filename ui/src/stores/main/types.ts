@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FeatureCollection, Polygon } from 'geojson';
+import { FeatureCollection, GeoJsonGeometryTypes, Polygon } from 'geojson';
 import { ColorSpecification, PropertyValueSpecification } from 'mapbox-gl';
 import { BasemapId, Properties } from '@/components/Map/types';
 import { ICollection } from '@/services/edr.service';
@@ -11,9 +11,11 @@ import { CollectionSlice } from '@/stores/main/slices/collections';
 import { DrawingSlice } from '@/stores/main/slices/drawing';
 import { LayerSlice } from '@/stores/main/slices/layers';
 import { LocationSlice } from '@/stores/main/slices/locations';
+import { ISearchSlice } from '@/stores/main/slices/search';
 import { ShareSlice } from '@/stores/main/slices/share';
 import { SpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
 import { ColorBrewerIndex, FriendlyColorBrewerPalettes } from '@/utils/colors/types';
+import { IFilterSlice } from './slices/datasourceFilters';
 
 export type ColorValueHex = `#${string}`;
 
@@ -78,6 +80,8 @@ export type PaletteDefinition = {
   index: number;
 };
 
+export type TGeometryTypes = GeoJsonGeometryTypes | 'raster';
+
 export type Layer = {
   id: string; // uuid
   datasourceId: ICollection['id'];
@@ -91,6 +95,8 @@ export type Layer = {
   opacity: number;
   position: number; // The order this layer is drawn relative to other user layers
   paletteDefinition: PaletteDefinition | null;
+  loaded: boolean;
+  geometryTypes: TGeometryTypes[];
 };
 
 export type Table = {
@@ -122,17 +128,15 @@ export enum DrawMode {
   Select = 'select',
 }
 
+export type TSearch = {
+  layerId: Layer['id'];
+  searchTerm: string;
+  matchedLocations: string[];
+};
+
 export type ParameterGroupMembers = Record<string, string[]>;
 
 export type MainState = {
-  search: string | null;
-  setSearch: (search: MainState['search']) => void;
-  provider: string | null;
-  setProvider: (provider: MainState['provider']) => void;
-  category: Category | null;
-  setCategory: (category: MainState['category']) => void;
-  collection: string | null;
-  setCollection: (collection: MainState['collection']) => void;
   geographyFilter: any | null;
   setGeographyFilter: (geographyFilter: MainState['geographyFilter']) => void;
   hasGeographyFilter: () => boolean;
@@ -143,8 +147,10 @@ export type MainState = {
   parameterGroupMembers: ParameterGroupMembers;
   setParameterGroupMembers: (parameterGroupMembers: MainState['parameterGroupMembers']) => void;
 } & CollectionSlice &
-  LocationSlice &
-  LayerSlice &
-  SpatialSelectionSlice &
   DrawingSlice &
-  ShareSlice;
+  IFilterSlice &
+  LayerSlice &
+  LocationSlice &
+  ShareSlice &
+  SpatialSelectionSlice &
+  ISearchSlice;

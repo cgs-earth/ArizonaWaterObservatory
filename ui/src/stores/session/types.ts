@@ -38,6 +38,7 @@ export enum Overlay {
   Legend = 'legend',
   Links = 'links',
   Screenshot = 'screenshot',
+  Search = 'search',
   Share = 'share',
   Warning = 'warning',
 }

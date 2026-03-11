@@ -20,8 +20,8 @@ export const Body: React.FC = () => {
   const setProvider = useMainStore((state) => state.setProvider);
   const category = useMainStore((state) => state.category);
   const setCategory = useMainStore((state) => state.setCategory);
-  const search = useMainStore((state) => state.search);
-  const setSearch = useMainStore((state) => state.setSearch);
+  const search = useMainStore((state) => state.searchTerm);
+  const setSearch = useMainStore((state) => state.setSearchTerm);
 
   useEffect(() => {
     const activeFilters: { title: string; value: string }[] = [];
