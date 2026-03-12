@@ -8,9 +8,9 @@ affine==2.4.0 \
     --hash=sha256:8a3df80e2b2378aef598a83c1392efd47967afec4242021a0b06b4c7cbc61a92 \
     --hash=sha256:a24d818d6a836c131976d22f8c27b8d3ca32d0af64c1d8d29deb7bafa4da1eea
     # via rasterio
-aiobotocore==3.2.1 \
-    --hash=sha256:59b1c1f59860cb10b2e5096edcc87a88842bee301969bd76a3ca0b1c4c30e6d3 \
-    --hash=sha256:68b7474af3e7124666b8e191805db5a7255d14e6187e0472481c845b6062e42e
+aiobotocore==2.5.4 \
+    --hash=sha256:4b32218728ca3d0be83835b604603a0cd6c329066e884bb78149334267f92440 \
+    --hash=sha256:60341f19eda77e41e1ab11eef171b5a98b5dbdb90804f5334b6f90e560e31fae
     # via s3fs
 aiohappyeyeballs==2.6.1 \
     --hash=sha256:c3f9d0113123803ccadfdf3f0faa505bc78e6a72d1cc4806cbd719826e943558 \
@@ -126,9 +126,9 @@ blinker==1.9.0 \
     --hash=sha256:b4ce2265a7abece45e7cc896e98dbebe6cead56bcf805a3d23136d145f5445bf \
     --hash=sha256:ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc
     # via flask
-botocore==1.42.61 \
-    --hash=sha256:476059beb3f462042742950cf195d26bc313461a77189c16e37e205b0a924b26 \
-    --hash=sha256:702d6011ace2b5b652a0dbb45053d4d9f79da2c5b184463042434e1754bdd601
+botocore==1.31.17 \
+    --hash=sha256:396459065dba4339eb4da4ec8b4e6599728eb89b7caaceea199e26f7d824a41c \
+    --hash=sha256:6ac34a1d34aa3750e78b77b8596617e2bab938964694d651939dba2cbde2c12b
     # via aiobotocore
 certifi==2026.2.25 \
     --hash=sha256:027692e4402ad994f1c42e52a4997a9763c646b73e4096e4d5d6db8af1d6f0fa \
@@ -459,15 +459,15 @@ frozenlist==1.8.0 \
     # via
     #   aiohttp
     #   aiosignal
-fsspec==2026.2.0 \
-    --hash=sha256:6544e34b16869f5aacd5b90bdf1a71acb37792ea3ddf6125ee69a22a53fb8bff \
-    --hash=sha256:98de475b5cb3bd66bedd5c4679e87b4fdfe1a3bf4d707b151b3c07e58c9a2437
+fsspec==2023.6.0 \
+    --hash=sha256:1cbad1faef3e391fba6dc005ae9b5bdcbf43005c9167ce78c915549c352c869a \
+    --hash=sha256:d0b2f935446169753e7a5c5c55681c54ea91996cc67be93c39a154fb3a2742af
     # via
     #   gcsfs
     #   s3fs
-gcsfs==2026.2.0 \
-    --hash=sha256:407feaa2af0de81ebce44ea7e6f68598a3753e5e42257b61d6a9f8c0d6d4754e \
-    --hash=sha256:d58a885d9e9c6227742b86da419c7a458e1f33c1de016e826ea2909f6338ed84
+gcsfs==2023.6.0 \
+    --hash=sha256:30b14fccadb3b7f0d99b2cd03bd8507c40f3a9a7d05847edca571f642bedbdff \
+    --hash=sha256:3b3c7d8eddd4ec1380f3b49fbb861ee1e974adb223564401f10884b6260d406f
     # via arizonawaterobservatory
 gdal==3.10.3 ; sys_platform == 'linux' \
     --hash=sha256:b5550650daeeae8e41091581d9aea7d75a9f15b0ebbeb8c96e37458fa02264cd
@@ -504,7 +504,6 @@ google-api-core==2.30.0 \
     # via
     #   google-cloud-core
     #   google-cloud-storage
-    #   google-cloud-storage-control
 google-auth==2.49.0 \
     --hash=sha256:9cc2d9259d3700d7a257681f81052db6737495a1a46b610597f4b8bafe5286ae \
     --hash=sha256:f893ef7307f19cf53700b7e2f61b5a6affe3aa0edf9943b13788920ab92d8d87
@@ -514,7 +513,6 @@ google-auth==2.49.0 \
     #   google-auth-oauthlib
     #   google-cloud-core
     #   google-cloud-storage
-    #   google-cloud-storage-control
 google-auth-oauthlib==1.3.0 \
     --hash=sha256:386b3fb85cf4a5b819c6ad23e3128d975216b4cac76324de1d90b128aaf38f29 \
     --hash=sha256:cd39e807ac7229d6b8b9c1e297321d36fcc8a9e4857dff4301870985df51a528
@@ -526,10 +524,6 @@ google-cloud-core==2.5.0 \
 google-cloud-storage==3.9.0 \
     --hash=sha256:2dce75a9e8b3387078cbbdad44757d410ecdb916101f8ba308abf202b6968066 \
     --hash=sha256:f2d8ca7db2f652be757e92573b2196e10fbc09649b5c016f8b422ad593c641cc
-    # via gcsfs
-google-cloud-storage-control==1.10.0 \
-    --hash=sha256:2bcbfa4ca6530d25a5baa8dbe80caf0eeabe4c6804798f4f107279719c316bdb \
-    --hash=sha256:81d9dc6b50106836733adca868501f879f0d7a1c41503d887a1a1b9b9ddbf508
     # via gcsfs
 google-crc32c==1.8.0 \
     --hash=sha256:14f87e04d613dfa218d6135e81b78272c3b904e2a7053b841481b38a7d901411 \
@@ -560,8 +554,6 @@ googleapis-common-protos==1.73.0 \
     --hash=sha256:dfdaaa2e860f242046be561e6d6cb5c5f1541ae02cfbcb034371aadb2942b4e8
     # via
     #   google-api-core
-    #   grpc-google-iam-v1
-    #   grpcio-status
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
 greenlet==3.3.2 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64' \
@@ -602,10 +594,6 @@ greenlet==3.3.2 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or 
     --hash=sha256:e26e72bec7ab387ac80caa7496e0f908ff954f31065b0ffc1f8ecb1338b11b54 \
     --hash=sha256:e3cb43ce200f59483eb82949bf1835a99cf43d7571e900d7c8d5c62cdf25d2f9
     # via sqlalchemy
-grpc-google-iam-v1==0.14.3 \
-    --hash=sha256:7a7f697e017a067206a3dfef44e4c634a34d3dee135fe7d7a4613fe3e59217e6 \
-    --hash=sha256:879ac4ef33136c5491a6300e27575a9ec760f6cdf9a2518798c1b8977a5dc389
-    # via google-cloud-storage-control
 grpcio==1.78.0 \
     --hash=sha256:12a771591ae40bc65ba67048fa52ef4f0e6db8279e595fd349f9dfddeef571f9 \
     --hash=sha256:185dea0d5260cbb2d224c507bf2a5444d5abbb1fa3594c1ed7e4c709d5eb8383 \
@@ -638,17 +626,7 @@ grpcio==1.78.0 \
     --hash=sha256:f2d4e43ee362adfc05994ed479334d5a451ab7bc3f3fee1b796b8ca66895acb4 \
     --hash=sha256:f9ab915a267fc47c7e88c387a3a28325b58c898e23d4995f765728f4e3dedb97 \
     --hash=sha256:fd5f135b1bd58ab088930b3c613455796dfa0393626a6972663ccdda5b4ac6ce
-    # via
-    #   google-api-core
-    #   google-cloud-storage-control
-    #   googleapis-common-protos
-    #   grpc-google-iam-v1
-    #   grpcio-status
-    #   opentelemetry-exporter-otlp-proto-grpc
-grpcio-status==1.78.0 \
-    --hash=sha256:a34cfd28101bfea84b5aa0f936b4b423019e9213882907166af6b3bddc59e189 \
-    --hash=sha256:b492b693d4bf27b47a6c32590701724f1d3b9444b36491878fb71f6208857f34
-    # via google-api-core
+    # via opentelemetry-exporter-otlp-proto-grpc
 idna==3.11 \
     --hash=sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea \
     --hash=sha256:795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902
@@ -676,9 +654,7 @@ jinja2==3.1.6 \
 jmespath==1.1.0 \
     --hash=sha256:472c87d80f36026ae83c6ddd0f1d05d4e510134ed462851fd5f754c8c3cbb88d \
     --hash=sha256:a5663118de4908c91729bea0acadca56526eb2698e83de10cd116ae0f4e97c64
-    # via
-    #   aiobotocore
-    #   botocore
+    # via botocore
 jsonschema==4.26.0 \
     --hash=sha256:0c26707e2efad8aa1bfc5b7ce170f3fccc2e4918ff85989ba9ffa9facb2be326 \
     --hash=sha256:d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce
@@ -850,7 +826,6 @@ multidict==6.7.1 \
     --hash=sha256:fc5907494fccf3e7d3f94f95c91d6336b092b5fc83811720fae5e2765890dfba \
     --hash=sha256:fcee94dfbd638784645b066074b338bc9cc155d4b4bffa4adce1615c5a426c19
     # via
-    #   aiobotocore
     #   aiohttp
     #   yarl
 netcdf4==1.7.4 \
@@ -1214,9 +1189,7 @@ propcache==0.4.1 \
 proto-plus==1.27.1 \
     --hash=sha256:912a7460446625b792f6448bade9e55cd4e41e6ac10e27009ef71a7f317fa147 \
     --hash=sha256:e4643061f3a4d0de092d62aa4ad09fa4756b2cbb89d4627f3985018216f9fefc
-    # via
-    #   google-api-core
-    #   google-cloud-storage-control
+    # via google-api-core
 protobuf==6.33.5 \
     --hash=sha256:3093804752167bcab3998bec9f1048baae6e29505adaf1afd14a37bddede533c \
     --hash=sha256:69915a973dd0f60f31a08b8318b73eab2bd6a392c79184b3612226b0a3f8ec02 \
@@ -1228,10 +1201,7 @@ protobuf==6.33.5 \
     --hash=sha256:d71b040839446bac0f4d162e758bea99c8251161dae9d0983a3b88dee345153b
     # via
     #   google-api-core
-    #   google-cloud-storage-control
     #   googleapis-common-protos
-    #   grpc-google-iam-v1
-    #   grpcio-status
     #   opentelemetry-proto
     #   proto-plus
 psycopg2==2.9.11 \
@@ -1499,7 +1469,6 @@ python-dateutil==2.9.0.post0 \
     --hash=sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3 \
     --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
     # via
-    #   aiobotocore
     #   botocore
     #   dateparser
     #   pandas
@@ -1789,9 +1758,9 @@ rsa==4.9.1 \
     --hash=sha256:68635866661c6836b8d39430f97a996acbd61bfa49406748ea243539fe239762 \
     --hash=sha256:e7bdbfdb5497da4c07dfd35530e1a902659db6ff241e39d9953cad06ebd0ae75
     # via google-auth
-s3fs==2026.2.0 \
-    --hash=sha256:65198835b86b1d5771112b0085d1da52a6ede36508b1aaa6cae2aedc765dfe10 \
-    --hash=sha256:91cb2a9f76e35643b76eeac3f47a6165172bb3def671f76b9111c8dd5779a2ac
+s3fs==2023.6.0 \
+    --hash=sha256:63fd8ddf05eb722de784b7b503196107f2a518061298cf005a8a4715b4d49117 \
+    --hash=sha256:d1a0a423d0d2e17fb2a193d9531935dc3f45ba742693448a461b6b34f6a92a24
     # via
     #   arizonawaterobservatory
     #   nationalwatermodel
@@ -1931,9 +1900,9 @@ tzlocal==5.3.1 \
     --hash=sha256:cceffc7edecefea1f595541dbd6e990cb1ea3d19bf01b2809f362a03dd7921fd \
     --hash=sha256:eb1a66c3ef5847adf7a834f1be0800581b683b5608e74f86ecbcef8ab91bb85d
     # via dateparser
-urllib3==2.6.3 \
-    --hash=sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed \
-    --hash=sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4
+urllib3==1.26.20 \
+    --hash=sha256:0ed14ccfbf1c30a9072c7ca157e4319b70d65f623e91e7b32fadb2853431016e \
+    --hash=sha256:40c2dc0c681e47eb8f90e7e27bf6ff7df2e677421fd46756da1161c39ca70d32
     # via
     #   botocore
     #   requests

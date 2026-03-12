@@ -12,6 +12,7 @@ from com.geojson.helpers import (
     GeojsonFeatureDict,
 )
 from com.otel import add_args_as_attributes_to_span, otel_trace
+import gcsfs
 import numpy as np
 from pygeoapi.crs import DEFAULT_STORAGE_CRS, get_crs
 from pygeoapi.provider.base import (
@@ -90,19 +91,27 @@ def get_zarr_dataset_handle(
         assert data, (
             "You must provide a gcs project in the 'data' field when using the gcs filesystem"
         )
+
+        # you must explicitly set asynchronous to False
+        # and pass in the loop, otherwise there will be issues
+        # with multiple event loops
+        fs = gcsfs.GCSFileSystem(
+            project=data,
+            token="anon",
+            requester_pays=False,
+            anon=True,
+            check_connection=False,
+            asynchronous=False,
+            loop=get_loop(),
+        )
+
         return xr.open_zarr(
-            f"gs://{remote_dataset}",
+            fs.get_mapper(remote_dataset),
             consolidated=True,
             zarr_format=2,
             chunks="auto",
-            storage_options={
-                "project": data,
-                "token": "anon",
-                "requester_pays": False,
-                "anon": True,
-            },
         )
-
+    # if not gcs, fall back to s3
     fs = s3fs.S3FileSystem(
         endpoint_url=data,
         anon=True,
