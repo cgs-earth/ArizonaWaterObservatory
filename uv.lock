@@ -295,7 +295,7 @@ server = [
     { name = "flask-cors", specifier = ">=6.0.2" },
     { name = "gevent", specifier = ">=1.4.0" },
     { name = "gunicorn", specifier = "<24" },
-    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=1e18b26c09b72c871b1dc4747ad039509354f1d6" },
+    { name = "pygeoapi", git = "https://github.com/internetofwater/pygeoapi.git?rev=ab729a925bf2ff120e5ee2aacce3a7c5fb9cfe35" },
 ]
 
 [[package]]
@@ -2560,7 +2560,7 @@ wheels = [
 [[package]]
 name = "pygeoapi"
 version = "0.24.dev0"
-source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=1e18b26c09b72c871b1dc4747ad039509354f1d6#1e18b26c09b72c871b1dc4747ad039509354f1d6" }
+source = { git = "https://github.com/internetofwater/pygeoapi.git?rev=ab729a925bf2ff120e5ee2aacce3a7c5fb9cfe35#ab729a925bf2ff120e5ee2aacce3a7c5fb9cfe35" }
 dependencies = [
     { name = "babel" },
     { name = "click" },
