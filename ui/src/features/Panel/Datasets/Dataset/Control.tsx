@@ -43,6 +43,7 @@ export const Control: React.FC<Props> = (props) => {
     const loadingInstance = loadingManager.add(`Creating layer for: ${name}`, LoadingType.Data);
     setIsLoading(true);
 
+    mainManager.clearAllPopups();
     try {
       controller.current = new AbortController();
 

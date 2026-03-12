@@ -1850,6 +1850,14 @@ class MainManager {
     this.store.getState().setCategory(null);
     this.store.getState().setCollection(null);
   }
+
+  public clearAllPopups(): void {
+    if (this.map) {
+      for (const popup of this.map._popups) {
+        popup.remove();
+      }
+    }
+  }
 }
 
 export default MainManager;
