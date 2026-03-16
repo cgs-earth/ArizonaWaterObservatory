@@ -22,6 +22,8 @@ COPY packages /opt/pygeoapi/packages/
 # Install all local integrations
 # --inexact makes it so the deployment packages we just copied aren't removed
 # --no-group makes it so etl code that isn't at runtime is skipped
+ENV NUMCODECS_NO_EXTENSION=1
+
 RUN uv sync --no-group etl --all-groups --all-packages
 
 COPY pygeoapi-deployment/ /opt/pygeoapi/pygeoapi-deployment/
