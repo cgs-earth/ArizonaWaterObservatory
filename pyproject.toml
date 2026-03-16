@@ -22,16 +22,30 @@ dependencies = [
     "awdb_forecasts",
     "noaa_rfc",
     "aiohttp>=3.12.12",
-    "xarray>=2025.4.0",
-    "zarr>=2.18.7",
+    "xarray==2025.11.0", # this should be pinned and be very carefully changed since it has lots of internal complexity which can change query behavior significantly
+    "zarr<3", # this MUST be below version 3 for the time being otherwise if it gets bumped above 3 then the event loop cannot be serialized and the async event loop sharing will not work
     "netcdf4>=1.7.2",
-    "s3fs>=2025.9.0",
+    # pins to the same s3fs version used in wwdh; mainly just for compatibility; could be bumped in the future
+    "s3fs==2023.6.0",
     "nationalwatermodel",
     "config-store",
     "rioxarray>=0.19.0",
     "geopandas>=1.1.1",
-    "pgedr",
-    "gcsfs>=2025.10.0",
+    "formatters",
+    "pgedr==0.2.0",
+    # on linux use anywhere between gdal 3.8 which appears to be the latest on github actions workflow runnings and 
+    # gdal 3.10 since that is the latest
+    # gdal version packaged for debian trixie
+    "gdal>=3.8,<3.11 ; platform_system == 'Linux'",
+
+    # on all other platforms use gdal 3.12 since that is the latest
+    # gdal version on macos packaged by homebrew and is easier to test with locally than downgrading
+    # the system gdal version
+    "gdal>=3.12,<3.13 ; platform_system != 'Linux'",
+    "pygeoapi-plugins>=0.5.0",
+    # pins to the same gcfs version that is compatible to the zarr version used in wwdh
+    # mainly just for compatibility; could be bumped in the future
+    "gcsfs>=2023.6.0",
 ]
 
 [dependency-groups]
@@ -42,21 +56,19 @@ dev = [
     "radon>=6.0.1",
 ]
 etl = [
-    "gcsfs>=2025.10.0",
+    "gcsfs",
     "pyarrow>=22.0.0",
     "ipykernel>=7.1.0",
     "jupytext>=1.18.1",
     "pip>=25.3",
     "dask>=2025.11.0",
-    "numcodecs>=0.16.5",
+    "numcodecs", # this should not be pinned to a specific version to avoid changing the zarr version dependency which is critical for national water model to work properly
 ]
 server = [
     "flask-cors>=6.0.2",
     "gevent>=1.4.0",
     "gunicorn<24",
     "pygeoapi",
-    "starlette>=0.52.1",
-    "uvicorn>=0.40.0",
 ]
 
 [tool.uv.workspace]
@@ -65,8 +77,9 @@ members = [
 ]
 
 [tool.uv.sources]
-pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="d13874427c64ad0e69f12fc2be329dbcf5c85401" }
-pgedr = {git = "https://github.com/internetofwater/pgedr.git", rev="eb6c86dc410bdfdd214c8cb8aa4a67943ae2968a"}
+# use dev branch which shares the same features across usbr and asu to keep consistency
+# this is rebased to be at least 0.23.0 for pygeoapi
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="ab729a925bf2ff120e5ee2aacce3a7c5fb9cfe35" }
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
@@ -75,6 +88,7 @@ snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git",
 awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , branch="main" }
 awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
 noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
+formatters = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/formatters" , rev="70396a4f583aa8949b78612f4223cf1dd4f8bfd3" }
 nationalwatermodel = { workspace = true }
 config-store = { workspace = true }
 

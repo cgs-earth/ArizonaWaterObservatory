@@ -1,9 +1,8 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: Apache-2.0
 
-from pygeoapi.crs import DEFAULT_CRS
+from pygeoapi.crs import DEFAULT_CRS, transform_bbox
 from pygeoapi.provider.base import ProviderNoDataError, ProviderQueryError
-from pygeoapi.util import transform_bbox
 import pyproj
 import pytest
 

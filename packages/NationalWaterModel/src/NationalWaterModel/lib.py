@@ -6,20 +6,21 @@ import logging
 from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
-from com.env import TRACER
+from com.env import TRACER, get_loop
 from com.geojson.helpers import (
     GeojsonFeatureCollectionDict,
     GeojsonFeatureDict,
 )
 from com.otel import add_args_as_attributes_to_span, otel_trace
+import gcsfs
 import numpy as np
-from pygeoapi.api import DEFAULT_STORAGE_CRS
+from pygeoapi.crs import DEFAULT_STORAGE_CRS, get_crs
 from pygeoapi.provider.base import (
     ProviderInvalidDataError,
     ProviderNoDataError,
     ProviderQueryError,
 )
-from pygeoapi.util import DATETIME_FORMAT, get_crs_from_uri
+from pygeoapi.util import DATETIME_FORMAT
 import pyproj
 import s3fs
 import xarray as xr
@@ -78,7 +79,11 @@ def get_zarr_dataset_handle(
     if not remote_dataset:
         try:
             LOGGER.debug(f"Opening local zarr dataset {data}")
-            return xr.open_zarr(data, consolidated=True, chunks="auto")
+            return xr.open_zarr(
+                data,
+                consolidated=True,
+                chunks="auto",
+            )
         except Exception as e:
             raise ProviderNoDataError(f"Failed to open {data}, {e}") from e
 
@@ -86,22 +91,32 @@ def get_zarr_dataset_handle(
         assert data, (
             "You must provide a gcs project in the 'data' field when using the gcs filesystem"
         )
+
+        # you must explicitly set asynchronous to False
+        # and pass in the loop, otherwise there will be issues
+        # with multiple event loops
+        fs = gcsfs.GCSFileSystem(
+            project=data,
+            token="anon",
+            requester_pays=False,
+            anon=True,
+            check_connection=False,
+            asynchronous=False,
+            loop=get_loop(),
+        )
+
         return xr.open_zarr(
-            f"gs://{remote_dataset}",
+            fs.get_mapper(remote_dataset),
             consolidated=True,
             zarr_format=2,
             chunks="auto",
-            storage_options={
-                "project": data,
-                "token": "anon",
-                "requester_pays": False,
-                "anon": True,
-            },
         )
-
+    # if not gcs, fall back to s3
     fs = s3fs.S3FileSystem(
         endpoint_url=data,
         anon=True,
+        loop=get_loop(),
+        asynchronous=False,
     )
     mapper = fs.get_mapper(remote_dataset, check=False)
     return xr.open_zarr(mapper, consolidated=True, chunks="auto")
@@ -133,7 +148,7 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
                     f"Failed to parse storage crs: {spatial_ref}"
                 ) from e
 
-    return get_crs_from_uri(DEFAULT_STORAGE_CRS)
+    return get_crs(DEFAULT_STORAGE_CRS)
 
 
 @otel_trace()
