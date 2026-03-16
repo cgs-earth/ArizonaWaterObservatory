@@ -592,7 +592,12 @@ resources:
         rel: map list 
         title: List of all map services available by the USGS
         href: https://tnmaccess.nationalmap.gov/api/v1/map_services?outputFormat=pJSON
-    extents: *default-extent
+    extents: 
+        spatial: *default-extent
+        temporal:
+            begin: 2019-01-01T00:00:00Z 
+            end: 2019-12-31T23:59:59Z
+            trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian
     providers:
       - type: map
         name: WMSFacade
