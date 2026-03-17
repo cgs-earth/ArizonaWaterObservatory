@@ -7,8 +7,6 @@ import { useEffect, useRef, useState } from 'react';
 import { ActionIcon, List, Tooltip } from '@mantine/core';
 import AddLocation from '@/assets/AddLocation';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
-import { useMap } from '@/contexts/MapContexts';
-import { MAP_ID } from '@/features/Map/config';
 import styles from '@/features/Panel/Panel.module.css';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
@@ -40,14 +38,10 @@ export const Control: React.FC<Props> = (props) => {
 
   const controller = useRef<AbortController | null>(null);
   const isMounted = useRef(false);
-  const { persistentPopup } = useMap(MAP_ID);
 
   const handleClick = async (name: string, id: ICollection['id']) => {
     const loadingInstance = loadingManager.add(`Creating layer for: ${name}`, LoadingType.Data);
     setIsLoading(true);
-    if (persistentPopup) {
-      persistentPopup.remove();
-    }
     try {
       controller.current = new AbortController();
 
