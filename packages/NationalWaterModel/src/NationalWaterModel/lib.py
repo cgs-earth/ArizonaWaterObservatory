@@ -518,6 +518,8 @@ def dataset_to_covjson(
                     "t": {
                         "values": [time_values]
                         if singleTimeseriesValue
+                        # if there is one time value but the time axis is already a list
+                        # then we don't want to wrap it in a list again
                         and not isinstance(time_values, list)
                         else time_values
                     },
