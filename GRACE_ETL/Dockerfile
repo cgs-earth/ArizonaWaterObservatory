@@ -50,4 +50,4 @@ USER nonroot
 WORKDIR /app
 
 # run the python application by default
-CMD ["python3", "src/main.py"]
+ENTRYPOINT ["python3", "src/main.py"]
