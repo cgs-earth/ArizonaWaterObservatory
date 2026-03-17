@@ -817,33 +817,33 @@ resources:
         title_field: name
 
 
-  GRACE:
-    type: collection
-    title: NASA GRACE
-    description: contains data from NASA's Gravity Recovery and Climate Experiment (GRACE; 2002-2017) and GRACE Follow On (GRACE-FO; 2018-present) satellites, which detect small changes in the Earth's gravity field caused by the redistribution of water on and beneath the land surface. The paired satellites travel about 137 miles (220 km) apart at an altitude of 300 miles (485 km) and record small changes in the distance separating them as they encounter variations in the Earth's gravitational field.
-    keywords: ["NASA"]
-    provider-name:  
-      - NASA
-    extents: *nwm-extents
-    links:
-      - type: application/html
-        rel: canonical 
-        title: Data source
-        href: https://nasagrace.unl.edu/ConusData.aspx
-      - type: application/html
-        rel: documentation
-        title: Documentation
-        href: https://nasagrace.unl.edu/About.aspx
-    providers:
-      - type: edr
-        name: NationalWaterModel.RasterEDRProvider
-        data: ${GRACE_S3_ENDPOINT:-http://localhost:9000}
-        remote_dataset: ${GRACE_PATH_IN_S3:-grace/grace_data.zarr}
-        x_field: lon
-        y_field: lat
-        time_field: time
-        s3_access_key: ${GRACE_S3_ACCESS_KEY:-minioadmin} 
-        s3_secret_key: ${GRACE_S3_SECRET_KEY:-minioadmin}
+  # GRACE:
+  #   type: collection
+  #   title: NASA GRACE
+  #   description: contains data from NASA's Gravity Recovery and Climate Experiment (GRACE; 2002-2017) and GRACE Follow On (GRACE-FO; 2018-present) satellites, which detect small changes in the Earth's gravity field caused by the redistribution of water on and beneath the land surface. The paired satellites travel about 137 miles (220 km) apart at an altitude of 300 miles (485 km) and record small changes in the distance separating them as they encounter variations in the Earth's gravitational field.
+  #   keywords: ["NASA"]
+  #   provider-name:  
+  #     - NASA
+  #   extents: *nwm-extents
+  #   links:
+  #     - type: application/html
+  #       rel: canonical 
+  #       title: Data source
+  #       href: https://nasagrace.unl.edu/ConusData.aspx
+  #     - type: application/html
+  #       rel: documentation
+  #       title: Documentation
+  #       href: https://nasagrace.unl.edu/About.aspx
+  #   providers:
+  #     - type: edr
+  #       name: NationalWaterModel.RasterEDRProvider
+  #       data: ${GRACE_S3_ENDPOINT:-http://localhost:9000}
+  #       remote_dataset: ${GRACE_PATH_IN_S3:-grace/grace_data.zarr}
+  #       x_field: lon
+  #       y_field: lat
+  #       time_field: time
+  #       s3_access_key: ${GRACE_S3_ACCESS_KEY:-minioadmin} 
+  #       s3_secret_key: ${GRACE_S3_SECRET_KEY:-minioadmin}
 
   config-store:
       type: process
