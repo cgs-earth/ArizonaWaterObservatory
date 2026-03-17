@@ -208,6 +208,8 @@ def project_dataset(
         dataset = dataset.rio.set_spatial_dims(x_dim=x_field, y_dim=y_field)
         dataset = dataset.rio.write_crs(storage_crs.to_wkt())
         dataset = dataset.rio.reproject(dst_crs=output_crs.to_wkt())
+        # rio reproject renames the x/y fields to be x and y
+        # so we need to rename them back to the original
         dataset = dataset.rename({"x": x_field, "y": y_field})
         return dataset
 
