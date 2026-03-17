@@ -205,7 +205,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--s3-store-path",
         default="grace_data.zarr",
-        help="Path to store GRACE data on S3",
+        help="Path to store GRACE data on S3 in the format <bucket>/<name>.zarr",
     )
     parser.add_argument(
         "--test-mode",
@@ -219,6 +219,6 @@ if __name__ == "__main__":
         args.access_key,
         args.secret_key,
         args.bucket,
-        args.s3_store_name,
+        args.s3_store_path,
         args.test_mode,
     )
