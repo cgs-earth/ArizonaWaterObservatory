@@ -29,6 +29,13 @@ import xarray as xr
 class ProviderSchema(TypedDict):
     """
     The config used to configure the provider
+
+    to test with local minio you can use something like the following
+    where data is the root url and remote_dataset represents the path
+    including the bucket name
+
+    data: http://localhost:9000
+    remote_dataset: grace/grace_data.zarr
     """
 
     # The type of provider
@@ -59,6 +66,12 @@ class ProviderSchema(TypedDict):
     # while still allowing for simple point filtering
     wkb_field: NotRequired[str]
 
+    # credentials for accessing s3 object stores
+    s3_access_key: NotRequired[str]
+    s3_secret_key: NotRequired[str]
+    # specify the zarr version; otherwise it defaults to version 2
+    zarr_version: NotRequired[int]
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,6 +82,9 @@ def get_zarr_dataset_handle(
     data: str,
     remote_dataset: str | None,
     is_gcs: bool = False,
+    s3_access_key: str | None = None,
+    s3_secret_key: str | None = None,
+    zarr_version: int = 2,
 ) -> xr.Dataset:
     """
     Open the zarr dataset but don't actually load the data.
@@ -83,6 +99,7 @@ def get_zarr_dataset_handle(
                 data,
                 consolidated=True,
                 chunks="auto",
+                zarr_format=zarr_version,
             )
         except Exception as e:
             raise ProviderNoDataError(f"Failed to open {data}, {e}") from e
@@ -108,18 +125,22 @@ def get_zarr_dataset_handle(
         return xr.open_zarr(
             fs.get_mapper(remote_dataset),
             consolidated=True,
-            zarr_format=2,
+            zarr_format=zarr_version,
             chunks="auto",
         )
     # if not gcs, fall back to s3
     fs = s3fs.S3FileSystem(
         endpoint_url=data,
-        anon=True,
+        anon=True if s3_access_key is None else False,
         loop=get_loop(),
         asynchronous=False,
+        key=s3_access_key,
+        secret=s3_secret_key,
     )
     mapper = fs.get_mapper(remote_dataset, check=False)
-    return xr.open_zarr(mapper, consolidated=True, chunks="auto")
+    return xr.open_zarr(
+        mapper, consolidated=True, chunks="auto", zarr_format=zarr_version
+    )
 
 
 def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
@@ -186,7 +207,9 @@ def project_dataset(
         # use rio.reproject
         dataset = dataset.rio.set_spatial_dims(x_dim=x_field, y_dim=y_field)
         dataset = dataset.rio.write_crs(storage_crs.to_wkt())
-        return dataset.rio.reproject(dst_crs=output_crs.to_wkt())
+        dataset = dataset.rio.reproject(dst_crs=output_crs.to_wkt())
+        dataset = dataset.rename({"x": x_field, "y": y_field})
+        return dataset
 
 
 @otel_trace()
@@ -493,6 +516,7 @@ def dataset_to_covjson(
                     "t": {
                         "values": [time_values]
                         if singleTimeseriesValue
+                        and not isinstance(time_values, list)
                         else time_values
                     },
                 },

@@ -48,7 +48,9 @@ class FileParser(HTMLParser):
         if self.in_table and tag == "a" and "href" in attrs:
             href = attrs["href"]
             assert href
-            if href.lower().endswith(".tif"):  # only keep GeoTIFFs
+            if href.lower().endswith(
+                ".nc4"
+            ):  # keep only the netcdf data which we can convert to zarr
                 self.links.append(href)
 
     def handle_endtag(self, tag):

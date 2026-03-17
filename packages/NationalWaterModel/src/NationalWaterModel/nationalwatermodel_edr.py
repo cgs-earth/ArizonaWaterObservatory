@@ -67,6 +67,9 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             if "remote_dataset" in provider_def
             else None,
             is_gcs=provider_def.get("is_gcs", False),
+            s3_secret_key=provider_def.get("s3_secret_key", None),
+            s3_access_key=provider_def.get("s3_access_key", None),
+            zarr_version=provider_def.get("zarr_version", 2),
         )
 
         if "storage_crs" not in provider_def:
@@ -212,6 +215,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-111.7,31.9&f=html&parameter-name=velocity&datetime=2023-01-01/2023-01-02
                  http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=sfcheadsubrt&bbox=-112.5,31.7,-110.7,33.0&datetime=2020-01-01
                  http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=sfcheadsubrt&bbox=-112.5,31.7,-111.7,32.0&datetime=2020-01-01/2020-01-02&f=json
+                 http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=zwattablrt&bbox=-114,31.7,-110.7,33.0&datetime=2020-01-01
+                 http://localhost:5005/collections/GRACE/cube?f=html&bbox=-400.5,31.7,-110.7,33.0&parameter-name=sfsm_inst&datetime=2002-04-01
         """
         if not select_properties or len(select_properties) > 1:
             raise ValueError(

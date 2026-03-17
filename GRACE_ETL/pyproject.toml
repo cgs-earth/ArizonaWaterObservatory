@@ -2,14 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [project]
-name = "grace"
+name = "GRACE_ETL"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "minio>=7.2.20",
+    "netcdf4>=1.7.4",
     "requests>=2.32.5",
+    "s3fs>=2026.2.0",
+    "xarray>=2026.2.0",
+    "zarr>=3.1.5",
 ]
 
 [dependency-groups]

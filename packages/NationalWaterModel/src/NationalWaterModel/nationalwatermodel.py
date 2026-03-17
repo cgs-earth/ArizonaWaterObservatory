@@ -47,6 +47,9 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             if "remote_dataset" in provider_def
             else None,
             is_gcs=provider_def.get("is_gcs", False),
+            s3_secret_key=provider_def.get("s3_secret_key", None),
+            s3_access_key=provider_def.get("s3_access_key", None),
+            zarr_version=provider_def.get("zarr_version", 2),
         )
         if "storage_crs" not in provider_def:
             self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
