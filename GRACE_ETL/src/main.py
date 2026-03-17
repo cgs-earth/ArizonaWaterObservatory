@@ -47,9 +47,7 @@ def get_previously_downloaded_urls(mc: minio.Minio, bucket):
     return previously_downloaded_urls
 
 
-def update_previously_downloaded_urls(
-    mc: minio.Minio, bucket: str, new_url: str
-):
+def update_checkpoint(mc: minio.Minio, bucket: str, new_url: str):
     previously_downloaded_urls = get_previously_downloaded_urls(mc, bucket)
 
     # make is a set to ensure no duplicates
@@ -127,10 +125,11 @@ def main(
     access_key: str,
     secret_key: str,
     bucket: str,
-    s3_store_name: str,
+    s3_store_path: str,
     test_mode: bool = False,
 ):
     minio_client = minio.Minio(endpoint, access_key, secret_key, secure=False)
+
     previously_downloaded_urls = get_previously_downloaded_urls(
         minio_client, bucket
     )
@@ -154,8 +153,6 @@ def main(
     parser.feed(response.text)
     LOGGER.info(f"Found {len(parser.links)} folders")
 
-    downloaded_urls = set()
-
     for i, link in enumerate(parser.links):
         if link["text"] in ["current", "NASApublication", "Web"]:
             continue
@@ -171,11 +168,8 @@ def main(
                 LOGGER.info(f"Skipping previously downloaded file {file_link}")
                 continue
             else:
-                downloaded_urls.add(file_link)
-                fetch_and_append(file_link, s3_fs, bucket, s3_store_name)
-                update_previously_downloaded_urls(
-                    minio_client, bucket, file_link
-                )
+                fetch_and_append(file_link, s3_fs, bucket, s3_store_path)
+                update_checkpoint(minio_client, bucket, file_link)
 
         LOGGER.info(f"Completed folder {i + 1}/{len(parser.links)}")
         if test_mode:
@@ -209,9 +203,9 @@ if __name__ == "__main__":
         help="MinIO/S3 bucket name",
     )
     parser.add_argument(
-        "--s3-store-name",
+        "--s3-store-path",
         default="grace_data.zarr",
-        help="Zarr store name on S3",
+        help="Path to store GRACE data on S3",
     )
     parser.add_argument(
         "--test-mode",

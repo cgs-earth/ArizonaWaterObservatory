@@ -1,6 +1,7 @@
 # Copyright 2026 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: Apache-2.0
 
+
 from main import main
 from minio import Minio
 import pytest
@@ -48,6 +49,7 @@ def test_main_integration(minio_container):
         endpoint=endpoint,
         bucket=bucket,
         test_mode=True,
+        s3_store_path=f"{bucket}/grace_data.zarr",
     )
 
     # Connect to MinIO to verify at least one file was uploaded
