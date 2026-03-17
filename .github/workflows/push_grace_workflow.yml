@@ -1,7 +1,7 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: Apache-2.0
 
-name: Push To GHCR
+name: Push Grace Workflow to GHCR
 
 on:
   push:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build_and_push:
-    name: "build and push backend image"
+    name: "build and push grace workflow image"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
