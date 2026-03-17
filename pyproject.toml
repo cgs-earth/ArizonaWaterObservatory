@@ -131,3 +131,7 @@ force-sort-within-sections = true
 # Order imports by type, which is determined by case, in addition to alphabetically.
 # By putting this to false we can force the order to be alphabetical.
 order-by-type = false
+
+
+[tool.pyright]
+ignore = ["GRACE_ETL/**"]
