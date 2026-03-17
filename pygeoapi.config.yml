@@ -837,13 +837,13 @@ resources:
     providers:
       - type: edr
         name: NationalWaterModel.RasterEDRProvider
-        data: http://localhost:9000
+        data: ${GRACE_S3_ENDPOINT:-http://localhost:9000}
         remote_dataset: ${GRACE_PATH_IN_S3:-grace/grace_data.zarr}
         x_field: lon
         y_field: lat
         time_field: time
-        s3_access_key: minioadmin
-        s3_secret_key: minioadmin
+        s3_access_key: ${GRACE_S3_ACCESS_KEY:-minioadmin} 
+        s3_secret_key: ${GRACE_S3_SECRET_KEY:-minioadmin}
 
   config-store:
       type: process
