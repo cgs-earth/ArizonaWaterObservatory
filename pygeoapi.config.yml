@@ -837,8 +837,8 @@ resources:
     providers:
       - type: edr
         name: NationalWaterModel.RasterEDRProvider
-        data: ${S3_ENDPOINT:-http://localhost:9000}
-        remote_dataset: ${GRACE_PATH_IN_S3:grace/grace_data.zarr}
+        data: http://localhost:9000
+        remote_dataset: ${GRACE_PATH_IN_S3:-grace/grace_data.zarr}
         x_field: lon
         y_field: lat
         time_field: time

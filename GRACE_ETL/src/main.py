@@ -17,6 +17,54 @@ import xarray as xr
 BASE_URL = "https://nasagrace.unl.edu"
 
 LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+
+LOGGER.addHandler(handler)
+
+
+def get_previously_downloaded_urls(mc: minio.Minio, bucket):
+    try:
+        existing_data = mc.get_object(
+            object_name="stored_files.json", bucket_name=bucket
+        )
+    except minio.error.S3Error:
+        existing_data = None
+
+    if not existing_data:
+        LOGGER.info("No metadata from previous download found")
+        previously_downloaded_urls = []
+    else:
+        existing_data = json.loads(existing_data.read().decode("utf-8"))
+        previously_downloaded_urls = existing_data[
+            "previously_downloaded_urls"
+        ]
+    return previously_downloaded_urls
+
+
+def update_previously_downloaded_urls(
+    mc: minio.Minio, bucket: str, new_url: str
+):
+    previously_downloaded_urls = get_previously_downloaded_urls(mc, bucket)
+
+    # make is a set to ensure no duplicates
+    data_in_object_store = list(set(previously_downloaded_urls + [new_url]))
+
+    jsonAsBytes = json.dumps(
+        {"previously_downloaded_urls": data_in_object_store}
+    ).encode("utf-8")
+    binioJson = io.BytesIO(jsonAsBytes)
+    mc.put_object(
+        object_name="stored_files.json",
+        bucket_name=bucket,
+        data=binioJson,
+        length=len(jsonAsBytes),
+    )
 
 
 def append_netcdf_to_s3_zarr(
@@ -65,9 +113,13 @@ def append_netcdf_to_s3_zarr(
 
 
 def fetch_and_append(file_link: str, s3_fs, bucket: str, store_name: str):
+    LOGGER.info(f"Fetching {file_link}")
     response = requests.get(f"{BASE_URL}/{file_link}")
+    LOGGER.info(f"Finished fetching {file_link}")
     response.raise_for_status()
+    LOGGER.info("Appending to S3 Zarr")
     append_netcdf_to_s3_zarr(response.content, s3_fs, bucket, store_name)
+    LOGGER.info("Finished appending to S3 Zarr")
 
 
 def main(
@@ -79,21 +131,9 @@ def main(
     test_mode: bool = False,
 ):
     minio_client = minio.Minio(endpoint, access_key, secret_key, secure=False)
-    try:
-        existing_data = minio_client.get_object(
-            object_name="stored_files.json", bucket_name=bucket
-        )
-    except minio.error.S3Error:
-        existing_data = None
-
-    if not existing_data:
-        print("No metadata from previous download found")
-        previously_downloaded_urls = []
-    else:
-        existing_data = json.loads(existing_data.read().decode("utf-8"))
-        previously_downloaded_urls = existing_data[
-            "previously_downloaded_urls"
-        ]
+    previously_downloaded_urls = get_previously_downloaded_urls(
+        minio_client, bucket
+    )
 
     # Use s3fs with MinIO/S3 credentials
     endpoint_url = endpoint
@@ -112,7 +152,7 @@ def main(
 
     parser = TopLevelFolderParser()
     parser.feed(response.text)
-    print(f"Found {len(parser.links)} folders")
+    LOGGER.info(f"Found {len(parser.links)} folders")
 
     downloaded_urls = set()
 
@@ -128,29 +168,20 @@ def main(
 
         for file_link in file_parser.links:
             if file_link in previously_downloaded_urls:
-                print(f"Skipping previously downloaded file {file_link}")
+                LOGGER.info(f"Skipping previously downloaded file {file_link}")
                 continue
             else:
                 downloaded_urls.add(file_link)
                 fetch_and_append(file_link, s3_fs, bucket, s3_store_name)
+                update_previously_downloaded_urls(
+                    minio_client, bucket, file_link
+                )
 
-        print(f"Completed folder {i + 1}/{len(parser.links)}")
+        LOGGER.info(f"Completed folder {i + 1}/{len(parser.links)}")
         if test_mode:
             break
 
     # merge existing data urls with new data urls
-    data_in_object_store = previously_downloaded_urls + list(downloaded_urls)
-
-    jsonAsBytes = json.dumps(
-        {"previously_downloaded_urls": data_in_object_store}
-    ).encode("utf-8")
-    binioJson = io.BytesIO(jsonAsBytes)
-    minio_client.put_object(
-        object_name="stored_files.json",
-        bucket_name=bucket,
-        data=binioJson,
-        length=len(jsonAsBytes),
-    )
 
 
 if __name__ == "__main__":
