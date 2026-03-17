@@ -38,7 +38,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: GRACE_ETL
-          file: Dockerfile
+          file: GRACE_ETL/Dockerfile
           push: true
           tags: ghcr.io/cgs-earth/asu-awo-grace-etl:latest
           cache-from: type=gha,scope=asu-awo-grace-etl
