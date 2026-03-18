@@ -159,6 +159,7 @@
   .geocoderWrapper {
     min-width: calc(100vw - (var(--default-spacing) * 2));
   }
+
   .dateSelectorButton {
     position: absolute;
     z-index: 1;
