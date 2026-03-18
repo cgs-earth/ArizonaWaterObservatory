@@ -48,7 +48,7 @@ const Popup: React.FC<Props> = (props) => {
   const [id, setId] = useState<string>(location.id);
 
   const layers = useMainStore((state) => state.layers);
-  const [layer, setLayer] = useState<Layer>(layers[0]);
+  const [layer, setLayer] = useState<Layer>();
   const setLinkLocation = useSessionStore((state) => state.setLinkLocation);
   const setOverlay = useSessionStore((state) => state.setOverlay);
 
@@ -60,7 +60,7 @@ const Popup: React.FC<Props> = (props) => {
   }, [locations]);
 
   useEffect(() => {
-    const layer = layers[0];
+    const layer = layers.filter((layer) => layer.id === layerId)[0];
     if (layer) {
       setLayer(layer);
     }

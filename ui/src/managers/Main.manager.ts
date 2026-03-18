@@ -848,6 +848,14 @@ class MainManager {
           this.map.removeLayer(layerId);
         }
       }
+
+      if (this.container && this.persistentPopup) {
+        const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
+        const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
+        if (locationId && layerId) {
+          this.persistentPopup.remove();
+        }
+      }
     }
 
     this.store.getState().setCharts(charts);
@@ -1853,6 +1861,13 @@ class MainManager {
         if (this.map.getLayer(layerId)) {
           this.map.removeLayer(layerId);
         }
+      }
+    }
+    if (this.container && this.persistentPopup) {
+      const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
+      const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
+      if (locationId && layerId) {
+        this.persistentPopup.remove();
       }
     }
   }
