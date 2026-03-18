@@ -22,6 +22,8 @@ from pygeoapi.provider.base import (
 )
 from pygeoapi.util import DATETIME_FORMAT
 import pyproj
+import rioxarray
+import rioxarray.exceptions
 import s3fs
 import xarray as xr
 
@@ -71,6 +73,11 @@ class ProviderSchema(TypedDict):
     s3_secret_key: NotRequired[str]
     # specify the zarr version; otherwise it defaults to version 2
     zarr_version: NotRequired[int]
+    # for some zarr datasets, they have duplicates values for a given variable
+    # at a given time; this may simply due to an issue in the upstream process
+    # which created the data (i.e. for GRACE, some data exports have duplicates for the boundary times)
+    # if this is set to true, then it will ensure the times are unique
+    drop_duplipate_times: NotRequired[bool]
 
 
 LOGGER = logging.getLogger(__name__)
@@ -207,7 +214,12 @@ def project_dataset(
         # use rio.reproject
         dataset = dataset.rio.set_spatial_dims(x_dim=x_field, y_dim=y_field)
         dataset = dataset.rio.write_crs(storage_crs.to_wkt())
-        dataset = dataset.rio.reproject(dst_crs=output_crs.to_wkt())
+        try:
+            dataset = dataset.rio.reproject(dst_crs=output_crs.to_wkt())
+        except rioxarray.exceptions.NoDataInBounds as e:
+            raise ProviderNoDataError(
+                f"Failed to reproject dataset, no data in bounds: {e}"
+            ) from e
         # rio reproject renames the x/y fields to be x and y
         # so we need to rename them back to the original
         dataset = dataset.rename({"x": x_field, "y": y_field})

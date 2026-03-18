@@ -202,13 +202,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--bucket",
-        default=os.environ.get("S3_BUCKET", "grace"),
+        default=os.environ.get("S3_BUCKET", "grace_data_bucket"),
         help="MinIO/S3 bucket name; Can be set with env var S3_BUCKET",
     )
     parser.add_argument(
         "--s3-store-path",
-        default="grace_data.zarr",
-        help="Path to store GRACE data on S3 in the format <bucket>/<name>.zarr",
+        default=os.environ.get("S3_STORE_PATH", "grace_data.zarr"),
+        help="Name of the Zarr directory within which to store GRACE data on S3; Must end with .zarr; Can be set with env var S3_STORE_PATH",
     )
     parser.add_argument(
         "--test-mode",

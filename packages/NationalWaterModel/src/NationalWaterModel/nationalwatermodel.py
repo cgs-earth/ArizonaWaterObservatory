@@ -11,6 +11,7 @@ from com.geojson.helpers import (
 )
 from com.otel import otel_trace
 from com.protocols.providers import OAFProviderProtocol
+import numpy as np
 from pygeoapi.crs import crs_transform
 from pygeoapi.provider.base import BaseProvider
 import pyproj
@@ -53,6 +54,16 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
         )
         if "storage_crs" not in provider_def:
             self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
+
+        if provider_def.get("drop_duplicate_times", False):
+            LOGGER.info(
+                f"Dropping duplicate times for {provider_def['remote_dataset'] if 'remote_dataset' in provider_def else provider_def['data']}"
+            )
+            time_values = self.zarr_dataset["time"].values
+            _, unique_idx = np.unique(time_values, return_index=True)
+            self.zarr_dataset = self.zarr_dataset.isel(
+                time=np.sort(unique_idx)
+            )
 
     @otel_trace()
     def items(  # type: ignore
