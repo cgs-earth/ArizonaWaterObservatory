@@ -119,7 +119,7 @@
         {% for parameter in data['parameter_names'].values() %}
         <tr>
           <td>{{ parameter['id'] }}</td>
-          <td>{{ parameter['name'] }}</td>
+          <td>{{ parameter['observedProperty']['label']['en'] }} <br /> <i>{{ parameter['observedProperty']['description']['en'] }}</i></td>
           <td>{{ parameter['unit']['symbol']['value'] }}</td>
         </tr>
         {% endfor %}
