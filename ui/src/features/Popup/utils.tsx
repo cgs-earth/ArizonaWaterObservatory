@@ -7,10 +7,10 @@ import { center } from '@turf/turf';
 import { Feature } from 'geojson';
 import { Map, MapMouseEvent, Popup as PopupType } from 'mapbox-gl';
 import { Root } from 'react-dom/client';
+import { LAYER_IDENTIFIER, LOCATION_IDENTIFIER } from '@/features/Map/consts';
 import Popup from '@/features/Popup';
 import { Mantine as MantineProvider } from '@/providers/Mantine';
 import { Layer, Location } from '@/stores/main/types';
-import { LAYER_IDENTIFIER, LOCATION_IDENTIFIER } from '../Map/consts';
 
 export const showGraphPopup = (
   layerId: Layer['id'],
