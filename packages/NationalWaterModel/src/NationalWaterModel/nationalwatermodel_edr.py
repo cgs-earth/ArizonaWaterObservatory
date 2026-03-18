@@ -11,6 +11,7 @@ from com.geojson.helpers import (
 )
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
+import numpy as np
 from pygeoapi.crs import DEFAULT_CRS, transform_bbox
 from pygeoapi.provider.base import ProviderQueryError
 from pygeoapi.provider.base_edr import BaseEDRProvider
@@ -74,6 +75,16 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         if "storage_crs" not in provider_def:
             self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
+
+        if provider_def.get("drop_duplicate_times", False):
+            LOGGER.info(
+                f"Dropping duplicate times for {provider_def['remote_dataset'] if 'remote_dataset' in provider_def else provider_def['data']}"
+            )
+            time_values = self.zarr_dataset["time"].values
+            _, unique_idx = np.unique(time_values, return_index=True)
+            self.zarr_dataset = self.zarr_dataset.isel(
+                time=np.sort(unique_idx)
+            )
 
     def get_fields(self) -> EDRFieldsMapping:
         """Get the list of all parameters (i.e. fields) that the user can filter by"""
