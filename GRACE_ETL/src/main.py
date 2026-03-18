@@ -113,7 +113,7 @@ def append_netcdf_to_s3_zarr(
 def fetch_and_append(file_link: str, s3_fs, bucket: str, store_name: str):
     LOGGER.info(f"Fetching {file_link}")
     response = requests.get(f"{BASE_URL}/{file_link}")
-    LOGGER.info(f"Finished fetching {file_link}")
+    LOGGER.info(f"Finished fetching {BASE_URL}/{file_link}")
     response.raise_for_status()
     LOGGER.info("Appending to S3 Zarr")
     append_netcdf_to_s3_zarr(response.content, s3_fs, bucket, store_name)
@@ -151,7 +151,7 @@ def main(
 
     parser = TopLevelFolderParser()
     parser.feed(response.text)
-    LOGGER.info(f"Found {len(parser.links)} folders")
+    LOGGER.info(f"Found {len(parser.links)} folders of GRACE data")
 
     for i, link in enumerate(parser.links):
         if link["text"] in ["current", "NASApublication", "Web"]:
@@ -165,7 +165,9 @@ def main(
 
         for file_link in file_parser.links:
             if file_link in previously_downloaded_urls:
-                LOGGER.info(f"Skipping previously downloaded file {file_link}")
+                LOGGER.info(
+                    f"Skipping previously downloaded file {BASE_URL}/{file_link}"
+                )
                 continue
             else:
                 fetch_and_append(file_link, s3_fs, bucket, s3_store_path)
@@ -173,6 +175,7 @@ def main(
 
         LOGGER.info(f"Completed folder {i + 1}/{len(parser.links)}")
         if test_mode:
+            LOGGER.info("Stopping early for test mode")
             break
 
     # merge existing data urls with new data urls
@@ -210,15 +213,20 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test-mode",
         action="store_true",
-        help="Download only a subset for testing",
+        help="Download only a subset of GRACE data for testing",
     )
 
     args = parser.parse_args()
-    main(
-        args.endpoint,
-        args.access_key,
-        args.secret_key,
-        args.bucket,
-        args.s3_store_path,
-        args.test_mode,
-    )
+    try:
+        main(
+            args.endpoint,
+            args.access_key,
+            args.secret_key,
+            args.bucket,
+            args.s3_store_path,
+            args.test_mode,
+        )
+    except KeyboardInterrupt:
+        LOGGER.info(
+            "Program interrupted by keyboard interrupt; this may have left zarr data in a corrupt or incomplete state; you may need to remove and re-create the zarr store"
+        )
