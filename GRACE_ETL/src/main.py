@@ -188,22 +188,22 @@ if __name__ == "__main__":
     parser.add_argument(
         "--endpoint",
         default=os.environ.get("S3_ENDPOINT", "localhost:9000"),
-        help="MinIO/S3 endpoint URL",
+        help="MinIO/S3 endpoint URL; Can be set with env var S3_ENDPOINT",
     )
     parser.add_argument(
         "--access-key",
         default=os.environ.get("S3_ACCESS_KEY", "minioadmin"),
-        help="MinIO/S3 access key",
+        help="MinIO/S3 access key; Can be set with env var S3_ACCESS_KEY",
     )
     parser.add_argument(
         "--secret-key",
         default=os.environ.get("S3_SECRET_KEY", "minioadmin"),
-        help="MinIO/S3 secret key",
+        help="MinIO/S3 secret key; Can be set with env var S3_SECRET_KEY",
     )
     parser.add_argument(
         "--bucket",
         default=os.environ.get("S3_BUCKET", "grace"),
-        help="MinIO/S3 bucket name",
+        help="MinIO/S3 bucket name; Can be set with env var S3_BUCKET",
     )
     parser.add_argument(
         "--s3-store-path",
