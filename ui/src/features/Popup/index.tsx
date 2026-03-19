@@ -60,7 +60,7 @@ const Popup: React.FC<Props> = (props) => {
   }, [locations]);
 
   useEffect(() => {
-    const layer = layers.filter((layer) => layer.id === layerId)[0];
+    const layer = layers.find((layer) => layer.id === layerId);
     if (layer) {
       setLayer(layer);
     }
