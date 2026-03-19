@@ -40,6 +40,8 @@ import {
   DEFAULT_FILL_OPACITY,
   DEFAULT_RASTER_OPACITY,
   drawLayers,
+  LAYER_IDENTIFIER,
+  LOCATION_IDENTIFIER,
 } from '@/features/Map/consts';
 import { drawnFeatureContainsExtent } from '@/features/Map/utils';
 import { getNextLink, stringifyBBox } from '@/managers/Main.utils';
@@ -96,6 +98,8 @@ class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
   private map: Map | null = null;
   private hoverPopup: Popup | null = null;
+  private persistentPopup: Popup | null = null;
+  private container: HTMLDivElement | null = null;
   private draw: MapboxDraw | null = null;
 
   constructor(store: UseBoundStore<StoreApi<MainState>>) {
@@ -118,9 +122,30 @@ class MainManager {
    *
    * @function
    */
-  public setPopup(popup: Popup): void {
+  public setHoverPopup(popup: Popup): void {
     if (!this.hoverPopup) {
       this.hoverPopup = popup;
+    }
+  }
+  /**
+   * Setter function to set container private variable after map initialization
+   *
+   * @function
+   */
+  public setPersistentPopup(popup: Popup): void {
+    if (!this.persistentPopup) {
+      this.persistentPopup = popup;
+    }
+  }
+
+  /**
+   * Setter function to set container private variable after map initialization
+   *
+   * @function
+   */
+  public setContainer(container: HTMLDivElement): void {
+    if (!this.container) {
+      this.container = container;
     }
   }
 
@@ -823,6 +848,14 @@ class MainManager {
           this.map.removeLayer(layerId);
         }
       }
+
+      if (this.container && this.persistentPopup) {
+        const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
+        const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
+        if (locationId && layerId) {
+          this.persistentPopup.remove();
+        }
+      }
     }
 
     this.store.getState().setCharts(charts);
@@ -943,6 +976,20 @@ class MainManager {
 
       if (invalidLocations.length === 0) {
         return;
+      }
+
+      if (this.container && this.persistentPopup) {
+        const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
+        const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
+        if (
+          locationId &&
+          layerId &&
+          invalidLocations.some(
+            (location) => location.layerId === layerId && location.id === locationId
+          )
+        ) {
+          this.persistentPopup.remove();
+        }
       }
 
       invalidLocations.forEach((location) => removeLocation(location));
@@ -1814,6 +1861,13 @@ class MainManager {
         if (this.map.getLayer(layerId)) {
           this.map.removeLayer(layerId);
         }
+      }
+    }
+    if (this.container && this.persistentPopup) {
+      const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
+      const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
+      if (locationId && layerId) {
+        this.persistentPopup.remove();
       }
     }
   }
