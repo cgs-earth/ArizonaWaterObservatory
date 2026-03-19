@@ -119,7 +119,7 @@ export const Chart: React.FC<Props> = (props) => {
         controller.current.abort('Component unmount');
       }
     };
-  }, [locationId, from, to]);
+  }, [locationId, parameters, from, to]);
 
   useEffect(() => {
     const collection = mainManager.getDatasource(collectionId);
