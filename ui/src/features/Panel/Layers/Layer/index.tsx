@@ -410,7 +410,7 @@ const Layer: React.FC<Props> = (props) => {
           <Group justify="space-between">
             <DateInput
               label="From"
-              size="sm"
+              size="xs"
               className={styles.datePicker}
               placeholder="Pick start date"
               value={from}
@@ -430,7 +430,7 @@ const Layer: React.FC<Props> = (props) => {
             />
             <DateInput
               label="To"
-              size="sm"
+              size="xs"
               className={styles.datePicker}
               placeholder="Pick end date"
               value={to}

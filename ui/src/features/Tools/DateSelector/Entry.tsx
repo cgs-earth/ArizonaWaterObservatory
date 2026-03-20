@@ -130,8 +130,6 @@ export const Entry: React.FC<Props> = (props) => {
     }
   };
 
-  const debouncedHandleChange = debounce(handleChange, 500);
-
   if (!layer.paletteDefinition) {
     return null;
   }
@@ -151,7 +149,7 @@ export const Entry: React.FC<Props> = (props) => {
           placeholder="Select..."
           data={data}
           value={String(layer.paletteDefinition.index)}
-          onChange={debouncedHandleChange}
+          onChange={handleChange}
           disabled={data.length === 0}
           searchable
         />
