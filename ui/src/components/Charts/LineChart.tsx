@@ -65,7 +65,6 @@ const LineChart = (props: Props) => {
       series = series.map((entry) => ({
         ...series,
         type: entry.type,
-        stack: entry.stack,
         data: entry.data,
         name:
           prettyLabels.find((prettyLabel) => prettyLabel.parameter === entry.name)?.label ??
