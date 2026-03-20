@@ -161,9 +161,6 @@
   }
 
   .dateSelectorButton {
-    position: absolute;
-    z-index: 1;
     margin-top: calc(var(--default-spacing) + 3rem);
-    left: var(--default-spacing);
   }
 }
