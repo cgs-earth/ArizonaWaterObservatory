@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { useEffect, useRef, useState } from 'react';
-import debounce from 'lodash.debounce';
 import { Map } from 'mapbox-gl';
 import { ComboboxData, Loader, Text } from '@mantine/core';
 import Select from '@/components/Select';
