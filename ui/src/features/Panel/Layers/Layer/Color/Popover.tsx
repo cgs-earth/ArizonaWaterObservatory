@@ -14,6 +14,7 @@ import { Variant } from '@/components/types';
 import { Gradient } from '@/features/Panel/Layers/Layer/Color/Gradient';
 import styles from '@/features/Panel/Panel.module.css';
 import { Layer } from '@/stores/main/types';
+import useSessionStore from '@/stores/session';
 import { createColorRange, isSamePalette, isValidPalette } from '@/utils/colors';
 import {
   ColorBrewerIndex,
@@ -50,6 +51,7 @@ export const Popover: React.FC<Props> = (props) => {
     parameterOptions.filter((option) => parameters.includes((option as ComboboxItem).value))
   );
 
+  const overlay = useSessionStore((store) => store.overlay);
   const [label, setLabel] = useState(paletteDefinition?.parameter ?? '');
 
   useEffect(() => {
@@ -62,10 +64,10 @@ export const Popover: React.FC<Props> = (props) => {
   }, [count, palette]);
 
   useEffect(() => {
-    if (parameters.length === 0) {
+    if (parameters.length === 0 || overlay) {
       setShow(false);
     }
-  }, [parameters]);
+  }, [parameters, overlay]);
 
   useEffect(() => {
     const data = parameterOptions.filter((option) =>
