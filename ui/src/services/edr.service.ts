@@ -1128,6 +1128,7 @@ export interface CoverageJSON {
   ranges: {
     [key: string]: {
       type: string;
+      axisNames: string[];
       values: number[];
     };
   };

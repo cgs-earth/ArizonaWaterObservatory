@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { CoverageJSON } from "@/services/edr.service";
+import { XAXisOption } from 'echarts/types/dist/shared';
+import { EChartsSeries } from '@/components/Charts/types';
+import { CoverageJSON } from '@/services/edr.service';
 
 export type TValues = Record<string, (number | null)[]>;
 export type TAxes = {
@@ -18,7 +20,7 @@ export type TOptions = {
 };
 
 export type TCoverageOptions = TOptions & {
-  parameters?: CoverageJSON["parameters"];
+  parameters?: CoverageJSON['parameters'];
 };
 
 export type TFilteredRange = [
@@ -28,3 +30,8 @@ export type TFilteredRange = [
     values: number[];
   },
 ];
+
+export type TChartData = {
+  x: XAXisOption;
+  series: EChartsSeries[];
+};

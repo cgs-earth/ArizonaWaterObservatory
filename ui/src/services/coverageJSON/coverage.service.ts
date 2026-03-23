@@ -3,23 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TAxes, TValues } from "@/services/coverageJSON/types";
-import {
-  CoverageAxesSegments,
-  CoverageAxesValues,
-  CoverageJSON,
-} from "@/services/edr.service";
+import { TAxes, TValues } from '@/services/coverageJSON/types';
+import { CoverageAxesSegments, CoverageAxesValues, CoverageJSON } from '@/services/edr.service';
 
 export class CoverageService {
-  getLength({
-    start,
-    stop,
-    num,
-  }: {
-    start: number;
-    stop: number;
-    num: number;
-  }): number {
+  getAxisNames(ranges: CoverageJSON['ranges']) {
+    return Object.entries(ranges).map(([parameterId, range]) => {
+      return { parameterId, axisNames: range.axisNames };
+    });
+  }
+
+  getLength({ start, stop, num }: { start: number; stop: number; num: number }): number {
     const length = Math.abs(stop - start) / num;
 
     return length;
@@ -37,23 +31,19 @@ export class CoverageService {
     return keys;
   }
 
-  isSegments(
-    axis: CoverageAxesSegments | CoverageAxesValues,
-  ): axis is CoverageAxesSegments {
+  isSegments(axis: CoverageAxesSegments | CoverageAxesValues): axis is CoverageAxesSegments {
     const a = axis as CoverageAxesSegments;
     return (
-      typeof a?.start !== "undefined" &&
-      typeof a?.stop !== "undefined" &&
-      typeof a?.num !== "undefined" &&
-      typeof a.start === "number" &&
-      typeof a.stop === "number" &&
-      typeof a.num === "number"
+      typeof a?.start !== 'undefined' &&
+      typeof a?.stop !== 'undefined' &&
+      typeof a?.num !== 'undefined' &&
+      typeof a.start === 'number' &&
+      typeof a.stop === 'number' &&
+      typeof a.num === 'number'
     );
   }
 
-  isValues(
-    axis: CoverageAxesSegments | CoverageAxesValues,
-  ): axis is CoverageAxesValues {
+  isValues(axis: CoverageAxesSegments | CoverageAxesValues): axis is CoverageAxesValues {
     return Array.isArray((axis as any)?.values);
   }
 
@@ -61,12 +51,7 @@ export class CoverageService {
     return coverage.domain.axes as TAxes;
   }
 
-  getCurrentValuesConstructor(
-    count: number,
-    values: TValues,
-    xCount: number,
-    yCount: number,
-  ) {
+  getCurrentValuesConstructor(count: number, values: TValues, xCount: number, yCount: number) {
     const keys = Object.keys(values);
 
     return (i: number, j: number): TValues => {
