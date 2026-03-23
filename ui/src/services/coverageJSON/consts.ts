@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: MIT
  */
 
-export const DATES_PROPERTY = "times";
+export const DATES_PROPERTY = 'times';

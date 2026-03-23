@@ -4,11 +4,7 @@
  */
 
 import { GeoJsonProperties } from 'geojson';
-import { EChartsSeries, Series } from '@/components/Charts/types';
-import notificationManager from '@/managers/Notification.init';
-import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
-import { NotificationType } from '@/stores/session/types';
-import { isCoverageCollection } from '@/utils/isTypeObject';
+import { Series } from '@/components/Charts/types';
 
 export const aggregateProperties = <T extends GeoJsonProperties>(
   series: Series<T>[],
