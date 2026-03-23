@@ -34,6 +34,7 @@ export const Category: React.FC<Props> = (props) => {
 
   const [categoryOptions, setCategoryOptions] = useState<ComboboxData>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
@@ -45,12 +46,12 @@ export const Category: React.FC<Props> = (props) => {
     );
 
     try {
+      setError('');
       setIsLoading(true);
       controller.current = new AbortController();
 
       const { parameterGroups } = await awoService.getCollections({
         params: {
-          'parameter-name': '*',
           ...(provider ? { 'provider-name': provider } : {}),
         },
       });
@@ -79,10 +80,20 @@ export const Category: React.FC<Props> = (props) => {
         (error as Error)?.name === 'AbortError' ||
         (typeof error === 'string' && error === 'Component unmount')
       ) {
-        console.log('Fetch request canceled');
+        console.warn('Fetch request canceled');
       } else if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        // TODO: remove when 204 added for this edge
+        if (_error.message.includes('404')) {
+          setCategoryOptions([]);
+          const message = provider
+            ? `No categories found for provider: ${provider}`
+            : 'No categories found.';
+          setError(message);
+          notificationManager.show(`Error: ${message}`, NotificationType.Error, 10000);
+        } else {
+          notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        }
       }
 
       if (isMounted.current) {
@@ -143,6 +154,7 @@ export const Category: React.FC<Props> = (props) => {
         value={category?.value}
         onChange={(_value, option) => onChange(option)}
         disabled={categoryOptions.length === 0 || isLoading}
+        error={error.length > 0 ? error : undefined}
         searchable
         clearable
       />
@@ -152,7 +164,10 @@ export const Category: React.FC<Props> = (props) => {
           <Text size="sm">Updating Categories</Text>
         </Group>
       ) : (
-        provider && <Text size="sm">Showing categories available for provider: {provider}</Text>
+        provider &&
+        error.length === 0 && (
+          <Text size="sm">Showing categories available for provider: {provider}</Text>
+        )
       )}
     </Stack>
   );

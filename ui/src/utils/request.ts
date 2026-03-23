@@ -13,7 +13,7 @@ export async function request<T>(options: IRequestOptions): Promise<T> {
   const res: Response = await fetch(url, init);
 
   if (!res.ok) {
-    throw new Error(res.statusText);
+    throw new Error(`${res.status}: ${res.statusText}`);
   }
 
   if (res.status === 204) {
