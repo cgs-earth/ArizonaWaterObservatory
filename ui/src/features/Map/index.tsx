@@ -99,8 +99,24 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
-    mainManager.setPopup(hoverPopup);
+    mainManager.setHoverPopup(hoverPopup);
   }, [hoverPopup]);
+
+  useEffect(() => {
+    if (!persistentPopup) {
+      return;
+    }
+
+    mainManager.setPersistentPopup(persistentPopup);
+  }, [persistentPopup]);
+
+  useEffect(() => {
+    if (!container) {
+      return;
+    }
+
+    mainManager.setContainer(container);
+  }, [container]);
 
   useEffect(() => {
     if (!draw) {
@@ -163,7 +179,7 @@ const MainMap: React.FC<Props> = (props) => {
 
             locations.forEach((location) => useMainStore.getState().addLocation(location));
 
-            showGraphPopup(locations, map, e, root, container, persistentPopup);
+            showGraphPopup(layer.id, locations, map, e, root, container, persistentPopup);
           }
         });
 

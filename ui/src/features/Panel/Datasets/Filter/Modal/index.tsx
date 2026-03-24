@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Group, Stack, Title } from '@mantine/core';
+import { Group, Stack, Text, Title } from '@mantine/core';
 import Button from '@/components/Button';
 import ModalComponent from '@/components/Modal';
 import { Variant } from '@/components/types';
@@ -52,7 +52,7 @@ const Modal: React.FC<Props> = (props) => {
 
   return (
     <ModalComponent size="auto" opened={open} onClose={onClose}>
-      <Stack gap="md" className={styles.modalBody}>
+      <Stack gap="var(--default-spacing)" className={styles.modalBody}>
         <Title order={5} size="h3">
           Filter
         </Title>
@@ -60,6 +60,14 @@ const Modal: React.FC<Props> = (props) => {
           <Provider provider={localProvider} onChange={setLocalProvider} />
           <Category category={localCategory} onChange={setLocalCategory} provider={localProvider} />
         </Group>
+        <Stack gap="calc(var(--default-spacing) / 2)">
+          <Text size="sm" c="dimmed">
+            Find datasets by selecting a provider, category, or both.
+          </Text>
+          <Text size="sm" c="dimmed">
+            Selecting a provider will show categories associated with that data provider.
+          </Text>
+        </Stack>
         <Group justify="center">
           <Button size="sm" variant={Variant.Primary} onClick={handleSave}>
             Save

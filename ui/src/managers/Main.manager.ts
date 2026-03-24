@@ -40,9 +40,11 @@ import {
   DEFAULT_FILL_OPACITY,
   DEFAULT_RASTER_OPACITY,
   drawLayers,
+  LAYER_IDENTIFIER,
+  LOCATION_IDENTIFIER,
 } from '@/features/Map/consts';
 import { drawnFeatureContainsExtent } from '@/features/Map/utils';
-import { getNextLink } from '@/managers/Main.utils';
+import { getNextLink, stringifyBBox } from '@/managers/Main.utils';
 import notificationManager from '@/managers/Notification.init';
 import {
   Config,
@@ -52,7 +54,7 @@ import {
   SourceOptions,
   StyleOptions,
 } from '@/managers/types';
-import { CoverageGridService } from '@/services/coverageGrid.service';
+import { CoverageGeoService } from '@/services/coverageJSON/coverageGeo.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import {
@@ -66,7 +68,7 @@ import {
 import { NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
 import { createDynamicStepExpression, isSamePalette } from '@/utils/colors';
-import { isValidColorBrewerIndex } from '@/utils/colors/types';
+import { ColorBrewerIndex, isValidColorBrewerIndex } from '@/utils/colors/types';
 import { isSameArray } from '@/utils/compareArrays';
 import { getIdStore } from '@/utils/getIdStore';
 import { getRandomHexColor } from '@/utils/hexColor';
@@ -96,6 +98,8 @@ class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
   private map: Map | null = null;
   private hoverPopup: Popup | null = null;
+  private persistentPopup: Popup | null = null;
+  private container: HTMLDivElement | null = null;
   private draw: MapboxDraw | null = null;
 
   constructor(store: UseBoundStore<StoreApi<MainState>>) {
@@ -118,9 +122,30 @@ class MainManager {
    *
    * @function
    */
-  public setPopup(popup: Popup): void {
+  public setHoverPopup(popup: Popup): void {
     if (!this.hoverPopup) {
       this.hoverPopup = popup;
+    }
+  }
+  /**
+   * Setter function to set container private variable after map initialization
+   *
+   * @function
+   */
+  public setPersistentPopup(popup: Popup): void {
+    if (!this.persistentPopup) {
+      this.persistentPopup = popup;
+    }
+  }
+
+  /**
+   * Setter function to set container private variable after map initialization
+   *
+   * @function
+   */
+  public setContainer(container: HTMLDivElement): void {
+    if (!this.container) {
+      this.container = container;
     }
   }
 
@@ -605,7 +630,7 @@ class MainManager {
     parameterNames?: string[],
     signal?: AbortSignal
   ): Promise<FeatureCollection> {
-    return await new CoverageGridService().createGrid(
+    return await new CoverageGeoService().createGrid(
       collectionId,
       bbox,
       from,
@@ -699,6 +724,8 @@ class MainManager {
     const to = this.getTo(datasource);
     const from = this.getFrom(datasourceId, collectionType, to);
 
+    const currentBBox = stringifyBBox(this.getBBox(datasourceId));
+
     const layer: Layer = {
       id: this.createUUID(),
       datasourceId: datasource.id,
@@ -713,6 +740,7 @@ class MainManager {
         collectionType === CollectionType.Map ? DEFAULT_RASTER_OPACITY : DEFAULT_FILL_OPACITY,
       position: layers.length + 1,
       paletteDefinition: null,
+      bbox: currentBBox,
     };
 
     this.store.getState().addLayer(layer);
@@ -738,7 +766,9 @@ class MainManager {
       features,
       signal,
       updateStore = true,
-    }: StyleOptions<{ [paletteDefinition.parameter]: number }>
+    }: StyleOptions<{ [paletteDefinition.parameter]: number }> = {} as StyleOptions<{
+      [paletteDefinition.parameter]: number;
+    }>
   ) {
     if (!this.map) {
       return;
@@ -749,20 +779,36 @@ class MainManager {
       (await this.getFeatures<Geometry, { [paletteDefinition.parameter]: number }>(layer, signal))
         .features;
 
-    const { parameter, count, palette, index } = paletteDefinition;
+    const { parameter, originalCount, actualCount, palette, index } = paletteDefinition;
     const expression = createDynamicStepExpression(
       defaultedfeatures,
       parameter,
       palette,
-      count,
+      originalCount, // Always try to maximize the number of groups
       index
     );
 
     if (updateStore) {
+      let newCount: ColorBrewerIndex = originalCount;
+
+      if (expression.length !== originalCount * 2 + 3) {
+        newCount = ((expression.length - 3) / 2) as ColorBrewerIndex;
+
+        if (isValidColorBrewerIndex(newCount) && newCount !== actualCount) {
+          notificationManager.show(
+            `Duplicate thresholds detected. Reducing to ${newCount} threshold(s)`,
+            NotificationType.Info,
+            5000
+          );
+        }
+      }
       this.store.getState().updateLayer({
         ...layer,
         color: expression,
-        paletteDefinition,
+        paletteDefinition: {
+          ...paletteDefinition,
+          actualCount: newCount,
+        },
       });
     }
 
@@ -800,6 +846,14 @@ class MainManager {
       for (const layerId of layerIds) {
         if (this.map.getLayer(layerId)) {
           this.map.removeLayer(layerId);
+        }
+      }
+
+      if (this.container && this.persistentPopup) {
+        const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
+        const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
+        if (locationId && layerId) {
+          this.persistentPopup.remove();
         }
       }
     }
@@ -922,6 +976,20 @@ class MainManager {
 
       if (invalidLocations.length === 0) {
         return;
+      }
+
+      if (this.container && this.persistentPopup) {
+        const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
+        const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
+        if (
+          locationId &&
+          layerId &&
+          invalidLocations.some(
+            (location) => location.layerId === layerId && location.id === locationId
+          )
+        ) {
+          this.persistentPopup.remove();
+        }
       }
 
       invalidLocations.forEach((location) => removeLocation(location));
@@ -1074,7 +1142,6 @@ class MainManager {
 
   private async addData(collectionId: ICollection['id'], layer: Layer, options?: SourceOptions) {
     const datasource = this.getDatasource(collectionId);
-    const sourceId = this.getSourceId(collectionId, layer.id);
 
     if (datasource) {
       const collectionType = getCollectionType(datasource);
@@ -1088,7 +1155,7 @@ class MainManager {
       }
     }
 
-    return sourceId;
+    return layer.id;
   }
 
   private addSource(collectionId: ICollection['id'], layerId: Layer['id']) {
@@ -1229,14 +1296,6 @@ class MainManager {
       const message = this.getNoDataMessage(layer.name, parameters.length, collectionId);
 
       notificationManager.show(message, NotificationType.Info, 10000);
-    }
-
-    if (layer.paletteDefinition) {
-      const features = aggregate.features as Feature<
-        Geometry,
-        { [layer.paletteDefinition.parameter]: number }
-      >[];
-      this.styleLayer(layer, layer.paletteDefinition, { features, signal: options?.signal });
     }
 
     (aggregate as any) = undefined;
@@ -1400,7 +1459,6 @@ class MainManager {
   }
 
   private getHoverEventHandler(
-    name: string,
     layerId: Layer['id'],
     collectionId: ICollection['id'],
     upperLabel: string,
@@ -1432,11 +1490,12 @@ class MainManager {
 
       this.map!.getCanvas().style.cursor = 'pointer';
       const { features } = e;
-      if (features && features.length > 0) {
+      const layer = this.getLayer(layerId);
+      if (features && features.length > 0 && layer) {
         const uniqueFeatures = this.getUniqueIds(features, collectionId);
         const html = `
             <span style="color:black;">
-              <strong>${name}</strong><br/>
+              <strong>${layer.name}</strong><br/>
               ${uniqueFeatures.map((locationId) => `<strong>${upperLabel} Id: </strong>${locationId}`).join('<br/>')}
               <div style="margin-top: 16px;display:flex;flex-direction:column;justify-content:center;align-items:center">
                 <p style="margin: 0;">Click to select the ${lowerLabel}.</p>
@@ -1512,24 +1571,12 @@ class MainManager {
           this.map.on(
             'mouseenter',
             [pointLayerId, fillLayerId, lineLayerId],
-            this.getHoverEventHandler(
-              layer.name,
-              layer.id,
-              layer.datasourceId,
-              upperLabel,
-              lowerLabel
-            )
+            this.getHoverEventHandler(layer.id, layer.datasourceId, upperLabel, lowerLabel)
           );
           this.map.on(
             'mousemove',
             [pointLayerId, fillLayerId, lineLayerId],
-            this.getHoverEventHandler(
-              layer.name,
-              layer.id,
-              layer.datasourceId,
-              upperLabel,
-              lowerLabel
-            )
+            this.getHoverEventHandler(layer.id, layer.datasourceId, upperLabel, lowerLabel)
           );
         }
         this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
@@ -1596,17 +1643,52 @@ class MainManager {
     const layers = this.store.getState().layers;
 
     const chunkSize = 5;
+    const results: PromiseSettledResult<Layer['id']>[] = [];
 
     for (let i = 0; i < layers.length; i += chunkSize) {
       const chunk = layers.slice(i, i + chunkSize);
-      await Promise.all(
+
+      const settled = await Promise.allSettled(
         chunk.map(async (layer) => {
           const collectionId = layer.datasourceId;
-          return await this.addData(collectionId, layer, {
+          // addData should return the layerId
+          return this.addData(collectionId, layer, {
             filterFeatures: drawnShapes,
           });
         })
       );
+
+      results.push(...settled);
+
+      await Promise.all(
+        settled
+          .map((result) => {
+            if (result.status === 'rejected') {
+              return null;
+            }
+
+            const layerId = result.value;
+            const layer = this.getLayer(layerId);
+            if (!layer || !layer.paletteDefinition) {
+              return null;
+            }
+
+            return this.styleLayer(layer, layer.paletteDefinition);
+          })
+          // Filter null results (status === 'rejected')
+          .filter(Boolean) as Promise<void>[]
+      );
+
+      for (const result of settled) {
+        if (result.status === 'rejected') {
+          notificationManager.show(
+            'An error occurred while applying a spatial filter, check the console for more details.',
+            NotificationType.Error,
+            10000
+          );
+          console.error('applySpatialFilter: addData failed:', result.reason);
+        }
+      }
     }
   }
 
@@ -1672,40 +1754,54 @@ class MainManager {
     const parametersChanged = !isSameArray(layer.parameters, parameters);
     const temporalRangeChanged =
       datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to);
+
+    const currentBBox = stringifyBBox(this.getBBox(layer.datasourceId));
     const paletteChanged = !isSamePalette(paletteDefinition, layer.paletteDefinition);
+    const repalette =
+      paletteChanged ||
+      currentBBox !== layer.bbox ||
+      (paletteDefinition && paletteDefinition.actualCount !== paletteDefinition.originalCount);
 
     // If the parameters have changed, or this is a grid layer and the temporal range has updated
     // grid layers are the only instance where temporal filtering applies, requiring a new fetch
     let _color = color;
-    if (parametersChanged || temporalRangeChanged) {
+    if (parametersChanged || temporalRangeChanged || paletteChanged) {
       const drawnShapes = this.store.getState().drawnShapes;
       await this.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
         from,
         to,
+        paletteDefinition,
       });
     }
 
     let correctedPaletteDefinition = paletteDefinition;
-    if (paletteChanged && paletteDefinition) {
+    if (repalette && paletteDefinition) {
+      correctedPaletteDefinition = {
+        ...paletteDefinition,
+        actualCount: paletteDefinition.originalCount,
+      };
+
       const expression = await this.styleLayer(layer, paletteDefinition, { updateStore: false });
       if (expression) {
         _color = expression;
 
-        if (expression.length !== paletteDefinition.count * 2 + 3) {
-          const count = (expression.length - 3) / 2;
+        if (expression.length !== paletteDefinition.originalCount * 2 + 3) {
+          const newCount = (expression.length - 3) / 2;
 
-          if (isValidColorBrewerIndex(count)) {
+          if (isValidColorBrewerIndex(newCount)) {
             correctedPaletteDefinition = {
-              ...paletteDefinition,
-              count,
+              ...correctedPaletteDefinition,
+              actualCount: newCount,
             };
-            notificationManager.show(
-              `Duplicate thresholds detected. Reducing to ${count} threshold(s)`,
-              NotificationType.Info,
-              5000
-            );
+            if (paletteDefinition.actualCount !== newCount) {
+              notificationManager.show(
+                `Duplicate thresholds detected. Reducing to ${newCount} threshold(s)`,
+                NotificationType.Info,
+                5000
+              );
+            }
           }
         }
       }
@@ -1721,6 +1817,7 @@ class MainManager {
       visible,
       opacity,
       paletteDefinition: correctedPaletteDefinition,
+      bbox: currentBBox,
     });
   }
 
@@ -1764,6 +1861,13 @@ class MainManager {
         if (this.map.getLayer(layerId)) {
           this.map.removeLayer(layerId);
         }
+      }
+    }
+    if (this.container && this.persistentPopup) {
+      const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
+      const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
+      if (locationId && layerId) {
+        this.persistentPopup.remove();
       }
     }
   }

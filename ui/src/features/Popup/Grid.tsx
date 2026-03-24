@@ -82,6 +82,9 @@ export const Grid: React.FC<Props> = (props) => {
   }, [times]);
 
   useEffect(() => {
+    if (times.length === 0 || !time) {
+      return;
+    }
     const timeIndex = times.findIndex((timeObj) => timeObj.value === time?.value);
     if (timeIndex !== -1 && feature.properties) {
       const displayValues: { value: string; label: string; unit: string }[] = [];
@@ -99,7 +102,7 @@ export const Grid: React.FC<Props> = (props) => {
       });
       setDisplayValues(displayValues);
     }
-  }, [time]);
+  }, [feature, time, times]);
 
   useEffect(() => {
     if (!layer.paletteDefinition) {
