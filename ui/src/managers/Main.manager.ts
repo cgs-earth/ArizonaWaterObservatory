@@ -54,7 +54,7 @@ import {
   SourceOptions,
   StyleOptions,
 } from '@/managers/types';
-import { CoverageGridService } from '@/services/coverageGrid.service';
+import { CoverageGeoService } from '@/services/coverageJSON/coverageGeo.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import {
@@ -630,7 +630,7 @@ class MainManager {
     parameterNames?: string[],
     signal?: AbortSignal
   ): Promise<FeatureCollection> {
-    return await new CoverageGridService().createGrid(
+    return await new CoverageGeoService().createGrid(
       collectionId,
       bbox,
       from,

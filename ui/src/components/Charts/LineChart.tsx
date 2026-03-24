@@ -18,9 +18,8 @@ import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import styles from '@/components/Charts/Charts.module.css';
 import { EChartsSeries, PrettyLabel } from '@/components/Charts/types';
-import { coverageJSONToSeries } from '@/components/Charts/utils';
+import { CoverageChartService } from '@/services/coverageJSON/coverageChart.service';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
-import { isCoverageCollection } from '@/utils/isTypeObject';
 
 echarts.use([
   TitleComponent,
@@ -55,17 +54,14 @@ const LineChart = (props: Props) => {
   } = props;
 
   const option: echarts.EChartsCoreOption = useMemo(() => {
-    const dates = isCoverageCollection(data)
-      ? (data.coverages[0]?.domain.axes.t as { values: string[] }).values
-      : (data.domain.axes.t as { values: string[] }).values;
-
-    let series = coverageJSONToSeries(data);
+    const chartData = new CoverageChartService().coverageJSONToSeries(data);
+    let { series } = chartData;
+    const { x } = chartData;
 
     if (prettyLabels.length > 0 && prettyLabels.length === series.length) {
       series = series.map((entry) => ({
         ...series,
         type: entry.type,
-        stack: entry.stack,
         data: entry.data,
         name:
           prettyLabels.find((prettyLabel) => prettyLabel.parameter === entry.name)?.label ??
@@ -102,11 +98,7 @@ const LineChart = (props: Props) => {
         top: '12%',
         bottom: '20%',
       },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: dates,
-      },
+      xAxis: x,
       yAxis: {
         type: 'value',
       },
