@@ -6,21 +6,24 @@ import logging
 from typing import Literal, NotRequired, TypedDict
 
 from com.covjson import CoverageCollectionDict, CoverageDict
-from com.env import TRACER
+from com.env import TRACER, get_loop
 from com.geojson.helpers import (
     GeojsonFeatureCollectionDict,
     GeojsonFeatureDict,
 )
 from com.otel import add_args_as_attributes_to_span, otel_trace
+import gcsfs
 import numpy as np
-from pygeoapi.api import DEFAULT_STORAGE_CRS
+from pygeoapi.crs import DEFAULT_STORAGE_CRS, get_crs
 from pygeoapi.provider.base import (
     ProviderInvalidDataError,
     ProviderNoDataError,
     ProviderQueryError,
 )
-from pygeoapi.util import DATETIME_FORMAT, get_crs_from_uri
+from pygeoapi.util import DATETIME_FORMAT
 import pyproj
+import rioxarray
+import rioxarray.exceptions
 import s3fs
 import xarray as xr
 
@@ -28,6 +31,13 @@ import xarray as xr
 class ProviderSchema(TypedDict):
     """
     The config used to configure the provider
+
+    to test with local minio you can use something like the following
+    where data is the root url and remote_dataset represents the path
+    including the bucket name
+
+    data: http://localhost:9000
+    remote_dataset: grace/grace_data.zarr
     """
 
     # The type of provider
@@ -58,6 +68,17 @@ class ProviderSchema(TypedDict):
     # while still allowing for simple point filtering
     wkb_field: NotRequired[str]
 
+    # credentials for accessing s3 object stores
+    s3_access_key: NotRequired[str]
+    s3_secret_key: NotRequired[str]
+    # specify the zarr version; otherwise it defaults to version 2
+    zarr_version: NotRequired[int]
+    # for some zarr datasets, they have duplicates values for a given variable
+    # at a given time; this may simply due to an issue in the upstream process
+    # which created the data (i.e. for GRACE, some data exports have duplicates for the boundary times)
+    # if this is set to true, then it will ensure the times are unique
+    drop_duplipate_times: NotRequired[bool]
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -68,6 +89,9 @@ def get_zarr_dataset_handle(
     data: str,
     remote_dataset: str | None,
     is_gcs: bool = False,
+    s3_access_key: str | None = None,
+    s3_secret_key: str | None = None,
+    zarr_version: int = 2,
 ) -> xr.Dataset:
     """
     Open the zarr dataset but don't actually load the data.
@@ -78,7 +102,12 @@ def get_zarr_dataset_handle(
     if not remote_dataset:
         try:
             LOGGER.debug(f"Opening local zarr dataset {data}")
-            return xr.open_zarr(data, consolidated=True, chunks="auto")
+            return xr.open_zarr(
+                data,
+                consolidated=True,
+                chunks="auto",
+                zarr_format=zarr_version,
+            )
         except Exception as e:
             raise ProviderNoDataError(f"Failed to open {data}, {e}") from e
 
@@ -86,25 +115,39 @@ def get_zarr_dataset_handle(
         assert data, (
             "You must provide a gcs project in the 'data' field when using the gcs filesystem"
         )
-        return xr.open_zarr(
-            f"gs://{remote_dataset}",
-            consolidated=True,
-            zarr_format=2,
-            chunks="auto",
-            storage_options={
-                "project": data,
-                "token": "anon",
-                "requester_pays": False,
-                "anon": True,
-            },
+
+        # you must explicitly set asynchronous to False
+        # and pass in the loop, otherwise there will be issues
+        # with multiple event loops
+        fs = gcsfs.GCSFileSystem(
+            project=data,
+            token="anon",
+            requester_pays=False,
+            anon=True,
+            check_connection=False,
+            asynchronous=False,
+            loop=get_loop(),
         )
 
+        return xr.open_zarr(
+            fs.get_mapper(remote_dataset),
+            consolidated=True,
+            zarr_format=zarr_version,
+            chunks="auto",
+        )
+    # if not gcs, fall back to s3
     fs = s3fs.S3FileSystem(
         endpoint_url=data,
-        anon=True,
+        anon=True if s3_access_key is None else False,
+        loop=get_loop(),
+        asynchronous=False,
+        key=s3_access_key,
+        secret=s3_secret_key,
     )
     mapper = fs.get_mapper(remote_dataset, check=False)
-    return xr.open_zarr(mapper, consolidated=True, chunks="auto")
+    return xr.open_zarr(
+        mapper, consolidated=True, chunks="auto", zarr_format=zarr_version
+    )
 
 
 def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
@@ -133,7 +176,7 @@ def get_crs_from_dataset(dataset: xr.Dataset) -> pyproj.CRS:
                     f"Failed to parse storage crs: {spatial_ref}"
                 ) from e
 
-    return get_crs_from_uri(DEFAULT_STORAGE_CRS)
+    return get_crs(DEFAULT_STORAGE_CRS)
 
 
 @otel_trace()
@@ -171,7 +214,16 @@ def project_dataset(
         # use rio.reproject
         dataset = dataset.rio.set_spatial_dims(x_dim=x_field, y_dim=y_field)
         dataset = dataset.rio.write_crs(storage_crs.to_wkt())
-        return dataset.rio.reproject(dst_crs=output_crs.to_wkt())
+        try:
+            dataset = dataset.rio.reproject(dst_crs=output_crs.to_wkt())
+        except rioxarray.exceptions.NoDataInBounds as e:
+            raise ProviderNoDataError(
+                f"Failed to reproject dataset, no data in bounds: {e}"
+            ) from e
+        # rio reproject renames the x/y fields to be x and y
+        # so we need to rename them back to the original
+        dataset = dataset.rename({"x": x_field, "y": y_field})
+        return dataset
 
 
 @otel_trace()
@@ -478,6 +530,9 @@ def dataset_to_covjson(
                     "t": {
                         "values": [time_values]
                         if singleTimeseriesValue
+                        # if there is one time value but the time axis is already a list
+                        # then we don't want to wrap it in a list again
+                        and not isinstance(time_values, list)
                         else time_values
                     },
                 },

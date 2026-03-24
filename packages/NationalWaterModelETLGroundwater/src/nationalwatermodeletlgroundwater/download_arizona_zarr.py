@@ -92,7 +92,7 @@ local_path = Path(__file__).parent / "zarr_dataset"
 print("Writing dataset to local filesystem...")
 # Write directly using path string
 # for some reason can't use zip store since there is a chunking issue with it
-store = zarr.storage.LocalStore(str(local_path))
+store = zarr.storage.LocalStore(str(local_path))  # pyright: ignore[reportAttributeAccessIssue]
 zarr_dataset_filtered.to_zarr(
     store=store,
     mode="w",

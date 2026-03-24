@@ -16,6 +16,5 @@ export type PrettyLabel = { parameter: string; label: string };
 export type EChartsSeries = {
   name: string;
   type: 'line';
-  stack: string;
   data: number[];
 };

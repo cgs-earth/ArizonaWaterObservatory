@@ -4,7 +4,12 @@
  */
 
 import { FeatureCollection } from 'geojson';
-import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
+import {
+  CoverageAxesSegments,
+  CoverageAxesValues,
+  CoverageCollection,
+  CoverageJSON,
+} from '@/services/edr.service';
 
 export const isCoverageCollection = (
   object: CoverageCollection | CoverageJSON | FeatureCollection
@@ -16,6 +21,12 @@ export const isCoverageJSON = (
   object: CoverageCollection | CoverageJSON | FeatureCollection
 ): object is CoverageJSON => {
   return Boolean(object?.type) && object.type === 'Coverage';
+};
+
+export const isAxesValues = (
+  object: CoverageAxesSegments | CoverageAxesValues
+): object is CoverageAxesValues => {
+  return 'values' in object && Array.isArray(object.values);
 };
 
 export const isFeatureCollection = (

@@ -159,4 +159,8 @@
   .geocoderWrapper {
     min-width: calc(100vw - (var(--default-spacing) * 2));
   }
+
+  .dateSelectorButton {
+    margin-top: calc(var(--default-spacing) + 3rem);
+  }
 }

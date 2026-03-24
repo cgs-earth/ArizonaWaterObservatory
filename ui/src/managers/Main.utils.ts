@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BBox } from 'geojson';
 import { ExtendedFeatureCollection } from '@/managers/types';
 import { ICollection } from '@/services/edr.service';
 import { Layer } from '@/stores/main/types';
@@ -34,4 +35,9 @@ export const getLocationsLayerIds = (
     lineLayerId: `user-${collectionId}-${layerId}-line`,
     rasterLayerId: `user-${collectionId}-${layerId}-raster`,
   };
+};
+
+// Helper function to make bbox ids
+export const stringifyBBox = (bbox: BBox): string => {
+  return bbox.join('_');
 };

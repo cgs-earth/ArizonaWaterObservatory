@@ -13,6 +13,7 @@ import { Item } from '@/features/Popup/Item';
 import { Location } from '@/features/Popup/Location';
 import styles from '@/features/Popup/Popup.module.css';
 import mainManager from '@/managers/Main.init';
+import useMainStore from '@/stores/main';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
@@ -30,21 +31,24 @@ type Props = {
   locations: LocationType[];
   features: Feature[];
   close: () => void;
+  layerId: Layer['id'];
 };
 
 const Popup: React.FC<Props> = (props) => {
-  const { locations, features } = props;
+  const { locations, features, layerId } = props;
 
   const [location, setLocation] = useState<LocationType>(locations[0]);
+
   const [feature, setFeature] = useState<Feature>();
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
-  const [layer, setLayer] = useState<Layer | null>(null);
   const [datasetName, setDatasetName] = useState<string>('');
   const [parameters, setParameters] = useState<Parameter[]>([]);
 
   const [id, setId] = useState<string>(location.id);
 
+  const layers = useMainStore((state) => state.layers);
+  const [layer, setLayer] = useState<Layer>();
   const setLinkLocation = useSessionStore((state) => state.setLinkLocation);
   const setOverlay = useSessionStore((state) => state.setOverlay);
 
@@ -54,6 +58,13 @@ const Popup: React.FC<Props> = (props) => {
       setLocation(location);
     }
   }, [locations]);
+
+  useEffect(() => {
+    const layer = layers.find((layer) => layer.id === layerId);
+    if (layer) {
+      setLayer(layer);
+    }
+  }, [layerId, layers]);
 
   useEffect(() => {
     if (
@@ -71,13 +82,6 @@ const Popup: React.FC<Props> = (props) => {
       setFeature(newFeature);
     }
   }, [location, layer]);
-
-  useEffect(() => {
-    const newLayer = mainManager.getLayer(location.layerId);
-    if (newLayer) {
-      setLayer(newLayer);
-    }
-  }, [location]);
 
   useEffect(() => {
     if (!layer) {

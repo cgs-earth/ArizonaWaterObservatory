@@ -34,6 +34,9 @@ export const Category: React.FC<Props> = (props) => {
 
   const [categoryOptions, setCategoryOptions] = useState<ComboboxData>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  // TODO: remove this temporary state when 204 added for this edge
+  const [noOptions, setNoOptions] = useState(false);
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
@@ -43,53 +46,62 @@ export const Category: React.FC<Props> = (props) => {
       'Fetching category dropdown options',
       LoadingType.Data
     );
-
     try {
+      setError('');
       setIsLoading(true);
+      setNoOptions(false);
       controller.current = new AbortController();
 
       const { parameterGroups } = await awoService.getCollections({
         params: {
-          'parameter-name': '*',
           ...(provider ? { 'provider-name': provider } : {}),
         },
       });
 
-      const categoryOptions: ComboboxData = parameterGroups
-        .map((parameterGroup) => ({
-          value: parameterGroup.label,
-          label: parameterGroup.label,
-        }))
-        .filter(
-          (parameterName, index, categoryOptions) =>
-            categoryOptions.map(({ value }) => value).indexOf(parameterName.value) === index
-        )
-        .sort((a, b) => a.label.localeCompare(b.label));
+      if (parameterGroups) {
+        const categoryOptions: ComboboxData = parameterGroups
+          .map((parameterGroup) => ({
+            value: parameterGroup.label,
+            label: parameterGroup.label,
+          }))
+          .filter(
+            (parameterName, index, categoryOptions) =>
+              categoryOptions.map(({ value }) => value).indexOf(parameterName.value) === index
+          )
+          .sort((a, b) => a.label.localeCompare(b.label));
 
-      if (isMounted.current) {
-        if (!parameterGroups.some((parameterGroup) => parameterGroup.label === category?.value)) {
-          onChange(null);
+        if (isMounted.current) {
+          if (!parameterGroups.some((parameterGroup) => parameterGroup.label === category?.value)) {
+            onChange(null);
+          }
+
+          setCategoryOptions(categoryOptions);
         }
-
-        setCategoryOptions(categoryOptions);
-        setIsLoading(false);
+      } else if (isMounted.current) {
+        setCategoryOptions([]);
+        setNoOptions(true);
       }
     } catch (error) {
       if (
         (error as Error)?.name === 'AbortError' ||
         (typeof error === 'string' && error === 'Component unmount')
       ) {
-        console.log('Fetch request canceled');
+        console.warn('Fetch request canceled');
       } else if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
-      }
-
-      if (isMounted.current) {
-        setIsLoading(false);
+        // TODO: remove when 204 added for this edge
+        if (_error.message.includes('404')) {
+          setCategoryOptions([]);
+          setNoOptions(true);
+        } else {
+          notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        }
       }
     } finally {
       loadingManager.remove(loadingInstance);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -143,6 +155,7 @@ export const Category: React.FC<Props> = (props) => {
         value={category?.value}
         onChange={(_value, option) => onChange(option)}
         disabled={categoryOptions.length === 0 || isLoading}
+        error={error.length > 0 ? error : undefined}
         searchable
         clearable
       />
@@ -151,8 +164,13 @@ export const Category: React.FC<Props> = (props) => {
           <Loader color="blue" type="dots" />
           <Text size="sm">Updating Categories</Text>
         </Group>
+      ) : noOptions ? (
+        <Text size="sm">No categories found for provider: {provider}</Text>
       ) : (
-        provider && <Text size="sm">Showing categories available for provider: {provider}</Text>
+        provider &&
+        error.length === 0 && (
+          <Text size="sm">Showing categories available for provider: {provider}</Text>
+        )
       )}
     </Stack>
   );
