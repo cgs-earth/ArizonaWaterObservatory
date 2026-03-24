@@ -15,6 +15,8 @@ This repo holds all code for the Arizona Water Observatory project including
 
 You can run the project by following the commands in the [makefile](makefile) and spinning up the necessary resources in docker compose. Then you can move into the `ui` folder and start the ui with `npm run dev`. You will need a mapbox token in your `.env` file to use the map.
 
+You should have GDAL version 3.12 installed for local development. This is the latest version of GDAL packaged in homebrew.
+
 ## Cloud Components
 
 The AWO uses a standard geospatial client-server architecture.

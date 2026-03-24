@@ -5,9 +5,9 @@
 
 .accordions {
   width: 100%;
-  max-height: calc(100vh - 220px);
+  /* max-height: calc(100vh - 220px);
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: auto; */
   border-bottom: 1px solid var(--asu-color-tertiary);
 }
 
@@ -17,6 +17,8 @@
 }
 
 .accordionBody {
+  max-height: calc(100vh - 17.1875rem);
+  overflow-x: hidden;
   overflow-y: auto;
 }
 

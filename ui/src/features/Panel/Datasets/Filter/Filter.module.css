@@ -55,6 +55,10 @@
 
 .filterWrapper {
   width: 100%;
+  z-index: 1;
+  position: sticky;
+  top: 0;
+  background: var(--mantine-color-default);
   border-left: 0.5rem solid var(--asu-color-tertiary);
 }
 

@@ -9,7 +9,7 @@ check:
 
 dev:
 	test -f local.openapi.yml || uv run pygeoapi openapi generate pygeoapi.config.yml --output-file local.openapi.yml
-	PYGEOAPI_CONFIG=pygeoapi.config.yml PYGEOAPI_OPENAPI=local.openapi.yml uv run pygeoapi serve --starlette
+	PYGEOAPI_CONFIG=pygeoapi.config.yml PYGEOAPI_OPENAPI=local.openapi.yml uv run pygeoapi serve
 
 deps:
 	# Using uv, install all Python dependencies needed for local development and spin up necessary docker services
@@ -53,6 +53,6 @@ adwr_wells_temporal_extent:
 # alter other dependencies; note that we technically only need to upgrade one package since they are
 # all in the same repo; however, all are listed here for clarity
 pull_git_deps:
-	@for dep in usace rise com snotel awdb_com awdb_forecasts noa_rfc; do \
+	@for dep in usace rise com snotel awdb_com awdb_forecasts noa_rfc formatters; do \
 		uv sync --upgrade --upgrade-package "$$dep"; \
 	done
