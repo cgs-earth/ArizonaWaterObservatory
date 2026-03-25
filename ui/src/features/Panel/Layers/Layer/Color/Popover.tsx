@@ -28,13 +28,13 @@ import {
 
 type Props = {
   paletteDefinition: Layer['paletteDefinition'];
-  handleChange: (paletteDefinition: Layer['paletteDefinition']) => void;
+  onChange: (paletteDefinition: Layer['paletteDefinition']) => void;
   parameters: string[];
   parameterOptions: ComboboxData;
 };
 
 export const Popover: React.FC<Props> = (props) => {
-  const { parameters, parameterOptions, paletteDefinition, handleChange } = props;
+  const { parameters, parameterOptions, paletteDefinition, onChange } = props;
 
   const [show, setShow] = useState(false);
 
@@ -97,7 +97,7 @@ export const Popover: React.FC<Props> = (props) => {
 
   const handleSave = () => {
     if (palette !== null && count !== null && parameter !== null) {
-      handleChange({
+      onChange({
         palette,
         actualCount: count,
         originalCount: paletteDefinition?.originalCount ?? count,

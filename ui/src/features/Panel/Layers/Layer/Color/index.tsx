@@ -25,8 +25,6 @@ const Color: React.FC<Props> = (props) => {
     parameterOptions,
     paletteDefinition,
     handlePaletteDefinitionChange,
-    color,
-    handleColorChange,
     collectionType,
   } = props;
 
@@ -34,19 +32,12 @@ const Color: React.FC<Props> = (props) => {
 
   return (
     <Group w={showPalette ? '100%' : 'calc(50% - (var(--default-spacing) * 2))'} align="flex-end">
-      <ColorInput
-        size="xs"
-        label="Symbol Color"
-        w={showPalette ? 'calc(50% - (var(--default-spacing) * 2))' : '100%'}
-        value={typeof color === 'string' && !paletteDefinition ? color : ''}
-        onChange={(value) => handleColorChange(value as ColorType)}
-      />
       {collectionType === CollectionType.EDRGrid && parameterOptions && (
         <Popover
           parameters={parameters}
           parameterOptions={parameterOptions}
           paletteDefinition={paletteDefinition}
-          handleChange={handlePaletteDefinitionChange}
+          onChange={handlePaletteDefinitionChange}
         />
       )}
     </Group>
