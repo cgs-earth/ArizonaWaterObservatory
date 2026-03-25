@@ -538,7 +538,7 @@ resources:
   #       id_field: REGISTRY_ID
   #       time_field: installed
 
-  usgs-national-map/elevation: 
+  usgs-national-map_elevation: 
     type: collection
     title: USGS National Map 3D Elevation Program (3DEP)
     description: provides nationwide topographic elevation data, including bare-earth digital elevation models (DEMs) and derivative products such as hillshades, contours, and 3D surface models.
@@ -571,7 +571,7 @@ resources:
           name: png
           mimetype: image/png
 
-  usgs-national-map/land-cover: 
+  usgs-national-map_land-cover: 
     type: collection
     title: USGS National Map Land Cover
     description: provides a raster for classification of land cover types across the Contiguous United States (CONUS), including forests, wetlands, urban areas, agricultural lands, and water bodies. It is derived from satellite imagery and other remote sensing data
