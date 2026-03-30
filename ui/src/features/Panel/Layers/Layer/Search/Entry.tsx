@@ -1,16 +1,16 @@
 /**
  * Copyright 2025 Lincoln Institute of Land Policy
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { useEffect, useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Stack, Text, TextInput } from '@mantine/core';
 import { StringIdentifierCollections } from '@/consts/collections';
-import { Matches } from '@/features/Search/Matches';
-import { Properties } from '@/features/Search/Properties';
-import styles from '@/features/Search/Search.module.css';
-import { getId } from '@/features/Search/utils';
+import { Matches } from '@/features/Panel/Layers/Layer/Search/Matches';
+import { Properties } from '@/features/Panel/Layers/Layer/Search/Properties';
+import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
+import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
 import { useLocations } from '@/hooks/useLocations';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';

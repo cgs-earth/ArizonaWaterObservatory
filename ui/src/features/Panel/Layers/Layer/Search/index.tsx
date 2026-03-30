@@ -1,14 +1,14 @@
 /**
  * Copyright 2025 Lincoln Institute of Land Policy
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { useEffect, useState } from 'react';
 import { ActionIcon, Box, Group, Popover, Stack, Text, Title, Tooltip } from '@mantine/core';
 import Info from '@/assets/Info';
 import SearchIcon from '@/assets/Search';
-import { Entry } from '@/features/Search/Entry';
-import styles from '@/features/Search/Search.module.css';
+import { Entry } from '@/features/Panel/Layers/Layer/Search/Entry';
+import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';

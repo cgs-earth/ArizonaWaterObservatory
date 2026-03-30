@@ -1,12 +1,12 @@
 /**
  * Copyright 2026 Lincoln Institute of Land Policy
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { useEffect, useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { ActionIcon, Button, Divider, Group, Stack, Text } from '@mantine/core';
-import Table from '../Table';
+import Table from '@/features/Table';
 
 type Props = {
   properties: GeoJsonProperties;

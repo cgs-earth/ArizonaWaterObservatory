@@ -1,6 +1,6 @@
 /**
  * Copyright 2026 Lincoln Institute of Land Policy
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { MouseEvent, ReactNode, useEffect, useMemo, useState } from 'react';
@@ -9,12 +9,12 @@ import { Feature, GeoJsonProperties, Geometry } from 'geojson';
 import { LngLatBoundsLike } from 'mapbox-gl';
 import { Box, Button, Divider, Group, Stack, Text } from '@mantine/core';
 import { useMap } from '@/contexts/MapContexts';
-import styles from '@/features/Search/Search.module.css';
+// import { getLabel } from '@/utils/getLabel';
+import { MAP_ID } from '@/features/Map/config';
+import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
 import useMainStore from '@/stores/main';
 import { Layer, Location } from '@/stores/main/types';
 import { getLabel } from '@/utils/getLabel';
-// import { getLabel } from '@/utils/getLabel';
-import { MAP_ID } from '../Map/config';
 import { getId, highlightMatches } from './utils';
 
 type Props = {

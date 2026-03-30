@@ -21,6 +21,7 @@ import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getRandomHexColor } from '@/utils/hexColor';
 import { getParameterUnit } from '@/utils/parameters';
+import { Tools } from './Tabs/Tools';
 
 dayjs.extend(isSameOrBefore);
 
@@ -308,13 +309,14 @@ const Layer: React.FC<Props> = (props) => {
     <Tabs
       value={tab}
       color="var(--asu-color-primary)"
-      classNames={{ panel: styles.content }}
+      classNames={{ panel: tab === 'tools' ? undefined : styles.content }}
       onChange={handleTabChange}
       defaultValue="settings"
     >
       <Tabs.List>
         <Tabs.Tab value="settings">Settings</Tabs.Tab>
         {showDataTab && <Tabs.Tab value="data">Data</Tabs.Tab>}
+        <Tabs.Tab value="tools">Tools</Tabs.Tab>
       </Tabs.List>
       <Tabs.Panel value="settings">
         <Settings
@@ -368,6 +370,9 @@ const Layer: React.FC<Props> = (props) => {
           />
         </Tabs.Panel>
       )}
+      <Tabs.Panel value="tools">
+        <Tools layer={layer} collectionType={collectionType} />
+      </Tabs.Panel>
     </Tabs>
   );
 };
