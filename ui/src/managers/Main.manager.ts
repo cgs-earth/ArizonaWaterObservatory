@@ -174,7 +174,7 @@ class MainManager {
    *
    * @function
    */
-  private createHexColor(): ColorValueHex {
+  public createHexColor(): ColorValueHex {
     return getRandomHexColor();
   }
 
