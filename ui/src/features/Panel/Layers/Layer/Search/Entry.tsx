@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
-import { Stack, Text } from '@mantine/core';
+import { Loader, Stack, Text } from '@mantine/core';
 import TextInput from '@/components/TextInput';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { Matches } from '@/features/Panel/Layers/Layer/Search/Matches';
@@ -85,23 +85,29 @@ export const Entry: React.FC<Props> = (props) => {
         onChange={(event) => handleChange(event.currentTarget.value)}
         placeholder="Search all features in layer"
       />
-      {showMatches && (
-        <Matches
-          layer={layer}
-          searchTerm={search.searchTerm}
-          matchedLocations={search.matchedLocations}
-          selectedLocations={selectedLocations}
-          otherLocations={otherLocations}
-          isStringIdentifierCollection={isStringIdentifierCollection}
-          lineLimit={5}
-          locationLimit={10}
-        />
-      )}
-      {showProperties && <Properties properties={sampleProperties} />}
-      {!showMatches && !showProperties && (
-        <Text size="sm" ta="center" mt="calc(var(--default-spacing) * 1)">
-          No locations found.
-        </Text>
+      {!layer.loaded || isLoading ? (
+        <Loader mx="auto" color="#0183a1" type="dots" />
+      ) : (
+        <>
+          {showMatches && (
+            <Matches
+              layer={layer}
+              searchTerm={search.searchTerm}
+              matchedLocations={search.matchedLocations}
+              selectedLocations={selectedLocations}
+              otherLocations={otherLocations}
+              isStringIdentifierCollection={isStringIdentifierCollection}
+              lineLimit={5}
+              locationLimit={10}
+            />
+          )}
+          {showProperties && <Properties properties={sampleProperties} />}
+          {!showMatches && !showProperties && (
+            <Text size="sm" ta="center" mt="calc(var(--default-spacing) * 1)">
+              No locations found.
+            </Text>
+          )}
+        </>
       )}
     </Stack>
   );
