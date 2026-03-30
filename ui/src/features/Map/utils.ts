@@ -4,17 +4,11 @@
  */
 
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import {
-  bboxPolygon,
-  booleanContains,
-  featureCollection as createFeatureCollection,
-} from '@turf/turf';
-import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { ExpressionSpecification, GeoJSONFeature, GeoJSONSource, Map } from 'mapbox-gl';
+import { bboxPolygon, booleanContains } from '@turf/turf';
+import { ExpressionSpecification, GeoJSONFeature, Map } from 'mapbox-gl';
 import { idStoreProperty } from '@/consts/collections';
 import { LayerId, SubLayerId } from '@/features/Map/config';
 import { Location } from '@/stores/main/types';
-import { SourceId } from './sources';
 
 const getSimpleSelectMessage = (layerId: LayerId | SubLayerId): string => {
   switch (layerId) {

@@ -12,14 +12,14 @@ import { DatePreset } from '@/components/DateInput/DateInput.types';
 import IconButton from '@/components/IconButton';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
+import { DetailedGradient } from '@/features/Panel/Layers/Layer/Color/DetailedGradient';
+import { Popover } from '@/features/Panel/Layers/Layer/Color/Popover';
 import styles from '@/features/Panel/Panel.module.css';
 import { useLayerValidation } from '@/hooks/useLayerValidation';
 import { useLoading } from '@/hooks/useLoading';
 import { Layer } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
 import { isSamePalette, isValidPalette } from '@/utils/colors';
-import { DetailedGradient } from '../Color/DetailedGradient';
-import { Popover } from '../Color/Popover';
 
 type Attributes = {
   from: Layer['from'];

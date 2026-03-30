@@ -4,9 +4,8 @@
  */
 
 import { ComboboxData, Group } from '@mantine/core';
-import ColorInput from '@/components/ColorInput';
 import { Popover } from '@/features/Panel/Layers/Layer/Color/Popover';
-import { Color as ColorType, Layer } from '@/stores/main/types';
+import { Layer } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
 
 type Props = {

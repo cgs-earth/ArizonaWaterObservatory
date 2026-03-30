@@ -16,9 +16,9 @@ import {
   CoverageJSON,
   ICollection,
 } from '@/services/edr.service';
+import awoService from '@/services/init/awo.init';
 import { isCoverageJSON } from '@/utils/isTypeObject';
 import { getDatetime } from '@/utils/url';
-import awoService from '../init/awo.init';
 
 export class CoverageGeoService extends CoverageService {
   private addGridValuesConstructor(
