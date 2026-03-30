@@ -18,7 +18,7 @@ import { Overlay } from '@/stores/session/types';
 
 const Filter: React.FC = () => {
   const [opened, { open, close }] = useDisclosure(false, {
-    onOpen: () => setOverlay(Overlay.Filter),
+    onClose: () => setOverlay(null),
   });
 
   const search = useMainStore((state) => state.searchTerm);
@@ -30,11 +30,16 @@ const Filter: React.FC = () => {
   useEffect(() => {
     if (overlay !== Overlay.Filter) {
       close();
+    } else if (!opened) {
+      open();
     }
   }, [overlay]);
 
+  const handleClick = () => {
+    setOverlay(Overlay.Filter);
+  };
+
   const handleClose = () => {
-    setOverlay(null);
     close();
   };
 
@@ -69,7 +74,7 @@ const Filter: React.FC = () => {
               size="lg"
               title="Open filters modal"
               classNames={{ root: styles.actionIconRoot, icon: styles.actionIcon }}
-              onClick={open}
+              onClick={handleClick}
             >
               <Tune />
             </ActionIcon>

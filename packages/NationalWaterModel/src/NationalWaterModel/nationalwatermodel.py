@@ -11,8 +11,9 @@ from com.geojson.helpers import (
 )
 from com.otel import otel_trace
 from com.protocols.providers import OAFProviderProtocol
+import numpy as np
+from pygeoapi.crs import crs_transform
 from pygeoapi.provider.base import BaseProvider
-from pygeoapi.util import crs_transform
 import pyproj
 import xarray as xr
 
@@ -47,9 +48,22 @@ class NationalWaterModelProvider(BaseProvider, OAFProviderProtocol):
             if "remote_dataset" in provider_def
             else None,
             is_gcs=provider_def.get("is_gcs", False),
+            s3_secret_key=provider_def.get("s3_secret_key", None),
+            s3_access_key=provider_def.get("s3_access_key", None),
+            zarr_version=provider_def.get("zarr_version", 2),
         )
         if "storage_crs" not in provider_def:
             self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
+
+        if provider_def.get("drop_duplicate_times", False):
+            LOGGER.info(
+                f"Dropping duplicate times for {provider_def['remote_dataset'] if 'remote_dataset' in provider_def else provider_def['data']}"
+            )
+            time_values = self.zarr_dataset["time"].values
+            _, unique_idx = np.unique(time_values, return_index=True)
+            self.zarr_dataset = self.zarr_dataset.isel(
+                time=np.sort(unique_idx)
+            )
 
     @otel_trace()
     def items(  # type: ignore

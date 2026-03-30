@@ -1,12 +1,9 @@
 # Copyright 2025 Lincoln Institute of Land Policy
 # SPDX-License-Identifier: MIT
-
 name: Pyright Type Checks
-
 on:
   push:
-  workflow_dispatch: # Allows manual triggering of the workflow
-
+  workflow_dispatch:
 jobs:
   pyright:
     runs-on: ubuntu-latest
@@ -19,8 +16,15 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: "Set up Python"
+      - name: Set up Python
         uses: actions/setup-python@v5
+
+      - name: Install GDAL 3.10 from UbuntuGIS
+        run: |
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+          sudo apt-get update
+          sudo apt-get install -y libgdal-dev
+          gdal-config --version
 
       - name: Install the project
         run: uv sync --all-extras --dev --all-packages --all-groups

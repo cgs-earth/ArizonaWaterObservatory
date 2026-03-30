@@ -125,7 +125,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
           <Group gap="calc(var(--default-spacing) * 2)" align="flex-end">
             <DateInput
               label="From"
-              size="sm"
+              size="xs"
               className={styles.datePicker}
               placeholder="Pick start date"
               value={from}
@@ -142,7 +142,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
             />
             <DateInput
               label="To"
-              size="sm"
+              size="xs"
               className={styles.datePicker}
               placeholder="Pick end date"
               value={to}

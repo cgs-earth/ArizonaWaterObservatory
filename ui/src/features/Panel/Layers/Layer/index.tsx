@@ -5,22 +5,13 @@
 
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { useEffect, useState } from 'react';
-import { ExpressionSpecification } from 'mapbox-gl';
-import { ComboboxData, Divider, Group, Stack, Text, Tooltip } from '@mantine/core';
-import Delete from '@/assets/Delete';
-import Button from '@/components/Button';
-import DateInput from '@/components/DateInput';
-import { DatePreset } from '@/components/DateInput/DateInput.types';
-import IconButton from '@/components/IconButton';
-import Select from '@/components/Select';
-import TextInput from '@/components/TextInput';
-import { Variant } from '@/components/types';
-import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
-import Color from '@/features/Panel/Layers/Layer/Color';
-import { DetailedGradient } from '@/features/Panel/Layers/Layer/Color/DetailedGradient';
+import { useCallback, useEffect, useState } from 'react';
+import { ComboboxData, Tabs } from '@mantine/core';
+import { Data } from '@/features/Panel/Layers/Layer/Tabs/Data';
+import { Settings } from '@/features/Panel/Layers/Layer/Tabs/Settings';
 import styles from '@/features/Panel/Panel.module.css';
-import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
@@ -28,10 +19,8 @@ import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
-import { isSamePalette, isValidPalette } from '@/utils/colors';
-import { isSameArray } from '@/utils/compareArrays';
+import { getRandomHexColor } from '@/utils/hexColor';
 import { getParameterUnit } from '@/utils/parameters';
-import { getTemporalExtent } from '@/utils/temporalExtent';
 
 dayjs.extend(isSameOrBefore);
 
@@ -43,26 +32,38 @@ const Layer: React.FC<Props> = (props) => {
   const { layer } = props;
 
   const [name, setName] = useState(layer.name);
+  const debouncedName = useDebounce(name, 300);
   const [color, setColor] = useState(layer.color);
+  const debouncedColor = useDebounce(color, 300);
   const [parameters, setParameters] = useState(layer.parameters);
   const [from, setFrom] = useState<string | null>(layer.from);
-  const [minDate, setMinDate] = useState<string>();
   const [to, setTo] = useState<string | null>(layer.to);
-  const [maxDate, setMaxDate] = useState<string>();
   const [opacity, setOpacity] = useState(layer.opacity);
+  const debouncedOpacity = useDebounce(opacity, 300);
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
   const [paletteDefinition, setPaletteDefinition] = useState(layer.paletteDefinition);
 
-  const [data, setData] = useState<ComboboxData>();
+  const [parameterOptions, setParameterOptions] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [parameterLimit, setParameterLimit] = useState<number>();
-  const [daysLimit, setDaysLimit] = useState<number>();
+  const [tab, setTab] = useState<string | null>();
 
-  const { isFetchingCollections, isLoadingGeography } = useLoading();
+  const { isFetchingCollections } = useLoading();
+
+  const { getDateInputError } = useLayerValidation(layer, isLoading, {
+    name,
+    parameters,
+    color,
+    from,
+    to,
+    opacity,
+    paletteDefinition,
+    collectionType,
+    parameterOptions,
+  });
 
   useEffect(() => {
-    if (isFetchingCollections || data) {
+    if (isFetchingCollections || parameterOptions) {
       return;
     }
 
@@ -71,19 +72,6 @@ const Layer: React.FC<Props> = (props) => {
     if (collection) {
       const collectionType = getCollectionType(collection);
       setCollectionType(collectionType);
-
-      const temporalExtent = getTemporalExtent(collection);
-
-      if (temporalExtent) {
-        const { min, max } = temporalExtent;
-
-        if (min) {
-          setMinDate(min);
-        }
-        if (max) {
-          setMaxDate(max);
-        }
-      }
 
       const paramObjects = Object.values(collection?.parameter_names ?? {});
 
@@ -97,31 +85,9 @@ const Layer: React.FC<Props> = (props) => {
           };
         })
         .sort((a, b) => a.label.localeCompare(b.label));
-      setData(data);
+      setParameterOptions(data);
     }
   }, [isFetchingCollections]);
-
-  useEffect(() => {
-    const restrictions = CollectionRestrictions[layer.datasourceId];
-
-    if (restrictions && restrictions.length > 0) {
-      const parameterLimitRestriction = restrictions.find(
-        (restriction) => restriction.type === RestrictionType.Parameter
-      );
-
-      if (parameterLimitRestriction && parameterLimitRestriction.count > 0) {
-        setParameterLimit(parameterLimitRestriction.count);
-      }
-
-      const daysLimitRestriction = restrictions.find(
-        (restriction) => restriction.type === RestrictionType.Day
-      );
-
-      if (daysLimitRestriction && daysLimitRestriction.days > 0) {
-        setDaysLimit(daysLimitRestriction.days);
-      }
-    }
-  }, [layer]);
 
   // If user updates color through the legend, update it here
   useEffect(() => {
@@ -136,6 +102,96 @@ const Layer: React.FC<Props> = (props) => {
     setPaletteDefinition(layer.paletteDefinition);
   }, [layer.paletteDefinition]);
 
+  useEffect(() => {
+    if (debouncedColor === layer.color) {
+      return;
+    }
+
+    void mainManager.updateLayer(
+      layer,
+      layer.name,
+      debouncedColor,
+      layer.parameters,
+      layer.from,
+      layer.to,
+      layer.visible,
+      layer.opacity,
+      layer.paletteDefinition
+    );
+  }, [debouncedColor]);
+
+  useEffect(() => {
+    if (debouncedName === layer.name) {
+      return;
+    }
+
+    void mainManager.updateLayer(
+      layer,
+      debouncedName,
+      layer.color,
+      layer.parameters,
+      layer.from,
+      layer.to,
+      layer.visible,
+      layer.opacity,
+      layer.paletteDefinition
+    );
+  }, [debouncedName]);
+
+  useEffect(() => {
+    if (debouncedOpacity === layer.opacity) {
+      return;
+    }
+
+    void mainManager.updateLayer(
+      layer,
+      layer.name,
+      layer.color,
+      layer.parameters,
+      layer.from,
+      layer.to,
+      layer.visible,
+      debouncedOpacity,
+      layer.paletteDefinition
+    );
+  }, [debouncedOpacity]);
+
+  useEffect(() => {
+    if (collectionType !== CollectionType.EDR || getDateInputError() || from === layer.from) {
+      return;
+    }
+
+    void mainManager.updateLayer(
+      layer,
+      layer.name,
+      layer.color,
+      layer.parameters,
+      from,
+      layer.to,
+      layer.visible,
+      layer.opacity,
+      layer.paletteDefinition
+    );
+  }, [from]);
+
+  useEffect(() => {
+    if (collectionType !== CollectionType.EDR || getDateInputError() || to === layer.to) {
+      return;
+    }
+
+    void mainManager.updateLayer(
+      layer,
+      layer.name,
+      layer.color,
+      layer.parameters,
+      layer.from,
+      to,
+      layer.visible,
+      layer.opacity,
+      layer.paletteDefinition
+    );
+  }, [to]);
+
   const handleSave = async () => {
     setIsLoading(true);
     const updateName = name !== layer.name ? `${layer.name} -> ${name}` : layer.name;
@@ -143,11 +199,20 @@ const Layer: React.FC<Props> = (props) => {
       `Updating layer: ${updateName}`,
       LoadingType.Locations
     );
+
+    // The user has cleared the dynamic visualization, reset color
+    const newColor =
+      paletteDefinition === null && typeof color !== 'string'
+        ? typeof layer.color === 'string'
+          ? layer.color
+          : getRandomHexColor()
+        : color;
+
     try {
       await mainManager.updateLayer(
         layer,
         name,
-        color,
+        newColor,
         parameters,
         from,
         to,
@@ -182,362 +247,128 @@ const Layer: React.FC<Props> = (props) => {
     notificationManager.show(`Deleted layer: ${layer.name}`, NotificationType.Success);
   };
 
-  const handleOpacityChange = (opacity: LayerType['opacity'], _layerId: LayerType['id']) => {
-    setOpacity(opacity);
-  };
+  const handleNameChange = useCallback((name: LayerType['name']) => setName(name), [setName]);
 
-  const getIsDateRangeOverLimit = () => {
-    if (daysLimit) {
-      if (!from || !to || !dayjs(from).isValid() || !dayjs(to).isValid()) {
-        return true;
-      }
-
-      return dayjs(to).diff(dayjs(from), 'days') > daysLimit;
-    }
-    return false;
-  };
-
-  /**
-   * This layer is a grid type which requires at least one selected parameter
-   *
-   * @constant
-   */
-  const isMissingParameters = collectionType === CollectionType.EDRGrid && parameters.length === 0;
-  /**
-   * There is a parameter count limit on for this dataset and we have exceeded it
-   *
-   * @constant
-   */
-  const isParameterSelectionOverLimit = parameterLimit ? parameters.length > parameterLimit : false;
-  /**
-   * There is a limit to the number of days allowed within this range on for this dataset and we have exceeded it
-   *
-   * @constant
-   */
-  const isDateRangeOverLimit = getIsDateRangeOverLimit();
-  /**
-   * Is the to date before the from date if both exist
-   *
-   * @constant
-   */
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
-
-  /**
-   * This dataset supports time series for parameters
-   *
-   * @constant
-   */
-  const hasScientificMeasurements = [CollectionType.EDR, CollectionType.EDRGrid].includes(
-    collectionType
+  const handleColorChange = useCallback(
+    (color: LayerType['color']) => {
+      setColor(color);
+      setPaletteDefinition(null);
+    },
+    [setColor, setPaletteDefinition]
   );
-  /**
-   * This is a features dataset, show additional message
-   *
-   * @constant
-   */
-  const showFeaturesMessage = collectionType === CollectionType.Features;
-  /**
-   * Show additional warning about date ranges for EDRGrid
-   *
-   * @constant
-   */
-  const showDateRangeWarning = collectionType === CollectionType.EDRGrid;
-  /**
-   * This is a raster or grid layer which can meaningfully implement opacity
-   *
-   * @constant
-   */
-  const showOpacitySlider = [CollectionType.Map, CollectionType.EDRGrid].includes(collectionType);
-  /**
-   * A raster layer can't be colorized
-   *
-   * @constant
-   */
-  const showColorInput = collectionType !== CollectionType.Map;
 
-  const isPaletteDefinitionValid = isValidPalette(paletteDefinition);
+  const handleOpacityChange = useCallback(
+    (opacity: LayerType['opacity']) => setOpacity(opacity),
+    [setOpacity]
+  );
 
-  const doesPaletteHaveParameter =
-    !paletteDefinition || parameters.includes(paletteDefinition?.parameter);
+  const handleFromChange = useCallback(
+    (from: LayerType['from']) => {
+      setFrom(from);
+    },
+    [setFrom]
+  );
 
-  /**
-   * The user has modified this layer since the last save
-   *
-   * @constant
-   */
-  const hasUnsavedChanges =
-    name !== layer.name ||
-    color !== layer.color ||
-    !isSameArray(parameters, layer.parameters) ||
-    from !== layer.from ||
-    to !== layer.to ||
-    opacity !== layer.opacity ||
-    !isSamePalette(paletteDefinition, layer.paletteDefinition);
+  const handleToChange = useCallback(
+    (to: LayerType['to']) => {
+      setTo(to);
+    },
+    [setTo]
+  );
 
-  /**
-   * This layer has validation issues or there are blocking actions
-   *
-   * @constant
-   */
-  const isSaveDisabled =
-    isLoadingGeography ||
-    !hasUnsavedChanges ||
-    isLoading ||
-    !isValidRange ||
-    isMissingParameters ||
-    isParameterSelectionOverLimit ||
-    !doesPaletteHaveParameter ||
-    !isPaletteDefinitionValid;
-  const getDateInputError = () => {
-    // is to >= from?
-    if (isValidRange) {
-      // is there a limit on days and have we exceeded it?
-      if (daysLimit && isDateRangeOverLimit) {
-        return `${dayjs(to).diff(dayjs(from), 'days') - daysLimit} day(s) over limit`;
-      }
-      return false;
-    }
+  const handlePaletteDefinitionChange = useCallback(
+    (paletteDefinition: LayerType['paletteDefinition']) => {
+      setPaletteDefinition(paletteDefinition);
+    },
+    [setPaletteDefinition]
+  );
 
-    return 'Invalid date range';
-  };
-
-  const getParameterError = () => {
-    if (parameterLimit && isParameterSelectionOverLimit) {
-      return `Please remove ${parameters.length - parameterLimit} parameter${parameters.length - parameterLimit > 1 ? 's' : ''}`;
-    }
-
-    return false;
-  };
-
-  const getSaveTooltip = () => {
-    if (isLoadingGeography) {
-      return 'Please wait for spatial filter to finish loading data.';
-    }
-
-    if (isLoading) {
-      return 'Please wait for layer update to finish.';
-    }
-    if (!isValidRange || isDateRangeOverLimit) {
-      return 'Please correct date range.';
-    }
-    if (isMissingParameters) {
-      return 'Grid layers require at least one parameter.';
-    }
-    if (isParameterSelectionOverLimit) {
-      return 'Please remove parameters.';
-    }
-    if (!isPaletteDefinitionValid) {
-      return 'Please correct dynamic color settings.';
-    }
-    if (!doesPaletteHaveParameter) {
-      return 'Dynamic color settings has invalid parameter.';
-    }
-
-    if (hasUnsavedChanges) {
-      return 'Save changes to layer.';
-    }
-
-    return 'Layer has not been modified.';
-  };
-
-  const getCancelTooltip = () => {
-    if (isLoadingGeography) {
-      return 'Please wait for spatial filter to finish loading data.';
-    }
-
-    if (isLoading) {
-      return 'Please wait for layer update to finish.';
-    }
-    if (!hasUnsavedChanges) {
-      return 'Layer has not been modified.';
-    }
-    return null;
-  };
-
-  const handleColorChange = (color: LayerType['color']) => {
-    setColor(color);
+  const handlePaletteDefinitionClear = useCallback(() => {
     setPaletteDefinition(null);
-  };
+    // setColor(typeof layer.color === 'string' ? layer.color : getRandomHexColor());
+  }, [layer.color, setPaletteDefinition, setColor]);
 
-  const handlePaletteDefinitionChange = (paletteDefinition: LayerType['paletteDefinition']) => {
-    setPaletteDefinition(paletteDefinition);
-  };
+  const handleParametersChange = useCallback(
+    (parameters: LayerType['parameters']) => {
+      setParameters(parameters);
+    },
+    [setParameters]
+  );
 
-  const showPalette = collectionType === CollectionType.EDRGrid && data;
+  const handleTabChange = useCallback(
+    (tab: string | null) => {
+      setTab(tab);
+    },
+    [setTab]
+  );
+
+  const showDataTab = [CollectionType.EDRGrid, CollectionType.EDR].includes(collectionType);
 
   return (
-    <Stack gap="xs" className={styles.accordionContent}>
-      <Group justify="space-between" gap="calc(var(--default-spacing) * 2)">
-        <TextInput
-          size="xs"
-          w={showPalette || !showColorInput ? '100%' : 'calc(49% - (var(--default-spacing) * 2))'}
-          label="Layer Name"
-          mr="auto"
-          value={name}
-          onChange={(event) => setName(event.currentTarget.value)}
+    <Tabs
+      value={tab}
+      color="var(--asu-color-primary)"
+      classNames={{ panel: styles.content }}
+      onChange={handleTabChange}
+      defaultValue="settings"
+    >
+      <Tabs.List>
+        <Tabs.Tab value="settings">Settings</Tabs.Tab>
+        {showDataTab && <Tabs.Tab value="data">Data</Tabs.Tab>}
+      </Tabs.List>
+      <Tabs.Panel value="settings">
+        <Settings
+          layer={layer}
+          collectionType={collectionType}
+          attributes={{
+            name,
+            parameters,
+            color,
+            from,
+            to,
+            opacity,
+          }}
+          attributeHandlers={{
+            onNameChange: handleNameChange,
+            onColorChange: handleColorChange,
+            onFromChange: handleFromChange,
+            onToChange: handleToChange,
+            onOpacityChange: handleOpacityChange,
+          }}
+          updateHandlers={{
+            onDelete: handleDelete,
+          }}
         />
-        {showColorInput && (
-          <Color
-            parameters={parameters}
-            parameterOptions={data}
-            color={color}
-            handleColorChange={handleColorChange}
-            paletteDefinition={paletteDefinition}
-            handlePaletteDefinitionChange={handlePaletteDefinitionChange}
+      </Tabs.Panel>
+      {showDataTab && (
+        <Tabs.Panel value="data">
+          <Data
+            layer={layer}
+            isLoading={isLoading}
+            parameterOptions={parameterOptions}
             collectionType={collectionType}
+            attributes={{
+              parameters,
+              from,
+              to,
+              paletteDefinition,
+              color,
+            }}
+            attributeHandlers={{
+              onFromChange: handleFromChange,
+              onToChange: handleToChange,
+              onParametersChange: handleParametersChange,
+              onPaletteDefinitionChange: handlePaletteDefinitionChange,
+              onPaletteDefinitionClear: handlePaletteDefinitionClear,
+            }}
+            updateHandlers={{
+              onSave: handleSave,
+              onCancel: handleCancel,
+            }}
           />
-        )}
-      </Group>
-      {layer.paletteDefinition &&
-        isValidPalette(layer.paletteDefinition) &&
-        typeof layer.color !== 'string' &&
-        typeof color !== 'string' && (
-          <DetailedGradient
-            collectionId={layer.datasourceId}
-            color={layer.color as ExpressionSpecification}
-            paletteDefinition={layer.paletteDefinition}
-          />
-        )}
-      {showFeaturesMessage && (
-        <Text size="xs" mt={-4} c="dimmed">
-          This is a features layer which contains no parameter values. Rendered data is a standard
-          feature collection with accessible properties and no underlying data.
-        </Text>
+        </Tabs.Panel>
       )}
-      {hasScientificMeasurements && (
-        <>
-          <Divider />
-          <Group justify="space-between">
-            <DateInput
-              label="From"
-              size="sm"
-              className={styles.datePicker}
-              placeholder="Pick start date"
-              value={from}
-              onChange={setFrom}
-              minDate={minDate}
-              maxDate={maxDate}
-              simplePresets={[
-                DatePreset.Today,
-                DatePreset.OneYear,
-                DatePreset.FiveYears,
-                DatePreset.TenYears,
-                DatePreset.FifteenYears,
-                DatePreset.ThirtyYears,
-              ]}
-              clearable
-              error={getDateInputError()}
-            />
-            <DateInput
-              label="To"
-              size="sm"
-              className={styles.datePicker}
-              placeholder="Pick end date"
-              value={to}
-              onChange={setTo}
-              minDate={minDate}
-              maxDate={maxDate}
-              simplePresets={[
-                DatePreset.Today,
-                DatePreset.OneYear,
-                DatePreset.FiveYears,
-                DatePreset.TenYears,
-                DatePreset.FifteenYears,
-                DatePreset.ThirtyYears,
-              ]}
-              clearable
-              error={getDateInputError()}
-            />
-          </Group>
-          {collectionType === CollectionType.EDR && (
-            <>
-              <Text size="xs" mt={-4} c="dimmed">
-                This date range is used to fetch timeseries for populating the chart at each
-                location. This date range has no impact on what locations are shown on the map.
-              </Text>
-              <Divider />
-            </>
-          )}
-          {showDateRangeWarning && (
-            <>
-              <Text size="xs" mt={-4} c="dimmed">
-                This date range is used for fetching data and rendering features on the map. If no
-                data renders after the layer is finished updating, increase the date range to find
-                more data.
-              </Text>
-              <Divider />
-            </>
-          )}
-          <Select
-            size="sm"
-            label="Parameter"
-            description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters."
-            placeholder="Select a Parameter"
-            multiple
-            clearable
-            searchable
-            data={data}
-            value={parameters}
-            onChange={setParameters}
-            error={getParameterError()}
-          />
-        </>
-      )}
-      {showOpacitySlider && (
-        <>
-          <Divider />
-          <OpacitySlider
-            id={layer.id}
-            opacity={opacity}
-            handleOpacityChange={handleOpacityChange}
-          />
-        </>
-      )}
-      <Group justify="space-between" align="flex-end">
-        <Group mt="md">
-          <Tooltip label={getSaveTooltip()}>
-            <Button
-              size="xs"
-              disabled={isSaveDisabled}
-              data-disabled={isSaveDisabled}
-              variant={Variant.Primary}
-              onClick={() => handleSave()}
-            >
-              Save
-            </Button>
-          </Tooltip>
-          <Tooltip
-            label={getCancelTooltip()}
-            disabled={!isLoading && hasUnsavedChanges && !isLoadingGeography}
-          >
-            <Button
-              size="xs"
-              disabled={isLoading || !hasUnsavedChanges || isLoadingGeography}
-              data-disabled={isLoading || !hasUnsavedChanges || isLoadingGeography}
-              variant={Variant.Tertiary}
-              onClick={() => handleCancel()}
-            >
-              Cancel
-            </Button>
-          </Tooltip>
-        </Group>
-        <Tooltip label="Delete this layer instance" openDelay={500}>
-          <IconButton
-            variant={Variant.Primary}
-            title="Remove layer"
-            className={styles.actionIcon}
-            onClick={() => handleDelete()}
-          >
-            <Delete />
-          </IconButton>
-        </Tooltip>
-      </Group>
-      {hasUnsavedChanges && (
-        <Text size="xs" c="red">
-          Unsaved changes!
-        </Text>
-      )}
-    </Stack>
+    </Tabs>
   );
 };
 

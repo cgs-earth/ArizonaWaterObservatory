@@ -11,10 +11,10 @@ from com.geojson.helpers import (
 )
 from com.helpers import EDRFieldsMapping
 from com.otel import otel_trace
-from pygeoapi.crs import DEFAULT_CRS
+import numpy as np
+from pygeoapi.crs import DEFAULT_CRS, transform_bbox
 from pygeoapi.provider.base import ProviderQueryError
 from pygeoapi.provider.base_edr import BaseEDRProvider
-from pygeoapi.util import transform_bbox
 import pyproj
 import xarray as xr
 
@@ -68,17 +68,42 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
             if "remote_dataset" in provider_def
             else None,
             is_gcs=provider_def.get("is_gcs", False),
+            s3_secret_key=provider_def.get("s3_secret_key", None),
+            s3_access_key=provider_def.get("s3_access_key", None),
+            zarr_version=provider_def.get("zarr_version", 2),
         )
 
         if "storage_crs" not in provider_def:
             self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
 
+        if provider_def.get("drop_duplicate_times", False):
+            LOGGER.info(
+                f"Dropping duplicate times for {provider_def['remote_dataset'] if 'remote_dataset' in provider_def else provider_def['data']}"
+            )
+            time_values = self.zarr_dataset["time"].values
+            _, unique_idx = np.unique(time_values, return_index=True)
+            self.zarr_dataset = self.zarr_dataset.isel(
+                time=np.sort(unique_idx)
+            )
+
     def get_fields(self) -> EDRFieldsMapping:
         """Get the list of all parameters (i.e. fields) that the user can filter by"""
         if not self._fields:
+            # we have to filter by both coords and variables since some coords (i.e. elevation) are sometimes listed
+            # as variables in zarr; i.e. such coords are arrays but not really dataset params that make sense to query by
+            #  (i.e. a coord like elevation is typically 1:1 for each feature)
+            coords = list(self.zarr_dataset.coords)
             for var, meta in self.zarr_dataset.variables.items():
                 var = str(var)
-                if var in (self.x_field, self.y_field, self.time_field):
+                if (
+                    var
+                    in (
+                        self.x_field,
+                        self.y_field,
+                        self.time_field,
+                    )
+                    or var in coords
+                ):
                     continue
 
                 if meta.attrs.get("units") is None:
@@ -201,6 +226,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
                  http://localhost:5005/collections/National_Water_Model_Channel_Routing_Output/cube?bbox=-112.5,31.7,-111.7,31.9&f=html&parameter-name=velocity&datetime=2023-01-01/2023-01-02
                  http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=sfcheadsubrt&bbox=-112.5,31.7,-110.7,33.0&datetime=2020-01-01
                  http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=sfcheadsubrt&bbox=-112.5,31.7,-111.7,32.0&datetime=2020-01-01/2020-01-02&f=json
+                 http://localhost:5005/collections/National_Water_Data_Reach_to_Reach_Routing_Output/cube?parameter-name=zwattablrt&bbox=-114,31.7,-110.7,33.0&datetime=2020-01-01
+                 http://localhost:5005/collections/GRACE/cube?f=html&bbox=-400.5,31.7,-110.7,33.0&parameter-name=sfsm_inst&datetime=2002-04-01
         """
         if not select_properties or len(select_properties) > 1:
             raise ValueError(

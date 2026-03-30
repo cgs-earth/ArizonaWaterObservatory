@@ -42,7 +42,6 @@ export const Control: React.FC<Props> = (props) => {
   const handleClick = async (name: string, id: ICollection['id']) => {
     const loadingInstance = loadingManager.add(`Creating layer for: ${name}`, LoadingType.Data);
     setIsLoading(true);
-
     try {
       controller.current = new AbortController();
 

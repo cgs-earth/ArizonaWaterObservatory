@@ -75,7 +75,8 @@ export type Color = PropertyValueSpecification<ColorSpecification>;
 
 export type PaletteDefinition = {
   palette: FriendlyColorBrewerPalettes;
-  count: ColorBrewerIndex;
+  actualCount: ColorBrewerIndex;
+  originalCount: ColorBrewerIndex;
   parameter: string;
   index: number;
 };
@@ -97,6 +98,7 @@ export type Layer = {
   paletteDefinition: PaletteDefinition | null;
   loaded: boolean;
   geometryTypes: TGeometryTypes[];
+  bbox: string; // String identifier to indicate AOI change
 };
 
 export type Table = {

@@ -49,11 +49,12 @@ export const getParameterList = (
 };
 
 export const getParameterUnit = (parameterName: ParameterName) => {
-  return parameterName.unit?.label?.en ?? parameterName.unit.symbol.value;
+  return parameterName.unit.symbol.value;
 };
 
 export const getLabel = (collection: ICollection, parameterId: string) => {
   const parameter = collection.parameter_names[parameterId];
+
   const unit = getParameterUnit(parameter);
 
   return `${parameter.name} (${unit})`;
