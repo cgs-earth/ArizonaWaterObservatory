@@ -5,9 +5,12 @@
 
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ComboboxData, Tabs } from '@mantine/core';
+import { Data } from '@/features/Panel/Layers/Layer/Tabs/Data';
+import { Settings } from '@/features/Panel/Layers/Layer/Tabs/Settings';
 import styles from '@/features/Panel/Panel.module.css';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useLayerValidation } from '@/hooks/useLayerValidation';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
@@ -18,8 +21,6 @@ import { LoadingType, NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getRandomHexColor } from '@/utils/hexColor';
 import { getParameterUnit } from '@/utils/parameters';
-import { Data } from './Tabs/Data';
-import { Settings } from './Tabs/Settings';
 
 dayjs.extend(isSameOrBefore);
 
@@ -31,11 +32,14 @@ const Layer: React.FC<Props> = (props) => {
   const { layer } = props;
 
   const [name, setName] = useState(layer.name);
+  const debouncedName = useDebounce(name, 300);
   const [color, setColor] = useState(layer.color);
+  const debouncedColor = useDebounce(color, 300);
   const [parameters, setParameters] = useState(layer.parameters);
   const [from, setFrom] = useState<string | null>(layer.from);
   const [to, setTo] = useState<string | null>(layer.to);
   const [opacity, setOpacity] = useState(layer.opacity);
+  const debouncedOpacity = useDebounce(opacity, 300);
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
   const [paletteDefinition, setPaletteDefinition] = useState(layer.paletteDefinition);
 
@@ -99,7 +103,43 @@ const Layer: React.FC<Props> = (props) => {
   }, [layer.paletteDefinition]);
 
   useEffect(() => {
-    if (color === layer.color) {
+    if (debouncedColor === layer.color) {
+      return;
+    }
+
+    void mainManager.updateLayer(
+      layer,
+      layer.name,
+      debouncedColor,
+      layer.parameters,
+      layer.from,
+      layer.to,
+      layer.visible,
+      layer.opacity,
+      layer.paletteDefinition
+    );
+  }, [debouncedColor]);
+
+  useEffect(() => {
+    if (debouncedName === layer.name) {
+      return;
+    }
+
+    void mainManager.updateLayer(
+      layer,
+      debouncedName,
+      layer.color,
+      layer.parameters,
+      layer.from,
+      layer.to,
+      layer.visible,
+      layer.opacity,
+      layer.paletteDefinition
+    );
+  }, [debouncedName]);
+
+  useEffect(() => {
+    if (debouncedOpacity === layer.opacity) {
       return;
     }
 
@@ -111,46 +151,10 @@ const Layer: React.FC<Props> = (props) => {
       layer.from,
       layer.to,
       layer.visible,
-      opacity,
+      debouncedOpacity,
       layer.paletteDefinition
     );
-  }, [color]);
-
-  useEffect(() => {
-    if (name === layer.name) {
-      return;
-    }
-
-    void mainManager.updateLayer(
-      layer,
-      name,
-      layer.color,
-      layer.parameters,
-      layer.from,
-      layer.to,
-      layer.visible,
-      layer.opacity,
-      layer.paletteDefinition
-    );
-  }, [name]);
-
-  useEffect(() => {
-    if (opacity === layer.opacity) {
-      return;
-    }
-
-    void mainManager.updateLayer(
-      layer,
-      name,
-      color,
-      parameters,
-      from,
-      to,
-      layer.visible,
-      opacity,
-      paletteDefinition
-    );
-  }, [opacity]);
+  }, [debouncedOpacity]);
 
   useEffect(() => {
     if (collectionType !== CollectionType.EDR || getDateInputError() || from === layer.from) {
@@ -165,8 +169,8 @@ const Layer: React.FC<Props> = (props) => {
       from,
       layer.to,
       layer.visible,
-      opacity,
-      paletteDefinition
+      layer.opacity,
+      layer.paletteDefinition
     );
   }, [from]);
 
@@ -195,11 +199,20 @@ const Layer: React.FC<Props> = (props) => {
       `Updating layer: ${updateName}`,
       LoadingType.Locations
     );
+
+    // The user has cleared the dynamic visualization, reset color
+    const newColor =
+      paletteDefinition === null && typeof color !== 'string'
+        ? typeof layer.color === 'string'
+          ? layer.color
+          : getRandomHexColor()
+        : color;
+
     try {
       await mainManager.updateLayer(
         layer,
         name,
-        color,
+        newColor,
         parameters,
         from,
         to,
@@ -234,25 +247,60 @@ const Layer: React.FC<Props> = (props) => {
     notificationManager.show(`Deleted layer: ${layer.name}`, NotificationType.Success);
   };
 
-  const handleNameChange = (name: LayerType['name']) => setName(name);
-  const handleColorChange = (color: LayerType['color']) => {
-    setColor(color);
-    setPaletteDefinition(null);
-  };
-  const handleOpacityChange = (opacity: LayerType['opacity']) => setOpacity(opacity);
-  const handleFromChange = (from: LayerType['from']) => setFrom(from);
-  const handleToChange = (to: LayerType['to']) => setTo(to);
-  const handlePaletteDefinitionChange = (paletteDefinition: LayerType['paletteDefinition']) => {
-    setPaletteDefinition(paletteDefinition);
-  };
-  const handlePaletteDefinitionClear = () => {
-    setPaletteDefinition(null);
-    setColor(typeof layer.color === 'string' ? layer.color : getRandomHexColor());
-  };
+  const handleNameChange = useCallback((name: LayerType['name']) => setName(name), [setName]);
 
-  const handleParametersChange = (parameters: LayerType['parameters']) => setParameters(parameters);
+  const handleColorChange = useCallback(
+    (color: LayerType['color']) => {
+      setColor(color);
+      setPaletteDefinition(null);
+    },
+    [setColor, setPaletteDefinition]
+  );
 
-  const handleTabChange = (tab: string | null) => setTab(tab);
+  const handleOpacityChange = useCallback(
+    (opacity: LayerType['opacity']) => setOpacity(opacity),
+    [setOpacity]
+  );
+
+  const handleFromChange = useCallback(
+    (from: LayerType['from']) => {
+      setFrom(from);
+    },
+    [setFrom]
+  );
+
+  const handleToChange = useCallback(
+    (to: LayerType['to']) => {
+      setTo(to);
+    },
+    [setTo]
+  );
+
+  const handlePaletteDefinitionChange = useCallback(
+    (paletteDefinition: LayerType['paletteDefinition']) => {
+      setPaletteDefinition(paletteDefinition);
+    },
+    [setPaletteDefinition]
+  );
+
+  const handlePaletteDefinitionClear = useCallback(() => {
+    setPaletteDefinition(null);
+    // setColor(typeof layer.color === 'string' ? layer.color : getRandomHexColor());
+  }, [layer.color, setPaletteDefinition, setColor]);
+
+  const handleParametersChange = useCallback(
+    (parameters: LayerType['parameters']) => {
+      setParameters(parameters);
+    },
+    [setParameters]
+  );
+
+  const handleTabChange = useCallback(
+    (tab: string | null) => {
+      setTab(tab);
+    },
+    [setTab]
+  );
 
   const showDataTab = [CollectionType.EDRGrid, CollectionType.EDR].includes(collectionType);
 
@@ -283,10 +331,12 @@ const Layer: React.FC<Props> = (props) => {
           attributeHandlers={{
             onNameChange: handleNameChange,
             onColorChange: handleColorChange,
-
             onFromChange: handleFromChange,
             onToChange: handleToChange,
             onOpacityChange: handleOpacityChange,
+          }}
+          updateHandlers={{
+            onDelete: handleDelete,
           }}
         />
       </Tabs.Panel>
@@ -313,7 +363,6 @@ const Layer: React.FC<Props> = (props) => {
             }}
             updateHandlers={{
               onSave: handleSave,
-              onDelete: handleDelete,
               onCancel: handleCancel,
             }}
           />

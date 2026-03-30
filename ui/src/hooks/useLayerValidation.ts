@@ -12,7 +12,7 @@ import { useLoading } from '@/hooks/useLoading';
 import mainManager from '@/managers/Main.init';
 import { Layer } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
-import { isValidPalette } from '@/utils/colors';
+import { isSamePalette, isValidPalette } from '@/utils/colors';
 import { isSameArray } from '@/utils/compareArrays';
 import { getTemporalExtent } from '@/utils/temporalExtent';
 
@@ -177,7 +177,8 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
   const hasUnsavedChanges =
     !isSameArray(parameters, layer.parameters) ||
     (collectionType === CollectionType.EDRGrid && from !== layer.from) ||
-    to !== layer.to;
+    to !== layer.to ||
+    !isSamePalette(paletteDefinition, layer.paletteDefinition);
 
   /**
    * This layer has validation issues or there are blocking actions
@@ -188,7 +189,7 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
     isLoadingGeography ||
     !hasUnsavedChanges ||
     isLoading ||
-    (collectionType === CollectionType.EDRGrid && !isValidRange) ||
+    (collectionType === CollectionType.EDRGrid && (!isValidRange || isDateRangeOverLimit)) ||
     isMissingParameters ||
     isParameterSelectionOverLimit;
 

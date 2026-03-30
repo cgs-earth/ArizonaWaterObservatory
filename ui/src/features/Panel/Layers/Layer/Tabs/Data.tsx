@@ -17,7 +17,7 @@ import { useLayerValidation } from '@/hooks/useLayerValidation';
 import { useLoading } from '@/hooks/useLoading';
 import { Layer } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
-import { isValidPalette } from '@/utils/colors';
+import { isSamePalette, isValidPalette } from '@/utils/colors';
 import { DetailedGradient } from '../Color/DetailedGradient';
 import { Popover } from '../Color/Popover';
 
@@ -40,7 +40,6 @@ type AttributeHandlers = {
 type UpdateHandlers = {
   onSave: () => void;
   onCancel: () => void;
-  onDelete: () => void;
 };
 
 type Props = {
@@ -67,7 +66,7 @@ export const Data: React.FC<Props> = (props) => {
       onPaletteDefinitionChange,
       onPaletteDefinitionClear,
     },
-    updateHandlers: { onSave, onCancel, onDelete },
+    updateHandlers: { onSave, onCancel },
   } = props;
 
   const {
@@ -86,6 +85,7 @@ export const Data: React.FC<Props> = (props) => {
     to,
     parameterOptions,
     collectionType,
+    paletteDefinition,
   });
 
   const { isLoadingGeography } = useLoading();
@@ -138,43 +138,47 @@ export const Data: React.FC<Props> = (props) => {
           />
         </Group>
       )}
-
-      <Select
-        size="sm"
-        label="Parameter"
-        description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters."
-        placeholder="Select a Parameter"
-        multiple
-        clearable
-        searchable
-        data={parameterOptions}
-        value={parameters}
-        onChange={onParametersChange}
-        error={getParameterError()}
-      />
-      {showPalette && parameterOptions && (
-        <Group gap="var(--default-spacing)" mt="var(--default-spacing)">
-          <Text size="sm" fw={700}>
-            Dynamic Visualization
-          </Text>
-          <Popover
-            paletteDefinition={paletteDefinition}
-            onChange={onPaletteDefinitionChange}
-            parameters={parameters}
-            parameterOptions={parameterOptions}
-          />
-          <IconButton
-            disabled={!paletteDefinition}
-            data-disabled={!paletteDefinition}
-            onClick={onPaletteDefinitionClear}
-            variant={Variant.Secondary}
-          >
-            <Delete />
-          </IconButton>
-        </Group>
-      )}
+      <Stack gap="calc(var(--default-spacing) / 4)">
+        <Select
+          size="sm"
+          label="Parameter"
+          description="Show locations that contain data for selected parameter(s). Please note if more than one parameter is selected, shown locations may not contain data for all selected parameters."
+          placeholder="Select a Parameter"
+          multiple
+          clearable
+          searchable
+          data={parameterOptions}
+          value={parameters}
+          onChange={onParametersChange}
+          error={getParameterError()}
+        />
+        {showPalette && parameterOptions && (
+          <Group align="flex-start" gap="var(--default-spacing)" mt="var(--default-spacing)">
+            <Text size="sm" fw={700}>
+              Dynamic Visualization
+            </Text>
+            <Popover
+              paletteDefinition={paletteDefinition}
+              onChange={onPaletteDefinitionChange}
+              parameters={parameters}
+              parameterOptions={parameterOptions}
+            />
+            <IconButton
+              size="md"
+              disabled={!paletteDefinition}
+              data-disabled={!paletteDefinition}
+              onClick={onPaletteDefinitionClear}
+              variant={Variant.Primary}
+            >
+              <Delete />
+            </IconButton>
+          </Group>
+        )}
+      </Stack>
       {layer.paletteDefinition &&
         isValidPalette(layer.paletteDefinition) &&
+        paletteDefinition &&
+        isSamePalette(layer.paletteDefinition, paletteDefinition) &&
         typeof layer.color !== 'string' &&
         typeof color !== 'string' && (
           <DetailedGradient
@@ -183,43 +187,31 @@ export const Data: React.FC<Props> = (props) => {
             paletteDefinition={layer.paletteDefinition}
           />
         )}
-      <Group justify="space-between" align="flex-end">
-        <Group mt="md">
-          <Tooltip label={getSaveTooltip()}>
-            <Button
-              size="xs"
-              disabled={isSaveDisabled}
-              data-disabled={isSaveDisabled}
-              variant={Variant.Primary}
-              onClick={() => onSave()}
-            >
-              Save
-            </Button>
-          </Tooltip>
-          <Tooltip
-            label={getCancelTooltip()}
-            disabled={!isLoading && hasUnsavedChanges && !isLoadingGeography}
-          >
-            <Button
-              size="xs"
-              disabled={isLoading || !hasUnsavedChanges || isLoadingGeography}
-              data-disabled={isLoading || !hasUnsavedChanges || isLoadingGeography}
-              variant={Variant.Tertiary}
-              onClick={() => onCancel()}
-            >
-              Cancel
-            </Button>
-          </Tooltip>
-        </Group>
-        <Tooltip label="Delete this layer instance" openDelay={500}>
-          <IconButton
+      <Group gap="var(--default-spacing)" mt="calc(var(--default-spacing) * 2)">
+        <Tooltip label={getSaveTooltip()}>
+          <Button
+            size="xs"
+            disabled={isSaveDisabled}
+            data-disabled={isSaveDisabled}
             variant={Variant.Primary}
-            title="Remove layer"
-            className={styles.actionIcon}
-            onClick={() => onDelete()}
+            onClick={() => onSave()}
           >
-            <Delete />
-          </IconButton>
+            Save
+          </Button>
+        </Tooltip>
+        <Tooltip
+          label={getCancelTooltip()}
+          disabled={!isLoading && hasUnsavedChanges && !isLoadingGeography}
+        >
+          <Button
+            size="xs"
+            disabled={isLoading || !hasUnsavedChanges || isLoadingGeography}
+            data-disabled={isLoading || !hasUnsavedChanges || isLoadingGeography}
+            variant={Variant.Tertiary}
+            onClick={() => onCancel()}
+          >
+            Cancel
+          </Button>
         </Tooltip>
       </Group>
       {hasUnsavedChanges && (

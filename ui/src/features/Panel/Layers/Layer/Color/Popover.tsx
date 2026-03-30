@@ -156,6 +156,7 @@ export const Popover: React.FC<Props> = (props) => {
           disabled={show}
         >
           <IconButton
+            size="md"
             disabled={noParameters}
             data-disabled={noParameters}
             variant={show ? Variant.Selected : Variant.Secondary}
