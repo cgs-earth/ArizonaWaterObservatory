@@ -7,14 +7,14 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { BasemapId } from '@/components/Map/types';
 import { createCollectionSlice } from '@/stores/main/slices/collections';
+import { createFilterSlice } from '@/stores/main/slices/datasourceFilters';
 import { createDrawingSlice } from '@/stores/main/slices/drawing';
 import { createLayerSlice } from '@/stores/main/slices/layers';
 import { createLocationSlice } from '@/stores/main/slices/locations';
+import { createSearchSlice } from '@/stores/main/slices/search';
 import { createShareSlice } from '@/stores/main/slices/share';
 import { createSpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
 import { MainState } from '@/stores/main/types';
-import { createFilterSlice } from './slices/datasourceFilters';
-import { createSearchSlice } from './slices/search';
 
 const useMainStore = create<MainState>()(
   immer((set, get, store) => ({

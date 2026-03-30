@@ -7,9 +7,9 @@ import { MouseEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 import { bbox } from '@turf/turf';
 import { Feature, GeoJsonProperties, Geometry } from 'geojson';
 import { LngLatBoundsLike } from 'mapbox-gl';
-import { Box, Button, Divider, Group, Stack, Text } from '@mantine/core';
+import { Box, Divider, Group, Stack, Text } from '@mantine/core';
+import Button from '@/components/Button';
 import { useMap } from '@/contexts/MapContexts';
-// import { getLabel } from '@/utils/getLabel';
 import { MAP_ID } from '@/features/Map/config';
 import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
 import useMainStore from '@/stores/main';
@@ -77,7 +77,7 @@ export const Matches: React.FC<Props> = (props) => {
 
   const matchedSet = useMemo(() => new Set(matchedLocations), [matchedLocations]);
 
-  // Bail early if no term — avoids heavy work entirely
+  // Bail early if no term - avoids heavy work entirely
   const hasTerm = !!searchTerm?.trim();
   const empty = !hasTerm;
 
@@ -105,7 +105,7 @@ export const Matches: React.FC<Props> = (props) => {
                 <Stack gap="calc(var(--default-spacing) / 1.75)" className={styles.searchResults}>
                   {lines}
                 </Stack>
-                <Stack gap="calc(var(--default-spacing) / 4)">
+                <Stack gap="calc(var(--default-spacing) / 2)">
                   <Button onClick={() => handleDeselect(id)} size="xs" p="var(--default-spacing)">
                     Deselect
                   </Button>
@@ -158,7 +158,7 @@ export const Matches: React.FC<Props> = (props) => {
                 <Stack gap="calc(var(--default-spacing) / 1.75)" className={styles.searchResults}>
                   {lines}
                 </Stack>
-                <Stack gap="calc(var(--default-spacing) / 4)">
+                <Stack gap="calc(var(--default-spacing) / 2)">
                   <Button onClick={() => handleSelect(id)} size="xs" p="var(--default-spacing)">
                     Select
                   </Button>

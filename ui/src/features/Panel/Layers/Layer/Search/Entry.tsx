@@ -5,14 +5,14 @@
 
 import { useEffect, useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
-import { Stack, Text, TextInput } from '@mantine/core';
+import { Stack, Text } from '@mantine/core';
+import TextInput from '@/components/TextInput';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { Matches } from '@/features/Panel/Layers/Layer/Search/Matches';
 import { Properties } from '@/features/Panel/Layers/Layer/Search/Properties';
 import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
 import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
 import { useLocations } from '@/hooks/useLocations';
-import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';
 import { hasSearchTerm } from '@/utils/searchFeatures';
@@ -20,12 +20,12 @@ import { sortObject } from '@/utils/sortObject';
 
 type Props = {
   layer: Layer;
+  isLoading?: boolean;
 };
 
 export const Entry: React.FC<Props> = (props) => {
-  const { layer } = props;
+  const { layer, isLoading = false } = props;
 
-  const [title, setTitle] = useState('');
   const [sampleProperties, setSampleProperties] = useState<GeoJsonProperties>(null);
 
   const { selectedLocations, otherLocations } = useLocations(layer);
@@ -39,14 +39,6 @@ export const Entry: React.FC<Props> = (props) => {
   };
   const addSearchTerm = useMainStore((state) => state.addSearch);
   const removeSearchTerm = useMainStore((state) => state.removeSearch);
-
-  useEffect(() => {
-    const datasource = mainManager.getDatasource(layer.datasourceId);
-
-    if (datasource && datasource?.title) {
-      setTitle(datasource.title);
-    }
-  }, [layer]);
 
   useEffect(() => {
     const location =
@@ -80,17 +72,18 @@ export const Entry: React.FC<Props> = (props) => {
   const showProperties = !showMatches && sampleProperties && search.searchTerm.length === 0;
 
   return (
-    <Stack className={styles.entry} gap="calc(var(--default-spacing) / 2)">
+    <Stack className={styles.entry} gap="var(--default-spacing)">
       <TextInput
         size="xs"
         label={
-          <Text size="xs" fw={700} title={title}>
-            {title}
+          <Text size="xs" fw={700} title={layer.name}>
+            {layer.name}
           </Text>
         }
+        disabled={!layer.loaded || isLoading}
         value={search.searchTerm}
         onChange={(event) => handleChange(event.currentTarget.value)}
-        placeholder="Search all features in data source"
+        placeholder="Search all features in layer"
       />
       {showMatches && (
         <Matches

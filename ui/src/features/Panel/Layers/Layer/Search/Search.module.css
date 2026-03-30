@@ -30,9 +30,12 @@
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  padding-top: var(--default-spacing);
-  padding-bottom: var(--default-spacing);
-  border-top: 3px solid var(--mantine-color-default-border);
+  padding: var(--default-spacing) calc(var(--default-spacing) * 2);
+}
+
+.propertiesButton {
+  white-space: nowrap;
+  color: var(--mantine-color-text);
 }
 
 .searchButton svg {

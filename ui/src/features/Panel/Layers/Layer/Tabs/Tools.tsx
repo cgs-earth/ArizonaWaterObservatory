@@ -5,19 +5,17 @@
 
 import { useCallback, useState } from 'react';
 import { Tabs } from '@mantine/core';
-import styles from '@/features/Panel/Panel.module.css';
+import { Entry } from '@/features/Panel/Layers/Layer/Search/Entry';
 import { Layer } from '@/stores/main/types';
-import { CollectionType } from '@/utils/collection';
-import Search from '../Search';
-import { Entry } from '../Search/Entry';
 
 type Props = {
   layer: Layer;
-  collectionType: CollectionType;
+  showSearchTool: boolean;
+  isLoading: boolean;
 };
 
 export const Tools: React.FC<Props> = (props) => {
-  const { layer } = props;
+  const { layer, isLoading, showSearchTool } = props;
 
   const [tab, setTab] = useState<string | null>();
 
@@ -32,17 +30,19 @@ export const Tools: React.FC<Props> = (props) => {
     <Tabs
       value={tab}
       color="var(--asu-color-primary)"
-      classNames={{ panel: styles.content }}
       onChange={handleTabChange}
       defaultValue="search"
     >
       <Tabs.List>
-        <Tabs.Tab value="search">Search</Tabs.Tab>
+        {showSearchTool && <Tabs.Tab value="search">Search</Tabs.Tab>}
+
         {/* {showDataTab && <Tabs.Tab value="data">Data</Tabs.Tab>} */}
       </Tabs.List>
-      <Tabs.Panel value="search">
-        <Entry layer={layer} />
-      </Tabs.Panel>
+      {showSearchTool && (
+        <Tabs.Panel value="search">
+          <Entry layer={layer} isLoading={isLoading} />
+        </Tabs.Panel>
+      )}
     </Tabs>
   );
 };

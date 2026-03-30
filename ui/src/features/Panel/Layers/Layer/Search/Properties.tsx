@@ -5,7 +5,11 @@
 
 import { useEffect, useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
-import { ActionIcon, Button, Divider, Group, Stack, Text } from '@mantine/core';
+import { Box, Divider, Group, Stack, Text } from '@mantine/core';
+import Button from '@/components/Button';
+import IconButton from '@/components/IconButton';
+import { Variant } from '@/components/types';
+import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
 import Table from '@/features/Table';
 
 type Props = {
@@ -25,6 +29,10 @@ export const Properties: React.FC<Props> = (props) => {
 
   const getMoreLabel = () => {
     return Math.min(5, list.length - count);
+  };
+
+  const getLessLabel = () => {
+    return Math.min(5, count - 5);
   };
 
   const handleShow = () => {
@@ -59,25 +67,31 @@ export const Properties: React.FC<Props> = (props) => {
               </Text>
               <Group gap="calc(var(--default-spacing) * 1.35)">
                 {showMore && (
-                  <ActionIcon size="sm" onClick={handleMore}>
+                  <IconButton size="sm" onClick={handleMore} className={styles.propertiesButton}>
                     <Text size="xs">+ {getMoreLabel()}</Text>
-                  </ActionIcon>
+                  </IconButton>
                 )}
                 {showMore && showLess && <Divider orientation="vertical" />}
                 {showLess && (
-                  <ActionIcon size="sm" onClick={handleLess}>
-                    <Text size="xs">- 5</Text>
-                  </ActionIcon>
+                  <IconButton size="sm" onClick={handleLess} className={styles.propertiesButton}>
+                    <Text size="xs">- {getLessLabel()}</Text>
+                  </IconButton>
                 )}
               </Group>
             </Stack>
           </Group>
         </>
       )}
-
-      <Button onClick={handleShow} size="xs" mt="var(--default-spacing)">
-        {showTable ? 'Hide Sample Feature' : 'Show Sample Feature'}
-      </Button>
+      <Box mx="auto">
+        <Button
+          onClick={handleShow}
+          variant={Variant.Secondary}
+          size="xs"
+          mt="var(--default-spacing)"
+        >
+          {showTable ? 'Hide Sample Feature' : 'Show Sample Feature'}
+        </Button>
+      </Box>
       {showTable && <Table properties={properties} search size="xs" />}
     </>
   );

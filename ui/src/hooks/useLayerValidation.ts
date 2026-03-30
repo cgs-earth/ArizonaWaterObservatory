@@ -104,6 +104,8 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
     return false;
   };
 
+  const showSearchTool = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
+
   /**
    * This layer is a grid type which requires at least one selected parameter
    *
@@ -276,6 +278,7 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
     hasUnsavedChanges,
     isSaveDisabled,
     showPalette,
+    showSearchTool,
     getIsDateRangeOverLimit,
     getDateInputError,
     getParameterError,

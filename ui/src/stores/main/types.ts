@@ -8,6 +8,7 @@ import { ColorSpecification, PropertyValueSpecification } from 'mapbox-gl';
 import { BasemapId, Properties } from '@/components/Map/types';
 import { ICollection } from '@/services/edr.service';
 import { CollectionSlice } from '@/stores/main/slices/collections';
+import { IFilterSlice } from '@/stores/main/slices/datasourceFilters';
 import { DrawingSlice } from '@/stores/main/slices/drawing';
 import { LayerSlice } from '@/stores/main/slices/layers';
 import { LocationSlice } from '@/stores/main/slices/locations';
@@ -15,7 +16,6 @@ import { ISearchSlice } from '@/stores/main/slices/search';
 import { ShareSlice } from '@/stores/main/slices/share';
 import { SpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
 import { ColorBrewerIndex, FriendlyColorBrewerPalettes } from '@/utils/colors/types';
-import { IFilterSlice } from './slices/datasourceFilters';
 
 export type ColorValueHex = `#${string}`;
 
