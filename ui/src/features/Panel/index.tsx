@@ -171,7 +171,7 @@ const Panel: React.FC = () => {
               >
                 <ClearAll />
                 {hasLayers && <Locations />}
-                <Mobile />
+                {mobile && <Mobile />}
               </Group>
             </Stack>
           </Collapse>

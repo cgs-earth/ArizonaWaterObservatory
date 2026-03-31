@@ -5,7 +5,6 @@
 
 import { useEffect, useState } from 'react';
 import { Stack, Text, Title, Tooltip } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
@@ -18,13 +17,6 @@ import { Overlay } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 
 const Links: React.FC = () => {
-  const [opened, { open, close }] = useDisclosure(false, {
-    onClose: () => {
-      setOverlay(null);
-      setLinkLocation(null);
-    },
-  });
-
   const layers = useMainStore((store) => store.layers);
 
   const overlay = useSessionStore((store) => store.overlay);
@@ -34,13 +26,7 @@ const Links: React.FC = () => {
 
   const [isEnabled, setIsEnabled] = useState(false);
 
-  useEffect(() => {
-    if (overlay !== Overlay.Links) {
-      close();
-    } else if (!opened) {
-      open();
-    }
-  }, [overlay]);
+  const opened = overlay === Overlay.Links;
 
   useEffect(() => {
     const isEnabled = layers.some((layer) => {
@@ -58,8 +44,13 @@ const Links: React.FC = () => {
     setIsEnabled(isEnabled);
   }, [layers]);
 
-  const handleClick = () => {
+  const handleOpen = () => {
     setOverlay(Overlay.Links);
+  };
+
+  const handleClose = () => {
+    setLinkLocation(null);
+    setOverlay(null);
   };
 
   const helpText = (
@@ -78,12 +69,12 @@ const Links: React.FC = () => {
           data-disabled={!isEnabled}
           size="sm"
           variant={opened ? Variant.Selected : Variant.Secondary}
-          onClick={handleClick}
+          onClick={handleOpen}
         >
           Export
         </Button>
       </Tooltip>
-      <Modal size="1222px" opened={opened} onClose={close}>
+      <Modal size="1222px" opened={opened} onClose={handleClose}>
         <Stack gap={0} className={styles.modalBody}>
           <Title order={5} size="h3">
             API Links
