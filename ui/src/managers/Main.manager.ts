@@ -64,6 +64,7 @@ import {
   MainState,
   PaletteDefinition,
   ParameterGroupMembers,
+  TGeometryTypes,
 } from '@/stores/main/types';
 import { NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
@@ -740,6 +741,8 @@ class MainManager {
         collectionType === CollectionType.Map ? DEFAULT_RASTER_OPACITY : DEFAULT_FILL_OPACITY,
       position: layers.length + 1,
       paletteDefinition: null,
+      loaded: false,
+      geometryTypes: [],
       bbox: currentBBox,
     };
 
@@ -1259,6 +1262,8 @@ class MainManager {
     const to = options?.to ?? layer.to;
     const parameters = options?.parameterNames ?? layer.parameters;
 
+    const geometryTypes = new Set<TGeometryTypes>();
+
     this.checkDateRestrictions(collectionId, from, to);
 
     this.checkParameterRestrictions(collectionId, parameters);
@@ -1284,6 +1289,9 @@ class MainManager {
       let filtered = this.filterLocations(collectionId, page, options?.filterFeatures);
       this.clearInvalidLocations(layer.id, collectionId, filtered);
       if (Array.isArray(filtered.features)) {
+        filtered.features.forEach((feature) => {
+          geometryTypes.add(feature.geometry.type);
+        });
         aggregate.features.push(...filtered.features);
         source.setData(aggregate);
       }
@@ -1299,6 +1307,12 @@ class MainManager {
     }
 
     (aggregate as any) = undefined;
+
+    this.store.getState().updateLayer({
+      ...layer,
+      loaded: true,
+      geometryTypes: Array.from(geometryTypes),
+    });
 
     return sourceId;
   }

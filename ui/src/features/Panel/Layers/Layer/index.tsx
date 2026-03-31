@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ComboboxData, Tabs } from '@mantine/core';
 import { Data } from '@/features/Panel/Layers/Layer/Tabs/Data';
 import { Settings } from '@/features/Panel/Layers/Layer/Tabs/Settings';
+import { Tools } from '@/features/Panel/Layers/Layer/Tabs/Tools';
 import styles from '@/features/Panel/Panel.module.css';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useLayerValidation } from '@/hooks/useLayerValidation';
@@ -50,7 +51,7 @@ const Layer: React.FC<Props> = (props) => {
 
   const { isFetchingCollections } = useLoading();
 
-  const { getDateInputError } = useLayerValidation(layer, isLoading, {
+  const { showSearchTool, getDateInputError } = useLayerValidation(layer, isLoading, {
     name,
     parameters,
     color,
@@ -304,17 +305,22 @@ const Layer: React.FC<Props> = (props) => {
 
   const showDataTab = [CollectionType.EDRGrid, CollectionType.EDR].includes(collectionType);
 
+  const showToolsTab = showSearchTool;
+
   return (
     <Tabs
       value={tab}
       color="var(--asu-color-primary)"
-      classNames={{ panel: styles.content }}
+      classNames={{
+        panel: tab === 'tools' ? styles.contentBorder : `${styles.content} ${styles.contentBorder}`,
+      }}
       onChange={handleTabChange}
       defaultValue="settings"
     >
       <Tabs.List>
         <Tabs.Tab value="settings">Settings</Tabs.Tab>
         {showDataTab && <Tabs.Tab value="data">Data</Tabs.Tab>}
+        {showToolsTab && <Tabs.Tab value="tools">Tools</Tabs.Tab>}
       </Tabs.List>
       <Tabs.Panel value="settings">
         <Settings
@@ -366,6 +372,11 @@ const Layer: React.FC<Props> = (props) => {
               onCancel: handleCancel,
             }}
           />
+        </Tabs.Panel>
+      )}
+      {showToolsTab && (
+        <Tabs.Panel value="tools">
+          <Tools showSearchTool={showSearchTool} isLoading={isLoading} layer={layer} />
         </Tabs.Panel>
       )}
     </Tabs>

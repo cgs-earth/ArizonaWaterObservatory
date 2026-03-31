@@ -21,8 +21,8 @@ const Filter: React.FC = () => {
     onClose: () => setOverlay(null),
   });
 
-  const search = useMainStore((state) => state.search);
-  const setSearch = useMainStore((state) => state.setSearch);
+  const search = useMainStore((state) => state.searchTerm);
+  const setSearch = useMainStore((state) => state.setSearchTerm);
 
   const overlay = useSessionStore((store) => store.overlay);
   const setOverlay = useSessionStore((store) => store.setOverlay);

@@ -13,7 +13,7 @@ import useMainStore from '@/stores/main';
 import { filterCollections } from '@/utils/filterCollections';
 
 const Datasets: React.FC = () => {
-  const search = useMainStore((state) => state.search);
+  const search = useMainStore((state) => state.searchTerm);
   const provider = useMainStore((state) => state.provider);
   const category = useMainStore((state) => state.category);
   const parameterGroupMembers = useMainStore((state) => state.parameterGroupMembers);

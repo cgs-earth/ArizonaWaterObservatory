@@ -68,8 +68,12 @@ export const useLocations = (layer: Layer) => {
   };
 
   useEffect(() => {
+    if (!layer.loaded) {
+      return;
+    }
+
     void getOtherLocations();
-  }, []);
+  }, [layer.loaded, locations]);
 
   useEffect(() => {
     isMounted.current = true;
