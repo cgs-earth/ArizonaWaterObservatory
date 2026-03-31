@@ -17,8 +17,8 @@ import { DatePreset } from '@/components/DateInput/DateInput.types';
 import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { Chart } from '@/features/Popup/Chart';
+import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
-import { Table } from '@/features/TopBar/Links/Table';
 import styles from '@/features/TopBar/TopBar.module.css';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
@@ -28,6 +28,7 @@ import { Layer, Location as LocationType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { createEmptyCsv } from '@/utils/csv';
 import { getIdStore } from '@/utils/getIdStore';
+import { getLabel } from '@/utils/getLabel';
 import { buildLocationUrl } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
@@ -55,6 +56,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [to, setTo] = useState<Layer['to']>(layer.to);
 
   const [id, setId] = useState<string>(String(location.id));
+  const [label, setLabel] = useState<string>(String(location.id));
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -116,6 +118,15 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
       setId(String(location.id));
     }
   }, [layer, location]);
+
+  useEffect(() => {
+    if (layer.label) {
+      const label = getLabel(location, layer.label);
+      if (label) {
+        setLabel(`${label} (${id})`);
+      }
+    }
+  }, [layer, location, id]);
 
   const getFileName = () => {
     let name = `data-${location.id}-${layer.parameters.join('_')}`;
@@ -199,7 +210,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
             <Text size="md" fw={700}>
               {layer.name}
             </Text>
-            <Text size="md">{location.id}</Text>
+            <Text size="md">{label}</Text>
           </Group>
           <Anchor
             title="This location in the API"

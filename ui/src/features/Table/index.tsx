@@ -5,8 +5,9 @@
 
 import { useEffect, useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
-import { Table as TableComponent, Text, TextInput } from '@mantine/core';
-import styles from '@/features/Popup/Popup.module.css';
+import { Table as TableComponent, Text } from '@mantine/core';
+import TextInput from '@/components/TextInput';
+import styles from '@/features/Table/Table.module.css';
 
 type Props = {
   properties: GeoJsonProperties;

@@ -3,18 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useEffect, useState } from 'react';
+import { Feature } from 'geojson';
 import { Box, Text } from '@mantine/core';
 import { Layer, Location } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
+import { getLabel } from '@/utils/getLabel';
 
 type Props = {
   id: Location['id'];
   name: Layer['name'];
+  feature: Feature | undefined;
   collectionType: CollectionType;
+  labelProperty: string | null;
 };
 
 export const Header: React.FC<Props> = (props) => {
-  const { id, name, collectionType } = props;
+  const { id, name, feature, collectionType, labelProperty } = props;
+
+  const [label, setLabel] = useState(id);
+
+  useEffect(() => {
+    if (!labelProperty || !feature) {
+      setLabel(id);
+      return;
+    }
+
+    const label = getLabel(feature, labelProperty);
+    if (label) {
+      setLabel(`${label} (${id})`);
+    }
+  }, [id, feature, labelProperty]);
 
   const getIdLabel = (collectionType: CollectionType) => {
     switch (collectionType) {
@@ -32,7 +51,7 @@ export const Header: React.FC<Props> = (props) => {
   return (
     <Box>
       <Text size="lg" fw={700}>
-        {getIdLabel(collectionType)}: {id}
+        {getIdLabel(collectionType)}: {label}
       </Text>
       <Text size="sm">{name}</Text>
     </Box>

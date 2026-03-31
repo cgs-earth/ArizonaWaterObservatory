@@ -35,6 +35,7 @@ export enum Overlay {
   Download = 'download',
   Filter = 'filter',
   Info = 'info',
+  Label = 'label',
   Legend = 'legend',
   Links = 'links',
   Screenshot = 'screenshot',

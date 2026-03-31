@@ -13,11 +13,14 @@ import Button from '@/components/Button';
 import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
 import { Variant } from '@/components/types';
+import { StringIdentifierCollections } from '@/consts/collections';
+import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
-import { Table } from '@/features/TopBar/Links/Table';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
+import { getIdStore } from '@/utils/getIdStore';
+import { getLabel } from '@/utils/getLabel';
 import { buildItemUrl } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
@@ -35,8 +38,32 @@ export const Item = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
 
+  const [id, setId] = useState<string>(String(location.id));
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
+  const [label, setLabel] = useState<string>(String(location.id));
+
+  useEffect(() => {
+    if (StringIdentifierCollections.includes(layer.datasourceId)) {
+      const id = getIdStore(location);
+      if (id) {
+        setId(id);
+      } else {
+        setId(String(location.id));
+      }
+    } else {
+      setId(String(location.id));
+    }
+  }, [location, layer]);
+
+  useEffect(() => {
+    if (layer.label) {
+      const label = getLabel(location, layer.label);
+      if (label) {
+        setLabel(`${label} (${id})`);
+      }
+    }
+  }, [layer, location, id]);
 
   useEffect(() => {
     const url = buildItemUrl(collection.id, String(location.id));
@@ -62,7 +89,7 @@ export const Item = forwardRef<HTMLDivElement, Props>((props, ref) => {
             <Text size="md" fw={700}>
               {layer.name}
             </Text>
-            <Text size="md">{location.id}</Text>
+            <Text size="md">{label}</Text>
           </Group>
           <Anchor title="This item in the API" href={url} target="_blank">
             API

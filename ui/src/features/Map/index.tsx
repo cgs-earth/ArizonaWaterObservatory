@@ -175,7 +175,7 @@ const MainMap: React.FC<Props> = (props) => {
             hoverPopup.remove();
 
             const uniqueFeatures = mainManager.getUniqueIds(features, layer.datasourceId);
-            const locations: Location[] = uniqueFeatures.map((id) => ({
+            const locations: Location[] = uniqueFeatures.map(({ id }) => ({
               id,
               layerId: layer.id,
             }));

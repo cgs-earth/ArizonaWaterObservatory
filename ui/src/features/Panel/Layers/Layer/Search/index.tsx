@@ -4,95 +4,112 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ActionIcon, Box, Group, Popover, Stack, Text, Title, Tooltip } from '@mantine/core';
-import Info from '@/assets/Info';
-import SearchIcon from '@/assets/Search';
-import { Entry } from '@/features/Panel/Layers/Layer/Search/Entry';
+import { GeoJsonProperties } from 'geojson';
+import { Loader, Stack, Text } from '@mantine/core';
+import TextInput from '@/components/TextInput';
+import { StringIdentifierCollections } from '@/consts/collections';
+import { Matches } from '@/features/Panel/Layers/Layer/Search/Matches';
+import { Properties } from '@/features/Panel/Layers/Layer/Search/Properties';
 import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
-import mainManager from '@/managers/Main.init';
+import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
+import { useLocations } from '@/hooks/useLocations';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';
-import useSessionStore from '@/stores/session';
-import { Overlay } from '@/stores/session/types';
-import { CollectionType, getCollectionType } from '@/utils/collection';
+import { hasSearchTerm } from '@/utils/searchFeatures';
+import { sortObject } from '@/utils/sortObject';
 
 type Props = {
-  layerId?: Layer['id'];
+  layer: Layer;
+  isLoading?: boolean;
 };
 
 const Search: React.FC<Props> = (props) => {
-  const { layerId } = props;
+  const { layer, isLoading = false } = props;
 
-  const layers = useMainStore((state) => state.layers)
-    .filter((layer) => !layerId || layer.id === layerId)
-    .filter(
-      (layer) =>
-        layer.loaded &&
-        [CollectionType.EDR, CollectionType.Features].includes(
-          getCollectionType(mainManager.getDatasource(layer.datasourceId)!)
-        )
-    );
+  const [sampleProperties, setSampleProperties] = useState<GeoJsonProperties>(null);
 
-  const overlay = useSessionStore((state) => state.overlay);
-  const setOverlay = useSessionStore((state) => state.setOverlay);
+  const { selectedLocations, otherLocations } = useLocations(layer);
 
-  const [show, setShow] = useState(false);
-
-  const handleShow = (show: boolean) => {
-    setOverlay(show ? Overlay.Search : null);
-    setShow(show);
+  const search = useMainStore((state) => state.searches).find(
+    (search) => search.layerId === layer.id
+  ) ?? {
+    layerId: layer.id,
+    searchTerm: '',
+    matchedLocations: [],
   };
+  const addSearchTerm = useMainStore((state) => state.addSearch);
+  const removeSearchTerm = useMainStore((state) => state.removeSearch);
 
   useEffect(() => {
-    if (overlay !== Overlay.Search) {
-      setShow(false);
+    const location =
+      selectedLocations.length > 0
+        ? selectedLocations[0]
+        : otherLocations.length > 0
+          ? otherLocations[0]
+          : null;
+
+    if (location) {
+      setSampleProperties(sortObject(location.properties));
     }
-  }, [overlay]);
+  }, [selectedLocations, otherLocations]);
 
-  const helpText = (
-    <>
-      <Text size="sm">
-        Search across the feature properties and values for each the data sources listed below.
-      </Text>
-    </>
-  );
+  const isStringIdentifierCollection = StringIdentifierCollections.includes(layer.datasourceId);
 
-  if (layers.length === 0) {
-    return null;
-  }
+  const handleChange = (searchTerm: string) => {
+    if (searchTerm.length === 0) {
+      removeSearchTerm(layer.id);
+      return;
+    }
+
+    const matchedLocations = [...selectedLocations, ...otherLocations]
+      .filter((feature) => hasSearchTerm(searchTerm, feature))
+      .map((feature) => getId(feature, isStringIdentifierCollection));
+
+    addSearchTerm(layer.id, searchTerm, matchedLocations);
+  };
+
+  const showMatches = search.matchedLocations.length > 0;
+  const showProperties = !showMatches && sampleProperties && search.searchTerm.length === 0;
 
   return (
-    <Popover opened={show} onChange={setShow} position="right-start" closeOnClickOutside={false}>
-      <Popover.Target>
-        <Tooltip label="Search across features shown for this data source" disabled={show}>
-          <ActionIcon className={styles.searchButton} size="lg" onClick={() => handleShow(!show)}>
-            <SearchIcon />
-          </ActionIcon>
-        </Tooltip>
-      </Popover.Target>
-      <Popover.Dropdown>
-        <Box className={styles.wrapper}>
-          <Tooltip multiline label={helpText}>
-            <Group className={styles.title} gap="xs" mb="var(--default-spacing)">
-              <Title order={4} size="h5">
-                Search
-              </Title>
-              <Info />
-            </Group>
-          </Tooltip>
-
-          <Stack
-            gap={0}
-            className={`${styles.container} ${styles.dateSelectorContainer}`}
-            align="flex-start"
-          >
-            {layers.map((layer) => (
-              <Entry key={`layer-order-${layer.id}`} layer={layer} />
-            ))}
-          </Stack>
-        </Box>
-      </Popover.Dropdown>
-    </Popover>
+    <Stack className={styles.entry} gap="var(--default-spacing)">
+      <TextInput
+        size="xs"
+        label={
+          <Text size="xs" fw={700} title={layer.name}>
+            {layer.name}
+          </Text>
+        }
+        disabled={!layer.loaded || isLoading}
+        value={search.searchTerm}
+        onChange={(event) => handleChange(event.currentTarget.value)}
+        placeholder="Search all features in layer"
+      />
+      {!layer.loaded || isLoading ? (
+        <Loader mx="auto" color="#0183a1" type="dots" />
+      ) : (
+        <>
+          {showMatches && (
+            <Matches
+              layer={layer}
+              searchTerm={search.searchTerm}
+              matchedLocations={search.matchedLocations}
+              selectedLocations={selectedLocations}
+              otherLocations={otherLocations}
+              isStringIdentifierCollection={isStringIdentifierCollection}
+              lineLimit={5}
+              locationLimit={10}
+            />
+          )}
+          {showProperties && <Properties properties={sampleProperties} />}
+          {!showMatches && !showProperties && (
+            <Text size="sm" ta="center" mt="calc(var(--default-spacing) * 1)">
+              No locations found.
+            </Text>
+          )}
+        </>
+      )}
+    </Stack>
   );
 };
 

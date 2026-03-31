@@ -43,12 +43,12 @@ export const Matches: React.FC<Props> = (props) => {
   const addLocation = useMainStore((state) => state.addLocation);
   const removeLocation = useMainStore((state) => state.removeLocation);
 
-  const [labelProperty, _setLabelProperty] = useState<string | null>(null);
+  const [labelProperty, setLabelProperty] = useState<string | null>(null);
 
   const { map } = useMap(MAP_ID);
 
   useEffect(() => {
-    // setLabelProperty(layer.label);
+    setLabelProperty(layer.label);
   }, [layer]);
 
   const handleSelect = (id: Location['id']) => {
