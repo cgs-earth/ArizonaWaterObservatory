@@ -448,6 +448,10 @@ resources:
         rel: canonical
         title: Data source
         href: https://usgs.osn.mghpcc.org/mdmf/gdp/PRISM_v2.zarr
+      - type: application/html
+        rel: methodology
+        title: Code that generated the data
+        href: https://code.usgs.gov/wma/nhgf/geo-data-portal/gdp_data_processing/-/blob/main/workflows/opendap/CIDA/PRISM_v2/prism_processing2_update.py?ref_type=heads
     providers:
       - type: edr
         name: xarray-edr
