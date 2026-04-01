@@ -853,5 +853,7 @@ resources:
       processor:
           name: config_store.ConfigStoreProcessor
 
-
-    
+  intersector:
+    type: process
+    processor:
+      name: pygeoapi_plugins.process.intersect.IntersectionProcessor

@@ -33,16 +33,15 @@ dependencies = [
     "geopandas>=1.1.1",
     "formatters",
     "pgedr==0.2.0",
-    # on linux use anywhere between gdal 3.8 which appears to be the latest on github actions workflow runnings and 
+    # on linux use anywhere between gdal 3.8 which appears to be the latest on github actions workflow runnings and
     # gdal 3.10 since that is the latest
     # gdal version packaged for debian trixie
     "gdal>=3.8,<3.11 ; platform_system == 'Linux'",
-
     # on all other platforms use gdal 3.12 since that is the latest
     # gdal version on macos packaged by homebrew and is easier to test with locally than downgrading
     # the system gdal version
     "gdal>=3.12,<3.13 ; platform_system != 'Linux'",
-    "pygeoapi-plugins>=0.5.0",
+    "pygeoapi-plugins",
     # pins to the same gcfs version that is compatible to the zarr version used in wwdh
     # mainly just for compatibility; could be bumped in the future
     "gcsfs>=2023.6.0",
@@ -79,7 +78,8 @@ members = [
 [tool.uv.sources]
 # use dev branch which shares the same features across usbr and asu to keep consistency
 # this is rebased to be at least 0.23.0 for pygeoapi
-pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="2b6288e40a1045052bbd98473ea49df8caa0ed72" }
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="a85c2f7646a326c2ba5ba2f436a98810e1285e4c" }
+pygeoapi-plugins = { git = "https://github.com/cgs-earth/pygeoapi-plugins.git", rev = "3798e584328d9d0908bdcedda77239ebb04d74cb" }
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }

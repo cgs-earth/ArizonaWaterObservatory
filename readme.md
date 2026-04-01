@@ -6,7 +6,7 @@ This repo holds all code for the Arizona Water Observatory project including
 
 1. The Frontend UI written with React and Mapbox
 2. The backend integrations written with pygeoapi 
-    - Our pygeoapi fork for this project can be found here: https://github.com/internetofwater/pygeoapi/tree/tmp-awo
+    - Our pygeoapi fork for this project can be found here: https://github.com/internetofwater/pygeoapi/tree/dev
 3. The deployment scripts with terraform on GCP
 4. Some of the ETL code is in this repository
     - Some of the more complex ETL code for Arizona Department of Water Resources groundwater wells is present here: https://github.com/cgs-earth/ArizonaGroundWaterETL/
