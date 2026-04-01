@@ -96,9 +96,10 @@ export type Layer = {
   opacity: number;
   position: number; // The order this layer is drawn relative to other user layers
   paletteDefinition: PaletteDefinition | null;
-  loaded: boolean;
   geometryTypes: TGeometryTypes[];
   bbox: string; // String identifier to indicate AOI change
+  label: string | null; // Used in place of a unique identifier in places like the popups or download modal
+  loaded: boolean;
 };
 
 export type Table = {

@@ -17,7 +17,7 @@ import awoService from '@/services/init/awo.init';
 import { Location } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { isCoverageCollection } from '@/utils/isTypeObject';
-import { getLabel } from '@/utils/parameters';
+import { getParameterLabel } from '@/utils/parameters';
 import { getDatetime } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
@@ -126,7 +126,7 @@ export const Chart: React.FC<Props> = (props) => {
     if (collection) {
       const labels = parameters.map((parameter) => ({
         parameter,
-        label: getLabel(collection, parameter),
+        label: getParameterLabel(collection, parameter),
       }));
 
       setLabels(labels);

@@ -196,3 +196,5 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
     },
   ],
 };
+
+export const CollectionDefaultLabels: Record<string, string> = {};

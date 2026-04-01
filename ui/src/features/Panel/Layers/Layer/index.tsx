@@ -51,17 +51,21 @@ const Layer: React.FC<Props> = (props) => {
 
   const { isFetchingCollections } = useLoading();
 
-  const { showSearchTool, getDateInputError } = useLayerValidation(layer, isLoading, {
-    name,
-    parameters,
-    color,
-    from,
-    to,
-    opacity,
-    paletteDefinition,
-    collectionType,
-    parameterOptions,
-  });
+  const { showSearchTool, showLabelTool, getDateInputError } = useLayerValidation(
+    layer,
+    isLoading,
+    {
+      name,
+      parameters,
+      color,
+      from,
+      to,
+      opacity,
+      paletteDefinition,
+      collectionType,
+      parameterOptions,
+    }
+  );
 
   useEffect(() => {
     if (isFetchingCollections || parameterOptions) {
@@ -376,7 +380,12 @@ const Layer: React.FC<Props> = (props) => {
       )}
       {showToolsTab && (
         <Tabs.Panel value="tools">
-          <Tools showSearchTool={showSearchTool} isLoading={isLoading} layer={layer} />
+          <Tools
+            showSearchTool={showSearchTool}
+            showLabelTool={showLabelTool}
+            isLoading={isLoading}
+            layer={layer}
+          />
         </Tabs.Panel>
       )}
     </Tabs>

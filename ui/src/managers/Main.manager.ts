@@ -19,7 +19,7 @@ import {
 import {
   GeoJSONFeature,
   GeoJSONSource,
-  Map,
+  Map as MapboxMap,
   MapMouseEvent,
   MapTouchEvent,
   Popup,
@@ -28,6 +28,7 @@ import {
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
 import {
+  CollectionDefaultLabels,
   CollectionRestrictions,
   idStoreProperty,
   ItemsOnlyCollections,
@@ -72,6 +73,7 @@ import { createDynamicStepExpression, isSamePalette } from '@/utils/colors';
 import { ColorBrewerIndex, isValidColorBrewerIndex } from '@/utils/colors/types';
 import { isSameArray } from '@/utils/compareArrays';
 import { getIdStore } from '@/utils/getIdStore';
+import { getLabel } from '@/utils/getLabel';
 import { getRandomHexColor } from '@/utils/hexColor';
 import { isTopLayer } from '@/utils/isTopLayer';
 import { joinSentence } from '@/utils/joinSentence';
@@ -97,7 +99,7 @@ import { getTemporalExtent } from '@/utils/temporalExtent';
  */
 class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
-  private map: Map | null = null;
+  private map: MapboxMap | null = null;
   private hoverPopup: Popup | null = null;
   private persistentPopup: Popup | null = null;
   private container: HTMLDivElement | null = null;
@@ -112,7 +114,7 @@ class MainManager {
    *
    * @function
    */
-  public setMap(map: Map): void {
+  public setMap(map: MapboxMap): void {
     if (!this.map) {
       this.map = map;
     }
@@ -431,30 +433,50 @@ class MainManager {
     return true;
   }
 
-  public getUniqueIds(features: GeoJSONFeature[], collectionId: ICollection['id']): Array<string> {
-    const uniques = new Set<string>();
+  public getUniqueIds(
+    features: GeoJSONFeature[],
+    layerId: Layer['id']
+  ): Array<{ id: string; label: string }> {
+    // Use a Map to maintain uniqueness by id while preserving the final display label.
+    const uniques = new Map<string, string>();
 
-    const useIdStore = StringIdentifierCollections.includes(collectionId);
+    const { datasourceId, label } = this.getLayer(layerId) ?? {
+      datasourceId: '',
+      label: null as string | null,
+    };
+    const useIdStore = StringIdentifierCollections.includes(datasourceId);
 
     for (const feature of features) {
+      const featureLabel = label ? getLabel(feature, label) : null;
       if (useIdStore) {
         const id = getIdStore(feature);
         if (id) {
-          uniques.add(id);
+          const idStr = String(id);
+          const display = featureLabel ? `${featureLabel} (${idStr})` : idStr;
+          if (!uniques.has(idStr)) {
+            uniques.set(idStr, display);
+          }
         } else {
           console.error(
             'Unable to find id store on layer from collection: ',
-            collectionId,
+            datasourceId,
             ', feature: ',
             feature
           );
         }
-      } else if (feature.id) {
-        uniques.add(String(feature.id));
+      } else if (feature.id != null) {
+        const idStr = String(feature.id);
+        const display = featureLabel ? `${featureLabel} (${idStr})` : idStr;
+        if (!uniques.has(idStr)) {
+          uniques.set(idStr, display);
+        }
       }
     }
 
-    return Array.from(uniques).sort();
+    // Convert to array of { id, label } and sort by the display label
+    return Array.from(uniques.entries())
+      .map(([id, displayLabel]) => ({ id, label: displayLabel }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }
 
   /**
@@ -727,6 +749,8 @@ class MainManager {
 
     const currentBBox = stringifyBBox(this.getBBox(datasourceId));
 
+    const label = CollectionDefaultLabels[datasourceId] ?? null;
+
     const layer: Layer = {
       id: this.createUUID(),
       datasourceId: datasource.id,
@@ -741,9 +765,10 @@ class MainManager {
         collectionType === CollectionType.Map ? DEFAULT_RASTER_OPACITY : DEFAULT_FILL_OPACITY,
       position: layers.length + 1,
       paletteDefinition: null,
-      loaded: false,
       geometryTypes: [],
       bbox: currentBBox,
+      label,
+      loaded: false,
     };
 
     this.store.getState().addLayer(layer);
@@ -1454,15 +1479,15 @@ class MainManager {
           // Hack, use the feature id to track this location, fetch id store in consuming features
           const uniqueFeatures = this.getUniqueIds(features, collectionId);
 
-          uniqueFeatures.forEach((locationId) => {
-            if (this.hasLocation(locationId)) {
+          uniqueFeatures.forEach(({ id }) => {
+            if (this.hasLocation(id)) {
               this.store.getState().removeLocation({
-                id: locationId,
+                id,
                 layerId,
               });
             } else {
               this.store.getState().addLocation({
-                id: locationId,
+                id,
                 layerId,
               });
             }
@@ -1506,7 +1531,7 @@ class MainManager {
       const { features } = e;
       const layer = this.getLayer(layerId);
       if (features && features.length > 0 && layer) {
-        const uniqueFeatures = this.getUniqueIds(features, collectionId);
+        const uniqueFeatures = this.getUniqueIds(features, layerId).map(({ label }) => label);
         const html = `
             <span style="color:black;">
               <strong>${layer.name}</strong><br/>

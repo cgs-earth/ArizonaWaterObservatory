@@ -5,17 +5,19 @@
 
 import { useCallback, useState } from 'react';
 import { Tabs } from '@mantine/core';
-import { Entry } from '@/features/Panel/Layers/Layer/Search/Entry';
+import Label from '@/features/Panel/Layers/Layer/Label';
+import Search from '@/features/Panel/Layers/Layer/Search';
 import { Layer } from '@/stores/main/types';
 
 type Props = {
   layer: Layer;
+  showLabelTool: boolean;
   showSearchTool: boolean;
   isLoading: boolean;
 };
 
 export const Tools: React.FC<Props> = (props) => {
-  const { layer, isLoading, showSearchTool } = props;
+  const { layer, isLoading, showLabelTool, showSearchTool } = props;
 
   const [tab, setTab] = useState<string | null>();
 
@@ -34,13 +36,19 @@ export const Tools: React.FC<Props> = (props) => {
       defaultValue="search"
     >
       <Tabs.List>
+        {showLabelTool && <Tabs.Tab value="label">Label</Tabs.Tab>}
         {showSearchTool && <Tabs.Tab value="search">Search</Tabs.Tab>}
 
         {/* {showDataTab && <Tabs.Tab value="data">Data</Tabs.Tab>} */}
       </Tabs.List>
+      {showLabelTool && (
+        <Tabs.Panel value="label">
+          <Label layer={layer} isLoading={isLoading} />
+        </Tabs.Panel>
+      )}
       {showSearchTool && (
         <Tabs.Panel value="search">
-          <Entry layer={layer} isLoading={isLoading} />
+          <Search layer={layer} isLoading={isLoading} />
         </Tabs.Panel>
       )}
     </Tabs>

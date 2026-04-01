@@ -9,7 +9,7 @@ import { Gradient } from '@/features/Panel/Layers/Layer/Color/Gradient';
 import mainManager from '@/managers/Main.init';
 import { Layer, PaletteDefinition } from '@/stores/main/types';
 import { createColorRange } from '@/utils/colors';
-import { getLabel } from '@/utils/parameters';
+import { getParameterLabel } from '@/utils/parameters';
 
 const LEFT_DEFAULT = 'Less';
 const RIGHT_DEFAULT = 'More';
@@ -63,7 +63,7 @@ export const DetailedGradient: React.FC<Props> = (props) => {
   useEffect(() => {
     const collection = mainManager.getDatasource(collectionId);
     if (collection) {
-      const label = getLabel(collection, paletteDefinition.parameter);
+      const label = getParameterLabel(collection, paletteDefinition.parameter);
 
       if (label) {
         setLabel(label);

@@ -120,6 +120,7 @@ const Popup: React.FC<Props> = (props) => {
 
   const handleLinkClick = () => {
     setLinkLocation(location);
+    console.log('clicked');
     setOverlay(Overlay.Links);
   };
 
@@ -136,7 +137,13 @@ const Popup: React.FC<Props> = (props) => {
 
   return (
     <Stack gap={0} className={styles.popupWrapper}>
-      <Header id={id} name={layer.name} collectionType={collectionType} />
+      <Header
+        id={id}
+        name={layer.name}
+        feature={feature}
+        collectionType={collectionType}
+        labelProperty={layer.label}
+      />
 
       {collectionType === CollectionType.EDR && feature && datasetName.length > 0 && (
         <Location

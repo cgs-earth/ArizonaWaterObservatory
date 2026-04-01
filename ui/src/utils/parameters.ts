@@ -52,7 +52,7 @@ export const getParameterUnit = (parameterName: ParameterName) => {
   return parameterName.unit.symbol.value;
 };
 
-export const getLabel = (collection: ICollection, parameterId: string) => {
+export const getParameterLabel = (collection: ICollection, parameterId: string) => {
   const parameter = collection.parameter_names[parameterId];
 
   const unit = getParameterUnit(parameter);
