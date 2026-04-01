@@ -645,8 +645,8 @@ resources:
         - example
         - quickstart
     extents:
-      spatial:
-        bbox: [-180, -90, 180, 90]
+      spatial: &az-spatial-extent
+        bbox: [-114.816591,31.332177,-109.045172, 31.332177]
         crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
       #   SELECT 
       #   TO_CHAR(MIN(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS earliest_observation_utc,
@@ -722,7 +722,11 @@ resources:
         rel: documentation
         title: Acgis Layer 
         href: https://www.arcgis.com/home/item.html?id=cf795fe0b23e4afc99728d1b97dd1253
-    extents: *default-extent
+    extents: 
+      <<: *default-extent
+      spatial:
+        bbox: [-164.924720, 32.923420,-103.787580, 70.280620]
+        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
     providers:
       - type: feature
         name: ESRI
@@ -753,7 +757,9 @@ resources:
         rel: documentation
         title: Acgis Layer 
         href: https://www.arcgis.com/home/item.html?id=cf795fe0b23e4afc99728d1b97dd1253
-    extents: *default-extent
+    extents:
+      <<: *default-extent
+      spatial: *az-spatial-extent
     providers:
       - type: feature
         name: ESRI
@@ -780,7 +786,9 @@ resources:
         rel: documentation
         title: Arizona Water Blueprint
         href: https://www.arcgis.com/apps/webappviewer/index.html?id=b84f6d906be94505b25d68d6af3b02ca
-    extents: *default-extent
+    extents: 
+      <<: *default-extent
+      spatial: *az-spatial-extent
     providers:
       - type: feature
         name: ESRI
