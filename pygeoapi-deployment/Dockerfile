@@ -39,6 +39,8 @@ ENV PATH="/opt/pygeoapi/.venv/bin:$PATH"
 ENV PYGEOAPI_CUSTOM_EVENT_LOOP_MODULE=com.env
 ENV PYGEOAPI_CUSTOM_EVENT_LOOP_GETTER=get_loop
 ENV PYGEOAPI_CACHE_PLUGINS=true
+# Enable redis cache for items/ and collections/ endpoints
+ENV PYGEOAPI_FLASK_CACHE_TYPE=REDIS
 
 # Entrypoint for running the app
 ENTRYPOINT [ "/opt/pygeoapi/pygeoapi-deployment/entrypoint.sh" ]
