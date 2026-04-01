@@ -10,9 +10,8 @@ server:
   cors: true
   pretty_print: true
   # admin: true
-  icon: https://www.asu.edu/themes/custom/asu_edu/favicon.ico
-  logo: https://awo-ui.netlify.app/ASU-logo.png
   templates:
+    static: /opt/pygeoapi/pygeoapi-deployment/static
     path: /opt/pygeoapi/pygeoapi-deployment/templates
   limits:
     default_items: 500
