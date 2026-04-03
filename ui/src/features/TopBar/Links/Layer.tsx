@@ -3,261 +3,242 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { Anchor, Box, Group, Text, Title } from '@mantine/core';
+import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Feature } from 'geojson';
+import { Anchor, Box, Divider, Flex, Group, Stack, Text, Title } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
-import { Download } from '@/features/TopBar/Links/Download';
-import { Header } from '@/features/TopBar/Links/Header';
-import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
-import styles from '@/features/TopBar/TopBar.module.css';
+import { StringIdentifierCollections } from '@/consts/collections';
+import styles from '@/features/TopBar/Links/Links.module.css';
 import { useLocations } from '@/hooks/useLocations';
 import mainManager from '@/managers/Main.init';
-import notificationManager from '@/managers/Notification.init';
 import { ICollection } from '@/services/edr.service';
-import { Layer as LayerType, Location } from '@/stores/main/types';
+import useMainStore from '@/stores/main';
+import { Layer as LayerType } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
-import { NotificationType } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
-import { getProvider } from '@/utils/provider';
-import { buildCubeUrl, buildItemsUrl, buildLocationsUrl } from '@/utils/url';
+import { getIdStore } from '@/utils/getIdStore';
+import { getLabel } from '@/utils/getLabel';
+import { hasSearchTerm } from '@/utils/searchFeatures';
+import { Download } from './Download';
+import { LayerBlock } from './LayerBlock';
+import { Menu } from './Menu';
+
+dayjs.extend(isSameOrBefore);
 
 type Props = {
   layer: LayerType;
-  linkLocation: Location | null;
+  open?: boolean;
 };
 
 export const Layer: React.FC<Props> = (props) => {
-  const { layer, linkLocation } = props;
+  const { layer } = props;
 
-  const { selectedLocations, otherLocations } = useLocations(layer);
+  const linkLocation = useSessionStore((state) => state.linkLocation);
+  const searches = useMainStore((state) => state.searches);
 
-  const hasNotification = useSessionStore((state) => state.hasNotification);
+  const { selectedLocations: mapLocations, otherLocations } = useLocations(layer);
 
-  const [dataset, setDataset] = useState<ICollection>();
-  const [provider, setProvider] = useState<string>('');
+  const [collection, setCollection] = useState<ICollection>();
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
-  const [url, setUrl] = useState('');
 
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [collectionLink, setCollectionLink] = useState('');
+  const [sourceLink, setSourceLink] = useState('');
+  const [documentationLink, setDocumentationLink] = useState('');
 
-  const controller = useRef<AbortController>(null);
-  const isMounted = useRef(true);
+  const [locations, setLocations] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-  useEffect(() => {
-    if (dataset) {
-      return;
-    }
-
-    const newDataset = mainManager.getDatasource(layer.datasourceId);
-
-    if (newDataset) {
-      setDataset(newDataset);
-    }
-  }, [layer]);
+  const [hasParameters, setHasParameters] = useState(false);
 
   useEffect(() => {
-    if (!dataset || provider.length > 0) {
-      return;
-    }
+    const search = searches.find((search) => search.layerId === layer.id);
 
-    const newProvider = getProvider(dataset.id);
-    setProvider(newProvider);
-    const collectionType = getCollectionType(dataset);
-    setCollectionType(collectionType);
-  }, [dataset]);
+    if (search) {
+      setSearchTerm(search.searchTerm);
+    }
+  }, [searches]);
 
   useEffect(() => {
-    if (!dataset) {
-      return;
+    if (linkLocation && linkLocation.layerId === layer.id) {
+      setLocations([...locations, linkLocation.id]);
     }
-
-    try {
-      let url = '';
-      if (collectionType === CollectionType.EDR) {
-        const bbox = mainManager.getBBox(dataset.id);
-        url = buildLocationsUrl(dataset.id, layer.parameters, bbox);
-      } else if (collectionType === CollectionType.EDRGrid) {
-        const bbox = mainManager.getBBox(dataset.id);
-        url = buildCubeUrl(
-          dataset.id,
-          layer.parameters,
-          layer.from,
-          layer.to,
-          false,
-          true,
-          undefined,
-          bbox
-        );
-      } else if (collectionType === CollectionType.Features) {
-        url = buildItemsUrl(dataset.id);
-      }
-
-      setUrl(url);
-    } catch (error) {
-      console.error(error);
-      // TODO: determine cause of duplicates
-      const message = `Unable to create base URL for layer: ${layer.name}. Skipping this entry in the Export modal.`;
-      if (!hasNotification(message)) {
-        notificationManager.show(message, NotificationType.Error, 10000);
-      }
-    }
-  }, [collectionType]);
+  }, [linkLocation]);
 
   useEffect(() => {
-    const datasource = mainManager.getDatasource(layer.datasourceId);
-    if (datasource) {
-      const collectionType = getCollectionType(datasource);
-      if (collectionType === CollectionType.Features) {
-        return setIsEnabled(true);
-      } else if ([CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType)) {
-        return setIsEnabled(layer.parameters.length > 0);
-      }
+    const collection = mainManager.getDatasource(layer.datasourceId);
+
+    if (collection) {
+      const collectionType = getCollectionType(collection);
+
+      const collectionLink =
+        collection.links.find((link) => link.rel === 'alternate' && link.type === 'text/html')
+          ?.href ?? '';
+      const sourceLink = collection.links.find((link) => link.rel === 'canonical')?.href ?? '';
+      const documentationLink =
+        collection.links.find((link) => link.rel === 'documentation')?.href ?? '';
+
+      setCollectionLink(collectionLink);
+      setSourceLink(sourceLink);
+      setDocumentationLink(documentationLink);
+
+      setCollectionType(collectionType);
+      setCollection(collection);
     }
-    setIsEnabled(false);
-  }, [layer]);
+  }, [layer.datasourceId]);
 
   useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-      if (controller.current) {
-        controller.current.abort('Component unmount');
-      }
-    };
-  }, []);
+    if (collectionType === CollectionType.Features) {
+      setHasParameters(true);
+    } else if ([CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType)) {
+      setHasParameters(layer.parameters.length > 0);
+    }
+  }, [layer, collectionType]);
 
-  const alternateLink = dataset?.links?.find(
-    (link) => link.rel === 'alternate' && link.type === 'text/html'
-  )?.href;
-
-  const getLabel = (collectionType: CollectionType) => {
-    switch (collectionType) {
-      case CollectionType.EDR:
-        return 'Location';
-      case CollectionType.EDRGrid:
-        return 'Grid';
-      case CollectionType.Features:
-        return 'Item';
-      default:
-        return '';
+  const addLocation = (locationId: string) => {
+    if (!locations.some((location) => location === locationId)) {
+      setLocations([...locations, locationId]);
     }
   };
 
-  const hasSelectedLocations = selectedLocations.length > 0;
-  const hasOtherLocations = otherLocations.length > 0;
+  const removeLocation = (locationId: string) => {
+    const filteredLocations = locations.filter((location) => location !== locationId);
+    setLocations(filteredLocations);
+  };
 
-  // This is a raster layer with no underlying data
-  if (collectionType === CollectionType.Map || url.length === 0) {
-    return null;
-  }
+  const handleSearchTermChange = (searchTerm: string) => {
+    setSearchTerm(searchTerm);
+  };
+
+  const handleClear = () => {
+    setLocations([]);
+  };
+
+  const links = [
+    { label: 'API', href: collectionLink, title: 'This dataset in the API' },
+    {
+      label: 'Source',
+      href: sourceLink,
+      title: 'Original source of pre-transformed data',
+    },
+    {
+      label: 'Info',
+      href: documentationLink,
+      title: 'Background information from the original source data',
+    },
+  ].filter((link) => link.href?.length > 0);
+
+  const isStringIdentifierCollection = StringIdentifierCollections.includes(layer.datasourceId);
+
+  const getId = (feature: Feature) => {
+    if (isStringIdentifierCollection) {
+      return getIdStore(feature) ?? String(feature.id);
+    }
+
+    return String(feature.id);
+  };
+
+  const getFeatureLabel = (feature: Feature) => {
+    if (layer.label) {
+      const label = getLabel(feature, layer.label);
+      if (label) {
+        return `${label} (${getId(feature)})`;
+      }
+    }
+
+    return getId(feature);
+  };
+
+  const selectedLocations = useMemo(() => {
+    return [
+      ...mapLocations.filter((feature) => locations.includes(getId(feature))),
+      ...otherLocations.filter((feature) => locations.includes(getId(feature))),
+    ];
+  }, [locations]);
 
   return (
     <>
       <Accordion
+        variant={Variant.Secondary}
         defaultValue={`links-${linkLocation?.layerId}-accordion`}
         items={[
           {
             id: `links-${layer.id}-accordion`,
 
             title: (
-              <Box className={styles.accordionHeader}>
-                <Group gap="xs">
-                  {provider.length > 0 && (
-                    <Text size="sm" fw={700}>
-                      {provider}
-                    </Text>
-                  )}
-                  <Text size="sm">{dataset?.title}</Text>
-                </Group>
-                {alternateLink ? (
-                  <Anchor
-                    title="This dataset in the API"
-                    href={alternateLink}
-                    target="_blank"
-                    className={styles.link}
-                  >
-                    <Title order={5} size="h3">
-                      {layer.name}
-                    </Title>
-                  </Anchor>
-                ) : (
+              <Group justify="space-between" className={styles.accordionHeader}>
+                <Stack gap="calc(var(--default-spacing) / 2)">
+                  <Text size="sm">{collection?.title}</Text>
+
                   <Title order={5} size="h3">
                     {layer.name}
                   </Title>
-                )}
-              </Box>
+                </Stack>
+                <Group gap="var(--default-spacing)" mr="calc(var(--default-spacing) * 2)">
+                  {links.map(({ label, href, title }, index) => (
+                    <Fragment key={`${collection?.id}-link-${label}`}>
+                      {index > 0 && <Divider orientation="vertical" />}
+                      <Anchor size="lg" target="_blank" href={href} title={title}>
+                        {label}
+                      </Anchor>
+                    </Fragment>
+                  ))}
+                </Group>
+              </Group>
             ),
             control: [CollectionType.EDR, CollectionType.Features].includes(collectionType) ? (
               <Download collectionId={layer.datasourceId} />
             ) : null,
             content: (
-              <Box className={styles.accordionBody}>
-                <Header
-                  url={url}
-                  isLoading={false}
-                  collectionType={collectionType}
-                  onGetAllCSV={() => null}
-                />
-                {!isEnabled || (!hasSelectedLocations && !hasOtherLocations) ? (
-                  <Group justify="center" align="center" className={styles.noParameterMessage}>
-                    <Text size="md">
-                      {!isEnabled
-                        ? 'Select at least one parameter for this layer to access links.'
-                        : 'No locations found.'}
-                    </Text>
-                  </Group>
-                ) : (
+              <Box px="var(--default-spacing)" pb="var(--default-spacing)">
+                {collection && (
                   <>
-                    {selectedLocations.length > 0 && (
-                      <Accordion
-                        defaultValue={`links-${linkLocation?.layerId}-selected-accordion`}
-                        items={[
-                          {
-                            id: `links-${layer.id}-selected-accordion`,
-                            title: (
-                              <Title order={6} size="h4" className={styles.accordionHeader}>
-                                {otherLocations.length > 0 && 'Selected '}
-                                {getLabel(collectionType)}s
-                              </Title>
-                            ),
-                            content: (
-                              <LayerBlock
-                                linkLocation={linkLocation}
-                                locations={selectedLocations}
-                                layer={layer}
-                                collection={dataset}
-                                collectionType={collectionType}
-                              />
-                            ),
-                          },
-                        ]}
-                        variant={Variant.Secondary}
-                      />
-                    )}
-                    {otherLocations.length > 0 && (
-                      <Accordion
-                        items={[
-                          {
-                            id: `links-${layer.id}-other-accordion`,
-                            title: (
-                              <Title order={6} size="h4" className={styles.accordionHeader}>
-                                {selectedLocations.length > 0 && 'Other '}
-                                {getLabel(collectionType)}s
-                              </Title>
-                            ),
-                            content: (
-                              <LayerBlock
-                                locations={otherLocations}
-                                layer={layer}
-                                collection={dataset}
-                                collectionType={collectionType}
-                              />
-                            ),
-                          },
-                        ]}
-                        variant={Variant.Secondary}
-                      />
+                    {hasParameters ? (
+                      <Flex className={styles.layerContent} gap={0}>
+                        <Menu
+                          collectionId={layer.datasourceId}
+                          collectionType={collectionType}
+                          mapLocations={mapLocations
+                            .filter((feature) => hasSearchTerm(searchTerm, feature))
+                            .map((feature) => ({
+                              id: getId(feature),
+                              label: getFeatureLabel(feature),
+                            }))}
+                          otherLocations={otherLocations
+                            .filter((feature) => hasSearchTerm(searchTerm, feature))
+                            .map((feature) => ({
+                              id: getId(feature),
+                              label: getFeatureLabel(feature),
+                            }))}
+                          selectedLocations={locations}
+                          addLocation={addLocation}
+                          removeLocation={removeLocation}
+                          searchTerm={searchTerm}
+                          onSearchTermChange={handleSearchTermChange}
+                          onClear={handleClear}
+                          linkLocation={linkLocation}
+                        />
+                        <LayerBlock
+                          layer={layer}
+                          collection={collection}
+                          collectionType={collectionType}
+                          locations={selectedLocations}
+                          linkLocation={linkLocation}
+                        />
+                      </Flex>
+                    ) : (
+                      <Group
+                        justify="center"
+                        align="center"
+                        className={styles.parameterMessageWrapper}
+                      >
+                        <Text fw={700}>
+                          Select at least one parameter for this data source to enable access to
+                          download functionality.
+                        </Text>
+                      </Group>
                     )}
                   </>
                 )}
@@ -265,7 +246,6 @@ export const Layer: React.FC<Props> = (props) => {
             ),
           },
         ]}
-        variant={Variant.Primary}
       />
     </>
   );

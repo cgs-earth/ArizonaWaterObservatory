@@ -5,7 +5,7 @@
 
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { Feature } from 'geojson';
 import { Anchor, Collapse, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -14,22 +14,29 @@ import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
-import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
-import { Chart } from '@/features/Popup/Chart';
+import { Charts } from '@/features/Charts';
+import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
-import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
-import styles from '@/features/TopBar/TopBar.module.css';
+import styles from '@/features/TopBar/Links/Links.module.css';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
-import { ICollection } from '@/services/edr.service';
+import {
+  CoverageCollection,
+  CoverageJSON,
+  ICollection,
+  IGetLocationParams,
+} from '@/services/edr.service';
+import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 import { createEmptyCsv } from '@/utils/csv';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
+import { getParameterUnit } from '@/utils/parameters';
 import { buildLocationUrl } from '@/utils/url';
+import { GeoJSON } from './GeoJSON';
 
 dayjs.extend(isSameOrBefore);
 
@@ -49,8 +56,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
-  const [datasetName, setDatasetName] = useState<string>('');
-  const [parameters, setParameters] = useState<Layer['parameters']>([]);
+  const [parameters, setParameters] = useState<Parameter[]>([]);
 
   const [from, setFrom] = useState<Layer['from']>(layer.from);
   const [to, setTo] = useState<Layer['to']>(layer.to);
@@ -73,19 +79,18 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   }, [id, from, to]);
 
   useEffect(() => {
-    if (!layer) {
-      return;
-    }
+    const collection = mainManager.getDatasource(layer.datasourceId);
 
-    const newDataset = mainManager.getDatasource(layer.datasourceId);
-
-    if (newDataset) {
-      setDatasetName(newDataset.title ?? '');
-      const paramObjects = Object.values(newDataset?.parameter_names ?? {});
+    if (collection) {
+      const paramObjects = Object.values(collection?.parameter_names ?? {});
 
       const parameters = paramObjects
-        .filter((object) => layer.parameters.includes(object.id))
-        .map((object) => object.name);
+        .filter((object) => object.type === 'Parameter' && layer.parameters.includes(object.id))
+        .map((object) => ({
+          id: object.id,
+          name: object.observedProperty.label.en,
+          unit: getParameterUnit(object),
+        }));
 
       if (parameters.length === 0) {
         closeChart();
@@ -93,7 +98,26 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
       setParameters(parameters);
     }
+
+    if (StringIdentifierCollections.includes(layer.datasourceId)) {
+      const id = getIdStore(location);
+      if (id) {
+        setId(id);
+      } else {
+        setId(String(location.id));
+      }
+    } else {
+      setId(String(location.id));
+    }
   }, [location, layer]);
+  useEffect(() => {
+    if (layer.label) {
+      const label = getLabel(location, layer.label);
+      if (label) {
+        setLabel(`${label} (${id})`);
+      }
+    }
+  }, [layer, location, id]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -105,28 +129,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (StringIdentifierCollections.includes(layer.datasourceId)) {
-      const id = getIdStore(location);
-      if (id) {
-        setId(id);
-      } else {
-        setId(String(location.id));
-      }
-    } else {
-      setId(String(location.id));
-    }
-  }, [layer, location]);
-
-  useEffect(() => {
-    if (layer.label) {
-      const label = getLabel(location, layer.label);
-      if (label) {
-        setLabel(`${label} (${id})`);
-      }
-    }
-  }, [layer, location, id]);
 
   const getFileName = () => {
     let name = `data-${location.id}-${layer.parameters.join('_')}`;
@@ -151,6 +153,11 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
     );
     try {
       setIsLoading(true);
+
+      if (!controller.current) {
+        controller.current = new AbortController();
+      }
+
       const res = await fetch(url);
 
       if (!res.ok) {
@@ -196,13 +203,29 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
 
+  const getData = (
+    collectionId: ICollection['id'],
+    locationId: LocationType['id'],
+    params: IGetLocationParams,
+    signal?: AbortSignal
+  ) =>
+    awoService.getLocation<CoverageCollection | CoverageJSON>(collectionId, locationId, {
+      signal,
+      params,
+    });
+
+  const handleFromChange = (from: Layer['from']) => setFrom(from);
+  const handleToChange = (to: Layer['to']) => setTo(to);
+
   const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
+
+  const locationIds = useMemo(() => [id], [id]);
 
   return (
     <Paper
       ref={ref}
       shadow="xl"
-      className={`${styles.locationWrapper} ${linkLocation && linkLocation.id === String(location?.id) ? styles.highlightLocation : ''}`}
+      className={`${styles.locationWrapper} ${linkLocation && linkLocation.id === String(location?.id) ? styles.locationHighlight : styles.locationStandard}`}
     >
       <Stack gap="xs">
         <Group justify="space-between">
@@ -224,32 +247,17 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
         <Code size="xs" code={code} />
         <Group justify="space-between" align="flex-end">
           <Group gap="var(--default-spacing)">
-            <Button
-              size="xs"
-              variant={openedProps ? Variant.Selected : Variant.Secondary}
-              className={styles.propertiesButton}
-              onClick={toggleProps}
-            >
+            <Button size="xs" className={styles.propertiesButton} onClick={toggleProps}>
               Properties
             </Button>
-            <Button
-              size="xs"
-              variant={openedGeo ? Variant.Selected : Variant.Secondary}
-              className={styles.propertiesButton}
-              onClick={toggleGeo}
-            >
+            <Button size="xs" className={styles.propertiesButton} onClick={toggleGeo}>
               GeoJSON
             </Button>
             <Tooltip
               label="Select one or more parameters in the layer controls to enable charts."
               disabled={parameters.length > 0}
             >
-              <Button
-                size="xs"
-                variant={openedChart ? Variant.Selected : Variant.Secondary}
-                className={styles.propertiesButton}
-                onClick={toggleChart}
-              >
+              <Button size="xs" className={styles.propertiesButton} onClick={toggleChart}>
                 Chart
               </Button>
             </Tooltip>
@@ -264,7 +272,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 size="xs"
                 disabled={isLoading}
                 data-disabled={isLoading}
-                variant={Variant.Primary}
                 className={styles.propertiesButton}
                 onClick={handleCSVClick}
               >
@@ -279,7 +286,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               className={styles.datePicker}
               placeholder="Pick start date"
               value={from}
-              onChange={setFrom}
+              onChange={handleFromChange}
               simplePresets={[
                 DatePreset.OneYear,
                 DatePreset.FiveYears,
@@ -296,7 +303,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               className={styles.datePicker}
               placeholder="Pick end date"
               value={to}
-              onChange={setTo}
+              onChange={handleToChange}
               simplePresets={[
                 DatePreset.OneYear,
                 DatePreset.FiveYears,
@@ -310,16 +317,17 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
           </Group>
         </Group>
         <Stack>
-          {openedChart && (
+          {openedChart && parameters.length > 0 && (
             <Collapse in={openedChart}>
-              <Chart
+              <Charts
                 className={styles.linksChart}
                 collectionId={layer.datasourceId}
-                locationId={id}
-                title={datasetName}
-                parameters={layer.parameters}
+                locationIds={locationIds}
+                parameters={parameters}
                 from={from}
                 to={to}
+                getData={getData}
+                tabs
               />
             </Collapse>
           )}

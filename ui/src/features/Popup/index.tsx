@@ -120,7 +120,6 @@ const Popup: React.FC<Props> = (props) => {
 
   const handleLinkClick = () => {
     setLinkLocation(location);
-    console.log('clicked');
     setOverlay(Overlay.Links);
   };
 

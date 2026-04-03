@@ -54,8 +54,8 @@ export class CoverageChartService extends CoverageService {
 
       series.push({
         name: parameterId,
-        // parameter: parameter.id,
-        // unit,
+        parameter: parameter.id,
+        unit,
         type: 'line',
         data: range.values,
       });
@@ -109,8 +109,8 @@ export class CoverageChartService extends CoverageService {
 
       series.push({
         name: parameterId,
-        // parameter: parameter.id,
-        // unit,
+        parameter: parameter.id,
+        unit,
         type: 'line',
         data: range.values,
       });

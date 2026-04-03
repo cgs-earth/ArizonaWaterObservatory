@@ -17,7 +17,7 @@ import { DatePreset } from '@/components/DateInput/DateInput.types';
 import { Variant } from '@/components/types';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
-import styles from '@/features/TopBar/TopBar.module.css';
+import styles from '@/features/TopBar/Links/Links.module.css';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
