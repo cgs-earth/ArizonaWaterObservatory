@@ -751,10 +751,10 @@ resources:
       - type: application/html
         rel: documentation
         title: Arizona Water Blueprint
-        href: https://www.arcgis.com/apps/webappviewer/index.html?id=b84f6d906be94505b25d68d6af3b02ca
+        href: https://experience.arcgis.com/experience/71bc84edbbf9424f9ceb2116acc6bf5a
       - type: application/html
         rel: documentation
-        title: Acgis Layer 
+        title: Arcgis Layer 
         href: https://www.arcgis.com/home/item.html?id=cf795fe0b23e4afc99728d1b97dd1253
     extents:
       spatial: *az-spatial-extent
