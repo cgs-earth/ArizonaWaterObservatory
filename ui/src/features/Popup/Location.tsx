@@ -3,18 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Feature } from 'geojson';
-import { Box, Group, Tooltip } from '@mantine/core';
+import { Box, Group, Stack, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { Parameter } from '@/features/Popup';
-import { Chart } from '@/features/Popup/Chart';
 import styles from '@/features/Popup/Popup.module.css';
+import {
+  CoverageCollection,
+  CoverageJSON,
+  ICollection,
+  IGetLocationParams,
+} from '@/services/edr.service';
+import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { getIdStore } from '@/utils/getIdStore';
+import { Charts } from '../Charts';
 import Table from '../Table';
 
 type Props = {
@@ -42,10 +49,16 @@ export const Location: React.FC<Props> = (props) => {
 
   const [tab, setTab] = useState<'chart' | 'table'>('chart');
   const [id, setId] = useState<string>();
+  const [selectedParameter, setSelectedParameter] = useState<string | null>(null);
 
   useEffect(() => {
     if (parameters.length === 0) {
       setTab('table');
+      return;
+    }
+
+    if (!selectedParameter || !parameters.some((parameter) => parameter.id === selectedParameter)) {
+      setSelectedParameter(parameters[0].id);
     }
   }, [parameters]);
 
@@ -58,26 +71,41 @@ export const Location: React.FC<Props> = (props) => {
     }
   }, [layer, location, feature]);
 
+  const getData = useCallback(
+    (
+      collectionId: ICollection['id'],
+      locationId: LocationType['id'],
+      params: IGetLocationParams,
+      signal?: AbortSignal
+    ) =>
+      awoService.getLocation<CoverageCollection | CoverageJSON>(collectionId, locationId, {
+        signal,
+        params,
+      }),
+    []
+  );
+
   return (
     <>
       <Box style={{ display: tab === 'chart' ? 'block' : 'none' }}>
-        {layer && datasetName.length > 0 && parameters.length > 0 && id && (
-          <Chart
+        {datasetName.length > 0 && parameters.length > 0 && selectedParameter && id && (
+          <Charts
             collectionId={layer.datasourceId}
-            locationId={id}
-            title={datasetName}
-            parameters={layer.parameters}
+            locationIds={[id]}
+            parameters={parameters}
             from={layer.from}
             to={layer.to}
+            getData={getData}
+            value={selectedParameter}
+            className={styles.chartWrapper}
           />
         )}
       </Box>
       <Box style={{ display: tab === 'table' ? 'block' : 'none' }} className={styles.tableWrapper}>
         {feature && <Table size="xs" properties={feature.properties} />}
       </Box>
-      <Group
-        justify="space-between"
-        align="flex-end"
+      <Stack
+        gap="calc(var(--default-spacing) * 2)"
         mt="var(--default-spacing)"
         mb="var(--default-spacing)"
       >
@@ -93,6 +121,23 @@ export const Location: React.FC<Props> = (props) => {
               onChange={(value, _option) => handleLocationChange(value)}
             />
           )}
+          {parameters.length > 0 && tab === 'chart' && (
+            <Select
+              className={styles.parametersDropdown}
+              size="xs"
+              label="Parameters"
+              searchable
+              data={parameters.map((parameter) => ({
+                value: parameter.id,
+                label: `${parameter.name} (${parameter.unit})`,
+              }))}
+              value={selectedParameter}
+              onChange={setSelectedParameter}
+              clearable={false}
+            />
+          )}
+        </Group>
+        <Group gap="var(--default-spacing)" align="flex-end">
           {parameters.length > 0 ? (
             <Button
               size="xs"
@@ -116,23 +161,23 @@ export const Location: React.FC<Props> = (props) => {
           >
             Properties
           </Button>
+          <Box component="span" className={styles.linkButtonWrapper}>
+            {parameters.length > 0 ? (
+              <Tooltip label="Open this location in the Links modal.">
+                <Button size="xs" onClick={handleLinkClick} variant={Variant.Primary}>
+                  Export
+                </Button>
+              </Tooltip>
+            ) : (
+              <Tooltip label="Select one or more parameters in the layer controls to access the Export modal.">
+                <Button size="xs" variant={Variant.Primary} disabled data-disabled>
+                  Export
+                </Button>
+              </Tooltip>
+            )}
+          </Box>
         </Group>
-        <Box component="span" className={styles.linkButtonWrapper}>
-          {parameters.length > 0 ? (
-            <Tooltip label="Open this location in the Links modal.">
-              <Button size="xs" onClick={handleLinkClick} variant={Variant.Primary}>
-                Link
-              </Button>
-            </Tooltip>
-          ) : (
-            <Tooltip label="Select one or more parameters in the layer controls to access the Export modal.">
-              <Button size="xs" variant={Variant.Primary} disabled data-disabled>
-                Export
-              </Button>
-            </Tooltip>
-          )}
-        </Box>
-      </Group>
+      </Stack>
     </>
   );
 };

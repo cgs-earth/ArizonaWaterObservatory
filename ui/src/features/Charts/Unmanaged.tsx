@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useMemo } from 'react';
 import { Box } from '@mantine/core';
 import LineChart from '@/components/Charts/LineChart';
 import styles from '@/features/Charts/Charts.module.css';
@@ -32,27 +33,30 @@ export const Unmanaged: React.FC<Props> = (props) => {
     value,
   } = props;
 
+  const filteredEntries = useMemo(
+    () => entries.filter(({ type }) => type === ETabTypes.Parameter),
+    [entries]
+  );
+
   return (
     <>
-      {entries
-        .filter((tab) => tab.type === ETabTypes.Parameter)
-        .map((tab) => (
-          <Box
-            key={`${collectionId}-${tab.value}-unmanaged-panel`}
-            className={`${styles.panel} ${chartClassname}`}
-            style={{ display: value === tab.value ? 'block' : 'none' }}
-          >
-            <LineChart
-              data={data}
-              legend
-              prettyLabels={entries.filter(({ type }) => type === ETabTypes.Parameter)}
-              theme={theme}
-              filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-              seriesLabels={seriesLabels}
-              chosenParameter={tab.value}
-            />
-          </Box>
-        ))}
+      {filteredEntries.map((tab) => (
+        <Box
+          key={`${collectionId}-${tab.value}-unmanaged-panel`}
+          className={`${styles.panel} ${chartClassname}`}
+          style={{ display: value === tab.value ? 'block' : 'none' }}
+        >
+          <LineChart
+            data={data}
+            legend
+            prettyLabels={filteredEntries}
+            theme={theme}
+            filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
+            seriesLabels={seriesLabels}
+            chosenParameter={tab.value}
+          />
+        </Box>
+      ))}
       {entries
         .filter((tab) => tab.type === ETabTypes.Unit)
         .map((tab) => (
@@ -64,7 +68,7 @@ export const Unmanaged: React.FC<Props> = (props) => {
             <LineChart
               data={data}
               legend
-              prettyLabels={entries.filter(({ type }) => type === ETabTypes.Parameter)}
+              prettyLabels={filteredEntries}
               theme={theme}
               filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
               seriesLabels={seriesLabels}

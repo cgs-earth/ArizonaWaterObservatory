@@ -5,14 +5,27 @@
 
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
+import { bbox } from '@turf/turf';
 import { Feature } from 'geojson';
 import { Box, Divider, Group, ScrollArea, Stack, Text, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
+import { StringIdentifierCollections } from '@/consts/collections';
 import { Parameter } from '@/features/Popup';
 import styles from '@/features/Popup/Popup.module.css';
+import {
+  CoverageCollection,
+  CoverageJSON,
+  ICollection,
+  IGetCubeParams,
+} from '@/services/edr.service';
+import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
+import { getIdStore } from '@/utils/getIdStore';
+import { normalizeBBox } from '@/utils/normalizeBBox';
+import { Charts } from '../Charts';
+import { TWrappedCoverage } from '../Charts/types';
 
 type Props = {
   location: LocationType;
@@ -29,11 +42,37 @@ export const Grid: React.FC<Props> = (props) => {
   const { location, locations, feature, layer, parameters, handleLocationChange, handleLinkClick } =
     props;
 
+  const [tab, setTab] = useState<'chart' | 'table'>('chart');
+
   const [times, setTimes] = useState<{ value: string; label: string }[]>([]);
   const [time, setTime] = useState<{ value: string; label: string }>();
   const [displayValues, setDisplayValues] = useState<
     { value: string; label: string; unit: string }[]
   >([]);
+  const [id, setId] = useState<string>();
+  const [selectedParameter, setSelectedParameter] = useState<string | null>(null);
+  const [chartDisabled, setChartDisabled] = useState(false);
+
+  useEffect(() => {
+    setChartDisabled(parameters.length === 0);
+    if (parameters.length === 0) {
+      setTab('table');
+      return;
+    }
+
+    if (!selectedParameter || !parameters.some((parameter) => parameter.id === selectedParameter)) {
+      setSelectedParameter(parameters[0].id);
+    }
+  }, [parameters]);
+
+  useEffect(() => {
+    if (StringIdentifierCollections.includes(layer.datasourceId)) {
+      const id = getIdStore(feature);
+      setId(id);
+    } else {
+      setId(location.id);
+    }
+  }, [layer, location, feature]);
 
   useEffect(() => {
     if (feature.properties) {
@@ -112,44 +151,79 @@ export const Grid: React.FC<Props> = (props) => {
     setTime(times[layer.paletteDefinition.index]);
   }, [layer.paletteDefinition]);
 
+  const getData = (
+    collectionId: ICollection['id'],
+    _locationId: LocationType['id'],
+    params: IGetCubeParams,
+    signal?: AbortSignal
+  ) => {
+    const normalizedBBox = normalizeBBox(bbox(feature));
+
+    return awoService.getCube<CoverageCollection | CoverageJSON>(collectionId, {
+      signal,
+      params: { ...params, bbox: normalizedBBox },
+    });
+  };
+
+  const onData = (data?: TWrappedCoverage[]) => {
+    if (data && data.every((wrappedCoverage) => wrappedCoverage.data === null)) {
+      setChartDisabled(true);
+      setTab('table');
+    }
+  };
+
   return (
     <>
       <Divider mt="calc(var(--default-spacing) / 2)" />
-      {time && (
-        <Text size="sm" mt="calc(var(--default-spacing) * 2)" mb="var(--default-spacing)">
-          {time?.label}
-        </Text>
-      )}
 
-      <ScrollArea scrollbars="x" type="hover" style={{ maxWidth: '100%' }}>
-        <Group
-          justify="flex-start"
-          align="flex-start"
-          mb="calc(var(--default-spacing) * 2)"
-          wrap="nowrap"
-        >
-          {displayValues.map((displayValue) => (
-            <Stack
-              key={`${location.id}-${displayValue.label}-${displayValue.value}`}
-              gap="var(--default-spacing)"
-              miw={120}
-            >
-              <Text size="sm" fw={700}>
-                {displayValue.label}
-              </Text>
-              <Text size="xs">
-                {displayValue.value} ({displayValue.unit})
-              </Text>
-            </Stack>
-          ))}
-        </Group>
-      </ScrollArea>
-      <Group
-        justify="space-between"
-        align="flex-end"
-        mt="var(--default-spacing)"
-        mb="var(--default-spacing)"
-      >
+      <Box style={{ display: tab === 'chart' ? 'block' : 'none' }}>
+        {parameters.length > 0 && id && selectedParameter && (
+          <Charts
+            collectionId={layer.datasourceId}
+            locationIds={[id]}
+            parameters={parameters}
+            from={layer.from}
+            to={layer.to}
+            getData={getData}
+            value={selectedParameter}
+            className={styles.chartWrapper}
+            onData={onData}
+          />
+        )}
+      </Box>
+      <Box style={{ display: tab === 'table' ? 'block' : 'none' }} className={styles.tableWrapper}>
+        {time && (
+          <Text size="sm" mt="calc(var(--default-spacing) * 2)" mb="var(--default-spacing)">
+            {time?.label}
+          </Text>
+        )}
+
+        <ScrollArea scrollbars="x" type="hover" style={{ maxWidth: '100%' }}>
+          <Group
+            justify="flex-start"
+            align="flex-start"
+            mb="calc(var(--default-spacing) * 2)"
+            wrap="nowrap"
+          >
+            {displayValues.map((displayValue) => (
+              <Stack
+                key={`${location.id}-${displayValue.label}-${displayValue.value}`}
+                gap="var(--default-spacing)"
+                miw={120}
+              >
+                <Text size="sm" fw={700}>
+                  {displayValue.label}
+                </Text>
+                <Text size="xs">
+                  {displayValue.value} ({displayValue.unit})
+                </Text>
+              </Stack>
+            ))}
+          </Group>
+        </ScrollArea>
+      </Box>
+
+      <Stack justify="space-between" mt="var(--default-spacing)" mb="var(--default-spacing)">
         <Group gap="var(--default-spacing)" align="flex-end">
           {locations.length > 1 && (
             <Select
@@ -174,14 +248,40 @@ export const Grid: React.FC<Props> = (props) => {
             />
           )}
         </Group>
-        <Box component="span" className={styles.linkButtonWrapper}>
-          <Tooltip label="Open this location in the Export modal.">
+        <Group gap="var(--default-spacing)" align="flex-end" justify="space-between">
+          <Group gap="calc(var(--default-spacing) / 2)">
+            {!chartDisabled ? (
+              <Button
+                size="xs"
+                onClick={() => setTab('chart')}
+                variant={tab === 'chart' ? Variant.Selected : Variant.Secondary}
+              >
+                Chart
+              </Button>
+            ) : (
+              <Tooltip label="Select one or more parameters in the layer controls to enable charts.">
+                <Button size="xs" disabled data-disabled>
+                  Chart
+                </Button>
+              </Tooltip>
+            )}
+
+            <Button
+              size="xs"
+              onClick={() => setTab('table')}
+              variant={tab === 'table' ? Variant.Selected : Variant.Secondary}
+            >
+              Values
+            </Button>
+          </Group>
+
+          <Tooltip label="Open this location in the Download modal.">
             <Button size="xs" onClick={handleLinkClick} variant={Variant.Primary}>
-              Export
+              Download
             </Button>
           </Tooltip>
-        </Box>
-      </Group>
+        </Group>
+      </Stack>
     </>
   );
 };

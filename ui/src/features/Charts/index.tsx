@@ -40,7 +40,7 @@ type Props = {
   select?: boolean;
   value?: string | null;
   tabHeight?: number;
-  onData?: () => void;
+  onData?: (data?: TWrappedCoverage[]) => void;
   getData: <T extends IRequestParams>(
     collectionId: ICollection['id'],
     locationId: Location['id'],
@@ -178,7 +178,7 @@ export const Charts: React.FC<Props> = ({
           : null
       );
 
-      onData();
+      onData(wrapped);
     } finally {
       if (isMounted.current) {
         setIsLoading(false);
@@ -203,6 +203,21 @@ export const Charts: React.FC<Props> = ({
     if (lastRequestKey.current === requestKey) {
       return;
     }
+
+    const paramOptions = parameters.map(({ id, name, unit }) => ({
+      value: id,
+      label: `${name} (${unit})`,
+      type: ETabTypes.Parameter,
+    }));
+
+    const unitOptions = Array.from(new Set(parameters.map((p) => p.unit))).map((unit) => ({
+      value: unit,
+      label: unit,
+      type: ETabTypes.Unit,
+    }));
+
+    setOptions([...paramOptions, ...unitOptions]);
+
     lastRequestKey.current = requestKey;
 
     controller.current = new AbortController();
@@ -213,6 +228,7 @@ export const Charts: React.FC<Props> = ({
     const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
 
     if (isValidRange) {
+      setData([]);
       void fetchData(controller.current.signal);
     } else {
       setError('Invalid date range provided');
@@ -228,30 +244,21 @@ export const Charts: React.FC<Props> = ({
     };
   }, []);
 
-  useEffect(() => {
-    const paramOptions = parameters.map(({ id, name, unit }) => ({
-      value: id,
-      label: `${name} (${unit})`,
-      type: ETabTypes.Parameter,
-    }));
-
-    const unitOptions = Array.from(new Set(parameters.map((p) => p.unit))).map((unit) => ({
-      value: unit,
-      label: unit,
-      type: ETabTypes.Unit,
-    }));
-
-    setOptions([...paramOptions, ...unitOptions]);
-  }, [parameters]);
-
-  const chartData = data.filter((w) => locationIds.includes(w.locationId)).map((w) => w.data);
+  const chartData = useMemo(
+    () =>
+      data
+        .filter((w) => locationIds.includes(w.locationId))
+        .map((w) => w.data)
+        .filter(Boolean),
+    [data]
+  );
 
   const seriesLabels = data
     .filter((w) => locationIds.includes(w.locationId))
     .map((w) => w.label ?? String(w.locationId));
 
   const showTabs = tabs && options.length > 0 && chartData.length > 0;
-  const showUnmanaged = !select && !tabs && typeof value === 'string';
+  const showUnmanaged = !select && !tabs && typeof value === 'string' && chartData.length > 0;
 
   return (
     <>
