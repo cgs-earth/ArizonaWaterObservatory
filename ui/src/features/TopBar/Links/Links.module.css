@@ -36,6 +36,10 @@
   border-top: 1px solid var(--mantine-color-default-border);
 }
 
+.contentBorder {
+  border-bottom: 0.5rem solid var(--asu-color-secondary);
+}
+
 .csvButton {
   max-width: 10em;
   margin-left: auto;
@@ -101,6 +105,14 @@
 
 .locationWrapper {
   padding: var(--default-spacing);
+}
+
+.modalHeader {
+  position: sticky;
+  top: 0;
+  background: var(--mantine-color-body);
+  z-index: 2;
+  border-bottom: 1px solid var(--mantine-color-default-border);
 }
 
 .parameterNameSelect {

@@ -200,6 +200,7 @@ export const Charts: React.FC<Props> = ({
   );
 
   useEffect(() => {
+    isMounted.current = true;
     if (lastRequestKey.current === requestKey) {
       return;
     }
@@ -222,13 +223,11 @@ export const Charts: React.FC<Props> = ({
 
     controller.current = new AbortController();
 
-    isMounted.current = true;
     setError(null);
 
     const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
 
     if (isValidRange) {
-      setData([]);
       void fetchData(controller.current.signal);
     } else {
       setError('Invalid date range provided');
@@ -239,7 +238,7 @@ export const Charts: React.FC<Props> = ({
     return () => {
       isMounted.current = false;
       if (controller.current) {
-        controller.current.abort('Component unmount');
+        // controller.current.abort('Component unmount');
       }
     };
   }, []);

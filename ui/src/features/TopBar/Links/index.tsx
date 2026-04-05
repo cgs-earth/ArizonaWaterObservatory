@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Stack, Text, Title, Tooltip } from '@mantine/core';
+import { Box, Stack, Text, Title, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
@@ -74,10 +74,12 @@ const Links: React.FC = () => {
         </Button>
       </Tooltip>
       <Modal size="1222px" opened={opened} onClose={handleClose}>
-        <Stack gap={0} className={styles.modalBody}>
-          <Title order={5} size="h3">
+        <Box className={styles.modalHeader}>
+          <Title order={5} size="h3" p="var(--default-spacing)">
             API Links
           </Title>
+        </Box>
+        <Stack gap={0} className={styles.modalBody}>
           <>
             {layers.map((layer) => (
               <Layer key={`links-entry-${layer.name}-${layer.id}`} layer={layer} />

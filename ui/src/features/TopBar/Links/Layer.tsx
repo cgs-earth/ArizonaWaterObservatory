@@ -192,7 +192,11 @@ export const Layer: React.FC<Props> = (props) => {
               <Download collectionId={layer.datasourceId} />
             ) : null,
             content: (
-              <Box px="var(--default-spacing)" pb="var(--default-spacing)">
+              <Box
+                px="var(--default-spacing)"
+                pb="var(--default-spacing)"
+                className={styles.contentBorder}
+              >
                 {collection && (
                   <>
                     {hasParameters ? (
