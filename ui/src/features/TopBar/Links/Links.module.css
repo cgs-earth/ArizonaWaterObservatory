@@ -10,6 +10,7 @@
 .partialWidth {
   width: 82%;
 }
+
 .fullWidth {
   width: 100%;
 }
@@ -123,6 +124,7 @@
   width: 14px;
   height: auto;
 }
+
 .parameterLabelWrapper > label > span {
   color: red;
 }

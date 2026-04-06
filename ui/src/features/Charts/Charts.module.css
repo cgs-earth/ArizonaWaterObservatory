@@ -12,9 +12,6 @@
 
 .panel {
   transition: height 0.2s ease-in-out;
-}
-
-.panel {
   height: 20rem;
 }
 
