@@ -75,6 +75,7 @@ export enum RestrictionType {
   Day = 'day',
   Parameter = 'parameter', // Limit number of parameters
   ParameterFirst = 'parameter-first', // Select a parameter before fetch
+  DateRange = 'date-range',
 }
 
 type RestrictionBase = {
@@ -98,12 +99,16 @@ type ParameterRestriction = RestrictionBase & {
 type ParameterFirstRestriction = RestrictionBase & {
   type: RestrictionType.ParameterFirst;
 };
-
+type DateRangeRestriction = RestrictionBase & {
+  type: RestrictionType.DateRange;
+  days: number;
+};
 export type Restiction =
   | SizeRestriction
   | DayRestriction
   | ParameterRestriction
-  | ParameterFirstRestriction;
+  | ParameterFirstRestriction
+  | DateRangeRestriction;
 
 export const CollectionRestrictions: Record<string, Restiction[]> = {
   [CollectionId.ArizonaWaterWells]: [
@@ -129,6 +134,11 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       count: 1,
       message: 'Select only one parameter.',
     },
+    {
+      type: RestrictionType.DateRange,
+      days: 1,
+      message: 'Select a date range no greater than one day.',
+    },
   ],
   [CollectionId.NWMReachToReach]: [
     {
@@ -145,6 +155,11 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       type: RestrictionType.Parameter,
       count: 1,
       message: 'Select only one parameter.',
+    },
+    {
+      type: RestrictionType.DateRange,
+      days: 1,
+      message: 'Select a date range no greater than one day.',
     },
   ],
   [CollectionId.NWMChannelRouting]: [
@@ -163,6 +178,11 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       count: 1,
       message: 'Select only one parameter.',
     },
+    {
+      type: RestrictionType.DateRange,
+      days: 1,
+      message: 'Select a date range no greater than one day.',
+    },
   ],
   [CollectionId.NWMGroundwaterOutput]: [
     {
@@ -174,6 +194,11 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       type: RestrictionType.Parameter,
       count: 1,
       message: 'Select only one parameter.',
+    },
+    {
+      type: RestrictionType.DateRange,
+      days: 1,
+      message: 'Select a date range no greater than one day.',
     },
   ],
   [CollectionId.NWMLakeOutput]: [
@@ -187,10 +212,20 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       count: 1,
       message: 'Select only one parameter.',
     },
+    {
+      type: RestrictionType.DateRange,
+      days: 1,
+      message: 'Select a date range no greater than one day.',
+    },
   ],
   [CollectionId.PRISM]: [
     {
       type: RestrictionType.Day,
+      days: 1095,
+      message: 'Select a date range no greater than three years.',
+    },
+    {
+      type: RestrictionType.DateRange,
       days: 1095,
       message: 'Select a date range no greater than three years.',
     },
