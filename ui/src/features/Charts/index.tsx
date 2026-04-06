@@ -71,11 +71,20 @@ export const Charts: React.FC<Props> = ({
   const computedColorScheme = useComputedColorScheme();
 
   const lastRequestKey = useRef<string | null>(null);
+  const lastLocationIds = useRef<typeof locationIds>([]);
 
   const [data, setData] = useState<TWrappedCoverage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState<TTypedOption[]>([]);
+
+  useEffect(() => {
+    if (!locationIds.some((locationId) => lastLocationIds.current.includes(locationId))) {
+      setData([]);
+    }
+
+    lastLocationIds.current = locationIds;
+  }, [locationIds]);
 
   const fetchData = async (signal: AbortSignal) => {
     const loadingInstance = loadingManager.add(
@@ -84,6 +93,7 @@ export const Charts: React.FC<Props> = ({
     );
 
     try {
+      setIsLoading(true);
       const datetime = getDatetime(from, to);
       const paramIds = parameters.map((p) => p.id);
 
@@ -179,10 +189,10 @@ export const Charts: React.FC<Props> = ({
       );
 
       onData(wrapped);
-    } finally {
       if (isMounted.current) {
         setIsLoading(false);
       }
+    } finally {
       loadingManager.remove(loadingInstance);
     }
   };

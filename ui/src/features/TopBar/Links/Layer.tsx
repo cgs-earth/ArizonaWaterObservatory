@@ -156,7 +156,7 @@ export const Layer: React.FC<Props> = (props) => {
       ...mapLocations.filter((feature) => locations.includes(getId(feature))),
       ...otherLocations.filter((feature) => locations.includes(getId(feature))),
     ];
-  }, [locations]);
+  }, [locations, mapLocations, otherLocations]);
 
   return (
     <>

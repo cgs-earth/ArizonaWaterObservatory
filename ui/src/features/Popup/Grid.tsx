@@ -6,7 +6,7 @@
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { bbox } from '@turf/turf';
-import { Feature } from 'geojson';
+import { BBox, Feature } from 'geojson';
 import { Box, Divider, Group, ScrollArea, Stack, Text, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
@@ -151,19 +151,76 @@ export const Grid: React.FC<Props> = (props) => {
     setTime(times[layer.paletteDefinition.index]);
   }, [layer.paletteDefinition]);
 
+  const parseBBox = (bbox: unknown): BBox | undefined => {
+    if (
+      typeof bbox === 'object' &&
+      Array.isArray(bbox) &&
+      bbox.every((coord) => typeof coord === 'number') &&
+      bbox.length === 4
+    ) {
+      return normalizeBBox(bbox as BBox);
+    } else if (typeof bbox === 'string') {
+      const parsedBbox = JSON.parse(bbox);
+      return parseBBox(parsedBbox);
+    }
+  };
+
+  const getBBox = (feature: Feature): BBox | undefined => {
+    const featureBBox = feature.bbox
+      ? feature.bbox
+      : feature.properties && feature.properties.bbox
+        ? feature.properties.bbox
+        : bbox(feature);
+
+    return parseBBox(featureBBox);
+  };
+
   const getData = (
     collectionId: ICollection['id'],
-    _locationId: LocationType['id'],
+    locationId: LocationType['id'],
     params: IGetCubeParams,
     signal?: AbortSignal
   ) => {
-    const normalizedBBox = normalizeBBox(bbox(feature));
+    const location = locations.find((location) => location.id === locationId);
 
-    return awoService.getCube<CoverageCollection | CoverageJSON>(collectionId, {
-      signal,
-      params: { ...params, bbox: normalizedBBox },
-    });
+    console.log('locations', locations, location, locationId);
+    if (location) {
+      const bbox = getBBox(feature);
+      if (bbox) {
+        console.log('??', locationId, feature, location, bbox);
+        return awoService.getCube<CoverageCollection | CoverageJSON>(collectionId, {
+          signal,
+          params: { ...params, bbox },
+        });
+      }
+    }
+
+    console.error('Location without bbox detected: ', location);
+
+    // Stub collection to resolve type issues
+    // This statement should never be reached
+    return {
+      type: 'CoverageCollection',
+      domainType: 'PointSeries',
+      coverages: [],
+      parameters: {},
+    } as CoverageCollection;
   };
+
+  // const getData = (
+  //   collectionId: ICollection['id'],
+  //   _locationId: LocationType['id'],
+  //   params: IGetCubeParams,
+  //   signal?: AbortSignal
+  // ) => {
+
+  //   const normalizedBBox = normalizeBBox(bbox(feature));
+
+  //   return awoService.getCube<CoverageCollection | CoverageJSON>(collectionId, {
+  //     signal,
+  //     params: { ...params, bbox: normalizedBBox },
+  //   });
+  // };
 
   const onData = (data?: TWrappedCoverage[]) => {
     if (data && data.every((wrappedCoverage) => wrappedCoverage.data === null)) {

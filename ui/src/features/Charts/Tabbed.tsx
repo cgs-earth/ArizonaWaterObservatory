@@ -44,6 +44,7 @@ export const Tabbed: React.FC<Props> = (props) => {
         panel: `${styles.panel} ${chartClassname}`,
         tab: styles.tab,
       }}
+      keepMounted={false}
     >
       <Tabs.List>
         {tabs.map((tab) => (

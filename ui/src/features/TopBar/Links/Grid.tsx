@@ -5,9 +5,10 @@
 
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { forwardRef, useEffect, useState } from 'react';
-import { Feature } from 'geojson';
-import { Anchor, Collapse, Group, Paper, Stack, Text } from '@mantine/core';
+import { forwardRef, useEffect, useRef, useState } from 'react';
+import { bbox } from '@turf/turf';
+import { BBox, Feature } from 'geojson';
+import { Anchor, Collapse, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Code from '@/components/Code';
@@ -15,12 +16,28 @@ import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import { Variant } from '@/components/types';
+import { StringIdentifierCollections } from '@/consts/collections';
+import { Charts } from '@/features/Charts';
+import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
+import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
-import { ICollection } from '@/services/edr.service';
+import notificationManager from '@/managers/Notification.init';
+import {
+  CoverageCollection,
+  CoverageJSON,
+  ICollection,
+  IGetCubeParams,
+} from '@/services/edr.service';
+import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
+import { LoadingType, NotificationType } from '@/stores/session/types';
+import { createEmptyCsv } from '@/utils/csv';
+import { getIdStore } from '@/utils/getIdStore';
+import { normalizeBBox } from '@/utils/normalizeBBox';
+import { getParameterUnit } from '@/utils/parameters';
 import { buildCubeUrl } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
@@ -37,14 +54,22 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
+  const [openedCharts, { toggle: toggleCharts, close: closeCharts }] = useDisclosure(false);
 
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
   const [_datasetName, setDatasetName] = useState<string>('');
-  const [_parameters, setParameters] = useState<string[]>([]);
+  const [parameters, setParameters] = useState<Parameter[]>([]);
 
   const [from, setFrom] = useState<string | null>(layer.from);
   const [to, setTo] = useState<string | null>(layer.to);
+
+  const [id, setId] = useState<string>(String(location.id));
+
+  const [_isLoading, setIsLoading] = useState(false);
+
+  const controller = useRef<AbortController>(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
     const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
@@ -67,12 +92,155 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
       const paramObjects = Object.values(newDataset?.parameter_names ?? {});
 
       const parameters = paramObjects
-        .filter((object) => layer.parameters.includes(object.id))
-        .map((object) => object.name);
+        .filter((object) => object.type === 'Parameter' && layer.parameters.includes(object.id))
+        .map((object) => ({
+          id: object.id,
+          name: object.observedProperty.label.en,
+          unit: getParameterUnit(object),
+        }));
+
+      if (parameters.length === 0) {
+        closeCharts();
+      }
 
       setParameters(parameters);
     }
+
+    if (StringIdentifierCollections.includes(layer.datasourceId)) {
+      const id = getIdStore(location);
+      if (id) {
+        setId(id);
+      } else {
+        setId(String(location.id));
+      }
+    } else {
+      setId(String(location.id));
+    }
   }, [location, layer]);
+
+  const getFileName = () => {
+    let name = `data-${location.id}-${layer.parameters.join('_')}`;
+
+    if (from && dayjs(from).isValid()) {
+      name += `-${dayjs(from).format('MM/DD/YYYY')}`;
+    }
+
+    if (to && dayjs(to).isValid()) {
+      name += `-${dayjs(to).format('MM/DD/YYYY')}`;
+    }
+
+    return `${name}.csv`;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleCSVClick = async () => {
+    if (!location.bbox) {
+      return;
+    }
+
+    const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
+
+    const loadingInstance = loadingManager.add(
+      `Generating csv for location: ${location.id}`,
+      LoadingType.Data
+    );
+    try {
+      setIsLoading(true);
+
+      if (!controller.current) {
+        controller.current = new AbortController();
+      }
+
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error(`Error: ${res.statusText.length > 0 ? res.statusText : 'Unknown error'}`);
+      }
+
+      let objectUrl = '';
+      if (res.status === 204) {
+        notificationManager.show(
+          `No data found for location: ${location.id} with the current parameter and date range selection.`,
+          NotificationType.Error,
+          10000
+        );
+        objectUrl = createEmptyCsv();
+      } else {
+        const blob = await res.blob();
+        objectUrl = URL.createObjectURL(blob);
+      }
+
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = getFileName();
+      document.body.appendChild(a);
+      a.click();
+
+      URL.revokeObjectURL(objectUrl);
+      a.remove();
+      notificationManager.show('CSV generated successfully.', NotificationType.Success, 10000);
+    } catch (err) {
+      if (((err as Error)?.message ?? '').length > 0) {
+        notificationManager.show((err as Error)?.message, NotificationType.Error, 10000);
+      } else if (typeof err === 'string') {
+        notificationManager.show(err, NotificationType.Error, 10000);
+      }
+    } finally {
+      loadingManager.remove(loadingInstance);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const parseBBox = (bbox: unknown): BBox | undefined => {
+    if (
+      typeof bbox === 'object' &&
+      Array.isArray(bbox) &&
+      bbox.every((coord) => typeof coord === 'number') &&
+      bbox.length === 4
+    ) {
+      return normalizeBBox(bbox as BBox);
+    } else if (typeof bbox === 'string') {
+      const parsedBbox = JSON.parse(bbox);
+      return parseBBox(parsedBbox);
+    }
+  };
+
+  const getBBox = (feature: Feature): BBox | undefined => {
+    const featureBBox = feature.bbox
+      ? feature.bbox
+      : feature.properties && feature.properties.bbox
+        ? feature.properties.bbox
+        : bbox(feature);
+
+    return parseBBox(featureBBox);
+  };
+
+  const getData = (
+    collectionId: ICollection['id'],
+    _locationId: LocationType['id'],
+    params: IGetCubeParams,
+    signal?: AbortSignal
+  ) => {
+    const bbox = getBBox(location);
+    if (bbox) {
+      return awoService.getCube<CoverageCollection | CoverageJSON>(collectionId, {
+        signal,
+        params: { ...params, bbox },
+      });
+    }
+    console.error('Location without bbox detected: ', location);
+
+    // Stub collection to resolve type issues
+    // This statement should never be reached
+    return {
+      type: 'CoverageCollection',
+      domainType: 'PointSeries',
+      coverages: [],
+      parameters: {},
+    } as CoverageCollection;
+  };
 
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
@@ -121,6 +289,38 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
             >
               GeoJSON
             </Button>
+            <Tooltip
+              label="Select one or more parameters in the layer controls to enable charts."
+              disabled={parameters.length > 0}
+            >
+              <Button
+                size="xs"
+                className={styles.propertiesButton}
+                onClick={toggleCharts}
+                variant={openedCharts ? Variant.Selected : Variant.Secondary}
+                disabled={parameters.length === 0}
+                {...(parameters.length === 0 ? { 'data-disabled': true } : {})}
+              >
+                Chart
+              </Button>
+            </Tooltip>
+            {/* <Tooltip
+              label={
+                isLoading
+                  ? 'Please wait for download to finish.'
+                  : 'Download the parameter data in CSV format.'
+              }
+            >
+              <Button
+                size="xs"
+                disabled={isLoading}
+                data-disabled={isLoading}
+                className={styles.propertiesButton}
+                onClick={handleCSVClick}
+              >
+                CSV
+              </Button>
+            </Tooltip> */}
           </Group>
           <Group gap="calc(var(--default-spacing) * 2)" align="flex-end">
             <DateInput
@@ -160,6 +360,20 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
           </Group>
         </Group>
         <Stack>
+          {openedCharts && parameters.length > 0 && (
+            <Collapse in={openedCharts}>
+              <Charts
+                className={styles.linksChart}
+                collectionId={layer.datasourceId}
+                locationIds={[id]}
+                parameters={parameters}
+                from={from}
+                to={to}
+                getData={getData}
+                tabs
+              />
+            </Collapse>
+          )}
           <Group align="flex-start" gap="calc(var(--default-spacing) * 2)" grow>
             {openedProps && (
               <Collapse in={openedProps}>

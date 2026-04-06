@@ -40,25 +40,28 @@ export const Unmanaged: React.FC<Props> = (props) => {
 
   return (
     <>
-      {filteredEntries.map((tab) => (
-        <Box
-          key={`${collectionId}-${tab.value}-unmanaged-panel`}
-          className={`${styles.panel} ${chartClassname}`}
-          style={{ display: value === tab.value ? 'block' : 'none' }}
-        >
-          <LineChart
-            data={data}
-            legend
-            prettyLabels={filteredEntries}
-            theme={theme}
-            filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-            seriesLabels={seriesLabels}
-            chosenParameter={tab.value}
-          />
-        </Box>
-      ))}
+      {filteredEntries
+        .filter((tab) => tab.value === value)
+        .map((tab) => (
+          <Box
+            key={`${collectionId}-${tab.value}-unmanaged-panel`}
+            className={`${styles.panel} ${chartClassname}`}
+            style={{ display: value === tab.value ? 'block' : 'none' }}
+          >
+            <LineChart
+              data={data}
+              legend
+              prettyLabels={filteredEntries}
+              theme={theme}
+              filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
+              seriesLabels={seriesLabels}
+              chosenParameter={tab.value}
+            />
+          </Box>
+        ))}
       {entries
         .filter((tab) => tab.type === ETabTypes.Unit)
+        .filter((tab) => tab.value === value)
         .map((tab) => (
           <Box
             key={`${collectionId}-${tab.value}-unmanaged-panel`}
