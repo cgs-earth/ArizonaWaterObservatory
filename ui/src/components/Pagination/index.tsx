@@ -13,7 +13,7 @@ type Props = PaginationProps & {
   onClick?: MouseEventHandler<HTMLDivElement>;
 };
 
-const Button: React.FC<Props> = (props) => {
+const Pagination: React.FC<Props> = (props) => {
   const { variant = Variant.Primary, onClick, ...paginationProps } = props;
 
   const handleClick = (event: MouseEvent<HTMLDivElement>) => {
@@ -37,4 +37,4 @@ const Button: React.FC<Props> = (props) => {
   );
 };
 
-export default Button;
+export default Pagination;
