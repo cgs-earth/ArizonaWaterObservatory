@@ -15,7 +15,11 @@ import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import { Variant } from '@/components/types';
-import { StringIdentifierCollections } from '@/consts/collections';
+import {
+  CollectionRestrictions,
+  RestrictionType,
+  StringIdentifierCollections,
+} from '@/consts/collections';
 import { Chart } from '@/features/Popup/Chart';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
@@ -63,6 +67,35 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
 
+  const [daysLimit, setDaysLimit] = useState<number>();
+  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
+
+  const getIsDateRangeOverLimit = () => {
+    if (daysLimit) {
+      if (!from || !to || !dayjs(from).isValid() || !dayjs(to).isValid()) {
+        return true;
+      }
+
+      return dayjs(to).diff(dayjs(from), 'days') > daysLimit;
+    }
+    return false;
+  };
+
+  const isDateRangeOverLimit = getIsDateRangeOverLimit();
+
+  const getDateInputError = () => {
+    // is to >= from?
+    if (isValidRange) {
+      // is there a limit on days and have we exceeded it?
+      if (daysLimit && isDateRangeOverLimit) {
+        return `${dayjs(to).diff(dayjs(from), 'days') - daysLimit} day(s) over limit`;
+      }
+      return false;
+    }
+
+    return 'Invalid date range';
+  };
+
   useEffect(() => {
     const url = buildLocationUrl(collection.id, id, layer.parameters, from, to, false, true);
 
@@ -76,10 +109,20 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
     if (!layer) {
       return;
     }
+    const restrictions = CollectionRestrictions[layer.datasourceId];
 
+    if (restrictions && restrictions.length > 0) {
+      const dateRangeLimitRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.DateRange
+      );
+
+      if (dateRangeLimitRestriction && dateRangeLimitRestriction.days > 0) {
+        setDaysLimit(dateRangeLimitRestriction.days);
+      }
+    }
     const newDataset = mainManager.getDatasource(layer.datasourceId);
 
-    if (newDataset) {
+    if (newDataset && !getIsDateRangeOverLimit()) {
       setDatasetName(newDataset.title ?? '');
       const paramObjects = Object.values(newDataset?.parameter_names ?? {});
 
@@ -196,8 +239,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
 
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
-
   return (
     <Paper
       ref={ref}
@@ -288,7 +329,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
             <DateInput
               label="To"
@@ -305,7 +346,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
           </Group>
         </Group>
