@@ -183,11 +183,9 @@ export const Grid: React.FC<Props> = (props) => {
   ) => {
     const location = locations.find((location) => location.id === locationId);
 
-    console.log('locations', locations, location, locationId);
     if (location) {
       const bbox = getBBox(feature);
       if (bbox) {
-        console.log('??', locationId, feature, location, bbox);
         return awoService.getCube<CoverageCollection | CoverageJSON>(collectionId, {
           signal,
           params: { ...params, bbox },
