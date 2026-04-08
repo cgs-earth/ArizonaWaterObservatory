@@ -11,7 +11,10 @@ import { Anchor, Box, Divider, Flex, Group, Stack, Text, Title } from '@mantine/
 import Accordion from '@/components/Accordion';
 import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
+import { Download } from '@/features/TopBar/Links/Download';
+import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
 import styles from '@/features/TopBar/Links/Links.module.css';
+import { Menu } from '@/features/TopBar/Links/Menu';
 import { useLocations } from '@/hooks/useLocations';
 import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
@@ -22,9 +25,6 @@ import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
 import { hasSearchTerm } from '@/utils/searchFeatures';
-import { Download } from './Download';
-import { LayerBlock } from './LayerBlock';
-import { Menu } from './Menu';
 
 dayjs.extend(isSameOrBefore);
 

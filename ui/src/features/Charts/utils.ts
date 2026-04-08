@@ -4,10 +4,10 @@
  */
 
 import { IRequestParams } from '@ogcapi-js/shared';
+import { TCoverageLabel, TWrappedCoverage } from '@/features/Charts/types';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
 import { Location } from '@/stores/main/types';
 import { isCoverageCollection } from '@/utils/isTypeObject';
-import { TCoverageLabel, TWrappedCoverage } from './types';
 
 const parseParamIds = (params?: IRequestParams) =>
   params?.['parameter-name']?.split(',').filter(Boolean) ?? [];

@@ -66,7 +66,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
   const [id, setId] = useState<string>(String(location.id));
 
-  const [_isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
@@ -242,6 +242,12 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
     } as CoverageCollection;
   };
 
+  const onLoading = (isLoading: boolean) => {
+    if (isMounted.current) {
+      setIsLoading(isLoading);
+    }
+  };
+
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
 
@@ -338,6 +344,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
+              disabled={isLoading}
               error={isValidRange ? false : 'Invalid date range'}
             />
             <DateInput
@@ -355,6 +362,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
+              disabled={isLoading}
               error={isValidRange ? false : 'Invalid date range'}
             />
           </Group>
@@ -371,6 +379,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 to={to}
                 getData={getData}
                 tabs
+                onLoading={onLoading}
               />
             </Collapse>
           )}

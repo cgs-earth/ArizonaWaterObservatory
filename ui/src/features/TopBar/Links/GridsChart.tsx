@@ -7,8 +7,7 @@ import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Feature } from 'geojson';
-import { Group, Progress, Tooltip } from '@mantine/core';
-import Button from '@/components/Button';
+import { Group, Progress } from '@mantine/core';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import { StringIdentifierCollections } from '@/consts/collections';
@@ -144,6 +143,7 @@ export const GridsChart: React.FC<Props> = (props) => {
     return { url, fileName };
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleGetAllCSV = async () => {
     setIsLoading(true);
 
@@ -201,6 +201,12 @@ export const GridsChart: React.FC<Props> = (props) => {
     }
   };
 
+  const onLoading = (isLoading: boolean) => {
+    if (isMounted.current) {
+      setIsLoading(isLoading);
+    }
+  };
+
   useEffect(() => {
     const collection = mainManager.getDatasource(layer.datasourceId);
 
@@ -224,6 +230,7 @@ export const GridsChart: React.FC<Props> = (props) => {
 
   const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const disabled = organizedLocations.length === 0 || isLoading || !isValidRange;
 
   const organizedLabels = useMemo(() => organizeLabels(), [organizedLocations]);
@@ -239,6 +246,7 @@ export const GridsChart: React.FC<Props> = (props) => {
           to={to}
           coverageLabels={organizedLabels}
           getData={getData}
+          onLoading={onLoading}
           className={styles.bigChart}
           tabs
           tabHeight={31.875}
@@ -262,6 +270,7 @@ export const GridsChart: React.FC<Props> = (props) => {
               DatePreset.ThirtyYears,
             ]}
             clearable
+            disabled={isLoading}
             error={isValidRange ? false : 'Invalid date range'}
           />
           <DateInput
@@ -279,10 +288,11 @@ export const GridsChart: React.FC<Props> = (props) => {
               DatePreset.ThirtyYears,
             ]}
             clearable
+            disabled={isLoading}
             error={isValidRange ? false : 'Invalid date range'}
           />
         </Group>
-        <Tooltip
+        {/* <Tooltip
           label={
             isLoading
               ? 'Please wait for download to finish.'
@@ -293,7 +303,7 @@ export const GridsChart: React.FC<Props> = (props) => {
           <Button size="sm" disabled={disabled} data-disabled={disabled} onClick={handleGetAllCSV}>
             Download All
           </Button>
-        </Tooltip>
+        </Tooltip> */}
       </Group>
       {isLoading && <Progress w="100%" value={progress} />}
     </>

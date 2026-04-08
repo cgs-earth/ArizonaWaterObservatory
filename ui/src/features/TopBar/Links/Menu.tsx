@@ -8,10 +8,10 @@ import Button from '@/components/Button';
 import TextInput from '@/components/TextInput';
 import { Variant } from '@/components/types';
 import styles from '@/features/TopBar/Links/Links.module.css';
+import { LocationBlock } from '@/features/TopBar/Links/LocationBlock';
 import { ICollection } from '@/services/edr.service';
 import { Location } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
-import { LocationBlock } from './LocationBlock';
 
 type Props = {
   collectionId: ICollection['id'];

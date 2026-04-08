@@ -116,7 +116,7 @@ export const LocationBlock: React.FC<Props> = (props) => {
         <>
           <NumberInput
             size="xs"
-            label={`${getLabel()}s per page`}
+            label={`${getLabel()}s shown`}
             value={pageSize}
             onChange={(value) => handlePageSizeChange(Number(value))}
             min={1}

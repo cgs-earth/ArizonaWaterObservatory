@@ -41,6 +41,7 @@ type Props = {
   value?: string | null;
   tabHeight?: number;
   onData?: (data?: TWrappedCoverage[]) => void;
+  onLoading?: (isLoading: boolean) => void;
   getData: <T extends IRequestParams>(
     collectionId: ICollection['id'],
     locationId: Location['id'],
@@ -62,6 +63,7 @@ export const Charts: React.FC<Props> = ({
   value = null,
   tabHeight,
   onData = () => null,
+  onLoading = () => null,
   getData,
   coverageLabels,
 }) => {
@@ -94,6 +96,7 @@ export const Charts: React.FC<Props> = ({
 
     try {
       setIsLoading(true);
+      onLoading(true);
       const datetime = getDatetime(from, to);
       const paramIds = parameters.map((p) => p.id);
 
@@ -189,6 +192,7 @@ export const Charts: React.FC<Props> = ({
       );
 
       onData(wrapped);
+      onLoading(false);
       if (isMounted.current) {
         setIsLoading(false);
       }

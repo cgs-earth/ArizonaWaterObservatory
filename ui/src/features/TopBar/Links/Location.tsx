@@ -18,6 +18,7 @@ import { StringIdentifierCollections } from '@/consts/collections';
 import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
+import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
@@ -36,7 +37,6 @@ import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
 import { getParameterUnit } from '@/utils/parameters';
 import { buildLocationUrl } from '@/utils/url';
-import { GeoJSON } from './GeoJSON';
 
 dayjs.extend(isSameOrBefore);
 
@@ -200,6 +200,12 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
     }
   };
 
+  const onLoading = (isLoading: boolean) => {
+    if (isMounted.current) {
+      setIsLoading(isLoading);
+    }
+  };
+
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
 
@@ -295,6 +301,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
+              disabled={isLoading}
               error={isValidRange ? false : 'Invalid date range'}
             />
             <DateInput
@@ -312,6 +319,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 DatePreset.ThirtyYears,
               ]}
               clearable
+              disabled={isLoading}
               error={isValidRange ? false : 'Invalid date range'}
             />
           </Group>
@@ -327,6 +335,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 from={from}
                 to={to}
                 getData={getData}
+                onLoading={onLoading}
                 tabs
               />
             </Collapse>

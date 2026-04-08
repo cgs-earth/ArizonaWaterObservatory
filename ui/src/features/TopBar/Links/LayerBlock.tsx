@@ -7,9 +7,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Feature } from 'geojson';
 import { Divider, Group, Paper, Stack, Text, Title } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
-import NumberInput from '@/components/NumberInput';
 import Pagination from '@/components/Pagination';
+import { Grid } from '@/features/TopBar/Links/Grid';
+import { GridsChart } from '@/features/TopBar/Links/GridsChart';
+import { Header } from '@/features/TopBar/Links/Header';
+import { Item } from '@/features/TopBar/Links/Item';
 import styles from '@/features/TopBar/Links/Links.module.css';
+import { Location } from '@/features/TopBar/Links/Location';
+import { LocationsChart } from '@/features/TopBar/Links/LocationsChart';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { ICollection } from '@/services/edr.service';
@@ -19,12 +24,6 @@ import { NotificationType } from '@/stores/session/types';
 import { chunk } from '@/utils/chunk';
 import { CollectionType } from '@/utils/collection';
 import { buildCubeUrl, buildItemsUrl, buildLocationsUrl } from '@/utils/url';
-import { Grid } from './Grid';
-import { GridsChart } from './GridsChart';
-import { Header } from './Header';
-import { Item } from './Item';
-import { Location } from './Location';
-import { LocationsChart } from './LocationsChart';
 
 type Props = {
   locations: Feature[];
@@ -40,7 +39,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
   const hasNotification = useSessionStore((state) => state.hasNotification);
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, _setPageSize] = useState(10);
   const [chunkedLocations, setChunkedLocations] = useState<Feature[][]>([]);
   const [currentChunk, setCurrentChunk] = useState<Feature[]>([]);
   const [url, setUrl] = useState('');
@@ -52,10 +51,10 @@ export const LayerBlock: React.FC<Props> = (props) => {
 
   const mobile = useMediaQuery('(max-width: 899px)');
 
-  const handlePageSizeChange = (pageSize: number) => {
-    setPageSize(pageSize);
-    setPage(1);
-  };
+  // const handlePageSizeChange = (pageSize: number) => {
+  //   setPageSize(pageSize);
+  //   setPage(1);
+  // };
 
   useEffect(() => {
     try {
@@ -162,6 +161,17 @@ export const LayerBlock: React.FC<Props> = (props) => {
     }
   };
 
+  const getCount = () => {
+    const length = currentChunk.length;
+    const totalLength = locations.length;
+
+    if (totalLength <= pageSize) {
+      return totalLength;
+    }
+
+    return `${length} / ${totalLength}`;
+  };
+
   return (
     <Stack
       component="section"
@@ -230,7 +240,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
                 />
               ))}
             <Group justify="space-between" align="flex-end">
-              {currentChunk.length > 0 && (
+              {/* {currentChunk.length > 0 && (
                 <NumberInput
                   size="xs"
                   label="Locations per page"
@@ -239,7 +249,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
                   min={1}
                   max={locations.length}
                 />
-              )}
+              )} */}
               <Pagination
                 size="sm"
                 total={chunkedLocations.length}
@@ -247,6 +257,9 @@ export const LayerBlock: React.FC<Props> = (props) => {
                 onChange={setPage}
                 mt="sm"
               />
+              <Text size="sm">
+                {getCount()} {getLabel()}(s)
+              </Text>
             </Group>
           </Stack>
         </Paper>

@@ -12,6 +12,8 @@ import Button from '@/components/Button';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
+import { Charts } from '@/features/Charts';
+import { TWrappedCoverage } from '@/features/Charts/types';
 import { Parameter } from '@/features/Popup';
 import styles from '@/features/Popup/Popup.module.css';
 import {
@@ -24,8 +26,6 @@ import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { getIdStore } from '@/utils/getIdStore';
 import { normalizeBBox } from '@/utils/normalizeBBox';
-import { Charts } from '../Charts';
-import { TWrappedCoverage } from '../Charts/types';
 
 type Props = {
   location: LocationType;

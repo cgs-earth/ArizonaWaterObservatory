@@ -172,6 +172,12 @@ export const LocationsChart: React.FC<Props> = (props) => {
     }
   };
 
+  const onLoading = (isLoading: boolean) => {
+    if (isMounted.current) {
+      setIsLoading(isLoading);
+    }
+  };
+
   useEffect(() => {
     const collection = mainManager.getDatasource(layer.datasourceId);
 
@@ -223,6 +229,7 @@ export const LocationsChart: React.FC<Props> = (props) => {
           to={to}
           coverageLabels={organizedLabels}
           getData={getData}
+          onLoading={onLoading}
           className={styles.bigChart}
           tabs
           tabHeight={31.875}
@@ -245,6 +252,7 @@ export const LocationsChart: React.FC<Props> = (props) => {
               DatePreset.FifteenYears,
               DatePreset.ThirtyYears,
             ]}
+            disabled={isLoading}
             clearable
             error={isValidRange ? false : 'Invalid date range'}
           />
@@ -262,6 +270,7 @@ export const LocationsChart: React.FC<Props> = (props) => {
               DatePreset.FifteenYears,
               DatePreset.ThirtyYears,
             ]}
+            disabled={isLoading}
             clearable
             error={isValidRange ? false : 'Invalid date range'}
           />

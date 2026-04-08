@@ -3,15 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Feature } from 'geojson';
 import { Box, Group, Stack, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
+import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
 import styles from '@/features/Popup/Popup.module.css';
+import Table from '@/features/Table';
 import {
   CoverageCollection,
   CoverageJSON,
@@ -21,8 +23,6 @@ import {
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { getIdStore } from '@/utils/getIdStore';
-import { Charts } from '../Charts';
-import Table from '../Table';
 
 type Props = {
   location: LocationType;
@@ -50,6 +50,10 @@ export const Location: React.FC<Props> = (props) => {
   const [tab, setTab] = useState<'chart' | 'table'>('chart');
   const [id, setId] = useState<string>();
   const [selectedParameter, setSelectedParameter] = useState<string | null>(null);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const isMounted = useRef(true);
 
   useEffect(() => {
     if (parameters.length === 0) {
@@ -85,6 +89,12 @@ export const Location: React.FC<Props> = (props) => {
     []
   );
 
+  const onLoading = (isLoading: boolean) => {
+    if (isMounted.current) {
+      setIsLoading(isLoading);
+    }
+  };
+
   return (
     <>
       <Box style={{ display: tab === 'chart' ? 'block' : 'none' }}>
@@ -96,6 +106,7 @@ export const Location: React.FC<Props> = (props) => {
             from={layer.from}
             to={layer.to}
             getData={getData}
+            onLoading={onLoading}
             value={selectedParameter}
             className={styles.chartWrapper}
           />
@@ -115,6 +126,7 @@ export const Location: React.FC<Props> = (props) => {
               className={styles.locationsDropdown}
               size="xs"
               label="Locations"
+              disabled={isLoading}
               searchable
               data={locations.map((location) => location.id)}
               value={location.id}
@@ -126,6 +138,7 @@ export const Location: React.FC<Props> = (props) => {
               className={styles.parametersDropdown}
               size="xs"
               label="Parameters"
+              disabled={isLoading}
               searchable
               data={parameters.map((parameter) => ({
                 value: parameter.id,
