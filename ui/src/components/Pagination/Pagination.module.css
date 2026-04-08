@@ -1,0 +1,66 @@
+/**
+ * Copyright 2026 Lincoln Institute of Land Policy
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.root {
+  /* box-shadow: 0px 4px 4px rgb(0, 0, 0); */
+}
+
+.control {
+  color: inherit;
+  box-shadow: 0px 2px 2px #00000040;
+  transition: transform 0.15s ease-in-out;
+}
+
+.primary:where([data-active]) {
+  color: #000;
+  background-color: var(--asu-color-primary);
+  border-color: var(--asu-color-primary);
+}
+
+.secondary:where([data-active]) {
+  color: #fff;
+  background-color: var(--asu-color-secondary);
+  border-color: var(--asu-color-secondary);
+}
+
+.tertiary:where([data-active]) {
+  color: #000;
+  background-color: var(--asu-color-tertiary);
+  border-color: var(--asu-color-tertiary);
+}
+
+.control:hover:not(:disabled):not([data-disabled='true']),
+.control:active:not(:disabled):not([data-disabled='true']) {
+  transform: scale(1.15);
+}
+
+.primary:hover,
+.primary:active,
+.primary:focus {
+  color: #000;
+  background-color: var(--asu-color-primary);
+}
+
+.secondary:hover,
+.secondary:active,
+.secondary:focus {
+  color: #fff;
+  background-color: var(--asu-color-secondary);
+  border-color: var(--asu-color-primary);
+}
+
+.tertiary:hover,
+.tertiary:active,
+.tertiary:focus {
+  color: #000;
+  background-color: var(--asu-color-tertiary);
+}
+
+.control:disabled,
+.control[data-disabled='true'] {
+  opacity: 0.5;
+  color: #000;
+  background-color: var(--asu-color-tertiary);
+}

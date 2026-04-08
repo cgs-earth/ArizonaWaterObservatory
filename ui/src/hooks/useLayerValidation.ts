@@ -42,6 +42,7 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
 
   const [parameterLimit, setParameterLimit] = useState<number>();
   const [daysLimit, setDaysLimit] = useState<number>();
+  const [parameterFirst, setParameterFirst] = useState(false);
 
   const [minDate, setMinDate] = useState<string>();
   const [maxDate, setMaxDate] = useState<string>();
@@ -67,6 +68,12 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
       if (daysLimitRestriction && daysLimitRestriction.days > 0) {
         setDaysLimit(daysLimitRestriction.days);
       }
+
+      const parameterFirstRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.ParameterFirst
+      );
+
+      setParameterFirst(Boolean(parameterFirstRestriction));
     }
   }, [layer]);
 
@@ -172,6 +179,8 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
   const doesPaletteHaveParameter =
     !paletteDefinition || parameters.includes(paletteDefinition?.parameter);
 
+  const needsAParameter = parameterFirst && parameters.length === 0;
+
   /**
    * The user has modified this layer since the last save
    *
@@ -194,7 +203,8 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
     isLoading ||
     (collectionType === CollectionType.EDRGrid && (!isValidRange || isDateRangeOverLimit)) ||
     isMissingParameters ||
-    isParameterSelectionOverLimit;
+    isParameterSelectionOverLimit ||
+    needsAParameter;
 
   const getDateInputError = () => {
     // is to >= from?
@@ -212,6 +222,10 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
   const getParameterError = () => {
     if (parameterLimit && isParameterSelectionOverLimit) {
       return `Please remove ${parameters.length - parameterLimit} parameter${parameters.length - parameterLimit > 1 ? 's' : ''}`;
+    }
+
+    if (needsAParameter) {
+      return 'Please select at least one parameter.';
     }
 
     return false;
@@ -239,6 +253,9 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
     }
     if (!doesPaletteHaveParameter) {
       return 'Dynamic color settings has invalid parameter.';
+    }
+    if (!needsAParameter) {
+      return 'Please select at least one parameter.';
     }
 
     if (hasUnsavedChanges) {

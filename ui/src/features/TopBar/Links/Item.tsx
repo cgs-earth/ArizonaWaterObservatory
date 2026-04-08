@@ -16,7 +16,7 @@ import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
-import styles from '@/features/TopBar/TopBar.module.css';
+import styles from '@/features/TopBar/Links/Links.module.css';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { getIdStore } from '@/utils/getIdStore';
