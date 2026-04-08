@@ -4,7 +4,7 @@
  */
 
 import { useRef } from 'react';
-import { Box, Group } from '@mantine/core';
+import { Box, Group, Paper } from '@mantine/core';
 import Button from '@/components/Button';
 import styles from '@/features/TopBar/TopBar.module.css';
 
@@ -29,7 +29,7 @@ export const UserGuide: React.FC = () => {
       className={styles.userGuideGroup}
       align="flex-start"
     >
-      <Box className={styles.userGuideWrapper}>
+      <Paper shadow="xl" radius="lg" withBorder className={styles.userGuideWrapper}>
         <Box
           ref={iframeRef}
           component="iframe"
@@ -40,7 +40,7 @@ export const UserGuide: React.FC = () => {
           allowFullScreen
           allow="fullscreen"
         />
-      </Box>
+      </Paper>
       <Button onClick={handleClick}>Full Screen</Button>
     </Group>
   );
