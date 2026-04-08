@@ -12,10 +12,10 @@ import Button from '@/components/Button';
 import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
 import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
+import { getId, highlightMatches } from '@/features/Panel/Layers/Layer/Search/utils';
 import useMainStore from '@/stores/main';
 import { Layer, Location } from '@/stores/main/types';
 import { getLabel } from '@/utils/getLabel';
-import { getId, highlightMatches } from './utils';
 
 type Props = {
   layer: Layer;

@@ -9,8 +9,8 @@ import Button from '@/components/Button';
 import Select from '@/components/Select';
 import { Variant } from '@/components/types';
 import styles from '@/features/Popup/Popup.module.css';
+import Table from '@/features/Table';
 import { Location as LocationType } from '@/stores/main/types';
-import Table from '../Table';
 
 type Props = {
   location: LocationType;

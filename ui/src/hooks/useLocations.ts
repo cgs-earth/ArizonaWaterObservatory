@@ -41,7 +41,6 @@ export const useLocations = (layer: Layer) => {
       controller.current = new AbortController();
 
       const allLocations = await mainManager.getFeatures(layer, controller.current.signal);
-
       const layerLocations = locations.filter((location) => location.layerId === layer.id);
 
       const filterFunction = getFilterFunction(layer.datasourceId);

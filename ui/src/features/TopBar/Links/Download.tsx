@@ -9,7 +9,7 @@ import DownloadIcon from '@/assets/Download';
 import Button from '@/components/Button';
 import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
-import styles from '@/features/TopBar/TopBar.module.css';
+import styles from '@/features/TopBar/Links/Links.module.css';
 import { Layer } from '@/stores/main/types';
 import { buildItemsUrl } from '@/utils/url';
 
