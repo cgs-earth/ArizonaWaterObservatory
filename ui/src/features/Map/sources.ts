@@ -8,6 +8,8 @@ import { SourceConfig, Sources } from '@/components/Map/types';
 export enum SourceId {
   MeasurePoints = 'measure-points',
   MeasureLine = 'measure-line',
+  SpatialSelection = 'spatial-selection',
+  SpatialSelectionBBox = 'spatial-selection-bbox',
 }
 
 /**
@@ -30,6 +32,30 @@ export const sourceConfigs: SourceConfig[] = [
   },
   {
     id: SourceId.MeasureLine,
+    type: Sources.GeoJSON,
+    definition: {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [],
+      },
+      cluster: false,
+    },
+  },
+  {
+    id: SourceId.SpatialSelection,
+    type: Sources.GeoJSON,
+    definition: {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [],
+      },
+      cluster: false,
+    },
+  },
+  {
+    id: SourceId.SpatialSelectionBBox,
     type: Sources.GeoJSON,
     definition: {
       type: 'geojson',

@@ -41,6 +41,7 @@ export enum Overlay {
   Screenshot = 'screenshot',
   Search = 'search',
   Share = 'share',
+  SpatialSelection = 'spatial-selection',
   Warning = 'warning',
 }
 

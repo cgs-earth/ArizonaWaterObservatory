@@ -18,6 +18,9 @@ export enum LayerId {
   DrawCold = 'draw-cold',
   DrawHot = 'draw-hot',
   Measure = 'measure',
+
+  SpatialSelection = 'spatial-selection',
+  SpatialSelectionBBox = 'spatial-selection-bbox',
 }
 
 export enum SubLayerId {
@@ -149,6 +152,36 @@ export const getLayerConfig = (id: LayerId | SubLayerId): null | LayerSpecificat
           'text-halo-width': 2,
         },
         filter: ['in', '$type', 'LineString'],
+      };
+    case LayerId.SpatialSelection:
+      return {
+        id: LayerId.SpatialSelection,
+        type: LayerType.Line,
+        source: SourceId.SpatialSelection,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#8c1d40',
+          'line-width': 4,
+        },
+        // filter: ['in', '$type', 'LineString'],
+      };
+    case LayerId.SpatialSelectionBBox:
+      return {
+        id: LayerId.SpatialSelectionBBox,
+        type: LayerType.Line,
+        source: SourceId.SpatialSelectionBBox,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#4ab7c4',
+          'line-width': 2.5,
+        },
+        // filter: ['in', '$type', 'LineString'],
       };
     default:
       return null;
@@ -587,5 +620,17 @@ export const layerDefinitions: MainLayerDefinition[] = [
         config: getLayerConfig(SubLayerId.MeasureLabel),
       },
     ],
+  },
+  {
+    id: LayerId.SpatialSelectionBBox,
+    controllable: false,
+    legend: false,
+    config: getLayerConfig(LayerId.SpatialSelectionBBox),
+  },
+  {
+    id: LayerId.SpatialSelection,
+    controllable: false,
+    legend: false,
+    config: getLayerConfig(LayerId.SpatialSelection),
   },
 ];

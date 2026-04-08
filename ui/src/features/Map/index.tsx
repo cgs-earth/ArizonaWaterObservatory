@@ -14,6 +14,7 @@ import { DEFAULT_BBOX, drawLayers } from '@/features/Map/consts';
 import { sourceConfigs } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent, getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
+import { useSpatialSelection } from '@/hooks/useSpatialSelection';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import { Location } from '@/stores/main/types';
@@ -56,6 +57,8 @@ const MainMap: React.FC<Props> = (props) => {
 
   const isMounted = useRef(true);
   const initialMapLoad = useRef(true);
+
+  useSpatialSelection(map);
 
   useEffect(() => {
     return () => {

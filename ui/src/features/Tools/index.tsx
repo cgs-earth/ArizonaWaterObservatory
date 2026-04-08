@@ -6,22 +6,22 @@
 import { Group } from '@mantine/core';
 import BasemapSelector from '@/features/Tools/Basemap';
 import { Draw } from '@/features/Tools/Draw';
-import { FAQ } from '@/features/Tools/FAQ';
 import { Geocoder } from '@/features/Tools/Geocoder';
-import { Glossary } from '@/features/Tools/Glossary';
 import Legend from '@/features/Tools/Legend';
 import { Screenshot } from '@/features/Tools/Screenshot';
 import { Warnings } from '@/features/Tools/Warnings';
+import SpatialSelection from './SpatialSelection';
 
 const Tools: React.FC = () => {
   return (
     <Group>
-      <Screenshot />
-      <FAQ />
-      <Glossary />
+      {/* <FAQ /> */}
+      {/* <Glossary /> */}
       <Legend />
-      <BasemapSelector />
+      <SpatialSelection />
       <Draw />
+      <Screenshot />
+      <BasemapSelector />
       <Geocoder />
       <Warnings />
     </Group>

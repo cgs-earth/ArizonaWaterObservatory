@@ -36,6 +36,7 @@ import {
   StringIdentifierCollections,
 } from '@/consts/collections';
 import { getDefaultGeoJSON } from '@/consts/geojson';
+import { getBBox } from '@/data/bbox';
 import {
   DEFAULT_BBOX,
   DEFAULT_FILL_OPACITY,
@@ -58,6 +59,7 @@ import {
 import { CoverageGeoService } from '@/services/coverageJSON/coverageGeo.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
+import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
 import {
   ColorValueHex,
   Layer,
@@ -1154,6 +1156,11 @@ class MainManager {
           turf.area(turf.bboxPolygon(DEFAULT_BBOX))
         );
       }
+      const spatialSelection = this.store.getState().spatialSelection;
+      if (spatialSelection && isSpatialSelectionPredefined(spatialSelection)) {
+        return getBBox(spatialSelection.boundary);
+      }
+
       return DEFAULT_BBOX;
     }
 
@@ -1690,6 +1697,9 @@ class MainManager {
       const settled = await Promise.allSettled(
         chunk.map(async (layer) => {
           const collectionId = layer.datasourceId;
+          // this.checkParameterRestrictions(layer.datasourceId, layer.parameters);
+          // this.checkDateRestrictions(layer.datasourceId, layer.from, layer.to);
+
           // addData should return the layerId
           return this.addData(collectionId, layer, {
             filterFeatures: drawnShapes,
