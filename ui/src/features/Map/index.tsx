@@ -347,24 +347,24 @@ const MainMap: React.FC<Props> = (props) => {
     }
 
     // Copy over all existing layers and sources when changing basemaps
-    const layers = map.getStyle().layers || [];
-    const sources = map.getStyle().sources || {};
-
-    const customLayers = layers.filter((layer) => {
-      return (
-        layer.id.startsWith('user-') ||
-        layer.id.startsWith('spatial-selection') ||
-        layer.id.startsWith('measure')
-      );
-    });
-
-    const customSources = Object.entries(sources).filter(([id]) => {
-      return (
-        id.startsWith('user-') || id.startsWith('spatial-selection') || id.startsWith('measure')
-      );
-    });
-
     map.once('styledata', () => {
+      const layers = map.getStyle().layers || [];
+      const sources = map.getStyle().sources || {};
+
+      const customLayers = layers.filter((layer) => {
+        return (
+          layer.id.startsWith('user-') ||
+          layer.id.startsWith('spatial-selection') ||
+          layer.id.startsWith('measure')
+        );
+      });
+
+      const customSources = Object.entries(sources).filter(([id]) => {
+        return (
+          id.startsWith('user-') || id.startsWith('spatial-selection') || id.startsWith('measure')
+        );
+      });
+
       for (const [id, source] of customSources) {
         if (!map.getSource(id)) {
           map.addSource(id, source);

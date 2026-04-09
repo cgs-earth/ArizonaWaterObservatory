@@ -2025,13 +2025,13 @@ class MainManager {
   }
 
   public clearAllData(): void {
+    this.clearLayers();
+    this.clearSources();
+
     this.store.getState().setLocations([]);
 
     this.store.getState().setLayers([]);
     this.store.getState().setDrawnShapes([]);
-
-    this.clearLayers();
-    this.clearSources();
 
     this.store.getState().setProvider(null);
     this.store.getState().setCategory(null);
