@@ -1103,7 +1103,7 @@ export type CoverageAxesSegments = {
   num: number;
 };
 export type CoverageAxesValues = {
-  values: (number | string)[];
+  values: string[] | number[];
 };
 
 export interface CoverageJSON {

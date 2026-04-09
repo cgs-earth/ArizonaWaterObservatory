@@ -4,12 +4,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Stack, Text, Title, Tooltip } from '@mantine/core';
+import { Box, Stack, Text, Title, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import { Layer } from '@/features/TopBar/Links/Layer';
-import styles from '@/features/TopBar/TopBar.module.css';
+import styles from '@/features/TopBar/Links/Links.module.css';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
@@ -21,7 +21,6 @@ const Links: React.FC = () => {
 
   const overlay = useSessionStore((store) => store.overlay);
   const setOverlay = useSessionStore((store) => store.setOverlay);
-  const linkLocation = useSessionStore((store) => store.linkLocation);
   const setLinkLocation = useSessionStore((store) => store.setLinkLocation);
 
   const [isEnabled, setIsEnabled] = useState(false);
@@ -75,17 +74,15 @@ const Links: React.FC = () => {
         </Button>
       </Tooltip>
       <Modal size="1222px" opened={opened} onClose={handleClose}>
-        <Stack gap={0} className={styles.modalBody}>
-          <Title order={5} size="h3">
+        <Box className={styles.modalHeader}>
+          <Title order={5} size="h3" p="var(--default-spacing)">
             API Links
           </Title>
+        </Box>
+        <Stack gap={0} className={styles.modalBody}>
           <>
             {layers.map((layer) => (
-              <Layer
-                key={`links-entry-${layer.name}-${layer.id}`}
-                layer={layer}
-                linkLocation={linkLocation}
-              />
+              <Layer key={`links-entry-${layer.name}-${layer.id}`} layer={layer} />
             ))}
           </>
         </Stack>

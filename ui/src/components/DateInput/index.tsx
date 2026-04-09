@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import debounce from 'lodash.debounce';
 import { DateInput as DateInputComponent, DateInputProps } from '@mantine/dates';
 import styles from '@/components/DateInput/DateInput.module.css';
@@ -22,7 +22,7 @@ const DateInput: React.FC<Props> = (props) => {
   // Retaining this for future reference, remove when custom presets get implemented
   // const simplePresetDates = simplePresets ? getSimplePresetDates(simplePresets) : [];
 
-  const debounceOnChange = debounce(onChange, delay);
+  const debounceOnChange = useMemo(() => debounce(onChange, delay), [onChange, delay]);
 
   useEffect(() => {
     return () => {

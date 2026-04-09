@@ -1950,6 +1950,7 @@ class MainManager {
       opacity,
       paletteDefinition: correctedPaletteDefinition,
       bbox: currentBBox,
+      loaded: true,
     });
   }
 
