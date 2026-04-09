@@ -351,11 +351,17 @@ const MainMap: React.FC<Props> = (props) => {
     const sources = map.getStyle().sources || {};
 
     const customLayers = layers.filter((layer) => {
-      return layer.id.startsWith('user-');
+      return (
+        layer.id.startsWith('user-') ||
+        layer.id.startsWith('spatial-selection') ||
+        layer.id.startsWith('measure')
+      );
     });
 
     const customSources = Object.entries(sources).filter(([id]) => {
-      return id.startsWith('user-');
+      return (
+        id.startsWith('user-') || id.startsWith('spatial-selection') || id.startsWith('measure')
+      );
     });
 
     map.once('styledata', () => {

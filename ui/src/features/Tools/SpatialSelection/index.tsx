@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { Group, Radio, Stack, Title, Tooltip } from '@mantine/core';
-import LegendIcon from '@/assets/Legend';
+import SpatialSelectionIcon from '@/assets/SpatialSelection';
+import Checkbox from '@/components/Checkbox';
 import IconButton from '@/components/IconButton';
 import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
@@ -27,6 +28,7 @@ const SpatialSelection: React.FC = () => {
   const setSpatialSelectionPredefinedBoundary = useMainStore(
     (state) => state.setSpatialSelectionPredefinedBoundary
   );
+  const setSpatialSelectionStrict = useMainStore((state) => state.setSpatialSelectionStrict);
 
   const [show, setShow] = useState(false);
 
@@ -41,10 +43,18 @@ const SpatialSelection: React.FC = () => {
     }
   };
 
+  const getIsStrict = (spatialSelection: SpatialSelectionType | null) => {
+    return Boolean(spatialSelection && spatialSelection.strict);
+  };
+
   const handleBoundaryChange = (boundary: string) => {
     if (isPredefinedBoundary(boundary)) {
       setSpatialSelectionPredefinedBoundary(boundary);
     }
+  };
+
+  const handleStrictChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSpatialSelectionStrict(event.currentTarget.checked);
   };
 
   useEffect(() => {
@@ -67,15 +77,12 @@ const SpatialSelection: React.FC = () => {
             variant={show ? Variant.Selected : Variant.Secondary}
             onClick={() => handleShow(!show)}
           >
-            <LegendIcon />
+            <SpatialSelectionIcon />
           </IconButton>
         </Tooltip>
       }
       content={
-        <Stack
-          gap="var(--default-spacing)"
-          className={`${styles.container} ${styles.legendWrapper}`}
-        >
+        <Stack gap="var(--default-spacing)" className={styles.container}>
           <Title order={5} size="h3" className={styles.legendTitle}>
             Spatial Selection
           </Title>
@@ -91,6 +98,11 @@ const SpatialSelection: React.FC = () => {
               <Radio value={PredefinedBoundary.ColoradoRiverBasin} label="Colorado River Basin" />
             </Group>
           </Radio.Group>
+          <Checkbox
+            disabled={!spatialSelection}
+            checked={getIsStrict(spatialSelection)}
+            onChange={handleStrictChange}
+          />
         </Stack>
       }
     />

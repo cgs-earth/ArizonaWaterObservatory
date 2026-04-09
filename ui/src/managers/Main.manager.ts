@@ -6,6 +6,7 @@
 import dayjs from 'dayjs';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
+import { combine, simplify } from '@turf/turf';
 import {
   BBox,
   Feature,
@@ -37,6 +38,7 @@ import {
 } from '@/consts/collections';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import { getBBox } from '@/data/bbox';
+import { LayerId } from '@/features/Map/config';
 import {
   DEFAULT_BBOX,
   DEFAULT_FILL_OPACITY,
@@ -45,6 +47,7 @@ import {
   LAYER_IDENTIFIER,
   LOCATION_IDENTIFIER,
 } from '@/features/Map/consts';
+import { SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent } from '@/features/Map/utils';
 import { getNextLink, stringifyBBox } from '@/managers/Main.utils';
 import notificationManager from '@/managers/Notification.init';
@@ -918,6 +921,12 @@ class MainManager {
       }
     }
 
+    if (this.map.getLayer(LayerId.SpatialSelectionBBox)) {
+      this.map.moveLayer(LayerId.SpatialSelectionBBox);
+    }
+    if (this.map.getLayer(LayerId.SpatialSelection)) {
+      this.map.moveLayer(LayerId.SpatialSelection);
+    }
     drawLayers.forEach((layerId) => this.map!.moveLayer(layerId));
   }
 
@@ -1318,7 +1327,31 @@ class MainManager {
         next
       );
 
-      let filtered = this.filterLocations(collectionId, page, options?.filterFeatures);
+      const spatialSelection = this.store.getState().spatialSelection;
+      let filter = options?.filterFeatures;
+      if (
+        !(options?.filterFeatures && options.filterFeatures.length > 0) &&
+        spatialSelection &&
+        spatialSelection.strict &&
+        isSpatialSelectionPredefined(spatialSelection)
+      ) {
+        const featureCollection = this.getMapFeatures<Polygon | MultiPolygon>(
+          SourceId.SpatialSelection
+        );
+        if (featureCollection) {
+          const combinedFeatures = combine(featureCollection).features as Feature<
+            Polygon | MultiPolygon
+          >[];
+          filter = combinedFeatures.map((feature) =>
+            simplify(feature, {
+              tolerance: 0.05,
+              mutate: false,
+            })
+          );
+        }
+      }
+
+      let filtered = this.filterLocations(collectionId, page, filter);
       this.clearInvalidLocations(layer.id, collectionId, filtered);
       if (Array.isArray(filtered.features)) {
         filtered.features.forEach((feature) => {
@@ -1643,6 +1676,22 @@ class MainManager {
     }
   }
 
+  private getMapFeatures<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(sourceId: string): FeatureCollection<T, V> | undefined {
+    const source = this.map?.getSource(sourceId) as GeoJSONSource;
+
+    const data = source._data;
+    if (typeof data !== 'string') {
+      const featureCollection = turf.featureCollection<T, V>(
+        (data as FeatureCollection<T, V>).features as Feature<T, V>[]
+      );
+
+      return featureCollection;
+    }
+  }
+
   /**
    *
    * @function
@@ -1654,14 +1703,8 @@ class MainManager {
     try {
       const sourceId = this.getSourceId(layer.datasourceId, layer.id);
 
-      const source = this.map?.getSource(sourceId) as GeoJSONSource;
-
-      const data = source._data;
-      if (typeof data !== 'string') {
-        const featureCollection = turf.featureCollection<T, V>(
-          (data as FeatureCollection<T, V>).features as Feature<T, V>[]
-        );
-
+      const featureCollection = this.getMapFeatures<T, V>(sourceId);
+      if (featureCollection) {
         return featureCollection;
       }
     } catch (error) {
@@ -1680,7 +1723,27 @@ class MainManager {
     );
 
     const drawnShapes = this.store.getState().drawnShapes;
-    const filteredData = this.filterLocations(layer.datasourceId, data, drawnShapes);
+    const spatialSelection = this.store.getState().spatialSelection;
+    let filter = drawnShapes;
+    if (
+      drawnShapes.length === 0 &&
+      spatialSelection &&
+      spatialSelection.strict &&
+      isSpatialSelectionPredefined(spatialSelection)
+    ) {
+      try {
+        const featureCollection = this.getMapFeatures<Polygon | MultiPolygon>(
+          SourceId.SpatialSelection
+        );
+        if (featureCollection) {
+          filter = featureCollection.features;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    const filteredData = this.filterLocations(layer.datasourceId, data, filter);
 
     return filteredData;
   }
