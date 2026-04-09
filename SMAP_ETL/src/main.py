@@ -48,7 +48,7 @@ def main(
 
     LOGGER.info("Searching for all SMAP data in Arizona")
 
-    files = get_smap_data_list_for_arizona()
+    files = get_smap_data_list_for_arizona(test_mode=test_mode)
 
     LOGGER.info(
         "Filtering down file list to only those not previously downloaded"
@@ -94,7 +94,9 @@ def main(
         LOGGER.info(
             f"Appending file {i}/{len(files_to_download)}: {hd5_file_path[0].name}"
         )
-        append_hd5_to_s3_zarr(hd5_file_path[0], s3_fs, bucket, s3_store_path)
+        append_hd5_to_s3_zarr(
+            hd5_file_path[0], s3_fs, bucket, s3_store_path, test_mode
+        )
 
         if test_mode and i > 5:
             LOGGER.warning("Stopping early since test mode was specified")
@@ -149,6 +151,6 @@ if __name__ == "__main__":
             args.test_mode,
         )
     except KeyboardInterrupt:
-        LOGGER.info(
-            "Program interrupted by keyboard interrupt; this may have left zarr data in a corrupt or incomplete state; you may need to remove and re-create the zarr store"
+        LOGGER.warning(
+            "Program interrupted by keyboard interrupt; this may have left zarr data in a corrupt or incomplete state; you should remove and re-create the zarr store"
         )

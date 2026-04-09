@@ -79,6 +79,8 @@ class ProviderSchema(TypedDict):
     # if this is set to true, then it will ensure the times are unique
     drop_duplipate_times: NotRequired[bool]
 
+    storage_crs: NotRequired[str]
+
 
 LOGGER = logging.getLogger(__name__)
 

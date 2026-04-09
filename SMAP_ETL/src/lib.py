@@ -5,11 +5,15 @@ import datetime
 import io
 import json
 import logging
+import os
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import earthaccess
 import minio
+import pandas as pd
+import pyproj
+from pyproj import Transformer
 import xarray as xr
 
 LOGGER = logging.getLogger(__name__)
@@ -54,7 +58,7 @@ def update_checkpoint(mc: minio.Minio, bucket: str, new_url: str):
     )
 
 
-def get_smap_data_list_for_arizona():
+def get_smap_data_list_for_arizona(test_mode: bool = False):
     earthaccess.login(persist=True)
 
     ARIZONA_BBOX = (-115.04883, 31.12820, -108.58887, 37.12529)
@@ -69,7 +73,10 @@ def get_smap_data_list_for_arizona():
     next_month = (
         datetime.datetime.now() + datetime.timedelta(days=30)
     ).strftime("%Y-%m")
-    arbitrary_early_date_before_start_of_data = "1900-01"
+    # get significantly less data if it test mode
+    arbitrary_early_date_before_start_of_data = (
+        "1900-01" if not test_mode else "2025-01-01"
+    )
 
     results = earthaccess.search_data(
         short_name=SMAP_DATASET,
@@ -190,42 +197,115 @@ def get_total_size_in_gb(files: list[earthaccess.DataGranule]) -> float:
     return total_size_in_mb / 1024
 
 
+def parse_time_from_path(hd5_file_path: Path):
+    """Given a hd5 file path from NASA SMAP, extract the time it is associated with"""
+    timestamp_str = hd5_file_path.name.split("_")[4]
+    return datetime.datetime.strptime(timestamp_str, "%Y%m%dT%H%M%S")
+
+
 def append_hd5_to_s3_zarr(
-    hd5_file_path: Path, s3_fs, bucket: str, store_name: str
+    hd5_file_path: Path,
+    s3_fs,
+    bucket: str,
+    store_name: str,
+    test_mode: bool = False,
 ):
     """
-    open hd5 file with xarray, and append to S3 Zarr store using fsspec mapper.
+    Open hd5 file with xarray, reproject cell_lat/cell_lon to EASE2 meters,
+    and append to S3 Zarr store using fsspec mapper.
     """
-    import os
+    root = xr.open_dataset(
+        hd5_file_path,
+        engine="h5netcdf",
+        phony_dims="sort",
+    )
 
-    try:
-        ds = xr.open_dataset(hd5_file_path, engine="h5netcdf")
+    geo = xr.open_dataset(
+        hd5_file_path,
+        engine="h5netcdf",
+        group="Geophysical_Data",
+        phony_dims="sort",
+    )
 
-        # Create fsspec mapper for Zarr store
-        zarr_mapper = s3_fs.get_mapper(f"{bucket}/{store_name}")
+    ds = xr.merge([geo, root[["cell_lat", "cell_lon"]]])
 
-        # Check if store exists by checking if it has any keys
-        store_exists = bool(list(zarr_mapper.keys()))
+    # Drop CRS metadata variable that has inconsistent dimensions across files
+    ds = ds.drop_vars("EASE2_global_projection", errors="ignore")
 
-        if store_exists:
-            # Append along 'time'
-            ds.to_zarr(
-                store=zarr_mapper,
-                mode="a",
-                append_dim="time",
-                consolidated=True,
-                zarr_format=2,
-            )
-        else:
-            # Create new store; do NOT set append_dim
-            ds.to_zarr(
-                store=zarr_mapper,
-                mode="w",
-                consolidated=True,
-                zarr_format=2,
-            )
+    # Drop HDF5 dimension scale artifacts that aren't Zarr-serializable
+    for var in list(ds.data_vars) + list(ds.coords):
+        ds[var].attrs.pop("DIMENSION_LABELS", None)
 
-    finally:
+    # --- Reproject cell_lat/cell_lon to EASE2 meters and assign as x/y coords ---
+    transformer = Transformer.from_crs(
+        "EPSG:4326", "EPSG:6933", always_xy=True
+    )
+
+    lons = ds["cell_lon"].values  # shape (y, x)
+    lats = ds["cell_lat"].values
+
+    x_meters, y_meters = transformer.transform(lons, lats)
+
+    # EASE2 is a regular grid, so collapse to 1D by taking the first row/col
+    x_1d = x_meters[0, :]  # x varies along columns
+    y_1d = y_meters[:, 0]  # y varies along rows
+
+    # Get the phony dim names that correspond to spatial axes
+    phony_y, phony_x = ds[
+        "cell_lat"
+    ].dims  # e.g. ("phony_dim_0", "phony_dim_1")
+
+    ds = ds.assign_coords(
+        {
+            phony_x: x_1d,
+            phony_y: y_1d,
+        }
+    ).rename({phony_x: "x", phony_y: "y"})
+
+    # Drop raw lat/lon — redundant now that we have x/y in meters
+    ds = ds.drop_vars(["cell_lat", "cell_lon"], errors="ignore")
+
+    # Extract time from filename
+    time_value = pd.Timestamp(parse_time_from_path(hd5_file_path))
+
+    # Force explicit time dimension
+    ds = ds.expand_dims(time=[time_value])
+    ds = ds.sortby("time")
+
+    # Create fsspec mapper for Zarr store
+    zarr_mapper = s3_fs.get_mapper(f"{bucket}/{store_name}")
+
+    store_exists = bool(list(zarr_mapper.keys()))
+
+    time_encoding = {
+        "time": {
+            "dtype": "int64",
+            "units": "microseconds since 1970-01-01T00:00:00",
+        }
+    }
+
+    if store_exists:
+        ds.to_zarr(
+            store=zarr_mapper,
+            mode="a",
+            append_dim="time",
+            consolidated=True,
+            zarr_format=2,
+        )
+    else:
+        # Add CRS variable so get_crs_from_dataset can detect it automatically on the
+        # query side of things
+        crs = pyproj.CRS.from_epsg(6933)
+        ds.attrs["proj4"] = crs.to_proj4()
+        ds.to_zarr(
+            store=zarr_mapper,
+            mode="w",
+            consolidated=True,
+            zarr_format=2,
+            encoding=time_encoding,
+        )
+
+    if not test_mode:
         LOGGER.info(
             f"Removing {hd5_file_path} since it was successfully appended to S3 Zarr store"
         )
