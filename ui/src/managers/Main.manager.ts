@@ -6,7 +6,7 @@
 import dayjs from 'dayjs';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
-import { combine, simplify } from '@turf/turf';
+import { combine, featureCollection, simplify } from '@turf/turf';
 import {
   BBox,
   Feature,
@@ -49,6 +49,7 @@ import {
 } from '@/features/Map/consts';
 import { SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent } from '@/features/Map/utils';
+import { ARIZONA_ID, LOWER_COLORADO_ID, UPPER_COLORADO_ID } from '@/hooks/useSpatialSelection';
 import { getNextLink, stringifyBBox } from '@/managers/Main.utils';
 import notificationManager from '@/managers/Notification.init';
 import {
@@ -70,6 +71,7 @@ import {
   MainState,
   PaletteDefinition,
   ParameterGroupMembers,
+  PredefinedBoundary,
   TGeometryTypes,
 } from '@/stores/main/types';
 import { NotificationType } from '@/stores/session/types';
@@ -901,6 +903,13 @@ class MainManager {
       return;
     }
 
+    if (this.map.getLayer(LayerId.SpatialSelectionBBox)) {
+      this.map.moveLayer(LayerId.SpatialSelectionBBox);
+    }
+    if (this.map.getLayer(LayerId.SpatialSelection)) {
+      this.map.moveLayer(LayerId.SpatialSelection);
+    }
+
     const layers = [...this.store.getState().layers].sort((a, b) => a.position - b.position);
     let lastLayer = '';
 
@@ -921,12 +930,6 @@ class MainManager {
       }
     }
 
-    if (this.map.getLayer(LayerId.SpatialSelectionBBox)) {
-      this.map.moveLayer(LayerId.SpatialSelectionBBox);
-    }
-    if (this.map.getLayer(LayerId.SpatialSelection)) {
-      this.map.moveLayer(LayerId.SpatialSelection);
-    }
     drawLayers.forEach((layerId) => this.map!.moveLayer(layerId));
   }
 
@@ -1329,23 +1332,40 @@ class MainManager {
 
       const spatialSelection = this.store.getState().spatialSelection;
       let filter = options?.filterFeatures;
-      if (
-        !(options?.filterFeatures && options.filterFeatures.length > 0) &&
-        spatialSelection &&
-        spatialSelection.strict &&
-        isSpatialSelectionPredefined(spatialSelection)
-      ) {
-        const featureCollection = this.getMapFeatures<Polygon | MultiPolygon>(
+
+      const hasExplicitFilters = options?.filterFeatures && options.filterFeatures.length > 0;
+
+      const shouldUseSpatialSelection =
+        !hasExplicitFilters &&
+        spatialSelection?.strict &&
+        isSpatialSelectionPredefined(spatialSelection);
+
+      if (shouldUseSpatialSelection) {
+        const spatialSelectionCollection = this.getMapFeatures<Polygon | MultiPolygon>(
           SourceId.SpatialSelection
         );
-        if (featureCollection) {
-          const combinedFeatures = combine(featureCollection).features as Feature<
+
+        if (spatialSelectionCollection) {
+          const allowedIds =
+            spatialSelection.boundary === PredefinedBoundary.Arizona
+              ? [ARIZONA_ID]
+              : [LOWER_COLORADO_ID, UPPER_COLORADO_ID];
+
+          const selectedFeatures = spatialSelectionCollection.features.filter((feature) =>
+            allowedIds.includes(String(feature.id))
+          );
+
+          const combinedFeatures = combine(featureCollection(selectedFeatures)).features as Feature<
             Polygon | MultiPolygon
           >[];
+
+          const toleranceFactor =
+            spatialSelection.boundary === PredefinedBoundary.Arizona ? 0.005 : 0.05;
+
           filter = combinedFeatures.map((feature) =>
             simplify(feature, {
-              tolerance: 0.05,
-              mutate: false,
+              tolerance: toleranceFactor,
+              mutate: true,
             })
           );
         }

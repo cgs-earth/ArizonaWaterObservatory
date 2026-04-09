@@ -255,6 +255,26 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
             }
           }
         };
+      case LayerId.SpatialSelection:
+        return (e) => {
+          const html = `
+            <div>
+              <strong>Data Boundary</strong>
+              <p>This is the shape used to generate the Data Bounding box. Restrict results to this boundary by selecting "Strict" in the Data Boundary tool.</p>
+            </div>
+            `;
+          hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        };
+      case LayerId.SpatialSelectionBBox:
+        return (e) => {
+          const html = `
+            <div>
+              <strong>Data Boundary BBox</strong><br/>
+              <p>This is the bounding box that is used to fetch data.</p>
+            </div>
+            `;
+          hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        };
 
       default:
         return (e) => {
@@ -390,7 +410,26 @@ export const getLayerMouseMoveFunction = (id: LayerId | SubLayerId): CustomListe
             }
           }
         };
-
+      case LayerId.SpatialSelectionBBox:
+        return (e) => {
+          const html = `
+            <div>
+              <strong>Data Bounding Box</strong>
+              <p>This is the bounding box that is used to fetch data.</p>
+            </div>
+            `;
+          hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        };
+      case LayerId.SpatialSelection:
+        return (e) => {
+          const html = `
+            <div>
+              <strong>Data Boundary</strong>
+              <p>This is the shape used to generate the Data Bounding box. Restrict results to this boundary by selecting "Strict" in the Data Boundary tool.</p>
+            </div>
+            `;
+          hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        };
       default:
         return (e) => {
           console.log('Hover Exit Event Triggered: ', e);
@@ -626,11 +665,15 @@ export const layerDefinitions: MainLayerDefinition[] = [
     controllable: false,
     legend: false,
     config: getLayerConfig(LayerId.SpatialSelectionBBox),
+    hoverFunction: getLayerHoverFunction(LayerId.SpatialSelectionBBox),
+    mouseMoveFunction: getLayerMouseMoveFunction(LayerId.SpatialSelectionBBox),
   },
   {
     id: LayerId.SpatialSelection,
     controllable: false,
     legend: false,
     config: getLayerConfig(LayerId.SpatialSelection),
+    hoverFunction: getLayerHoverFunction(LayerId.SpatialSelection),
+    mouseMoveFunction: getLayerMouseMoveFunction(LayerId.SpatialSelection),
   },
 ];

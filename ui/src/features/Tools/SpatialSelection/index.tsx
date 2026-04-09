@@ -11,6 +11,7 @@ import IconButton from '@/components/IconButton';
 import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
 import styles from '@/features/Tools/Tools.module.css';
+import { useLoading } from '@/hooks/useLoading';
 import useMainStore from '@/stores/main';
 import {
   isPredefinedBoundary,
@@ -29,6 +30,8 @@ const SpatialSelection: React.FC = () => {
     (state) => state.setSpatialSelectionPredefinedBoundary
   );
   const setSpatialSelectionStrict = useMainStore((state) => state.setSpatialSelectionStrict);
+
+  const { isLoadingGeography } = useLoading();
 
   const [show, setShow] = useState(false);
 
@@ -69,7 +72,6 @@ const SpatialSelection: React.FC = () => {
       opened={show}
       onChange={setShow}
       closeOnClickOutside={false}
-      classNames={{ dropdown: styles.legendContent }}
       position="bottom-start"
       target={
         <Tooltip label="Change data boundaries" disabled={show}>
@@ -94,12 +96,22 @@ const SpatialSelection: React.FC = () => {
             onChange={handleBoundaryChange}
           >
             <Group gap="var(--default-spacing)">
-              <Radio value={PredefinedBoundary.Arizona} label="Arizona" />
-              <Radio value={PredefinedBoundary.ColoradoRiverBasin} label="Colorado River Basin" />
+              <Radio
+                disabled={isLoadingGeography}
+                value={PredefinedBoundary.Arizona}
+                label="Arizona"
+              />
+              <Radio
+                disabled={isLoadingGeography}
+                value={PredefinedBoundary.ColoradoRiverBasin}
+                label="Colorado River Basin"
+              />
             </Group>
           </Radio.Group>
           <Checkbox
-            disabled={!spatialSelection}
+            label="Strict"
+            size="sm"
+            disabled={isLoadingGeography || !spatialSelection}
             checked={getIsStrict(spatialSelection)}
             onChange={handleStrictChange}
           />

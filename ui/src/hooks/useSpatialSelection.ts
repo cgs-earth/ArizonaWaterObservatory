@@ -19,12 +19,12 @@ import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelect
 import { PredefinedBoundary } from '@/stores/main/types';
 import { LoadingType, NotificationType } from '@/stores/session/types';
 
-const LOWER_COLORADO_ID = '15';
+export const LOWER_COLORADO_ID = '15';
 export const LOWER_COLORADO_ID_NUMERIC = Number(LOWER_COLORADO_ID);
-const UPPER_COLORADO_ID = '14';
+export const UPPER_COLORADO_ID = '14';
 export const UPPER_COLORADO_ID_NUMERIC = Number(UPPER_COLORADO_ID);
 export const COLORADO_RIVER_BASIN_ID_NUMERIC = 1;
-const ARIZONA_ID = '04';
+export const ARIZONA_ID = '04';
 export const ARIZONA_ID_NUMERIC = Number(ARIZONA_ID);
 
 export const useSpatialSelection = (map: Map | null) => {
