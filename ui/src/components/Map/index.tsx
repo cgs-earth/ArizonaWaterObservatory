@@ -68,6 +68,8 @@ const MapComponent: React.FC<MapComponentProps> = (props) => {
   } = props;
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Prevent duplicate map instantiations in dev mode
   const isFirstLoad = useRef(true);
   const {
     map,
