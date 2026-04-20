@@ -134,4 +134,4 @@ order-by-type = false
 
 
 [tool.pyright]
-ignore = ["GRACE_ETL/**"]
+ignore = ["GRACE_ETL/**", "SMAP_ETL/**"]
