@@ -9,7 +9,7 @@ check:
 
 dev:
 	test -f local.openapi.yml || uv run pygeoapi openapi generate pygeoapi.config.yml --output-file local.openapi.yml
-	PYGEOAPI_CONFIG=pygeoapi.config.yml PYGEOAPI_OPENAPI=local.openapi.yml PYGEOAPI_DEPLOYMENT_DIR=$(pwd)/pygeoapi-deployment uv run pygeoapi serve
+	PYGEOAPI_CONFIG=pygeoapi.config.yml PYGEOAPI_OPENAPI=local.openapi.yml PYGEOAPI_DEPLOYMENT_DIR=$(PWD)/pygeoapi-deployment uv run pygeoapi serve
 
 deps:
 	# Using uv, install all Python dependencies needed for local development and spin up necessary docker services
