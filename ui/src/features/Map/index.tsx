@@ -345,7 +345,7 @@ const MainMap: React.FC<Props> = (props) => {
     }
 
     if (terrainActive) {
-      map.setTerrain({ source: SourceId.Bathymetry });
+      map.setTerrain({ source: SourceId.Terrain });
     } else {
       map.setTerrain(null);
     }

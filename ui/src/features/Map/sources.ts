@@ -9,7 +9,6 @@ export enum SourceId {
   MeasurePoints = 'measure-points',
   MeasureLine = 'measure-line',
   Terrain = 'terrain',
-  Bathymetry = 'bathymetry',
 }
 
 /**
@@ -50,16 +49,6 @@ export const sourceConfigs: SourceConfig[] = [
       url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
       tileSize: 512,
       maxzoom: 14,
-    },
-  },
-  {
-    id: SourceId.Bathymetry,
-    type: Sources.Vector,
-    definition: {
-      type: 'vector',
-      url: 'mapbox://mapbox.mapbox-bathymetry-v2',
-      // tileSize: 512,
-      // maxzoom: 14,
     },
   },
 ];
