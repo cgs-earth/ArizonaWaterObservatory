@@ -11,8 +11,8 @@ server:
   pretty_print: true
   # admin: true
   templates:
-    static: /opt/pygeoapi/pygeoapi-deployment/static
-    path: /opt/pygeoapi/pygeoapi-deployment/templates
+    static: ${PYGEOAPI_DEPLOYMENT_DIR:-/opt/pygeoapi/pygeoapi-deployment}/static
+    path: ${PYGEOAPI_DEPLOYMENT_DIR:-/opt/pygeoapi/pygeoapi-deployment}/templates
   limits:
     default_items: 500
     max_items: 10000
