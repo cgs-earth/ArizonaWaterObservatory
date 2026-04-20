@@ -27,6 +27,13 @@ export const COLORADO_RIVER_BASIN_ID_NUMERIC = 1;
 export const ARIZONA_ID = '04';
 export const ARIZONA_ID_NUMERIC = Number(ARIZONA_ID);
 
+/**
+ * This hook loads specific features from the reference service, before storing them all into a single GeoJSON source.
+ * It listens for any changes to spatialSelection in the main store and handles any data fetches/filtering as required.
+ *
+ * @param map Map | null
+ * @returns void
+ */
 export const useSpatialSelection = (map: Map | null) => {
   const spatialSelection = useMainStore((state) => state.spatialSelection);
   const layerCount = useMainStore((state) => state.layers.length);
