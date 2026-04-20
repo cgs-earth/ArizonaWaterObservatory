@@ -68,6 +68,17 @@ services:
       - LOG_LEVEL=debug
     restart: on-failure
 
+  # test minio container for uploading smap / grace etl data
+  minio:
+    container_name: awo_test_minio
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - awo_minio:/data
+
   dashboard-ui:
     build:
       context: dashboard-ui
@@ -80,3 +91,4 @@ services:
 volumes:
   redis_data: 
   awo_postgres_data:
+  awo_minio:

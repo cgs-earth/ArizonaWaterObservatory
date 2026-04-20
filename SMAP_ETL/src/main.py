@@ -40,6 +40,13 @@ def main(
     test_mode: bool,
 ):
     mc = minio.Minio(endpoint, access_key, secret_key, secure=False)
+
+    if not mc.bucket_exists(bucket):
+        LOGGER.warning(
+            f"Specified bucket '{bucket}' does not exist. Creating bucket {bucket}"
+        )
+        mc.make_bucket(bucket)
+
     previously_downloaded_urls = get_previously_downloaded_urls(mc, bucket)
     LOGGER.debug(f"{previously_downloaded_urls=}")
     LOGGER.info(
@@ -139,6 +146,15 @@ if __name__ == "__main__":
         action="store_true",
         help="Download only a subset of SMAP data for testing",
     )
+
+    if not os.environ.get("EARTHDATA_USERNAME") or not os.environ.get(
+        "EARTHDATA_PASSWORD"
+    ):
+        # You can alternatively get a token from https://urs.earthdata.nasa.gov/documentation/for_users/user_token#/api/users/token
+        # but as far as I can tell, the token cannot be auto refreshed and thus will require manual renewal after 60 days
+        LOGGER.warning(
+            "Missing at least one of env vars EARTHDATA_USERNAME or EARTHDATA_PASSWORD; Falling back to cached / interactive login credentials. Without credentials, SMAP data cannot be downloaded. New credentials can be generated here: https://urs.earthdata.nasa.gov/home"
+        )
 
     args = parser.parse_args()
     try:

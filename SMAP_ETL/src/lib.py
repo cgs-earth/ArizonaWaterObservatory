@@ -22,6 +22,7 @@ SMAP_CHECKPOINT_JSON = "stored_smap_files.json"
 
 
 def get_previously_downloaded_urls(mc: minio.Minio, bucket) -> list[str]:
+    """Try to source the list of previously downloaded urls from the object store"""
     try:
         existing_data = mc.get_object(
             object_name=SMAP_CHECKPOINT_JSON, bucket_name=bucket
@@ -159,6 +160,10 @@ def filter_data_to_once_a_day(
 
 
 def get_hd5_file_url(file: earthaccess.DataGranule) -> str:
+    """
+    Given a DataGranule object, return the link to the hd5 file that
+    can be used to download the data
+    """
     data_links: list[str] = file.data_links()
     hd5_links = []
     for link in data_links:
@@ -192,6 +197,7 @@ def filter_data_to_only_new_files(
 
 
 def get_total_size_in_gb(files: list[earthaccess.DataGranule]) -> float:
+    """Given a list of datasets"""
     total_size_in_mb = sum([file.size() for file in files])
 
     return total_size_in_mb / 1024
@@ -241,7 +247,7 @@ def append_hd5_to_s3_zarr(
         "EPSG:4326", "EPSG:6933", always_xy=True
     )
 
-    lons = ds["cell_lon"].values  # shape (y, x)
+    lons = ds["cell_lon"].values
     lats = ds["cell_lat"].values
 
     x_meters, y_meters = transformer.transform(lons, lats)
@@ -265,7 +271,8 @@ def append_hd5_to_s3_zarr(
     # Drop raw lat/lon — redundant now that we have x/y in meters
     ds = ds.drop_vars(["cell_lat", "cell_lon"], errors="ignore")
 
-    # Extract time from filename
+    # Extract time from filename; we will use this as the time dimension
+    # and serialize it with pandas so it can be used in queries
     time_value = pd.Timestamp(parse_time_from_path(hd5_file_path))
 
     # Force explicit time dimension
@@ -277,6 +284,8 @@ def append_hd5_to_s3_zarr(
 
     store_exists = bool(list(zarr_mapper.keys()))
 
+    # ensure the time dimension is encoded as microseconds
+    # which keeps it consistent with other datasets in the AWO
     time_encoding = {
         "time": {
             "dtype": "int64",
@@ -306,6 +315,8 @@ def append_hd5_to_s3_zarr(
         )
 
     if not test_mode:
+        # after appending to S3 Zarr store, remove the local file
+        # so the data on disk doesn't grow indefinitely
         LOGGER.info(
             f"Removing {hd5_file_path} since it was successfully appended to S3 Zarr store"
         )
