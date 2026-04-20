@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
 import { bboxPolygon, featureCollection } from '@turf/turf';
 import { BBox, Feature, MultiPolygon, Polygon } from 'geojson';
 import { FilterSpecification, GeoJSONSource, LngLatBoundsLike, Map } from 'mapbox-gl';
-import { getBBox } from '@/data/bbox';
+import { getBBox } from '@/consts/bbox';
 import { LayerId } from '@/features/Map/config';
 import { SourceId } from '@/features/Map/sources';
 import loadingManager from '@/managers/Loading.init';

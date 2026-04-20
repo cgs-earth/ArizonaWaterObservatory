@@ -28,6 +28,7 @@ import {
 } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
+import { getBBox } from '@/consts/bbox';
 import {
   CollectionDefaultLabels,
   CollectionRestrictions,
@@ -37,7 +38,6 @@ import {
   StringIdentifierCollections,
 } from '@/consts/collections';
 import { getDefaultGeoJSON } from '@/consts/geojson';
-import { getBBox } from '@/data/bbox';
 import { LayerId } from '@/features/Map/config';
 import {
   DEFAULT_BBOX,
