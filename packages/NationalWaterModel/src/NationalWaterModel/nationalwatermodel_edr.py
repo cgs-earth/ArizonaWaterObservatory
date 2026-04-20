@@ -74,6 +74,8 @@ class NationalWaterModelEDRProvider(BaseEDRProvider):
 
         if "storage_crs" not in provider_def:
             self.storage_crs = get_crs_from_dataset(self.zarr_dataset)
+        else:
+            self.storage_crs = pyproj.CRS(provider_def["storage_crs"])
 
         if provider_def.get("drop_duplicate_times", False):
             LOGGER.info(
