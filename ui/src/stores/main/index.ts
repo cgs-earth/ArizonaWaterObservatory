@@ -18,13 +18,15 @@ import { MainState } from '@/stores/main/types';
 
 const useMainStore = create<MainState>()(
   immer((set, get, store) => ({
-    basemap: BasemapId.Streets,
-    setBasemap: (basemap) => set({ basemap }),
     charts: [],
     setCharts: (charts: MainState['charts']) => set({ charts }),
     geographyFilter: null,
     setGeographyFilter: (geographyFilter) => set({ geographyFilter, configGenerated: false }),
     hasGeographyFilter: () => Boolean(get().geographyFilter),
+    basemap: BasemapId.Streets,
+    setBasemap: (basemap) => set({ basemap }),
+    terrainActive: false,
+    setTerrainActive: (terrainActive) => set({ terrainActive }),
     parameterGroupMembers: {},
     setParameterGroupMembers: (parameterGroupMembers) => set({ parameterGroupMembers }),
     ...createCollectionSlice(set, get, store),

@@ -145,6 +145,8 @@ export type MainState = {
   hasGeographyFilter: () => boolean;
   basemap: BasemapId;
   setBasemap: (collection: MainState['basemap']) => void;
+  terrainActive: boolean;
+  setTerrainActive: (terrainActive: MainState['terrainActive']) => void;
   charts: Chart[];
   setCharts: (charts: MainState['charts']) => void;
   parameterGroupMembers: ParameterGroupMembers;

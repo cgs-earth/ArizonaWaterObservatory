@@ -59,6 +59,8 @@ export enum Sources {
   VectorTile = 'vector-tile',
   ESRI = 'esri',
   Raster = 'raster',
+  RasterDEM = 'raster-dem',
+  Vector = 'vector',
 }
 
 /**
