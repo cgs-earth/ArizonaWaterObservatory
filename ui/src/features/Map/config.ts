@@ -257,6 +257,7 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
         };
       case LayerId.SpatialSelection:
         return (e) => {
+          map.getCanvas().style.cursor = 'pointer';
           const html = `
             <div>
               <strong>Data Boundary</strong>
@@ -267,6 +268,7 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
         };
       case LayerId.SpatialSelectionBBox:
         return (e) => {
+          map.getCanvas().style.cursor = 'pointer';
           const html = `
             <div>
               <strong>Data Boundary BBox</strong><br/>
@@ -327,6 +329,8 @@ export const getLayerCustomHoverExitFunction = (
           console.log('Draw: ', draw);
           console.log('Content Root: ', root);
           console.log('Content Container: ', container);
+
+          map.getCanvas().style.cursor = '';
         };
     }
   };
@@ -412,6 +416,7 @@ export const getLayerMouseMoveFunction = (id: LayerId | SubLayerId): CustomListe
         };
       case LayerId.SpatialSelectionBBox:
         return (e) => {
+          map.getCanvas().style.cursor = 'pointer';
           const html = `
             <div>
               <strong>Data Bounding Box</strong>
@@ -422,6 +427,7 @@ export const getLayerMouseMoveFunction = (id: LayerId | SubLayerId): CustomListe
         };
       case LayerId.SpatialSelection:
         return (e) => {
+          map.getCanvas().style.cursor = 'pointer';
           const html = `
             <div>
               <strong>Data Boundary</strong>

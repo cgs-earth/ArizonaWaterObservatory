@@ -148,13 +148,13 @@ export const useSpatialSelection = (map: Map | null) => {
 
     loadingInstance.current = loadingManager.add(message, LoadingType.Geography);
     try {
-      await mainManager.applySpatialFilter([]);
+      await mainManager.applySpatialFilter([], { rethrow: true });
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        notificationManager.show(`${_error.message}`, NotificationType.Error, 10000);
       } else if (typeof error === 'string') {
-        notificationManager.show(`Error: ${error}`, NotificationType.Error, 10000);
+        notificationManager.show(`${error}`, NotificationType.Error, 10000);
       }
     } finally {
       loadingInstance.current = loadingManager.remove(loadingInstance.current);

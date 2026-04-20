@@ -53,6 +53,7 @@ import { ARIZONA_ID, LOWER_COLORADO_ID, UPPER_COLORADO_ID } from '@/hooks/useSpa
 import { getNextLink, stringifyBBox } from '@/managers/Main.utils';
 import notificationManager from '@/managers/Notification.init';
 import {
+  ApplySpatialFilterOptions,
   Config,
   ExtendedFeatureCollection,
   GetConfigResponse,
@@ -1061,12 +1062,21 @@ class MainManager {
   ) {
     const restrictions = CollectionRestrictions[collectionId];
     if (restrictions && restrictions.length > 0) {
+      const datasource = this.getDatasource(collectionId);
+      const parameterFirstRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.ParameterFirst
+      );
+
+      if (parameterFirstRestriction && parameters.length === 0) {
+        const message = `Dataset: ${datasource?.title}, requires at least one parameter.`;
+        throw new Error(message);
+      }
+
       const parameterRestriction = restrictions.find(
         (restriction) => restriction.type === RestrictionType.Parameter
       );
 
       if (parameterRestriction) {
-        const datasource = this.getDatasource(collectionId);
         const hasNoParameters = parameters.length === 0;
 
         if (hasNoParameters || parameters.length > parameterRestriction.count) {
@@ -1076,6 +1086,7 @@ class MainManager {
           } else {
             message += ` Please remove ${parameters.length - parameterRestriction.count} parameter${parameters.length - parameterRestriction.count > 1 ? 's' : ''}`;
           }
+
           throw new Error(message);
         }
       }
@@ -1768,7 +1779,10 @@ class MainManager {
     return filteredData;
   }
 
-  public async applySpatialFilter(drawnShapes: Feature<Polygon | MultiPolygon>[]): Promise<void> {
+  public async applySpatialFilter(
+    drawnShapes: Feature<Polygon | MultiPolygon>[],
+    options?: ApplySpatialFilterOptions
+  ): Promise<void> {
     const layers = this.store.getState().layers;
 
     const chunkSize = 5;
@@ -1780,8 +1794,6 @@ class MainManager {
       const settled = await Promise.allSettled(
         chunk.map(async (layer) => {
           const collectionId = layer.datasourceId;
-          // this.checkParameterRestrictions(layer.datasourceId, layer.parameters);
-          // this.checkDateRestrictions(layer.datasourceId, layer.from, layer.to);
 
           // addData should return the layerId
           return this.addData(collectionId, layer, {
@@ -1813,12 +1825,17 @@ class MainManager {
 
       for (const result of settled) {
         if (result.status === 'rejected') {
-          notificationManager.show(
-            'An error occurred while applying a spatial filter, check the console for more details.',
-            NotificationType.Error,
-            10000
-          );
-          console.error('applySpatialFilter: addData failed:', result.reason);
+          // TODO: this will only show the first error
+          if (options?.rethrow) {
+            throw new Error(result.reason);
+          } else {
+            notificationManager.show(
+              'An error occurred while applying a spatial filter, check the console for more details.',
+              NotificationType.Error,
+              10000
+            );
+            console.error('applySpatialFilter: addData failed:', result.reason);
+          }
         }
       }
     }
