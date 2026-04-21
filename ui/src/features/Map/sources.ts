@@ -8,6 +8,7 @@ import { SourceConfig, Sources } from '@/components/Map/types';
 export enum SourceId {
   MeasurePoints = 'measure-points',
   MeasureLine = 'measure-line',
+  Terrain = 'terrain',
 }
 
 /**
@@ -38,6 +39,16 @@ export const sourceConfigs: SourceConfig[] = [
         features: [],
       },
       cluster: false,
+    },
+  },
+  {
+    id: SourceId.Terrain,
+    type: Sources.Vector,
+    definition: {
+      type: 'raster-dem',
+      url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+      tileSize: 512,
+      maxzoom: 14,
     },
   },
 ];
