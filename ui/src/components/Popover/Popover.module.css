@@ -6,3 +6,14 @@
 .root {
   position: absolute;
 }
+
+.dropdown {
+  padding: calc(var(--default-spacing) / 2);
+}
+
+.dropdown > *:first-child {
+  padding: var(--default-spacing);
+
+  border: calc(0.0625rem * var(--mantine-scale)) solid var(--input-border);
+  border-radius: inherit;
+}

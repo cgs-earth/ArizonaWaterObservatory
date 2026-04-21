@@ -18,7 +18,12 @@ type Props = ModalProps & {
 const Modal: React.FC<PropsWithChildren<Props>> = (props) => {
   const { opened, onClose, ...modalProps } = props;
   return (
-    <ModalRoot opened={opened} onClose={onClose} {...modalProps}>
+    <ModalRoot
+      opened={opened}
+      onClose={onClose}
+      classNames={{ root: styles.root, overlay: styles.overlay, inner: styles.inner }}
+      {...modalProps}
+    >
       <ModalOverlay />
       <ModalContent classNames={{ content: styles.content }}>
         <IconButton

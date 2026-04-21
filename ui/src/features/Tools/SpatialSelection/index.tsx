@@ -82,11 +82,6 @@ const SpatialSelection: React.FC = () => {
 
   return (
     <>
-      <Confirm
-        opened={confirmAction.opened}
-        onClose={confirmAction.close}
-        onConfirm={confirmAction.confirm}
-      />
       <Popover
         offset={16}
         opened={show}
@@ -115,7 +110,7 @@ const SpatialSelection: React.FC = () => {
                 value={getBoundaryValue(spatialSelection)}
                 onChange={handleBoundaryChange}
               >
-                <Group gap="var(--default-spacing)">
+                <Group gap="calc(var(--default-spacing) * 2)">
                   <Radio
                     disabled={isLoadingGeography}
                     value={PredefinedBoundary.Arizona}
@@ -142,6 +137,11 @@ const SpatialSelection: React.FC = () => {
             />
           </Stack>
         }
+      />
+      <Confirm
+        opened={confirmAction.opened}
+        onClose={confirmAction.close}
+        onConfirm={confirmAction.confirm}
       />
     </>
   );

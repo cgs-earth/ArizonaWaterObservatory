@@ -208,7 +208,7 @@ export const Screenshot: React.FC = () => {
   };
 
   const handleShow = (show: boolean) => {
-    setOverlay(show ? Overlay.Draw : null);
+    setOverlay(show ? Overlay.Screenshot : null);
     setShow(show);
   };
 
@@ -223,7 +223,7 @@ export const Screenshot: React.FC = () => {
   const debouncedHandleHeightChange = debounce(handleHeightChange, 500);
 
   useEffect(() => {
-    if (overlay !== Overlay.Draw) {
+    if (overlay !== Overlay.Screenshot) {
       setShow(false);
     }
   }, [overlay]);
