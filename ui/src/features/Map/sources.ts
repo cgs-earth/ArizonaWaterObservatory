@@ -10,6 +10,7 @@ export enum SourceId {
   MeasureLine = 'measure-line',
   SpatialSelection = 'spatial-selection',
   SpatialSelectionBBox = 'spatial-selection-bbox',
+  Terrain = 'terrain',
 }
 
 /**
@@ -64,6 +65,16 @@ export const sourceConfigs: SourceConfig[] = [
         features: [],
       },
       cluster: false,
+    },
+  },
+  {
+    id: SourceId.Terrain,
+    type: Sources.Vector,
+    definition: {
+      type: 'raster-dem',
+      url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+      tileSize: 512,
+      maxzoom: 14,
     },
   },
 ];

@@ -11,7 +11,7 @@ import { LayerType } from '@/components/Map/types';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { DEFAULT_BBOX, drawLayers } from '@/features/Map/consts';
-import { sourceConfigs } from '@/features/Map/sources';
+import { sourceConfigs, SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent, getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
 import { useSpatialSelection } from '@/hooks/useSpatialSelection';
@@ -46,6 +46,7 @@ const MainMap: React.FC<Props> = (props) => {
   const layers = useMainStore((state) => state.layers);
   const basemap = useMainStore((state) => state.basemap);
   const searches = useMainStore((state) => state.searches);
+  const terrainActive = useMainStore((state) => state.terrainActive);
 
   const loadingInstances = useSessionStore((state) => state.loadingInstances);
 
@@ -340,6 +341,18 @@ const MainMap: React.FC<Props> = (props) => {
       }
     };
   }, [map, geocoder]);
+
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+
+    if (terrainActive) {
+      map.setTerrain({ source: SourceId.Terrain });
+    } else {
+      map.setTerrain(null);
+    }
+  }, [terrainActive]);
 
   useEffect(() => {
     if (!map) {
