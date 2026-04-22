@@ -20,7 +20,7 @@ import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import styles from '@/pages/pages.module.css';
 import useMainStore from '@/stores/main';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 
 export const LayoutPage: React.FC = () => {
   const controller = useRef<AbortController>(null);
@@ -47,16 +47,16 @@ export const LayoutPage: React.FC = () => {
           if (loaded) {
             notificationManager.show(
               'Shared configuration loaded successfully.',
-              NotificationType.Success
+              NotificationVariant.Success
             );
             setShareId(shareId);
             setConfigGenerated(true);
           } else {
-            notificationManager.show('Unable to load config.', NotificationType.Error);
+            notificationManager.show('Unable to load config.', NotificationVariant.Error);
           }
         }
       } else if (typeof response === 'string') {
-        notificationManager.show(response, NotificationType.Error);
+        notificationManager.show(response, NotificationVariant.Error);
       }
     } catch (error) {
       if (
@@ -66,7 +66,7 @@ export const LayoutPage: React.FC = () => {
         console.log('Fetch request canceled');
       } else if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);

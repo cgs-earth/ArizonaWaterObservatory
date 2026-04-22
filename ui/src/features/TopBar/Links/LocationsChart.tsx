@@ -26,7 +26,7 @@ import {
 } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location } from '@/stores/main/types';
-import { NotificationType } from '@/stores/session/types';
+import { NotificationVariant } from '@/stores/session/types';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
 import { getParameterUnit } from '@/utils/parameters';
@@ -148,7 +148,7 @@ export const LocationsChart: React.FC<Props> = (props) => {
       onEntryError: (name, error) => {
         notificationManager.show(
           `An error occurred generating file: ${name}. See console for further details.`,
-          NotificationType.Error,
+          NotificationVariant.Error,
           10000
         );
         console.error('Error', name, error);
@@ -157,7 +157,7 @@ export const LocationsChart: React.FC<Props> = (props) => {
     });
 
     if (isMounted.current) {
-      notificationManager.show("All CSV's generated", NotificationType.Success, 10000);
+      notificationManager.show("All CSV's generated", NotificationVariant.Success, 10000);
 
       const objectUrl = URL.createObjectURL(zipBlob);
       const a = document.createElement('a');
