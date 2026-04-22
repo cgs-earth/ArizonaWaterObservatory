@@ -6,6 +6,7 @@
 import dayjs from 'dayjs';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import * as turf from '@turf/turf';
+import { combine, featureCollection, simplify } from '@turf/turf';
 import {
   BBox,
   Feature,
@@ -27,6 +28,7 @@ import {
 } from 'mapbox-gl';
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
+import { getBBox } from '@/consts/bbox';
 import {
   CollectionDefaultLabels,
   CollectionRestrictions,
@@ -36,6 +38,7 @@ import {
   StringIdentifierCollections,
 } from '@/consts/collections';
 import { getDefaultGeoJSON } from '@/consts/geojson';
+import { LayerId } from '@/features/Map/config';
 import {
   DEFAULT_BBOX,
   DEFAULT_FILL_OPACITY,
@@ -44,10 +47,13 @@ import {
   LAYER_IDENTIFIER,
   LOCATION_IDENTIFIER,
 } from '@/features/Map/consts';
+import { SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent } from '@/features/Map/utils';
+import { ARIZONA_ID, LOWER_COLORADO_ID, UPPER_COLORADO_ID } from '@/hooks/useSpatialSelection';
 import { getNextLink, stringifyBBox } from '@/managers/Main.utils';
 import notificationManager from '@/managers/Notification.init';
 import {
+  ApplySpatialFilterOptions,
   Config,
   ExtendedFeatureCollection,
   GetConfigResponse,
@@ -58,6 +64,7 @@ import {
 import { CoverageGeoService } from '@/services/coverageJSON/coverageGeo.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
+import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
 import {
   ColorValueHex,
   Layer,
@@ -65,6 +72,7 @@ import {
   MainState,
   PaletteDefinition,
   ParameterGroupMembers,
+  PredefinedBoundary,
   TGeometryTypes,
 } from '@/stores/main/types';
 import { NotificationVariant } from '@/stores/session/types';
@@ -896,6 +904,13 @@ class MainManager {
       return;
     }
 
+    if (this.map.getLayer(LayerId.SpatialSelectionBBox)) {
+      this.map.moveLayer(LayerId.SpatialSelectionBBox);
+    }
+    if (this.map.getLayer(LayerId.SpatialSelection)) {
+      this.map.moveLayer(LayerId.SpatialSelection);
+    }
+
     const layers = [...this.store.getState().layers].sort((a, b) => a.position - b.position);
     let lastLayer = '';
 
@@ -1047,12 +1062,21 @@ class MainManager {
   ) {
     const restrictions = CollectionRestrictions[collectionId];
     if (restrictions && restrictions.length > 0) {
+      const datasource = this.getDatasource(collectionId);
+      const parameterFirstRestriction = restrictions.find(
+        (restriction) => restriction.type === RestrictionType.ParameterFirst
+      );
+
+      if (parameterFirstRestriction && parameters.length === 0) {
+        const message = `Dataset: ${datasource?.title}, requires at least one parameter.`;
+        throw new Error(message);
+      }
+
       const parameterRestriction = restrictions.find(
         (restriction) => restriction.type === RestrictionType.Parameter
       );
 
       if (parameterRestriction) {
-        const datasource = this.getDatasource(collectionId);
         const hasNoParameters = parameters.length === 0;
 
         if (hasNoParameters || parameters.length > parameterRestriction.count) {
@@ -1062,6 +1086,7 @@ class MainManager {
           } else {
             message += ` Please remove ${parameters.length - parameterRestriction.count} parameter${parameters.length - parameterRestriction.count > 1 ? 's' : ''}`;
           }
+
           throw new Error(message);
         }
       }
@@ -1154,6 +1179,11 @@ class MainManager {
           turf.area(turf.bboxPolygon(DEFAULT_BBOX))
         );
       }
+      const spatialSelection = this.store.getState().spatialSelection;
+      if (spatialSelection && isSpatialSelectionPredefined(spatialSelection)) {
+        return getBBox(spatialSelection.boundary);
+      }
+
       return DEFAULT_BBOX;
     }
 
@@ -1311,7 +1341,48 @@ class MainManager {
         next
       );
 
-      let filtered = this.filterLocations(collectionId, page, options?.filterFeatures);
+      const spatialSelection = this.store.getState().spatialSelection;
+      let filter = options?.filterFeatures;
+
+      const hasExplicitFilters = options?.filterFeatures && options.filterFeatures.length > 0;
+
+      const shouldUseSpatialSelection =
+        !hasExplicitFilters &&
+        spatialSelection?.strict &&
+        isSpatialSelectionPredefined(spatialSelection);
+
+      if (shouldUseSpatialSelection) {
+        const spatialSelectionCollection = this.getMapFeatures<Polygon | MultiPolygon>(
+          SourceId.SpatialSelection
+        );
+
+        if (spatialSelectionCollection) {
+          const allowedIds =
+            spatialSelection.boundary === PredefinedBoundary.Arizona
+              ? [ARIZONA_ID]
+              : [LOWER_COLORADO_ID, UPPER_COLORADO_ID];
+
+          const selectedFeatures = spatialSelectionCollection.features.filter((feature) =>
+            allowedIds.includes(String(feature.id))
+          );
+
+          const combinedFeatures = combine(featureCollection(selectedFeatures)).features as Feature<
+            Polygon | MultiPolygon
+          >[];
+
+          const toleranceFactor =
+            spatialSelection.boundary === PredefinedBoundary.Arizona ? 0.005 : 0.05;
+
+          filter = combinedFeatures.map((feature) =>
+            simplify(feature, {
+              tolerance: toleranceFactor,
+              mutate: true,
+            })
+          );
+        }
+      }
+
+      let filtered = this.filterLocations(collectionId, page, filter);
       this.clearInvalidLocations(layer.id, collectionId, filtered);
       if (Array.isArray(filtered.features)) {
         filtered.features.forEach((feature) => {
@@ -1636,6 +1707,22 @@ class MainManager {
     }
   }
 
+  private getMapFeatures<
+    T extends Geometry = Geometry,
+    V extends GeoJsonProperties = GeoJsonProperties,
+  >(sourceId: string): FeatureCollection<T, V> | undefined {
+    const source = this.map?.getSource(sourceId) as GeoJSONSource;
+
+    const data = source._data;
+    if (typeof data !== 'string') {
+      const featureCollection = turf.featureCollection<T, V>(
+        (data as FeatureCollection<T, V>).features as Feature<T, V>[]
+      );
+
+      return featureCollection;
+    }
+  }
+
   /**
    *
    * @function
@@ -1647,14 +1734,8 @@ class MainManager {
     try {
       const sourceId = this.getSourceId(layer.datasourceId, layer.id);
 
-      const source = this.map?.getSource(sourceId) as GeoJSONSource;
-
-      const data = source._data;
-      if (typeof data !== 'string') {
-        const featureCollection = turf.featureCollection<T, V>(
-          (data as FeatureCollection<T, V>).features as Feature<T, V>[]
-        );
-
+      const featureCollection = this.getMapFeatures<T, V>(sourceId);
+      if (featureCollection) {
         return featureCollection;
       }
     } catch (error) {
@@ -1673,12 +1754,35 @@ class MainManager {
     );
 
     const drawnShapes = this.store.getState().drawnShapes;
-    const filteredData = this.filterLocations(layer.datasourceId, data, drawnShapes);
+    const spatialSelection = this.store.getState().spatialSelection;
+    let filter = drawnShapes;
+    if (
+      drawnShapes.length === 0 &&
+      spatialSelection &&
+      spatialSelection.strict &&
+      isSpatialSelectionPredefined(spatialSelection)
+    ) {
+      try {
+        const featureCollection = this.getMapFeatures<Polygon | MultiPolygon>(
+          SourceId.SpatialSelection
+        );
+        if (featureCollection) {
+          filter = featureCollection.features;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    const filteredData = this.filterLocations(layer.datasourceId, data, filter);
 
     return filteredData;
   }
 
-  public async applySpatialFilter(drawnShapes: Feature<Polygon | MultiPolygon>[]): Promise<void> {
+  public async applySpatialFilter(
+    drawnShapes: Feature<Polygon | MultiPolygon>[],
+    _options?: ApplySpatialFilterOptions
+  ): Promise<void> {
     const layers = this.store.getState().layers;
 
     const chunkSize = 5;
@@ -1690,6 +1794,7 @@ class MainManager {
       const settled = await Promise.allSettled(
         chunk.map(async (layer) => {
           const collectionId = layer.datasourceId;
+
           // addData should return the layerId
           return this.addData(collectionId, layer, {
             filterFeatures: drawnShapes,
@@ -1932,13 +2037,13 @@ class MainManager {
   }
 
   public clearAllData(): void {
+    this.clearLayers();
+    this.clearSources();
+
     this.store.getState().setLocations([]);
 
     this.store.getState().setLayers([]);
     this.store.getState().setDrawnShapes([]);
-
-    this.clearLayers();
-    this.clearSources();
 
     this.store.getState().setProvider(null);
     this.store.getState().setCategory(null);

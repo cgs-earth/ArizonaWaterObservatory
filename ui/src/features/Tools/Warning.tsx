@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Group, Stack, Text } from '@mantine/core';
+import { Box, Group, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Checkbox from '@/components/Checkbox';
@@ -75,10 +75,12 @@ export const Warning: React.FC<Props> = (props) => {
         <Text size="lg" mr="auto" fw={700}>
           Notice
         </Text>
-        <Text size="md">
-          This dataset has restrictions to allow this data to render in browser:
-        </Text>
-        {content}
+        <Box ml="var(--default-spacing)">
+          <Text size="md">
+            This dataset has restrictions to allow this data to render in browser:
+          </Text>
+          {content}
+        </Box>
         <Group justify="space-between" w="100%">
           <Button size="sm" onClick={() => handleClick()}>
             Ok
