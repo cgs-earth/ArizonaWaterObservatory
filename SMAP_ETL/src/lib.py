@@ -7,6 +7,8 @@ import json
 import logging
 import os
 from pathlib import Path
+import platform
+import resource
 from zoneinfo import ZoneInfo
 
 import earthaccess
@@ -292,6 +294,20 @@ def append_hd5_to_s3_zarr(
             "units": "microseconds since 1970-01-01T00:00:00",
         }
     }
+
+    # add a check for how much memory is in use
+    # tracemalloc.start()
+
+    # current, _ = tracemalloc.get_traced_memory()
+    # print(f"Current memory in use: {current} bytes")
+
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    if platform.system() == "Darwin":
+        rss_mb = usage.ru_maxrss / 1024 / 1024  # macOS: bytes
+    else:
+        rss_mb = usage.ru_maxrss / 1024  # Linux: kilobytes
+
+    print(f"Peak RSS: {rss_mb:.1f} MB")
 
     if store_exists:
         ds.to_zarr(
