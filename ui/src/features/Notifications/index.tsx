@@ -5,11 +5,11 @@
 
 import { Box, Notification, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { History } from '@/features/Notifications/History';
 import styles from '@/features/Notifications/Notifications.module.css';
 import notificationManager from '@/managers/Notification.init';
 import useSessionStore from '@/stores/session';
 import { NotificationVariant } from '@/stores/session/types';
-import { History } from './History';
 
 const Notifications: React.FC = () => {
   const notifications = useSessionStore((state) => state.notifications);

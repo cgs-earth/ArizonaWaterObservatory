@@ -84,6 +84,8 @@ class NotificationManager {
       clearTimeout(timer.timeoutId);
       timer.remaining -= Date.now() - timer.startTime;
     }
+
+    this.store.getState().markViewed(id);
   }
 
   resume(id: string) {
