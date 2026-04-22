@@ -46,7 +46,7 @@ export const History: React.FC<Props> = (props) => {
           ))}
         </Stack>
       )}
-      <Tooltip label="Change map styling." disabled={show}>
+      <Tooltip label="View notifications." disabled={show}>
         <Box mt="calc(var(--default-spacing) / 2)">
           <IconButton
             variant={show ? Variant.Selected : Variant.Secondary}
