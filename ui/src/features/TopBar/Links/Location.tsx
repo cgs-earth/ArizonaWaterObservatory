@@ -31,7 +31,7 @@ import {
 } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 import { createEmptyCsv } from '@/utils/csv';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
@@ -168,7 +168,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
       if (res.status === 204) {
         notificationManager.show(
           `No data found for location: ${location.id} with the current parameter and date range selection.`,
-          NotificationType.Error,
+          NotificationVariant.Error,
           10000
         );
         objectUrl = createEmptyCsv();
@@ -185,12 +185,12 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
       URL.revokeObjectURL(objectUrl);
       a.remove();
-      notificationManager.show('CSV generated successfully.', NotificationType.Success, 10000);
+      notificationManager.show('CSV generated successfully.', NotificationVariant.Success, 10000);
     } catch (err) {
       if (((err as Error)?.message ?? '').length > 0) {
-        notificationManager.show((err as Error)?.message, NotificationType.Error, 10000);
+        notificationManager.show((err as Error)?.message, NotificationVariant.Error, 10000);
       } else if (typeof err === 'string') {
-        notificationManager.show(err, NotificationType.Error, 10000);
+        notificationManager.show(err, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);

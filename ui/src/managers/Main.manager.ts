@@ -75,7 +75,7 @@ import {
   PredefinedBoundary,
   TGeometryTypes,
 } from '@/stores/main/types';
-import { NotificationType } from '@/stores/session/types';
+import { NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection';
 import { createDynamicStepExpression, isSamePalette } from '@/utils/colors';
 import { ColorBrewerIndex, isValidColorBrewerIndex } from '@/utils/colors/types';
@@ -833,7 +833,7 @@ class MainManager {
         if (isValidColorBrewerIndex(newCount) && newCount !== actualCount) {
           notificationManager.show(
             `Duplicate thresholds detected. Reducing to ${newCount} threshold(s)`,
-            NotificationType.Info,
+            NotificationVariant.Info,
             5000
           );
         }
@@ -1399,7 +1399,7 @@ class MainManager {
     if (aggregate.features.length === 0) {
       const message = this.getNoDataMessage(layer.name, parameters.length, collectionId);
 
-      notificationManager.show(message, NotificationType.Info, 10000);
+      notificationManager.show(message, NotificationVariant.Info, 10000);
     }
 
     (aggregate as any) = undefined;
@@ -1781,7 +1781,7 @@ class MainManager {
 
   public async applySpatialFilter(
     drawnShapes: Feature<Polygon | MultiPolygon>[],
-    options?: ApplySpatialFilterOptions
+    _options?: ApplySpatialFilterOptions
   ): Promise<void> {
     const layers = this.store.getState().layers;
 
@@ -1825,17 +1825,12 @@ class MainManager {
 
       for (const result of settled) {
         if (result.status === 'rejected') {
-          // TODO: this will only show the first error
-          if (options?.rethrow) {
-            throw new Error(result.reason);
-          } else {
-            notificationManager.show(
-              'An error occurred while applying a spatial filter, check the console for more details.',
-              NotificationType.Error,
-              10000
-            );
-            console.error('applySpatialFilter: addData failed:', result.reason);
-          }
+          notificationManager.show(
+            'An error occurred while applying a spatial filter, check the console for more details.',
+            NotificationVariant.Error,
+            10000
+          );
+          console.error('applySpatialFilter: addData failed:', result.reason);
         }
       }
     }
@@ -1947,7 +1942,7 @@ class MainManager {
             if (paletteDefinition.actualCount !== newCount) {
               notificationManager.show(
                 `Duplicate thresholds detected. Reducing to ${newCount} threshold(s)`,
-                NotificationType.Info,
+                NotificationVariant.Info,
                 5000
               );
             }

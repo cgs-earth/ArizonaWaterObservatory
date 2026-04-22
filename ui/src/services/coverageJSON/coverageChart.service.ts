@@ -9,7 +9,7 @@ import notificationManager from '@/managers/Notification.init';
 import { CoverageService } from '@/services/coverageJSON/coverage.service';
 import { TChartData, TCoverageOptions, TOptions, TValues } from '@/services/coverageJSON/types';
 import { CoverageAxesValues, CoverageCollection, CoverageJSON } from '@/services/edr.service';
-import { NotificationType } from '@/stores/session/types';
+import { NotificationVariant } from '@/stores/session/types';
 import { isAxesValues, isCoverageCollection } from '@/utils/isTypeObject';
 import { getParameterUnit } from '@/utils/parameters';
 
@@ -92,7 +92,7 @@ export class CoverageChartService extends CoverageService {
     if (this.isSegments(xObj) && this.isSegments(yObj)) {
       notificationManager.show(
         `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
-        NotificationType.Error,
+        NotificationVariant.Error,
         10000
       );
       return [];
@@ -109,7 +109,7 @@ export class CoverageChartService extends CoverageService {
     const coverageParameters = coverage.parameters ?? options?.parameters;
 
     if (!coverage.ranges) {
-      notificationManager.show('Missing ranges in coverage data', NotificationType.Error, 10000);
+      notificationManager.show('Missing ranges in coverage data', NotificationVariant.Error, 10000);
       return [];
     }
 
@@ -166,7 +166,7 @@ export class CoverageChartService extends CoverageService {
     if (!coverage.ranges || !dates) {
       notificationManager.show(
         'Missing ranges or date axis in coverage data',
-        NotificationType.Error,
+        NotificationVariant.Error,
         10000
       );
       return [];
@@ -243,7 +243,7 @@ export class CoverageChartService extends CoverageService {
 
     notificationManager.show(
       `Domain type ${coverage.domain.domainType} is not currently supported.`,
-      NotificationType.Error,
+      NotificationVariant.Error,
       10000
     );
     return [];

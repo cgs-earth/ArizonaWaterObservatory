@@ -33,7 +33,7 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import useMainStore from '@/stores/main';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 
 const Panel: React.FC = () => {
   const mobile = useMediaQuery('(max-width: 899px)');
@@ -47,11 +47,11 @@ const Panel: React.FC = () => {
     const loadingInstance = loadingManager.add('Fetching all datasets.', LoadingType.Collections);
     try {
       await mainManager.getCollections();
-      notificationManager.show('Updated datasets', NotificationType.Success);
+      notificationManager.show('Updated datasets', NotificationVariant.Success);
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);

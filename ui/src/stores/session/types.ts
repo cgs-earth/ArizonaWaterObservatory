@@ -10,7 +10,7 @@ import { MeasureSlice } from '@/stores/session/slices/measure';
 import { NotificationsSlice } from '@/stores/session/slices/notifications';
 import { WarningsSlice } from '@/stores/session/slices/warning';
 
-export enum NotificationType {
+export enum NotificationVariant {
   Success = 'success',
   Error = 'error',
   Info = 'info',
@@ -47,9 +47,11 @@ export enum Overlay {
 
 export type Notification = {
   id: string;
+  createdAt: number;
   message: string;
-  type: NotificationType;
-  visible: boolean;
+  type: NotificationVariant;
+  visible: boolean; // This notification is visible on screen
+  viewed: boolean; // This notification has been viewed in history
 };
 
 export type Warning = {
