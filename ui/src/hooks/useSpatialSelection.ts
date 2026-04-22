@@ -17,7 +17,7 @@ import geoconnexService from '@/services/init/geoconnex.init';
 import useMainStore from '@/stores/main';
 import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
 import { PredefinedBoundary } from '@/stores/main/types';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 
 export const LOWER_COLORADO_ID = '15';
 export const LOWER_COLORADO_ID_NUMERIC = Number(LOWER_COLORADO_ID);
@@ -159,15 +159,15 @@ export const useSpatialSelection = (map: Map | null) => {
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`${_error.message}`, NotificationType.Error, 10000);
+        notificationManager.show(`${_error.message}`, NotificationVariant.Error, 10000);
       } else if (typeof error === 'string') {
-        notificationManager.show(`${error}`, NotificationType.Error, 10000);
+        notificationManager.show(`${error}`, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingInstance.current = loadingManager.remove(loadingInstance.current);
       notificationManager.show(
         `Data boundaries updated to: ${getTitle()}`,
-        NotificationType.Success
+        NotificationVariant.Success
       );
     }
   };
