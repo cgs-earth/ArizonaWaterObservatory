@@ -24,7 +24,7 @@ import useMainStore from '@/stores/main';
 import { DrawMode } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { MeasureUnit } from '@/stores/session/slices/measure';
-import { LoadingType, NotificationType, Overlay } from '@/stores/session/types';
+import { LoadingType, NotificationVariant, Overlay } from '@/stores/session/types';
 
 export const Draw: React.FC = () => {
   const [show, setShow] = useState(false);
@@ -59,9 +59,9 @@ export const Draw: React.FC = () => {
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
       } else if (typeof error === 'string') {
-        notificationManager.show(`Error: ${error}`, NotificationType.Error, 10000);
+        notificationManager.show(`Error: ${error}`, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingInstance.current = loadingManager.remove(loadingInstance.current);
@@ -105,7 +105,7 @@ export const Draw: React.FC = () => {
       draw.changeMode('draw_polygon');
       notificationManager.show(
         'Finish drawing the shape, or click the cancel button to exit the draw tool.',
-        NotificationType.Info,
+        NotificationVariant.Info,
         10000
       );
     }
@@ -122,7 +122,7 @@ export const Draw: React.FC = () => {
       setDrawMode(DrawMode.Measure);
       notificationManager.show(
         'Click two points on the map to measure the distance between.',
-        NotificationType.Info,
+        NotificationVariant.Info,
         10000
       );
       if (map) {

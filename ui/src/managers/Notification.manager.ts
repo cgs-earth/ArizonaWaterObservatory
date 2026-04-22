@@ -5,7 +5,7 @@
 
 import { v6 } from 'uuid';
 import { StoreApi, UseBoundStore } from 'zustand';
-import { Notification, NotificationType, SessionState } from '@/stores/session/types';
+import { Notification, NotificationVariant, SessionState } from '@/stores/session/types';
 
 type Timer = {
   timeoutId: ReturnType<typeof setTimeout>;
@@ -40,14 +40,14 @@ class NotificationManager {
 
   private startTimer(id: Notification['id'], duration: number): ReturnType<typeof setTimeout> {
     return setTimeout(() => {
-      this.store.getState().removeNotification(id);
+      this.store.getState().hideNotification(id);
       this.remove(id);
     }, duration);
   }
 
   show(
     message: string,
-    type: NotificationType = NotificationType.Info,
+    type: NotificationVariant = NotificationVariant.Info,
     duration: number = 3000
   ): Notification['id'] {
     const id = this.createUUID();
@@ -57,6 +57,8 @@ class NotificationManager {
       message,
       type,
       visible: true,
+      viewed: false,
+      createdAt: Date.now(),
     });
 
     const startTime = Date.now();
@@ -104,6 +106,21 @@ class NotificationManager {
       throw new Error(`Error: no timer instance found for id: ${id}`);
     }
 
+    if (timer) {
+      clearTimeout(timer.timeoutId);
+      this.remove(id);
+    }
+    this.store.getState().hideNotification(id);
+  }
+
+  viewed(id: string) {
+    this.store.getState().markViewed(id);
+  }
+
+  delete(id: string) {
+    const timer = this.get(id);
+
+    // This notification will likely not have a timeout instance
     if (timer) {
       clearTimeout(timer.timeoutId);
       this.remove(id);

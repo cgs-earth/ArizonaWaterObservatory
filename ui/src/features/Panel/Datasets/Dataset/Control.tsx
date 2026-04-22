@@ -16,7 +16,7 @@ import warningManager from '@/managers/Warning.init';
 import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 
 type Props = {
@@ -83,13 +83,13 @@ export const Control: React.FC<Props> = (props) => {
       }
 
       await mainManager.createLayer(id, parameters, controller.current.signal);
-      notificationManager.show(`Added layer for: ${name}`, NotificationType.Success);
+      notificationManager.show(`Added layer for: ${name}`, NotificationVariant.Success);
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
       } else if (typeof error === 'string') {
-        notificationManager.show(`Error: ${error}`, NotificationType.Error, 10000);
+        notificationManager.show(`Error: ${error}`, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);

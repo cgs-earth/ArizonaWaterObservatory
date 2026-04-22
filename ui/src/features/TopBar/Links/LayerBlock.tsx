@@ -20,7 +20,7 @@ import notificationManager from '@/managers/Notification.init';
 import { ICollection } from '@/services/edr.service';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
-import { NotificationType } from '@/stores/session/types';
+import { NotificationVariant } from '@/stores/session/types';
 import { chunk } from '@/utils/chunk';
 import { CollectionType } from '@/utils/collection';
 import { buildCubeUrl, buildItemsUrl, buildLocationsUrl } from '@/utils/url';
@@ -83,7 +83,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
       // TODO: determine cause of duplicates
       const message = `Unable to create base URL for layer: ${collection.title}. Skipping this entry in the Export modal.`;
       if (!hasNotification(message)) {
-        notificationManager.show(message, NotificationType.Error, 10000);
+        notificationManager.show(message, NotificationVariant.Error, 10000);
       }
     }
   }, [collection, collectionType]);
