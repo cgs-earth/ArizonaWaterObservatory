@@ -101,6 +101,11 @@ export const useSpatialSelection = (map: Map | null) => {
       { id: ARIZONA_ID_NUMERIC, bbox: getBBox(PredefinedBoundary.Arizona) },
       { id: COLORADO_RIVER_BASIN_ID_NUMERIC, bbox: getBBox(PredefinedBoundary.ColoradoRiverBasin) },
     ];
+    loadingInstance.current = loadingManager.add(
+      'Loading Predefined Boundary data',
+      LoadingType.Geography
+    );
+
     const [azResult, lcResult, ucResult] = await Promise.allSettled([
       fetchArizona(),
       fetchLowerColoradoBasin(),
@@ -135,6 +140,8 @@ export const useSpatialSelection = (map: Map | null) => {
     if (spatialSelectionBBoxSource) {
       spatialSelectionBBoxSource.setData(bboxFeatureCollection);
     }
+
+    loadingInstance.current = loadingManager.remove(loadingInstance.current);
   };
 
   const switchPredefinedBoundaries = async (boundary: PredefinedBoundary, strict: boolean) => {
