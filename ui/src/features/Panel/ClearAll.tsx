@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { LngLatBoundsLike } from 'mapbox-gl';
 import Button from '@/components/Button';
 import { BasemapId } from '@/components/Map/types';
 import { Variant } from '@/components/types';
+import { getBBox } from '@/consts/bbox';
 import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
+import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
 
 export const ClearAll: React.FC = () => {
   const setBasemap = useMainStore((state) => state.setBasemap);
+  const spatialSelection = useMainStore((state) => state.spatialSelection);
   const { map, draw } = useMap(MAP_ID);
 
   const handleClick = () => {
@@ -20,16 +24,14 @@ export const ClearAll: React.FC = () => {
 
     if (map) {
       map.resize();
-      map.fitBounds(
-        [
-          [-114.8183, 31.3322], // Southwest corner [lng, lat]
-          [-109.0452, 37.0043], // Northeast corner [lng, lat]
-        ],
-        {
-          padding: 50,
-          animate: false,
-        }
-      );
+
+      if (spatialSelection && isSpatialSelectionPredefined(spatialSelection)) {
+        const { boundary } = spatialSelection;
+
+        const bbox = getBBox(boundary) as LngLatBoundsLike;
+
+        map.fitBounds(bbox, { padding: 40 });
+      }
       setBasemap(BasemapId.Streets);
     }
 

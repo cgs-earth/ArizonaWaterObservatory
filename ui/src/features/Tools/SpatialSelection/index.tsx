@@ -71,7 +71,8 @@ const SpatialSelection: React.FC = () => {
   };
 
   const handleStrictChange = (event: ChangeEvent<HTMLInputElement>) => {
-    confirmAction.run(() => applyStrictChange(event.target.checked));
+    const checked = event.target.checked;
+    confirmAction.run(() => applyStrictChange(checked));
   };
 
   useEffect(() => {

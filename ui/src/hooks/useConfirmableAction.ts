@@ -31,6 +31,7 @@ export const useConfirmableAction = (shouldConfirm: boolean) => {
   };
 
   const confirm = () => {
+    console.log('I GOT CALLED', actionRef.current);
     actionRef.current?.();
     actionRef.current = null;
     close();
