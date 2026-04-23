@@ -98,7 +98,7 @@
 .headerWrapper {
   padding: var(--default-spacing);
   background: var(--mantine-color-body);
-  z-index: 200; /* Accordion icons will show over */
+  z-index: var(--z-header-wrapper); /* Accordion icons will show over */
 }
 
 .fallbackWrapper {
@@ -132,7 +132,7 @@
   margin-left: unset;
   margin-right: unset;
   display: none;
-  z-index: 1;
+  z-index: var(--z-mobile-open);
 }
 
 .panelBody {
@@ -146,7 +146,7 @@
 }
 
 .panelContent {
-  z-index: 199;
+  z-index: var(--z-panel-content);
 }
 
 .panelClosed {
@@ -187,7 +187,7 @@
   position: sticky;
   top: 0;
   background: var(--mantine-color-body);
-  z-index: 200; /* Accordion icons will show over */
+  z-index: var(--z-tabs-list); /* Accordion icons will show over */
 }
 
 .title {

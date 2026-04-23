@@ -5,8 +5,10 @@
 
 import { useEffect, useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
-import { Button, Loader, Stack, Text } from '@mantine/core';
+import { Box, Loader, Stack, Text } from '@mantine/core';
+import Button from '@/components/Button';
 import Select from '@/components/Select';
+import { Variant } from '@/components/types';
 import styles from '@/features/Panel/Layers/Layer/Label/Label.module.css';
 import Table from '@/features/Table';
 import { useLocations } from '@/hooks/useLocations';
@@ -74,9 +76,16 @@ const Label: React.FC<Props> = (props) => {
         <Loader mx="auto" color="#0183a1" type="dots" />
       ) : (
         <>
-          <Button onClick={handleShow} size="xs" mt="var(--default-spacing)">
-            {showTable ? 'Hide Sample Feature' : 'Show Sample Feature'}
-          </Button>
+          <Box mx="auto">
+            <Button
+              variant={Variant.Secondary}
+              onClick={handleShow}
+              size="xs"
+              mt="var(--default-spacing)"
+            >
+              {showTable ? 'Hide Sample Feature' : 'Show Sample Feature'}
+            </Button>
+          </Box>
           {showTable && <Table properties={sampleProperties} search size="xs" />}
         </>
       )}

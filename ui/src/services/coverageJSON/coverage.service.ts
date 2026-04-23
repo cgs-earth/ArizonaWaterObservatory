@@ -41,7 +41,7 @@ export class CoverageService {
     });
 
     const keys: TValues = {};
-    let keyValues = Object.keys(filteredRanges);
+    let keyValues = filteredRanges.map((entry) => entry[0]);
     if (coverage.parameters) {
       keyValues = Object.keys(coverage.parameters);
     }

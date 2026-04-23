@@ -37,6 +37,20 @@ html {
 
   --default-spacing: 0.5rem; /* 16px * 0.5 = 8px */
   --mobile-width: 899px;
+
+  --z-mobile-open: 1;
+  --z-filter-wrapper: 1;
+  --z-data-selector: 1;
+  --z-download-wrapper: 1;
+  --z-modal-header: 2;
+  --z-accordion-header: 2;
+  --z-mobile-overlay: 198;
+  --z-panel-content: 199;
+  --z-header-wrapper: 200;
+  --z-tabs-list: 200;
+  --z-confirm-modal: 301;
+  --z-filter-modal: 302;
+  --z-panel-tab: 302;
 }
 
 :where([data-mantine-color-scheme='dark']) {

@@ -231,6 +231,7 @@ const Layer: React.FC<Props> = (props) => {
         const _error = error as Error;
         notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
       }
+      console.error(error);
     } finally {
       loadingManager.remove(loadingInstance);
       setIsLoading(false);

@@ -54,7 +54,7 @@
   position: absolute;
   top: var(--default-spacing);
   left: var(--default-spacing);
-  z-index: 1;
+  z-index: var(--z-download-wrapper);
 }
 
 .downloadButtonWrapper > button:first-of-type {
@@ -112,7 +112,7 @@
   position: sticky;
   top: 0;
   background: var(--mantine-color-body);
-  z-index: 2;
+  z-index: var(--z-modal-header);
   border-bottom: 1px solid var(--mantine-color-default-border);
 }
 

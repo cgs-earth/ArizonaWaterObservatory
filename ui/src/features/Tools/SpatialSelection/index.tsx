@@ -82,6 +82,11 @@ const SpatialSelection: React.FC = () => {
 
   return (
     <>
+      <Confirm
+        opened={confirmAction.opened}
+        onClose={confirmAction.close}
+        onConfirm={confirmAction.confirm}
+      />
       <Popover
         offset={16}
         opened={show}
@@ -137,11 +142,6 @@ const SpatialSelection: React.FC = () => {
             />
           </Stack>
         }
-      />
-      <Confirm
-        opened={confirmAction.opened}
-        onClose={confirmAction.close}
-        onConfirm={confirmAction.confirm}
       />
     </>
   );
