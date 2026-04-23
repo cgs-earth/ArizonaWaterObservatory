@@ -22,6 +22,17 @@ export enum FriendlyColorBrewerPalettes {
   Oranges = 'Oranges',
   Purples = 'Purples',
   Reds = 'Reds',
+
+  RedGrey = 'RdGy',
+  BrowBlueGreen = 'BrBG',
+  RedBlue = 'RdBu',
+  RedYellowBlue = 'RdYlBu',
+  PinkYellowGreen = 'PiYG',
+  RedYellowGreen = 'RdYlGn',
+  Spectral = 'Spectral',
+  Accent = 'Accent',
+  Dark = 'Dark2',
+  Pastel = 'Pastel1',
 }
 
 export const getPaletteLabel = (palette: FriendlyColorBrewerPalettes): string => {
@@ -62,14 +73,34 @@ export const getPaletteLabel = (palette: FriendlyColorBrewerPalettes): string =>
       return 'Purples';
     case FriendlyColorBrewerPalettes.Reds:
       return 'Reds';
+    case FriendlyColorBrewerPalettes.RedGrey:
+      return 'Red-Grey';
+    case FriendlyColorBrewerPalettes.BrowBlueGreen:
+      return 'Brown-Blue-Green';
+    case FriendlyColorBrewerPalettes.RedBlue:
+      return 'Red-Blue';
+    case FriendlyColorBrewerPalettes.RedYellowBlue:
+      return 'Red-Yellow-Blue';
+    case FriendlyColorBrewerPalettes.PinkYellowGreen:
+      return 'Pink-Yellow-Green';
+    case FriendlyColorBrewerPalettes.RedYellowGreen:
+      return 'Red-Yellow-Green';
+    case FriendlyColorBrewerPalettes.Spectral:
+      return 'Spectral';
+    case FriendlyColorBrewerPalettes.Accent:
+      return 'Accent';
+    case FriendlyColorBrewerPalettes.Dark:
+      return 'Dark';
+    case FriendlyColorBrewerPalettes.Pastel:
+      return 'Pastel';
     default:
       return palette; // fallback to raw code if unknown
   }
 };
 
-export type ColorBrewerIndex = 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type ColorBrewerIndex = 3 | 4 | 5 | 6 | 7 | 8;
 
-export const validColorBrewerIndex = [3, 4, 5, 6, 7, 8, 9];
+export const validColorBrewerIndex = [3, 4, 5, 6, 7, 8];
 
 export const isValidColorBrewerIndex = (index: number): index is ColorBrewerIndex => {
   return validColorBrewerIndex.includes(index);
