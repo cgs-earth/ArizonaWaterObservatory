@@ -16,6 +16,7 @@ from lib import (
     get_previously_downloaded_urls,
     get_smap_data_list_for_arizona,
     get_total_size_in_gb,
+    update_checkpoint,
 )
 import minio
 import s3fs
@@ -108,6 +109,11 @@ def main(
         if test_mode and i > 5:
             LOGGER.warning("Stopping early since test mode was specified")
             break
+
+        LOGGER.info(
+            f"Updating checkpoint file with new file {hd5_file_path[0].name}"
+        )
+        update_checkpoint(mc, bucket, hd5_file_path[0].name)
 
     LOGGER.info("Done!")
 
