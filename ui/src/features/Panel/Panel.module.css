@@ -248,4 +248,8 @@
     height: unset;
     max-height: unset;
   }
+
+  .accordionBody {
+    max-height: calc(100vh - 24.6rem);
+  }
 }
