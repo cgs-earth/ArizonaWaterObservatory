@@ -29,7 +29,6 @@ RUN uv sync --no-group etl --all-groups --all-packages
 COPY pygeoapi-deployment/ /opt/pygeoapi/pygeoapi-deployment/
 
 COPY pygeoapi.config.yml /opt/pygeoapi/pygeoapi.config.yml
-COPY pygeoapi-deployment/templates/ /opt/pygeoapi/.venv/lib/python3.12/site-packages/pygeoapi/templates/
 
 # Set up environment
 ENV PATH="/opt/pygeoapi/.venv/bin:$PATH"
@@ -41,6 +40,10 @@ ENV PYGEOAPI_CUSTOM_EVENT_LOOP_GETTER=get_loop
 ENV PYGEOAPI_CACHE_PLUGINS=true
 # Enable redis cache for items/ and collections/ endpoints
 ENV PYGEOAPI_FLASK_CACHE_TYPE=REDIS
+# AWO Ontology mapping
+ENV PYGEOAPI_ONTOLOGY_GRAPH=/opt/pygeoapi/pygeoapi-deployment/ontology.ttl
+ENV PYGEOAPI_ONTOLOGY_DEFAULT_PREFIX="http://lincolninst.edu/cgs/vocabularies/asu/awo#"
+ENV PYGEOAPI_ONTOLOGY_CONCEPT_SCHEME=:conceptScheme_7a2617b0
 
 # Entrypoint for running the app
 ENTRYPOINT [ "/opt/pygeoapi/pygeoapi-deployment/entrypoint.sh" ]
