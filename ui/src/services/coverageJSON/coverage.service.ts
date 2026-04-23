@@ -21,6 +21,7 @@ export class CoverageService {
   }
 
   getValues(coverage: CoverageJSON, options?: TCoverageOptions): TValues {
+    console.log('GetValues');
     const filteredRanges = Object.entries(coverage.ranges).filter(([parameterId]) => {
       if (options?.chosenParameter) {
         const parameterEntry = coverage.parameters[parameterId];
@@ -41,12 +42,17 @@ export class CoverageService {
     });
 
     const keys: TValues = {};
-    let keyValues = Object.keys(filteredRanges);
+    let keyValues = filteredRanges.map((entry) => entry[0]);
+    console.log('keyvalue:', keyValues, 'coverage', coverage, 'filteredRanges', filteredRanges);
     if (coverage.parameters) {
       keyValues = Object.keys(coverage.parameters);
+      console.log('coverege parmaters', keyValues);
     }
     for (const key of keyValues) {
-      keys[key] = coverage.ranges[key].values;
+      console.log(coverage.ranges[key]);
+      if (coverage.ranges[key]?.values) {
+        keys[key] = coverage.ranges[key].values;
+      }
     }
     return keys;
   }

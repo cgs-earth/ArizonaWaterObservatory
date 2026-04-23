@@ -213,6 +213,95 @@ export class CoverageChartService extends CoverageService {
 
     return series;
   }
+  private addPointValuesConstructor(
+    xValues: number[],
+    yValues: number[],
+    series: EChartsSeries[],
+    parameters: CoverageJSON['parameters'],
+    times: (string | number)[],
+    values: TValues
+  ) {
+    const count = times.length;
+
+    const xLength = xValues.length;
+    const yLength = yValues.length;
+
+    const getCurrentValues = this.getCurrentValuesConstructor(count, values, xLength, yLength);
+    let id = 1;
+
+    return (x: number, y: number) => {
+      const currentValues = getCurrentValues(x, y);
+      if (Object.values(currentValues).every((array) => array.every((value) => value === null))) {
+        return;
+      }
+
+      const [parameterId, data] = Object.entries(currentValues)[0];
+      if (Object.values(data).every((value) => value === null)) {
+        return;
+      }
+      // This grid entry would have no values to display
+      const parameter = parameters[parameterId];
+      const unit = getParameterUnit(parameter);
+      series.push({
+        name: `${parameterId} point ${id}`,
+        parameter: parameterId,
+        unit,
+        data: data as number[],
+        type: 'line',
+      });
+      id += 1;
+    };
+  }
+
+  private processPointValues(
+    timesObj: CoverageAxesValues,
+    xObj: CoverageAxesValues,
+    yObj: CoverageAxesValues,
+    coverage: CoverageJSON,
+    options?: TCoverageOptions
+  ): EChartsSeries[] {
+    let values: TValues | null = this.getValues(coverage, options);
+
+    const series: EChartsSeries[] = [];
+
+    const coverageParameters = coverage.parameters;
+
+    const addPoint = this.addPointValuesConstructor(
+      xObj.values as number[],
+      yObj.values as number[],
+      series,
+      coverageParameters,
+      timesObj.values,
+      values
+    );
+
+    for (let y = 0; y < yObj.values.length; y++) {
+      for (let x = 0; x < xObj.values.length; x++) {
+        addPoint(x, y);
+      }
+    }
+    values = null;
+
+    return series;
+  }
+  private processPoint(coverage: CoverageJSON, options?: TCoverageOptions) {
+    const { t, x: xObj, y: yObj } = this.getAxes(coverage);
+
+    if (this.isSegments(xObj) && this.isSegments(yObj)) {
+      notificationManager.show(
+        `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
+        NotificationType.Error,
+        10000
+      );
+      return [];
+    }
+
+    if (this.isValues(xObj) && this.isValues(yObj)) {
+      return this.processPointValues(t, xObj, yObj, coverage, options);
+    }
+
+    return [];
+  }
 
   private coverageCollectionToSeries(coverage: CoverageCollection, options?: TOptions) {
     const parameters = coverage.parameters as CoverageJSON['parameters'];
@@ -241,6 +330,9 @@ export class CoverageChartService extends CoverageService {
       return this.processGrid(coverage, options);
     }
 
+    if (coverage.domain.domainType === 'Point') {
+      return this.processPoint(coverage, options);
+    }
     notificationManager.show(
       `Domain type ${coverage.domain.domainType} is not currently supported.`,
       NotificationType.Error,
