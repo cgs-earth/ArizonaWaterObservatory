@@ -8,7 +8,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { bbox } from '@turf/turf';
 import { BBox, Feature } from 'geojson';
-import { Anchor, Collapse, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
+import { Anchor, Collapse, ComboboxData, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Code from '@/components/Code';
@@ -16,19 +16,14 @@ import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import { Variant } from '@/components/types';
-import {
-  CollectionRestrictions,
-  RestrictionType,
-  StringIdentifierCollections,
-} from '@/consts/collections';
+import { StringIdentifierCollections } from '@/consts/collections';
 import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
-import loadingManager from '@/managers/Loading.init';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
 import mainManager from '@/managers/Main.init';
-import notificationManager from '@/managers/Notification.init';
 import {
   CoverageCollection,
   CoverageJSON,
@@ -37,8 +32,7 @@ import {
 } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
-import { LoadingType, NotificationType } from '@/stores/session/types';
-import { createEmptyCsv } from '@/utils/csv';
+import { CollectionType } from '@/utils/collection';
 import { getIdStore } from '@/utils/getIdStore';
 import { normalizeBBox } from '@/utils/normalizeBBox';
 import { getParameterUnit } from '@/utils/parameters';
@@ -47,15 +41,15 @@ import { buildCubeUrl } from '@/utils/url';
 dayjs.extend(isSameOrBefore);
 
 type Props = {
-  location: Feature;
-  collection: ICollection;
   layer: Layer;
+  isLoading: boolean;
+  collection: ICollection;
+  location: Feature;
   linkLocation?: LocationType | null;
+  collectionType: CollectionType;
+  parameterOptions: ComboboxData | undefined;
 };
-
 export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { location, layer, collection, linkLocation } = props;
-
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
   const [openedCharts, { toggle: toggleCharts, close: closeCharts }] = useDisclosure(false);
@@ -63,45 +57,19 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
   const [_datasetName, setDatasetName] = useState<string>('');
-  const [parameters, setParameters] = useState<Parameter[]>([]);
 
-  const [from, setFrom] = useState<string | null>(layer.from);
-  const [to, setTo] = useState<string | null>(layer.to);
-  const [daysLimit, setDaysLimit] = useState<number>();
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
-
-  const getIsDateRangeOverLimit = () => {
-    if (daysLimit) {
-      if (!from || !to || !dayjs(from).isValid() || !dayjs(to).isValid()) {
-        return true;
-      }
-
-      return dayjs(to).diff(dayjs(from), 'days') > daysLimit;
-    }
-    return false;
-  };
-
-  const isDateRangeOverLimit = getIsDateRangeOverLimit();
-
-  const getDateInputError = () => {
-    // is to >= from?
-    if (isValidRange) {
-      // is there a limit on days and have we exceeded it?
-      if (daysLimit && isDateRangeOverLimit) {
-        return `${dayjs(to).diff(dayjs(from), 'days') - daysLimit} day(s) over limit`;
-      }
-      return false;
-    }
-
-    return 'Invalid date range';
-  };
-
-  const [id, setId] = useState<string>(String(location.id));
-
+  const isMounted = useRef(true);
+  const { layer, location, collection, collectionType, parameterOptions, linkLocation } = props;
   const [isLoading, setIsLoading] = useState(false);
 
-  const controller = useRef<AbortController>(null);
-  const isMounted = useRef(true);
+  const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
+    parameterOptions,
+    collectionType,
+  });
+  const [id, setId] = useState<string>(String(location.id));
+  const [parameters, setParameters] = useState<Parameter[]>([]);
+  const [from, setFrom] = useState<string | null>(layer.from);
+  const [to, setTo] = useState<string | null>(layer.to);
 
   useEffect(() => {
     const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
@@ -115,18 +83,6 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   useEffect(() => {
     if (!layer) {
       return;
-    }
-
-    const restrictions = CollectionRestrictions[layer.datasourceId];
-
-    if (restrictions && restrictions.length > 0) {
-      const dateRangeLimitRestriction = restrictions.find(
-        (restriction) => restriction.type === RestrictionType.DateRange
-      );
-
-      if (dateRangeLimitRestriction && dateRangeLimitRestriction.days > 0) {
-        setDaysLimit(dateRangeLimitRestriction.days);
-      }
     }
 
     const newDataset = mainManager.getDatasource(layer.datasourceId);
@@ -161,81 +117,6 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
       setId(String(location.id));
     }
   }, [location, layer]);
-
-  const getFileName = () => {
-    let name = `data-${location.id}-${layer.parameters.join('_')}`;
-
-    if (from && dayjs(from).isValid()) {
-      name += `-${dayjs(from).format('MM/DD/YYYY')}`;
-    }
-
-    if (to && dayjs(to).isValid()) {
-      name += `-${dayjs(to).format('MM/DD/YYYY')}`;
-    }
-
-    return `${name}.csv`;
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleCSVClick = async () => {
-    if (!location.bbox) {
-      return;
-    }
-
-    const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
-
-    const loadingInstance = loadingManager.add(
-      `Generating csv for location: ${location.id}`,
-      LoadingType.Data
-    );
-    try {
-      setIsLoading(true);
-
-      if (!controller.current) {
-        controller.current = new AbortController();
-      }
-
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        throw new Error(`Error: ${res.statusText.length > 0 ? res.statusText : 'Unknown error'}`);
-      }
-
-      let objectUrl = '';
-      if (res.status === 204) {
-        notificationManager.show(
-          `No data found for location: ${location.id} with the current parameter and date range selection.`,
-          NotificationType.Error,
-          10000
-        );
-        objectUrl = createEmptyCsv();
-      } else {
-        const blob = await res.blob();
-        objectUrl = URL.createObjectURL(blob);
-      }
-
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = getFileName();
-      document.body.appendChild(a);
-      a.click();
-
-      URL.revokeObjectURL(objectUrl);
-      a.remove();
-      notificationManager.show('CSV generated successfully.', NotificationType.Success, 10000);
-    } catch (err) {
-      if (((err as Error)?.message ?? '').length > 0) {
-        notificationManager.show((err as Error)?.message, NotificationType.Error, 10000);
-      } else if (typeof err === 'string') {
-        notificationManager.show(err, NotificationType.Error, 10000);
-      }
-    } finally {
-      loadingManager.remove(loadingInstance);
-      if (isMounted.current) {
-        setIsLoading(false);
-      }
-    }
-  };
 
   const parseBBox = (bbox: unknown): BBox | undefined => {
     if (

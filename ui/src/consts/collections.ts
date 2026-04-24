@@ -137,11 +137,6 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       count: 1,
       message: 'Select only one parameter.',
     },
-    {
-      type: RestrictionType.DateRange,
-      days: 1,
-      message: 'Select a date range no greater than one day.',
-    },
   ],
   [CollectionId.NWMReachToReach]: [
     {
@@ -158,11 +153,6 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       type: RestrictionType.Parameter,
       count: 1,
       message: 'Select only one parameter.',
-    },
-    {
-      type: RestrictionType.DateRange,
-      days: 1,
-      message: 'Select a date range no greater than one day.',
     },
   ],
   [CollectionId.NWMChannelRouting]: [
@@ -181,11 +171,6 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       count: 1,
       message: 'Select only one parameter.',
     },
-    {
-      type: RestrictionType.DateRange,
-      days: 1,
-      message: 'Select a date range no greater than one day.',
-    },
   ],
   [CollectionId.NWMGroundwaterOutput]: [
     {
@@ -197,11 +182,6 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       type: RestrictionType.Parameter,
       count: 1,
       message: 'Select only one parameter.',
-    },
-    {
-      type: RestrictionType.DateRange,
-      days: 1,
-      message: 'Select a date range no greater than one day.',
     },
   ],
   [CollectionId.NWMLakeOutput]: [
@@ -215,20 +195,10 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       count: 1,
       message: 'Select only one parameter.',
     },
-    {
-      type: RestrictionType.DateRange,
-      days: 1,
-      message: 'Select a date range no greater than one day.',
-    },
   ],
   [CollectionId.PRISM]: [
     {
       type: RestrictionType.Day,
-      days: 1095,
-      message: 'Select a date range no greater than three years.',
-    },
-    {
-      type: RestrictionType.DateRange,
       days: 1095,
       message: 'Select a date range no greater than three years.',
     },
