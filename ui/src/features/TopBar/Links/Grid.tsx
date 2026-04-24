@@ -8,7 +8,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { bbox } from '@turf/turf';
 import { BBox, Feature } from 'geojson';
-import { Anchor, Collapse, ComboboxData, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
+import { Anchor, Collapse, Group, Paper, Stack, Text, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Code from '@/components/Code';
@@ -47,7 +47,6 @@ type Props = {
   location: Feature;
   linkLocation?: LocationType | null;
   collectionType: CollectionType;
-  parameterOptions: ComboboxData | undefined;
 };
 export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
@@ -59,11 +58,10 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [_datasetName, setDatasetName] = useState<string>('');
 
   const isMounted = useRef(true);
-  const { layer, location, collection, collectionType, parameterOptions, linkLocation } = props;
+  const { layer, location, collection, collectionType, linkLocation } = props;
   const [isLoading, setIsLoading] = useState(false);
 
   const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
-    parameterOptions,
     collectionType,
   });
   const [id, setId] = useState<string>(String(location.id));
