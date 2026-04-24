@@ -78,6 +78,7 @@ export enum RestrictionType {
   Day = 'day',
   Parameter = 'parameter', // Limit number of parameters
   ParameterFirst = 'parameter-first', // Select a parameter before fetch
+  DateRange = 'date-range',
 }
 
 type RestrictionBase = {
@@ -101,12 +102,16 @@ type ParameterRestriction = RestrictionBase & {
 type ParameterFirstRestriction = RestrictionBase & {
   type: RestrictionType.ParameterFirst;
 };
-
+type DateRangeRestriction = RestrictionBase & {
+  type: RestrictionType.DateRange;
+  days: number;
+};
 export type Restiction =
   | SizeRestriction
   | DayRestriction
   | ParameterRestriction
-  | ParameterFirstRestriction;
+  | ParameterFirstRestriction
+  | DateRangeRestriction;
 
 export const CollectionRestrictions: Record<string, Restiction[]> = {
   [CollectionId.ArizonaWaterWells]: [
