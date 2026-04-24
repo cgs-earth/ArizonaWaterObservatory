@@ -290,7 +290,7 @@ export class CoverageChartService extends CoverageService {
     if (this.isSegments(xObj) && this.isSegments(yObj)) {
       notificationManager.show(
         `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
-        NotificationType.Error,
+        NotificationVariant.Error,
         10000
       );
       return [];
