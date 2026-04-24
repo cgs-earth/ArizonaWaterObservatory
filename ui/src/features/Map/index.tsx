@@ -11,9 +11,10 @@ import { LayerType } from '@/components/Map/types';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { DEFAULT_BBOX, drawLayers } from '@/features/Map/consts';
-import { sourceConfigs } from '@/features/Map/sources';
+import { sourceConfigs, SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent, getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
+import { useSpatialSelection } from '@/hooks/useSpatialSelection';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import { Location } from '@/stores/main/types';
@@ -45,6 +46,7 @@ const MainMap: React.FC<Props> = (props) => {
   const layers = useMainStore((state) => state.layers);
   const basemap = useMainStore((state) => state.basemap);
   const searches = useMainStore((state) => state.searches);
+  const terrainActive = useMainStore((state) => state.terrainActive);
 
   const loadingInstances = useSessionStore((state) => state.loadingInstances);
 
@@ -56,6 +58,8 @@ const MainMap: React.FC<Props> = (props) => {
 
   const isMounted = useRef(true);
   const initialMapLoad = useRef(true);
+
+  useSpatialSelection(map);
 
   useEffect(() => {
     return () => {
@@ -343,19 +347,37 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
+    if (terrainActive) {
+      map.setTerrain({ source: SourceId.Terrain });
+    } else {
+      map.setTerrain(null);
+    }
+  }, [terrainActive]);
+
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+
     // Copy over all existing layers and sources when changing basemaps
-    const layers = map.getStyle().layers || [];
-    const sources = map.getStyle().sources || {};
-
-    const customLayers = layers.filter((layer) => {
-      return layer.id.startsWith('user-');
-    });
-
-    const customSources = Object.entries(sources).filter(([id]) => {
-      return id.startsWith('user-');
-    });
-
     map.once('styledata', () => {
+      const layers = map.getStyle().layers || [];
+      const sources = map.getStyle().sources || {};
+
+      const customLayers = layers.filter((layer) => {
+        return (
+          layer.id.startsWith('user-') ||
+          layer.id.startsWith('spatial-selection') ||
+          layer.id.startsWith('measure')
+        );
+      });
+
+      const customSources = Object.entries(sources).filter(([id]) => {
+        return (
+          id.startsWith('user-') || id.startsWith('spatial-selection') || id.startsWith('measure')
+        );
+      });
+
       for (const [id, source] of customSources) {
         if (!map.getSource(id)) {
           map.addSource(id, source);

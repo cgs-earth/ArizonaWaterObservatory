@@ -22,7 +22,7 @@ import loadingManager from '@/managers/Loading.init';
 import notificationManager from '@/managers/Notification.init';
 import { CoverageCollection, CoverageJSON, ICollection } from '@/services/edr.service';
 import { Location } from '@/stores/main/types';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 import { getDatetime } from '@/utils/url';
 
 dayjs.extend(isSameOrBefore);
@@ -180,7 +180,7 @@ export const Charts: React.FC<Props> = ({
       if (rejected.length > 0) {
         notificationManager.show(
           `Some locations failed to load (${rejected.length}/${pending.length}).`,
-          NotificationType.Info,
+          NotificationVariant.Info,
           8000
         );
       }

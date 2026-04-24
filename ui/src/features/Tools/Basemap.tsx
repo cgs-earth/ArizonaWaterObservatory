@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { Grid, Image, Paper, Stack, Text, Title, Tooltip } from '@mantine/core';
 import Basemap from '@/assets/Basemap';
+import Checkbox from '@/components/Checkbox';
 import IconButton from '@/components/IconButton';
 import { basemaps } from '@/components/Map/consts';
 import { BasemapId } from '@/components/Map/types';
@@ -23,11 +24,18 @@ export const BasemapSelector: React.FC = () => {
   const overlay = useSessionStore((state) => state.overlay);
   const setOverlay = useSessionStore((state) => state.setOverlay);
 
+  const terrainActive = useMainStore((state) => state.terrainActive);
+  const setTerrainActive = useMainStore((state) => state.setTerrainActive);
+
   const [show, setShow] = useState(false);
 
   const handleShow = (show: boolean) => {
     setOverlay(show ? Overlay.Basemap : null);
     setShow(show);
+  };
+
+  const handleTerrainChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setTerrainActive(event.currentTarget.checked);
   };
 
   useEffect(() => {
@@ -115,6 +123,12 @@ export const BasemapSelector: React.FC = () => {
                 );
               })}
           </Grid>
+          <Checkbox
+            size="sm"
+            checked={terrainActive}
+            onChange={handleTerrainChange}
+            label="Show Terrain"
+          />
         </Stack>
       }
     />

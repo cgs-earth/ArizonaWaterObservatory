@@ -4,40 +4,73 @@
  */
 
 import { Box, Notification, Stack } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { History } from '@/features/Notifications/History';
 import styles from '@/features/Notifications/Notifications.module.css';
 import notificationManager from '@/managers/Notification.init';
 import useSessionStore from '@/stores/session';
-import { NotificationType } from '@/stores/session/types';
+import { NotificationVariant } from '@/stores/session/types';
 
 const Notifications: React.FC = () => {
   const notifications = useSessionStore((state) => state.notifications);
 
-  const getColor = (type: NotificationType) => {
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const getColor = (type: NotificationVariant) => {
     switch (type) {
-      case NotificationType.Error:
+      case NotificationVariant.Error:
         return 'red';
-      case NotificationType.Success:
+      case NotificationVariant.Success:
         return 'green';
-      case NotificationType.Info:
+      case NotificationVariant.Info:
       default:
         return undefined;
     }
   };
 
+  const handleClick = (show: boolean) => {
+    if (show) {
+      open();
+    } else {
+      close();
+    }
+  };
+
+  if (notifications.length === 0) {
+    return;
+  }
+
   return (
     <Box className={styles.notificationsWrapper}>
-      <Stack>
-        {notifications.map((notification) => (
-          <Notification
-            key={notification.id}
-            color={getColor(notification.type)}
-            onClose={() => notificationManager.hide(notification.id)}
-            onMouseEnter={() => notificationManager.pause(notification.id)}
-            onMouseLeave={() => notificationManager.resume(notification.id)}
+      <Stack gap="var(--default-spacing)" align="flex-end">
+        {!opened && (
+          <Stack
+            gap="calc(var(--default-spacing) / 2)"
+            align="flex-end"
+            className={styles.notificationStack}
           >
-            {notification.message}
-          </Notification>
-        ))}
+            {notifications
+              .filter((notification) => notification.visible)
+              .map((notification) => (
+                <Notification
+                  key={notification.id}
+                  className={styles.notification}
+                  color={getColor(notification.type)}
+                  onClose={() => notificationManager.hide(notification.id)}
+                  onMouseEnter={() => notificationManager.pause(notification.id)}
+                  onMouseLeave={() => notificationManager.resume(notification.id)}
+                >
+                  {notification.message}
+                </Notification>
+              ))}
+          </Stack>
+        )}
+        <History
+          show={opened}
+          onClick={handleClick}
+          notifications={notifications}
+          getColor={getColor}
+        />
       </Stack>
     </Box>
   );
