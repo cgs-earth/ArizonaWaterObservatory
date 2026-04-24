@@ -3,12 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createTheme } from '@mantine/core';
+import { Checkbox, createTheme, Radio } from '@mantine/core';
 
 export const theme = createTheme({
   cursorType: 'pointer',
   fontFamily: 'Arial, Helvetica, sans-serif',
   headings: {
     fontFamily: 'Arial, Helvetica, sans-serif',
+  },
+  components: {
+    Radio: Radio.extend({
+      styles: {
+        label: {
+          paddingInlineStart: 'var(--default-spacing)',
+        },
+      },
+    }),
+    Checkbox: Checkbox.extend({
+      styles: {
+        label: {
+          paddingInlineStart: 'var(--default-spacing)',
+        },
+      },
+    }),
   },
 });

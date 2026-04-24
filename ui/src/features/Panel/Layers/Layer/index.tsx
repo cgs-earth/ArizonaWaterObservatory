@@ -18,7 +18,7 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { Layer as LayerType } from '@/stores/main/types';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getRandomHexColor } from '@/utils/hexColor';
 import { getParameterUnit } from '@/utils/parameters';
@@ -225,11 +225,11 @@ const Layer: React.FC<Props> = (props) => {
         opacity,
         paletteDefinition
       );
-      notificationManager.show(`Updated layer: ${updateName}`, NotificationType.Success);
+      notificationManager.show(`Updated layer: ${updateName}`, NotificationVariant.Success);
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);
@@ -249,7 +249,7 @@ const Layer: React.FC<Props> = (props) => {
 
   const handleDelete = () => {
     mainManager.deleteLayer(layer);
-    notificationManager.show(`Deleted layer: ${layer.name}`, NotificationType.Success);
+    notificationManager.show(`Deleted layer: ${layer.name}`, NotificationVariant.Success);
   };
 
   const handleNameChange = useCallback((name: LayerType['name']) => setName(name), [setName]);

@@ -68,3 +68,7 @@ export type ExtendedFeatureCollection<
   numberReturned?: number;
   timeStamp?: string;
 };
+
+export type ApplySpatialFilterOptions = {
+  rethrow: boolean;
+};

@@ -17,7 +17,7 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { Layer } from '@/stores/main/types';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -57,9 +57,9 @@ export const Entry: React.FC<Props> = (props) => {
     } catch (err) {
       const error = err as Error;
       if ((error?.message ?? '').length > 0 && error?.name !== 'AbortError') {
-        notificationManager.show((err as Error)?.message, NotificationType.Error, 10000);
+        notificationManager.show((err as Error)?.message, NotificationVariant.Error, 10000);
       } else if (typeof err === 'string') {
-        notificationManager.show(err, NotificationType.Error, 10000);
+        notificationManager.show(err, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);
@@ -95,9 +95,9 @@ export const Entry: React.FC<Props> = (props) => {
     } catch (err) {
       const error = err as Error;
       if ((error?.message ?? '').length > 0 && error?.name !== 'AbortError') {
-        notificationManager.show((err as Error)?.message, NotificationType.Error, 10000);
+        notificationManager.show((err as Error)?.message, NotificationVariant.Error, 10000);
       } else if (typeof err === 'string') {
-        notificationManager.show(err, NotificationType.Error, 10000);
+        notificationManager.show(err, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);
