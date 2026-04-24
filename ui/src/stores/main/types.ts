@@ -29,10 +29,22 @@ export enum SpatialSelectionType {
   Drawn = 'custom-drawn-polygon',
   Selected = 'select-existing-polygons',
   Upload = 'custom-upload-shape',
+  Predefined = 'pre-defined-bounds',
 }
+
+export enum PredefinedBoundary {
+  Arizona = 'arizona',
+  ColoradoRiverBasin = 'colorado-river-basin',
+}
+
+export type Location = {
+  id: string; // location/{this}
+  layerId: Layer['id'];
+};
 
 export interface SpatialSelectionBase {
   type: SpatialSelectionType;
+  strict: boolean;
 }
 
 export interface SpatialSelectionDrawn extends SpatialSelectionBase {
@@ -47,14 +59,20 @@ export interface SpatialSelectionUpload extends SpatialSelectionBase {
 
 export interface SpatialSelectionSelected extends SpatialSelectionBase {
   type: SpatialSelectionType.Selected;
-  locations: string[]; // location IDs
+  locations: Location[]; // location IDs
+}
+
+export interface SpatialSelectionPredefined extends SpatialSelectionBase {
+  type: SpatialSelectionType.Predefined;
+  boundary: PredefinedBoundary;
 }
 
 // Discriminated union for all spatial selection types
 export type SpatialSelection =
   | SpatialSelectionDrawn
   | SpatialSelectionUpload
-  | SpatialSelectionSelected;
+  | SpatialSelectionSelected
+  | SpatialSelectionPredefined;
 
 export enum DatasourceType {
   Point = 'point',
@@ -113,11 +131,6 @@ export type Chart = {
   location: string;
   parameter: string; // id of parameter as returned by datasource
   dataVisualization: DataVisualization;
-};
-
-export type Location = {
-  id: string; // location/{this}
-  layerId: Layer['id'];
 };
 
 export type Category = {

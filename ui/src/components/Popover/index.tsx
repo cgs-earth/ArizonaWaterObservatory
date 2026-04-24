@@ -5,6 +5,7 @@
 
 import { ReactNode } from 'react';
 import { Popover as _Popover, PopoverDropdown, PopoverProps, PopoverTarget } from '@mantine/core';
+import styles from '@/components/Popover/Popover.module.css';
 
 type Props = PopoverProps & {
   target: ReactNode;
@@ -18,9 +19,9 @@ const Popover: React.FC<Props> = (props) => {
   const shouldRender = popoverProps.opened || !unmountOnExit;
 
   return (
-    <_Popover withArrow={false} {...popoverProps}>
+    <_Popover withArrow={false} classNames={{ dropdown: styles.dropdown }} {...popoverProps}>
       <PopoverTarget>{target}</PopoverTarget>
-      {shouldRender && <PopoverDropdown>{content}</PopoverDropdown>}
+      {shouldRender && <PopoverDropdown bdrs={0}>{content}</PopoverDropdown>}
     </_Popover>
   );
 };

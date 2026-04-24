@@ -4,14 +4,15 @@
  */
 
 import Button from '@/components/Button';
-import { basemaps } from '@/components/Map/consts';
 import { BasemapId } from '@/components/Map/types';
 import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
 import mainManager from '@/managers/Main.init';
+import useMainStore from '@/stores/main';
 
 export const ClearAll: React.FC = () => {
+  const setBasemap = useMainStore((state) => state.setBasemap);
   const { map, draw } = useMap(MAP_ID);
 
   const handleClick = () => {
@@ -29,7 +30,7 @@ export const ClearAll: React.FC = () => {
           animate: false,
         }
       );
-      map.setStyle(basemaps[BasemapId.Streets]);
+      setBasemap(BasemapId.Streets);
     }
 
     if (draw) {
