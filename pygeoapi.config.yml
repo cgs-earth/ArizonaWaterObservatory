@@ -871,7 +871,6 @@ resources:
     keywords: ["NASA"]
     provider-name:  
       - NASA
-    visibility: hidden
     extents:
       spatial:
         bbox: [-170, 15, -51, 72]
