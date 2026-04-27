@@ -1,6 +1,6 @@
 /**
  * Copyright 2025 Lincoln Institute of Land Policy
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { ILink, IRequestParams, Service, TRequestMethods } from '@ogcapi-js/shared';
@@ -1103,7 +1103,7 @@ export type CoverageAxesSegments = {
   num: number;
 };
 export type CoverageAxesValues = {
-  values: (number | string)[];
+  values: string[] | number[];
 };
 
 export interface CoverageJSON {

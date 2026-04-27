@@ -1,13 +1,15 @@
 /**
  * Copyright 2025 Lincoln Institute of Land Policy
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { StateCreator } from 'zustand';
 import {
   MainState,
+  PredefinedBoundary,
   SpatialSelection,
   SpatialSelectionDrawn,
+  SpatialSelectionPredefined,
   SpatialSelectionSelected,
   SpatialSelectionType,
   SpatialSelectionUpload,
@@ -21,9 +23,38 @@ export interface SpatialSelectionSlice {
     featureCollection: SpatialSelectionUpload['featureCollection']
   ) => void;
   setSpatialSelectionSelected: (locations: SpatialSelectionSelected['locations']) => void;
+  setSpatialSelectionPredefinedBoundary: (boundary: SpatialSelectionPredefined['boundary']) => void;
+  setSpatialSelectionStrict: (strict: SpatialSelection['strict']) => void;
   hasSpatialSelection: () => boolean;
   hasSpatialSelectionType: (type: SpatialSelectionType) => boolean;
 }
+
+export const isSpatialSelectionDrawn = (
+  selection: SpatialSelection
+): selection is SpatialSelectionDrawn => {
+  return selection.type === SpatialSelectionType.Drawn;
+};
+
+export const isSpatialSelectionUpload = (
+  selection: SpatialSelection
+): selection is SpatialSelectionUpload => {
+  return selection.type === SpatialSelectionType.Upload;
+};
+
+export const isSpatialSelectionSelected = (
+  selection: SpatialSelection
+): selection is SpatialSelectionSelected => {
+  return selection.type === SpatialSelectionType.Selected;
+};
+
+export const isSpatialSelectionPredefined = (
+  selection: SpatialSelection
+): selection is SpatialSelectionPredefined => {
+  return selection.type === SpatialSelectionType.Predefined;
+};
+
+export const isPredefinedBoundary = (boundary: string): boundary is PredefinedBoundary =>
+  Object.values<string>(PredefinedBoundary).includes(boundary);
 
 export const createSpatialSelectionSlice: StateCreator<
   MainState,
@@ -31,13 +62,18 @@ export const createSpatialSelectionSlice: StateCreator<
   [],
   SpatialSelectionSlice
 > = (set, get) => ({
-  spatialSelection: null,
+  spatialSelection: {
+    type: SpatialSelectionType.Predefined,
+    boundary: PredefinedBoundary.Arizona,
+    strict: false,
+  },
   setSpatialSelection: (spatialSelection) => set({ spatialSelection, configGenerated: false }),
   setSpatialSelectionDrawn: (featureCollection) =>
     set((state) => {
       state.spatialSelection = {
         type: SpatialSelectionType.Drawn,
         featureCollection,
+        strict: state.spatialSelection?.strict ?? false,
       };
       state.configGenerated = false;
     }),
@@ -46,6 +82,7 @@ export const createSpatialSelectionSlice: StateCreator<
       state.spatialSelection = {
         type: SpatialSelectionType.Upload,
         featureCollection,
+        strict: state.spatialSelection?.strict ?? false,
       };
       state.configGenerated = false;
     }),
@@ -54,8 +91,28 @@ export const createSpatialSelectionSlice: StateCreator<
       state.spatialSelection = {
         type: SpatialSelectionType.Selected,
         locations,
+        strict: state.spatialSelection?.strict ?? false,
       };
       state.configGenerated = false;
+    }),
+  setSpatialSelectionPredefinedBoundary: (boundary) =>
+    set((state) => {
+      state.spatialSelection = {
+        type: SpatialSelectionType.Predefined,
+        boundary,
+        strict: state.spatialSelection?.strict ?? false,
+      };
+      state.configGenerated = false;
+    }),
+  setSpatialSelectionStrict: (strict) =>
+    set((state) => {
+      if (state.spatialSelection) {
+        state.spatialSelection = {
+          ...state.spatialSelection,
+          strict,
+        };
+        state.configGenerated = false;
+      }
     }),
   hasSpatialSelection: () => get().spatialSelection !== null,
   hasSpatialSelectionType: (type) => {

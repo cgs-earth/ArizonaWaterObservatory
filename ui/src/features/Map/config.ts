@@ -18,6 +18,9 @@ export enum LayerId {
   DrawCold = 'draw-cold',
   DrawHot = 'draw-hot',
   Measure = 'measure',
+
+  SpatialSelection = 'spatial-selection',
+  SpatialSelectionBBox = 'spatial-selection-bbox',
 }
 
 export enum SubLayerId {
@@ -150,6 +153,36 @@ export const getLayerConfig = (id: LayerId | SubLayerId): null | LayerSpecificat
         },
         filter: ['in', '$type', 'LineString'],
       };
+    case LayerId.SpatialSelection:
+      return {
+        id: LayerId.SpatialSelection,
+        type: LayerType.Line,
+        source: SourceId.SpatialSelection,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#8c1d40',
+          'line-width': 4,
+        },
+        // filter: ['in', '$type', 'LineString'],
+      };
+    case LayerId.SpatialSelectionBBox:
+      return {
+        id: LayerId.SpatialSelectionBBox,
+        type: LayerType.Line,
+        source: SourceId.SpatialSelectionBBox,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#4ab7c4',
+          'line-width': 2.5,
+        },
+        // filter: ['in', '$type', 'LineString'],
+      };
     default:
       return null;
   }
@@ -222,6 +255,28 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
             }
           }
         };
+      case LayerId.SpatialSelection:
+        return (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          const html = `
+            <div>
+              <strong>Data Boundary</strong>
+              <p>This is the shape used to generate the Data Bounding Box. Restrict results to this boundary by selecting "Strict" in the Data Boundary tool.</p>
+            </div>
+            `;
+          hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        };
+      case LayerId.SpatialSelectionBBox:
+        return (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          const html = `
+            <div>
+              <strong>Data Boundary BBox</strong><br/>
+              <p>This is the bounding box that is used to fetch data.</p>
+            </div>
+            `;
+          hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        };
 
       default:
         return (e) => {
@@ -274,6 +329,8 @@ export const getLayerCustomHoverExitFunction = (
           console.log('Draw: ', draw);
           console.log('Content Root: ', root);
           console.log('Content Container: ', container);
+
+          map.getCanvas().style.cursor = '';
         };
     }
   };
@@ -357,7 +414,28 @@ export const getLayerMouseMoveFunction = (id: LayerId | SubLayerId): CustomListe
             }
           }
         };
-
+      case LayerId.SpatialSelectionBBox:
+        return (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          const html = `
+            <div>
+              <strong>Data Bounding Box</strong>
+              <p>This is the bounding box that is used to fetch data.</p>
+            </div>
+            `;
+          hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        };
+      case LayerId.SpatialSelection:
+        return (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          const html = `
+            <div>
+              <strong>Data Boundary</strong>
+              <p>This is the shape used to generate the Data Bounding Box. Restrict results to this boundary by selecting "Strict" in the Data Boundary tool.</p>
+            </div>
+            `;
+          hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        };
       default:
         return (e) => {
           console.log('Hover Exit Event Triggered: ', e);
@@ -587,5 +665,21 @@ export const layerDefinitions: MainLayerDefinition[] = [
         config: getLayerConfig(SubLayerId.MeasureLabel),
       },
     ],
+  },
+  {
+    id: LayerId.SpatialSelectionBBox,
+    controllable: false,
+    legend: false,
+    config: getLayerConfig(LayerId.SpatialSelectionBBox),
+    hoverFunction: getLayerHoverFunction(LayerId.SpatialSelectionBBox),
+    mouseMoveFunction: getLayerMouseMoveFunction(LayerId.SpatialSelectionBBox),
+  },
+  {
+    id: LayerId.SpatialSelection,
+    controllable: false,
+    legend: false,
+    config: getLayerConfig(LayerId.SpatialSelection),
+    hoverFunction: getLayerHoverFunction(LayerId.SpatialSelection),
+    mouseMoveFunction: getLayerMouseMoveFunction(LayerId.SpatialSelection),
   },
 ];

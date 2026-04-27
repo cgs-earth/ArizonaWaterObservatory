@@ -33,7 +33,7 @@ import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import useMainStore from '@/stores/main';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 
 const Panel: React.FC = () => {
   const mobile = useMediaQuery('(max-width: 899px)');
@@ -47,11 +47,11 @@ const Panel: React.FC = () => {
     const loadingInstance = loadingManager.add('Fetching all datasets.', LoadingType.Collections);
     try {
       await mainManager.getCollections();
-      notificationManager.show('Updated datasets', NotificationType.Success);
+      notificationManager.show('Updated datasets', NotificationVariant.Success);
     } catch (error) {
       if ((error as Error)?.message) {
         const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+        notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
       }
     } finally {
       loadingManager.remove(loadingInstance);
@@ -132,14 +132,14 @@ const Panel: React.FC = () => {
                 >
                   <Tabs.List>
                     <Tabs.Tab value="datasets">
-                      <Tooltip label={datasetsHelpText} openDelay={500} zIndex={302}>
+                      <Tooltip label={datasetsHelpText} openDelay={500} zIndex="var(--z-panel-tab)">
                         <Title order={2} size={mobile ? 'h4' : 'h3'} className={styles.title}>
                           Datasets
                         </Title>
                       </Tooltip>
                     </Tabs.Tab>
                     <Tabs.Tab value="layers" disabled={!hasLayers}>
-                      <Tooltip label={layerHelpText} openDelay={500} zIndex={302}>
+                      <Tooltip label={layerHelpText} openDelay={500} zIndex="var(--z-panel-tab)">
                         <Group gap="var(--default-spacing)">
                           <Title order={2} size={mobile ? 'h4' : 'h3'} className={styles.title}>
                             Layers
@@ -171,7 +171,7 @@ const Panel: React.FC = () => {
               >
                 <ClearAll />
                 {hasLayers && <Locations />}
-                <Mobile />
+                {mobile && <Mobile />}
               </Group>
             </Stack>
           </Collapse>
@@ -179,7 +179,9 @@ const Panel: React.FC = () => {
           <Toggle open={opened} setOpen={toggle} />
         </Group>
       </Box>
-      {mobile && opened && <Overlay zIndex={198} color="#000" backgroundOpacity={0.7} />}
+      {mobile && opened && (
+        <Overlay zIndex="var(--z-mobile-overlay)" color="#000" backgroundOpacity={0.7} />
+      )}
     </>
   );
 };

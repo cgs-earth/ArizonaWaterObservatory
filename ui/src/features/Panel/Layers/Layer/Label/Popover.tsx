@@ -1,0 +1,88 @@
+/**
+ * Copyright 2025 Lincoln Institute of Land Policy
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useEffect, useState } from 'react';
+import { ActionIcon, Box, Group, Popover, Stack, Text, Title, Tooltip } from '@mantine/core';
+import Info from '@/assets/Info';
+import LabelIcon from '@/assets/Label';
+import Label from '@/features/Panel/Layers/Layer/Label';
+import styles from '@/features/Panel/Layers/Layer/Label/Label.module.css';
+import mainManager from '@/managers/Main.init';
+import useMainStore from '@/stores/main';
+import useSessionStore from '@/stores/session';
+import { Overlay } from '@/stores/session/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
+
+export const LabelPopover: React.FC = () => {
+  const layers = useMainStore((state) => state.layers).filter(
+    (layer) =>
+      layer.loaded &&
+      [CollectionType.EDR, CollectionType.Features].includes(
+        getCollectionType(mainManager.getDatasource(layer.datasourceId)!)
+      )
+  );
+
+  const overlay = useSessionStore((state) => state.overlay);
+  const setOverlay = useSessionStore((state) => state.setOverlay);
+
+  const [show, setShow] = useState(false);
+
+  const handleShow = (show: boolean) => {
+    setOverlay(show ? Overlay.Label : null);
+    setShow(show);
+  };
+
+  useEffect(() => {
+    if (overlay !== Overlay.Label) {
+      setShow(false);
+    }
+  }, [overlay]);
+
+  const helpText = (
+    <>
+      <Text size="sm">
+        Select the property that will be used to label features instead of the default identifier
+      </Text>
+    </>
+  );
+
+  if (layers.length === 0) {
+    return null;
+  }
+
+  return (
+    <Popover opened={show} onChange={setShow} position="right-start" closeOnClickOutside={false}>
+      <Popover.Target>
+        <Tooltip multiline label={helpText} disabled={show}>
+          <ActionIcon className={styles.searchButton} size="lg" onClick={() => handleShow(!show)}>
+            <LabelIcon />
+          </ActionIcon>
+        </Tooltip>
+      </Popover.Target>
+      <Popover.Dropdown>
+        <Box className={styles.wrapper}>
+          <Tooltip multiline label={helpText}>
+            <Group className={styles.title} gap="xs" mb="var(--default-spacing)">
+              <Title order={4} size="h5">
+                Label
+              </Title>
+              <Info />
+            </Group>
+          </Tooltip>
+
+          <Stack
+            gap={0}
+            className={`${styles.container} ${styles.dateSelectorContainer}`}
+            align="flex-start"
+          >
+            {layers.map((layer) => (
+              <Label key={`layer-order-${layer.id}`} layer={layer} />
+            ))}
+          </Stack>
+        </Box>
+      </Popover.Dropdown>
+    </Popover>
+  );
+};
