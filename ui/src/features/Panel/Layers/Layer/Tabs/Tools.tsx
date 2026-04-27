@@ -36,19 +36,19 @@ export const Tools: React.FC<Props> = (props) => {
       defaultValue="search"
     >
       <Tabs.List>
-        {showLabelTool && <Tabs.Tab value="label">Label</Tabs.Tab>}
         {showSearchTool && <Tabs.Tab value="search">Search</Tabs.Tab>}
+        {showLabelTool && <Tabs.Tab value="label">Label</Tabs.Tab>}
 
         {/* {showDataTab && <Tabs.Tab value="data">Data</Tabs.Tab>} */}
       </Tabs.List>
-      {showLabelTool && (
-        <Tabs.Panel value="label">
-          <Label layer={layer} isLoading={isLoading} />
-        </Tabs.Panel>
-      )}
       {showSearchTool && (
         <Tabs.Panel value="search">
           <Search layer={layer} isLoading={isLoading} />
+        </Tabs.Panel>
+      )}
+      {showLabelTool && (
+        <Tabs.Panel value="label">
+          <Label layer={layer} isLoading={isLoading} />
         </Tabs.Panel>
       )}
     </Tabs>
