@@ -33,15 +33,3 @@
   border: calc(0.0625rem * var(--mantine-scale)) solid var(--input-border);
   border-radius: inherit;
 }
-
-.root {
-  z-index: 301;
-}
-
-.overlay {
-  z-index: 302;
-}
-
-.inner {
-  z-index: 303;
-}

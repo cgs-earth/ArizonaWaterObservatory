@@ -40,7 +40,7 @@
 
 .dateSelectorButton {
   position: absolute;
-  z-index: 1;
+  z-index: var(--z-data-selector);
   margin-top: var(--default-spacing);
   left: var(--default-spacing);
 }
@@ -62,7 +62,7 @@
 }
 
 .legendWrapper {
-  width: 21.875rem;
+  width: 22.5rem;
 }
 
 .legendWrapper > * {

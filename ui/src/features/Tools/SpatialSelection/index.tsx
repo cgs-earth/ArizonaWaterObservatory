@@ -71,7 +71,8 @@ const SpatialSelection: React.FC = () => {
   };
 
   const handleStrictChange = (event: ChangeEvent<HTMLInputElement>) => {
-    confirmAction.run(() => applyStrictChange(event.target.checked));
+    const checked = event.target.checked;
+    confirmAction.run(() => applyStrictChange(checked));
   };
 
   useEffect(() => {
@@ -82,6 +83,11 @@ const SpatialSelection: React.FC = () => {
 
   return (
     <>
+      <Confirm
+        opened={confirmAction.opened}
+        onClose={confirmAction.close}
+        onConfirm={confirmAction.confirm}
+      />
       <Popover
         offset={16}
         opened={show}
@@ -137,11 +143,6 @@ const SpatialSelection: React.FC = () => {
             />
           </Stack>
         }
-      />
-      <Confirm
-        opened={confirmAction.opened}
-        onClose={confirmAction.close}
-        onConfirm={confirmAction.confirm}
       />
     </>
   );

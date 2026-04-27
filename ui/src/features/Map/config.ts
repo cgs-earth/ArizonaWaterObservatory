@@ -261,7 +261,7 @@ export const getLayerHoverFunction = (id: LayerId | SubLayerId): CustomListenerF
           const html = `
             <div>
               <strong>Data Boundary</strong>
-              <p>This is the shape used to generate the Data Bounding box. Restrict results to this boundary by selecting "Strict" in the Data Boundary tool.</p>
+              <p>This is the shape used to generate the Data Bounding Box. Restrict results to this boundary by selecting "Strict" in the Data Boundary tool.</p>
             </div>
             `;
           hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
@@ -431,7 +431,7 @@ export const getLayerMouseMoveFunction = (id: LayerId | SubLayerId): CustomListe
           const html = `
             <div>
               <strong>Data Boundary</strong>
-              <p>This is the shape used to generate the Data Bounding box. Restrict results to this boundary by selecting "Strict" in the Data Boundary tool.</p>
+              <p>This is the shape used to generate the Data Bounding Box. Restrict results to this boundary by selecting "Strict" in the Data Boundary tool.</p>
             </div>
             `;
           hoverPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);

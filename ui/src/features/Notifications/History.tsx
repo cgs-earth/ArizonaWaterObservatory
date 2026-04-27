@@ -49,6 +49,7 @@ export const History: React.FC<Props> = (props) => {
       <Tooltip label="View notifications." disabled={show}>
         <Box mt="calc(var(--default-spacing) / 2)">
           <IconButton
+            size="xl"
             variant={show ? Variant.Selected : Variant.Secondary}
             onClick={() => onClick(!show)}
           >

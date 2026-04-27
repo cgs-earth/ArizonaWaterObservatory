@@ -242,6 +242,8 @@ class MainManager {
     const locations = this.store.getState().locations;
     const drawnShapes = this.store.getState().drawnShapes;
     const basemap = this.store.getState().basemap;
+    const spatialSelection = this.store.getState().spatialSelection;
+    const terrainActive = this.store.getState().terrainActive;
 
     const bounds = this.map.getBounds();
     const zoom = this.map.getZoom();
@@ -263,6 +265,8 @@ class MainManager {
       center,
       bearing,
       pitch,
+      spatialSelection,
+      terrainActive,
     };
   }
 
@@ -300,6 +304,9 @@ class MainManager {
       method: 'POST',
       body: JSON.stringify({ inputs: config }),
       signal,
+      headers: {
+        'Access-Control-Request-Headers': 'location', // Specify that we need the request header
+      },
     });
 
     if (response.ok) {
@@ -378,6 +385,8 @@ class MainManager {
     store.setCollection(config.collection);
     store.setCharts(config.charts);
     store.setDrawnShapes(config.drawnShapes);
+    store.setSpatialSelection(config.spatialSelection);
+    store.setTerrainActive(config.terrainActive);
 
     // Rehydrate drawn shapes
     for (const shape of config.drawnShapes) {

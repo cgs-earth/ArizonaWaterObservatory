@@ -68,7 +68,7 @@ const Filter: React.FC = () => {
                 }
               : {})}
           />
-          <Tooltip label="Configure filters" zIndex={302}>
+          <Tooltip label="Configure filters" zIndex="var(--z-filter-modal)">
             <ActionIcon
               variant="transparent"
               size="lg"

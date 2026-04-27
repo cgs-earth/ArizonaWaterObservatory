@@ -132,14 +132,14 @@ const Panel: React.FC = () => {
                 >
                   <Tabs.List>
                     <Tabs.Tab value="datasets">
-                      <Tooltip label={datasetsHelpText} openDelay={500} zIndex={302}>
+                      <Tooltip label={datasetsHelpText} openDelay={500} zIndex="var(--z-panel-tab)">
                         <Title order={2} size={mobile ? 'h4' : 'h3'} className={styles.title}>
                           Datasets
                         </Title>
                       </Tooltip>
                     </Tabs.Tab>
                     <Tabs.Tab value="layers" disabled={!hasLayers}>
-                      <Tooltip label={layerHelpText} openDelay={500} zIndex={302}>
+                      <Tooltip label={layerHelpText} openDelay={500} zIndex="var(--z-panel-tab)">
                         <Group gap="var(--default-spacing)">
                           <Title order={2} size={mobile ? 'h4' : 'h3'} className={styles.title}>
                             Layers
@@ -179,7 +179,9 @@ const Panel: React.FC = () => {
           <Toggle open={opened} setOpen={toggle} />
         </Group>
       </Box>
-      {mobile && opened && <Overlay zIndex={198} color="#000" backgroundOpacity={0.7} />}
+      {mobile && opened && (
+        <Overlay zIndex="var(--z-mobile-overlay)" color="#000" backgroundOpacity={0.7} />
+      )}
     </>
   );
 };

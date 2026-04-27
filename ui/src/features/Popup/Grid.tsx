@@ -330,9 +330,9 @@ export const Grid: React.FC<Props> = (props) => {
             </Button>
           </Group>
 
-          <Tooltip label="Open this location in the Download modal.">
+          <Tooltip label="Open this location in the Export modal.">
             <Button size="xs" onClick={handleLinkClick} variant={Variant.Primary}>
-              Download
+              Export
             </Button>
           </Tooltip>
         </Group>

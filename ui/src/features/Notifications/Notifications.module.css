@@ -12,7 +12,7 @@
 
 .unviewedCountIcon {
   position: absolute;
-  bottom: 1.5rem;
+  bottom: 2rem;
   right: -0.1875rem;
   background: var(--mantine-color-default);
   padding: 0 0.375rem;
