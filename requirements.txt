@@ -1363,7 +1363,7 @@ pydantic-core==2.46.3 \
     --hash=sha256:ff5e7783bcc5476e1db448bf268f11cb257b1c276d3e89f00b5727be86dd0127 \
     --hash=sha256:ffe0883b56cfc05798bf994164d2b2ff03efe2d22022a2bb080f3b626176dd56
     # via pydantic
-pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@f8f4421a0f640b2885554fdf8cb1cf807da69420
+pygeoapi @ git+https://github.com/internetofwater/pygeoapi.git@2b68ffedd7603f1910adca4fd8d50cdec567685a
     # via
     #   pgedr
     #   pygeoapi-plugins
