@@ -13,6 +13,7 @@ import { Variant } from '@/components/types';
 import { About } from '@/features/TopBar/Info/About';
 import { FAQ } from '@/features/TopBar/Info/FAQ';
 import { Glossary } from '@/features/TopBar/Info/Glossary';
+import { UserGuide } from '@/features/TopBar/Info/UserGuide';
 import styles from '@/features/TopBar/TopBar.module.css';
 import useSessionStore from '@/stores/session';
 import { HelpTab, Overlay } from '@/stores/session/types';
@@ -95,6 +96,11 @@ const Info: React.FC = () => {
                 Frequently Asked Questions
               </Text>
             </Tabs.Tab>
+            <Tabs.Tab value={HelpTab.UserGuide}>
+              <Text size="md" fw={700}>
+                User Guide
+              </Text>
+            </Tabs.Tab>
             {/* <Tabs.Tab value={HelpTab.Contact}>
               <Text size="md" fw={700}>
                 Contact Us
@@ -110,6 +116,9 @@ const Info: React.FC = () => {
           </Tabs.Panel>
           <Tabs.Panel value={HelpTab.FAQ}>
             <FAQ />
+          </Tabs.Panel>
+          <Tabs.Panel value={HelpTab.UserGuide}>
+            <UserGuide />
           </Tabs.Panel>
           {/* <Tabs.Panel value={HelpTab.Contact}>
             <Contact />

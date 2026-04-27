@@ -76,6 +76,7 @@ export enum HelpTab {
   Contact = 'contact',
   FAQ = 'FAQ',
   Glossary = 'glossary',
+  UserGuide = 'user-guide',
 }
 
 export type SessionState = {

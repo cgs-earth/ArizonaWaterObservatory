@@ -46,6 +46,7 @@
   position: sticky;
   top: 0;
   background: var(--mantine-color-body);
+  z-index: 1;
 }
 
 .accordionBody {
@@ -179,6 +180,31 @@
 .contactLink {
   margin-top: var(--default-spacing);
   white-space: nowrap;
+}
+
+.userGuide {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.userGuideGroup {
+  margin-top: calc(var(--default-spacing) * 2);
+}
+
+.userGuideWrapper {
+  position: relative;
+  width: 79%;
+  height: 0;
+  padding-top: 101.8%;
+  padding-bottom: 0;
+  overflow: hidden;
+  will-change: transform;
 }
 
 @media screen and (max-width: 899px) {
