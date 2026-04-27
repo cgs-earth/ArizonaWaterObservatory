@@ -36,6 +36,8 @@ export type Config = {
   locations: MainState['locations'];
   drawnShapes: MainState['drawnShapes'];
   basemap: MainState['basemap'];
+  spatialSelection: MainState['spatialSelection'];
+  terrainActive: MainState['terrainActive'];
   bounds: LngLatBoundsLike | null;
   zoom: number;
   center: LngLat;
