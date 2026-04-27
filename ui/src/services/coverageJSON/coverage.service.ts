@@ -46,7 +46,9 @@ export class CoverageService {
       keyValues = Object.keys(coverage.parameters);
     }
     for (const key of keyValues) {
-      keys[key] = coverage.ranges[key].values;
+      if (coverage.ranges[key]?.values) {
+        keys[key] = coverage.ranges[key].values;
+      }
     }
     return keys;
   }
