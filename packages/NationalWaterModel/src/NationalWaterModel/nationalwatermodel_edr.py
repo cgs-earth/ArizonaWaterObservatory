@@ -24,13 +24,11 @@ from NationalWaterModel.lib import (
 )
 
 from .lib import (
+    ProviderSchema,
     dataset_to_geojson,
     get_crs_from_dataset,
     get_zarr_dataset_handle,
     project_dataset,
-)
-from .nationalwatermodel import (
-    ProviderSchema,
 )
 
 LOGGER = logging.getLogger(__name__)
