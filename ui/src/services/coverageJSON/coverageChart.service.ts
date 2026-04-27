@@ -231,6 +231,7 @@ export class CoverageChartService extends CoverageService {
 
     return (x: number, y: number) => {
       const currentValues = getCurrentValues(x, y);
+      // Check to determine if the paramater selected has a value.
       if (Object.values(currentValues).every((array) => array.every((value) => value === null))) {
         return;
       }
@@ -239,7 +240,7 @@ export class CoverageChartService extends CoverageService {
       if (Object.values(data).every((value) => value === null)) {
         return;
       }
-      // This grid entry would have no values to display
+
       const parameter = parameters[parameterId];
       const unit = getParameterUnit(parameter);
       series.push({
