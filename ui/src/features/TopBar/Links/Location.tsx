@@ -14,7 +14,11 @@ import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
-import { StringIdentifierCollections } from '@/consts/collections';
+import {
+  CollectionRestrictions,
+  RestrictionType,
+  StringIdentifierCollections,
+} from '@/consts/collections';
 import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
@@ -69,6 +73,36 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
 
+  const [daysLimit, setDaysLimit] = useState<number>();
+  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
+  const [_datasetName, setDatasetName] = useState<string>('');
+
+  const getIsDateRangeOverLimit = () => {
+    if (daysLimit) {
+      if (!from || !to || !dayjs(from).isValid() || !dayjs(to).isValid()) {
+        return true;
+      }
+
+      return dayjs(to).diff(dayjs(from), 'days') > daysLimit;
+    }
+    return false;
+  };
+
+  const isDateRangeOverLimit = getIsDateRangeOverLimit();
+
+  const getDateInputError = () => {
+    // is to >= from?
+    if (isValidRange) {
+      // is there a limit on days and have we exceeded it?
+      if (daysLimit && isDateRangeOverLimit) {
+        return `${dayjs(to).diff(dayjs(from), 'days') - daysLimit} day(s) over limit`;
+      }
+      return false;
+    }
+
+    return 'Invalid date range';
+  };
+
   useEffect(() => {
     const url = buildLocationUrl(collection.id, id, layer.parameters, from, to, false, true);
 
@@ -82,23 +116,38 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
     const collection = mainManager.getDatasource(layer.datasourceId);
 
     if (collection) {
-      const paramObjects = Object.values(collection?.parameter_names ?? {});
+      const restrictions = CollectionRestrictions[layer.datasourceId];
 
-      const parameters = paramObjects
-        .filter((object) => object.type === 'Parameter' && layer.parameters.includes(object.id))
-        .map((object) => ({
-          id: object.id,
-          name: object.observedProperty.label.en,
-          unit: getParameterUnit(object),
-        }));
+      if (restrictions && restrictions.length > 0) {
+        const dateRangeLimitRestriction = restrictions.find(
+          (restriction) => restriction.type === RestrictionType.DateRange
+        );
 
-      if (parameters.length === 0) {
-        closeChart();
+        if (dateRangeLimitRestriction && dateRangeLimitRestriction.days > 0) {
+          setDaysLimit(dateRangeLimitRestriction.days);
+        }
       }
+      const newDataset = mainManager.getDatasource(layer.datasourceId);
 
-      setParameters(parameters);
+      if (newDataset && !getIsDateRangeOverLimit()) {
+        setDatasetName(newDataset.title ?? '');
+        const paramObjects = Object.values(newDataset?.parameter_names ?? {});
+
+        const parameters = paramObjects
+          .filter((object) => object.type === 'Parameter' && layer.parameters.includes(object.id))
+          .map((object) => ({
+            id: object.id,
+            name: object.observedProperty.label.en,
+            unit: getParameterUnit(object),
+          }));
+
+        if (parameters.length === 0) {
+          closeChart();
+        }
+
+        setParameters(parameters);
+      }
     }
-
     if (StringIdentifierCollections.includes(layer.datasourceId)) {
       const id = getIdStore(location);
       if (id) {
@@ -223,8 +272,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const handleFromChange = (from: Layer['from']) => setFrom(from);
   const handleToChange = (to: Layer['to']) => setTo(to);
 
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
-
   const locationIds = useMemo(() => [id], [id]);
 
   return (
@@ -302,7 +349,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               ]}
               clearable
               disabled={isLoading}
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
             <DateInput
               label="To"
@@ -320,7 +367,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               ]}
               clearable
               disabled={isLoading}
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
           </Group>
         </Group>
