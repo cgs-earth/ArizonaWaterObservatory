@@ -5,6 +5,7 @@
 
 import { bbox, bboxPolygon, point } from '@turf/turf';
 import { BBox, FeatureCollection, Point, Polygon } from 'geojson';
+import { Properties } from '@/components/Map/types';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import { DATES_PROPERTY } from '@/services/coverageJSON/consts';
 import { CoverageService } from '@/services/coverageJSON/coverage.service';
@@ -16,9 +17,9 @@ import {
   CoverageJSON,
   ICollection,
 } from '@/services/edr.service';
+import awoService from '@/services/init/awo.init';
 import { isCoverageJSON } from '@/utils/isTypeObject';
 import { getDatetime } from '@/utils/url';
-import awoService from '../init/awo.init';
 
 export class CoverageGeoService extends CoverageService {
   private addGridValuesConstructor(
@@ -208,7 +209,7 @@ export class CoverageGeoService extends CoverageService {
     xValues: number[],
     yValues: number[],
     featureCollection: FeatureCollection<Point>,
-    times: (string | number)[],
+    times: string[] | number[],
     values: TValues,
     currentId?: number
   ) {
@@ -231,7 +232,7 @@ export class CoverageGeoService extends CoverageService {
 
       const xValue = xValues[x];
 
-      const pointFeature = point(
+      const pointFeature = point<Properties>(
         [xValue, yValue],
         {
           [DATES_PROPERTY]: times,
@@ -242,6 +243,7 @@ export class CoverageGeoService extends CoverageService {
       );
       const pointBBox = bbox(pointFeature);
       pointFeature.bbox = pointBBox;
+      pointFeature.properties.bbox = pointBBox;
       featureCollection.features.push(pointFeature);
       id += 1;
     };

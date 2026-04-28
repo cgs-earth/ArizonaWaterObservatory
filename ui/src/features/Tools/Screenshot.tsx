@@ -22,7 +22,7 @@ import styles from '@/features/Tools/Tools.module.css';
 import notificationManager from '@/managers/Notification.init';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
-import { NotificationType, Overlay } from '@/stores/session/types';
+import { NotificationVariant, Overlay } from '@/stores/session/types';
 import { handleCreateMapImage } from '@/utils/screenshot';
 
 export const Screenshot: React.FC = () => {
@@ -203,12 +203,12 @@ export const Screenshot: React.FC = () => {
       });
       downloadDataUrl(dataUrl, `${name}-legend.jpg`);
     } catch (err) {
-      notificationManager.show((err as Error).message, NotificationType.Error, 10000);
+      notificationManager.show((err as Error).message, NotificationVariant.Error, 10000);
     }
   };
 
   const handleShow = (show: boolean) => {
-    setOverlay(show ? Overlay.Draw : null);
+    setOverlay(show ? Overlay.Screenshot : null);
     setShow(show);
   };
 
@@ -223,7 +223,7 @@ export const Screenshot: React.FC = () => {
   const debouncedHandleHeightChange = debounce(handleHeightChange, 500);
 
   useEffect(() => {
-    if (overlay !== Overlay.Draw) {
+    if (overlay !== Overlay.Screenshot) {
       setShow(false);
     }
   }, [overlay]);

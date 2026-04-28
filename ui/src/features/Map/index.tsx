@@ -5,20 +5,25 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { MapMouseEvent, Marker } from 'mapbox-gl';
+import { useMediaQuery } from '@mantine/hooks';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
+import { LayerType } from '@/components/Map/types';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
 import { DEFAULT_BBOX, drawLayers } from '@/features/Map/consts';
-import { sourceConfigs } from '@/features/Map/sources';
+import { sourceConfigs, SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent, getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
+import { useSpatialSelection } from '@/hooks/useSpatialSelection';
 import mainManager from '@/managers/Main.init';
+import notificationManager from '@/managers/Notification.init';
 import useMainStore from '@/stores/main';
 import { Location } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
 import { isTopLayer } from '@/utils/isTopLayer';
+import { getDefaultFilter, getFilter } from '@/utils/layerDefinitions';
 
 const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
 const INITIAL_ZOOM = 4;
@@ -42,6 +47,9 @@ const MainMap: React.FC<Props> = (props) => {
   const locations = useMainStore((state) => state.locations);
   const layers = useMainStore((state) => state.layers);
   const basemap = useMainStore((state) => state.basemap);
+  const searches = useMainStore((state) => state.searches);
+  const terrainActive = useMainStore((state) => state.terrainActive);
+  const setTerrainActive = useMainStore((state) => state.setTerrainActive);
 
   const loadingInstances = useSessionStore((state) => state.loadingInstances);
 
@@ -54,6 +62,10 @@ const MainMap: React.FC<Props> = (props) => {
   const isMounted = useRef(true);
   const initialMapLoad = useRef(true);
 
+  const mobile = useMediaQuery('(max-width: 899px)');
+
+  useSpatialSelection(map);
+
   useEffect(() => {
     return () => {
       isMounted.current = false;
@@ -64,8 +76,6 @@ const MainMap: React.FC<Props> = (props) => {
     if (!map) {
       return;
     }
-
-    mainManager.setMap(map);
 
     map.on('mousedown', () => {
       if (
@@ -79,6 +89,8 @@ const MainMap: React.FC<Props> = (props) => {
     });
 
     if (initialMapLoad.current) {
+      initialMapLoad.current = false;
+      mainManager.setMap(map);
       map.resize();
       map.fitBounds(
         [
@@ -90,7 +102,10 @@ const MainMap: React.FC<Props> = (props) => {
           animate: false,
         }
       );
-      initialMapLoad.current = false;
+
+      if (!mobile) {
+        setTerrainActive(true);
+      }
     }
   }, [map]);
 
@@ -171,8 +186,8 @@ const MainMap: React.FC<Props> = (props) => {
           if (features && features.length > 0) {
             hoverPopup.remove();
 
-            const uniqueFeatures = mainManager.getUniqueIds(features, layer.datasourceId);
-            const locations: Location[] = uniqueFeatures.map((id) => ({
+            const uniqueFeatures = mainManager.getUniqueIds(features, layer.id);
+            const locations: Location[] = uniqueFeatures.map(({ id }) => ({
               id,
               layerId: layer.id,
             }));
@@ -190,6 +205,38 @@ const MainMap: React.FC<Props> = (props) => {
       }
     });
   }, [layers]);
+
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+
+    layers.forEach((layer) => {
+      const { pointLayerId, lineLayerId, fillLayerId } = mainManager.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
+      const search = searches.find((search) => search.layerId === layer.id);
+
+      if (!search) {
+        if (map.getFilter(pointLayerId)) {
+          map.setFilter(pointLayerId, getDefaultFilter(LayerType.Circle));
+        }
+        if (map.getFilter(lineLayerId)) {
+          map.setFilter(lineLayerId, getDefaultFilter(LayerType.Line));
+        }
+        if (map.getFilter(fillLayerId)) {
+          map.setFilter(fillLayerId, getDefaultFilter(LayerType.Fill));
+        }
+
+        return;
+      }
+
+      map.setFilter(pointLayerId, getFilter(search.matchedLocations, LayerType.Circle));
+      map.setFilter(lineLayerId, getFilter(search.matchedLocations, LayerType.Line));
+      map.setFilter(fillLayerId, getFilter(search.matchedLocations, LayerType.Fill));
+    });
+  }, [searches]);
 
   useEffect(() => {
     if (!map || !draw) {
@@ -308,18 +355,39 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
+    if (terrainActive) {
+      notificationManager.show('3D Terrain active.');
+      map.setTerrain({ source: SourceId.Terrain });
+    } else {
+      notificationManager.show('3D Terrain disabled.');
+      map.setTerrain(null);
+    }
+  }, [terrainActive]);
+
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+
+    const prevStyle = map.getStyle();
+
+    const customLayers = (prevStyle.layers || []).filter(
+      (layer) =>
+        layer.id.startsWith('user-') ||
+        layer.id.startsWith('spatial-selection') ||
+        layer.id.startsWith('measure') ||
+        layer.id.startsWith('terrain')
+    );
+
+    const customSources = Object.entries(prevStyle.sources || {}).filter(
+      ([id]) =>
+        id.startsWith('user-') ||
+        id.startsWith('spatial-selection') ||
+        id.startsWith('measure') ||
+        id.startsWith('terrain')
+    );
+
     // Copy over all existing layers and sources when changing basemaps
-    const layers = map.getStyle().layers || [];
-    const sources = map.getStyle().sources || {};
-
-    const customLayers = layers.filter((layer) => {
-      return layer.id.startsWith('user-');
-    });
-
-    const customSources = Object.entries(sources).filter(([id]) => {
-      return id.startsWith('user-');
-    });
-
     map.once('styledata', () => {
       for (const [id, source] of customSources) {
         if (!map.getSource(id)) {
@@ -331,6 +399,11 @@ const MainMap: React.FC<Props> = (props) => {
         if (!map.getLayer(layer.id)) {
           map.addLayer(layer);
         }
+      }
+
+      const terrainActive = useMainStore.getState().terrainActive;
+      if (terrainActive) {
+        map.setTerrain({ source: SourceId.Terrain });
       }
     });
 

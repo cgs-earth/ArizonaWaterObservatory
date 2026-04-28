@@ -10,7 +10,7 @@ import { MeasureSlice } from '@/stores/session/slices/measure';
 import { NotificationsSlice } from '@/stores/session/slices/notifications';
 import { WarningsSlice } from '@/stores/session/slices/warning';
 
-export enum NotificationType {
+export enum NotificationVariant {
   Success = 'success',
   Error = 'error',
   Info = 'info',
@@ -35,18 +35,23 @@ export enum Overlay {
   Download = 'download',
   Filter = 'filter',
   Info = 'info',
+  Label = 'label',
   Legend = 'legend',
   Links = 'links',
   Screenshot = 'screenshot',
+  Search = 'search',
   Share = 'share',
+  SpatialSelection = 'spatial-selection',
   Warning = 'warning',
 }
 
 export type Notification = {
   id: string;
+  createdAt: number;
   message: string;
-  type: NotificationType;
-  visible: boolean;
+  type: NotificationVariant;
+  visible: boolean; // This notification is visible on screen
+  viewed: boolean; // This notification has been viewed in history
 };
 
 export type Warning = {
@@ -71,6 +76,7 @@ export enum HelpTab {
   Contact = 'contact',
   FAQ = 'FAQ',
   Glossary = 'glossary',
+  UserGuide = 'user-guide',
 }
 
 export type SessionState = {

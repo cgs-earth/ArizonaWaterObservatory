@@ -40,7 +40,7 @@
 
 .dateSelectorButton {
   position: absolute;
-  z-index: 1;
+  z-index: var(--z-data-selector);
   margin-top: var(--default-spacing);
   left: var(--default-spacing);
 }
@@ -56,13 +56,18 @@
   }
 }
 
+.info > svg {
+  width: 16px;
+  height: auto;
+}
+
 /* Manual padding to handle component overflow issues */
 .legendContent {
   padding: unset;
 }
 
 .legendWrapper {
-  width: 21.875rem;
+  width: 22.5rem;
 }
 
 .legendWrapper > * {

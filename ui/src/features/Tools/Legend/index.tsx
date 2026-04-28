@@ -1,6 +1,6 @@
 /**
  * Copyright 2025 Lincoln Institute of Land Policy
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -58,7 +58,6 @@ const Legend: React.FC = () => {
         opened={show}
         onChange={setShow}
         closeOnClickOutside={false}
-        classNames={{ dropdown: styles.legendContent }}
         position="bottom-start"
         target={
           <Tooltip

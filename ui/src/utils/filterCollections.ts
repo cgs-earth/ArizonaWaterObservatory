@@ -9,7 +9,7 @@ import { getProvider } from '@/utils/provider';
 
 export const filterCollections = (
   collections: MainState['collections'],
-  search: MainState['search'],
+  search: MainState['searchTerm'],
   provider: MainState['provider'],
   category: MainState['category'],
   parameterGroupMembers: MainState['parameterGroupMembers']

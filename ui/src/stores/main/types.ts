@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FeatureCollection, Polygon } from 'geojson';
+import { FeatureCollection, GeoJsonGeometryTypes, Polygon } from 'geojson';
 import { ColorSpecification, PropertyValueSpecification } from 'mapbox-gl';
 import { BasemapId, Properties } from '@/components/Map/types';
 import { ICollection } from '@/services/edr.service';
 import { CollectionSlice } from '@/stores/main/slices/collections';
+import { IFilterSlice } from '@/stores/main/slices/datasourceFilters';
 import { DrawingSlice } from '@/stores/main/slices/drawing';
 import { LayerSlice } from '@/stores/main/slices/layers';
 import { LocationSlice } from '@/stores/main/slices/locations';
+import { ISearchSlice } from '@/stores/main/slices/search';
 import { ShareSlice } from '@/stores/main/slices/share';
 import { SpatialSelectionSlice } from '@/stores/main/slices/spatialSelection';
 import { ColorBrewerIndex, FriendlyColorBrewerPalettes } from '@/utils/colors/types';
@@ -27,10 +29,22 @@ export enum SpatialSelectionType {
   Drawn = 'custom-drawn-polygon',
   Selected = 'select-existing-polygons',
   Upload = 'custom-upload-shape',
+  Predefined = 'pre-defined-bounds',
 }
+
+export enum PredefinedBoundary {
+  Arizona = 'arizona',
+  ColoradoRiverBasin = 'colorado-river-basin',
+}
+
+export type Location = {
+  id: string; // location/{this}
+  layerId: Layer['id'];
+};
 
 export interface SpatialSelectionBase {
   type: SpatialSelectionType;
+  strict: boolean;
 }
 
 export interface SpatialSelectionDrawn extends SpatialSelectionBase {
@@ -45,14 +59,20 @@ export interface SpatialSelectionUpload extends SpatialSelectionBase {
 
 export interface SpatialSelectionSelected extends SpatialSelectionBase {
   type: SpatialSelectionType.Selected;
-  locations: string[]; // location IDs
+  locations: Location[]; // location IDs
+}
+
+export interface SpatialSelectionPredefined extends SpatialSelectionBase {
+  type: SpatialSelectionType.Predefined;
+  boundary: PredefinedBoundary;
 }
 
 // Discriminated union for all spatial selection types
 export type SpatialSelection =
   | SpatialSelectionDrawn
   | SpatialSelectionUpload
-  | SpatialSelectionSelected;
+  | SpatialSelectionSelected
+  | SpatialSelectionPredefined;
 
 export enum DatasourceType {
   Point = 'point',
@@ -79,6 +99,8 @@ export type PaletteDefinition = {
   index: number;
 };
 
+export type TGeometryTypes = GeoJsonGeometryTypes | 'raster';
+
 export type Layer = {
   id: string; // uuid
   datasourceId: ICollection['id'];
@@ -92,7 +114,10 @@ export type Layer = {
   opacity: number;
   position: number; // The order this layer is drawn relative to other user layers
   paletteDefinition: PaletteDefinition | null;
+  geometryTypes: TGeometryTypes[];
   bbox: string; // String identifier to indicate AOI change
+  label: string | null; // Used in place of a unique identifier in places like the popups or download modal
+  loaded: boolean;
 };
 
 export type Table = {
@@ -108,11 +133,6 @@ export type Chart = {
   dataVisualization: DataVisualization;
 };
 
-export type Location = {
-  id: string; // location/{this}
-  layerId: Layer['id'];
-};
-
 export type Category = {
   value: string;
   label: string;
@@ -124,29 +144,31 @@ export enum DrawMode {
   Select = 'select',
 }
 
+export type TSearch = {
+  layerId: Layer['id'];
+  searchTerm: string;
+  matchedLocations: string[];
+};
+
 export type ParameterGroupMembers = Record<string, string[]>;
 
 export type MainState = {
-  search: string | null;
-  setSearch: (search: MainState['search']) => void;
-  provider: string | null;
-  setProvider: (provider: MainState['provider']) => void;
-  category: Category | null;
-  setCategory: (category: MainState['category']) => void;
-  collection: string | null;
-  setCollection: (collection: MainState['collection']) => void;
   geographyFilter: any | null;
   setGeographyFilter: (geographyFilter: MainState['geographyFilter']) => void;
   hasGeographyFilter: () => boolean;
   basemap: BasemapId;
   setBasemap: (collection: MainState['basemap']) => void;
+  terrainActive: boolean;
+  setTerrainActive: (terrainActive: MainState['terrainActive']) => void;
   charts: Chart[];
   setCharts: (charts: MainState['charts']) => void;
   parameterGroupMembers: ParameterGroupMembers;
   setParameterGroupMembers: (parameterGroupMembers: MainState['parameterGroupMembers']) => void;
 } & CollectionSlice &
-  LocationSlice &
-  LayerSlice &
-  SpatialSelectionSlice &
   DrawingSlice &
-  ShareSlice;
+  IFilterSlice &
+  LayerSlice &
+  LocationSlice &
+  ShareSlice &
+  SpatialSelectionSlice &
+  ISearchSlice;

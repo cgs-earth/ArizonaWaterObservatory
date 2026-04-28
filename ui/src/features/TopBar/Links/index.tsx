@@ -4,13 +4,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Stack, Text, Title, Tooltip } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { Box, Stack, Text, Title, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import { Layer } from '@/features/TopBar/Links/Layer';
-import styles from '@/features/TopBar/TopBar.module.css';
+import styles from '@/features/TopBar/Links/Links.module.css';
 import mainManager from '@/managers/Main.init';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
@@ -18,29 +17,15 @@ import { Overlay } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 
 const Links: React.FC = () => {
-  const [opened, { open, close }] = useDisclosure(false, {
-    onClose: () => {
-      setOverlay(null);
-      setLinkLocation(null);
-    },
-  });
-
   const layers = useMainStore((store) => store.layers);
 
   const overlay = useSessionStore((store) => store.overlay);
   const setOverlay = useSessionStore((store) => store.setOverlay);
-  const linkLocation = useSessionStore((store) => store.linkLocation);
   const setLinkLocation = useSessionStore((store) => store.setLinkLocation);
 
   const [isEnabled, setIsEnabled] = useState(false);
 
-  useEffect(() => {
-    if (overlay !== Overlay.Links) {
-      close();
-    } else if (!opened) {
-      open();
-    }
-  }, [overlay]);
+  const opened = overlay === Overlay.Links;
 
   useEffect(() => {
     const isEnabled = layers.some((layer) => {
@@ -58,8 +43,13 @@ const Links: React.FC = () => {
     setIsEnabled(isEnabled);
   }, [layers]);
 
-  const handleClick = () => {
+  const handleOpen = () => {
     setOverlay(Overlay.Links);
+  };
+
+  const handleClose = () => {
+    setLinkLocation(null);
+    setOverlay(null);
   };
 
   const helpText = (
@@ -78,23 +68,21 @@ const Links: React.FC = () => {
           data-disabled={!isEnabled}
           size="sm"
           variant={opened ? Variant.Selected : Variant.Secondary}
-          onClick={handleClick}
+          onClick={handleOpen}
         >
           Export
         </Button>
       </Tooltip>
-      <Modal size="1222px" opened={opened} onClose={close}>
-        <Stack gap={0} className={styles.modalBody}>
-          <Title order={5} size="h3">
+      <Modal size="1222px" opened={opened} onClose={handleClose}>
+        <Box className={styles.modalHeader}>
+          <Title order={5} size="h3" p="var(--default-spacing)">
             API Links
           </Title>
+        </Box>
+        <Stack gap={0} className={styles.modalBody}>
           <>
             {layers.map((layer) => (
-              <Layer
-                key={`links-entry-${layer.name}-${layer.id}`}
-                layer={layer}
-                linkLocation={linkLocation}
-              />
+              <Layer key={`links-entry-${layer.name}-${layer.id}`} layer={layer} />
             ))}
           </>
         </Stack>

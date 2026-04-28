@@ -48,11 +48,21 @@ export const getParameterList = (
   return getParameters(collection, limit);
 };
 
-export const getParameterUnit = (parameterName: ParameterName) => {
+// TODO: multi-language support, cover more cases
+export const getParameterUnit = (parameterName: ParameterName): string => {
+  // TODO: should this be the ultimate source of truth?
+  // if (parameterName.unit?.label?.en) {
+  //   return parameterName.unit.label.en;
+  // }
+
+  if (typeof parameterName.unit.symbol === 'string') {
+    return parameterName.unit.symbol;
+  }
+
   return parameterName.unit.symbol.value;
 };
 
-export const getLabel = (collection: ICollection, parameterId: string) => {
+export const getParameterLabel = (collection: ICollection, parameterId: string) => {
   const parameter = collection.parameter_names[parameterId];
 
   const unit = getParameterUnit(parameter);

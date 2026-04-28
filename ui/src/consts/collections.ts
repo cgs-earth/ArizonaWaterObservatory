@@ -22,6 +22,7 @@ export enum CollectionId {
 
   NOAARFC = 'noaa-rfc',
   PRISM = 'usgs-prism',
+  GRACE = 'GRACE',
 }
 
 export enum Provider {
@@ -30,14 +31,16 @@ export enum Provider {
   USGS = 'usgs',
   USACE = 'usace',
   NOAA = 'noaa',
+  NASA = 'nasa',
 }
 
 export const ProviderDatasources: Record<Provider, string[]> = {
   [Provider.USBR]: [],
-  [Provider.USDA]: [CollectionId.SNOTELEdr],
-  [Provider.USGS]: [CollectionId.Streamgages],
-  [Provider.USACE]: [CollectionId.USACEEdr],
+  [Provider.USDA]: [],
+  [Provider.USGS]: [],
+  [Provider.USACE]: [],
   [Provider.NOAA]: [],
+  [Provider.NASA]: [],
 };
 
 export const idStoreProperty = 'id_store';
@@ -195,4 +198,13 @@ export const CollectionRestrictions: Record<string, Restiction[]> = {
       message: 'Select a date range no greater than three years.',
     },
   ],
+  [CollectionId.GRACE]: [
+    {
+      type: RestrictionType.Parameter,
+      count: 1,
+      message: 'Select only one parameter.',
+    },
+  ],
 };
+
+export const CollectionDefaultLabels: Record<string, string> = {};

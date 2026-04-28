@@ -92,7 +92,7 @@ export const Content: React.FC<Props> = (props) => {
   ].filter((link) => link.href?.length > 0);
 
   return (
-    <Stack gap="var(--default-spacing)" className={styles.accordionContent}>
+    <Stack gap="var(--default-spacing)" className={styles.content}>
       <Text size="sm">This dataset {dataset.description}</Text>
       {[CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType) && (
         <>

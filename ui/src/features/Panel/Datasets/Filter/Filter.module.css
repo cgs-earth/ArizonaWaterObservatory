@@ -55,7 +55,7 @@
 
 .filterWrapper {
   width: 100%;
-  z-index: 1;
+  z-index: var(--z-filter-wrapper);
   position: sticky;
   top: 0;
   background: var(--mantine-color-default);

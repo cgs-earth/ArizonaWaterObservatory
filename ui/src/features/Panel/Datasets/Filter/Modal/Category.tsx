@@ -1,6 +1,6 @@
 /**
  * Copyright 2025 Lincoln Institute of Land Policy
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -21,7 +21,7 @@ import loadingManager from '@/managers/Loading.init';
 import notificationManager from '@/managers/Notification.init';
 import awoService from '@/services/init/awo.init';
 import { MainState } from '@/stores/main/types';
-import { LoadingType, NotificationType } from '@/stores/session/types';
+import { LoadingType, NotificationVariant } from '@/stores/session/types';
 
 type Props = {
   category: MainState['category'];
@@ -94,7 +94,7 @@ export const Category: React.FC<Props> = (props) => {
           setCategoryOptions([]);
           setNoOptions(true);
         } else {
-          notificationManager.show(`Error: ${_error.message}`, NotificationType.Error, 10000);
+          notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
         }
       }
     } finally {

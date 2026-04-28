@@ -10,7 +10,7 @@ import '@testing-library/jest-dom';
 import { render } from '@test-utils';
 import mapboxglMock, { LngLatLike } from 'mapbox-gl';
 import { vi } from 'vitest';
-import MapComponent from '@/components/Map/ClientSide';
+import MapComponent from '@/components/Map';
 import {
   addClickFunctions,
   addControls,

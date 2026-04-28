@@ -32,7 +32,6 @@
 .panel {
   position: relative;
   border-right: 1px solid var(--border);
-  z-index: 1;
 }
 
 .content {
@@ -67,7 +66,7 @@
 
 .sticky .control {
   position: sticky;
-  z-index: 2;
+  z-index: var(--z-accordion-header);
 }
 
 .top .control {

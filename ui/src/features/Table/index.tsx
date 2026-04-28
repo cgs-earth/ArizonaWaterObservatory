@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Table as TableComponent, Text } from '@mantine/core';
 import TextInput from '@/components/TextInput';
-import styles from '@/features/TopBar/TopBar.module.css';
+import styles from '@/features/Table/Table.module.css';
 
 type Props = {
   properties: GeoJsonProperties;
@@ -15,7 +15,7 @@ type Props = {
   search?: boolean;
 };
 
-export const Table: React.FC<Props> = (props) => {
+const Table: React.FC<Props> = (props) => {
   const { properties, size = 'sm', search = false } = props;
 
   const [filteredProperties, setFilteredProperties] = useState<GeoJsonProperties>(properties);
@@ -41,8 +41,8 @@ export const Table: React.FC<Props> = (props) => {
     <>
       {search && (
         <TextInput
-          size="sm"
-          label="Search"
+          size="xs"
+          label="Search Table"
           placeholder="Search property names and values"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.currentTarget.value)}
@@ -90,3 +90,5 @@ export const Table: React.FC<Props> = (props) => {
     </>
   );
 };
+
+export default Table;

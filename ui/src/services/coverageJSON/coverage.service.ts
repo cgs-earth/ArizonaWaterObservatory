@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TAxes, TValues } from '@/services/coverageJSON/types';
+import { TAxes, TCoverageOptions, TValues } from '@/services/coverageJSON/types';
 import { CoverageAxesSegments, CoverageAxesValues, CoverageJSON } from '@/services/edr.service';
+import { getParameterUnit } from '@/utils/parameters';
 
 export class CoverageService {
   getAxisNames(ranges: CoverageJSON['ranges']) {
@@ -19,14 +20,35 @@ export class CoverageService {
     return length;
   }
 
-  getValues(coverage: CoverageJSON): TValues {
+  getValues(coverage: CoverageJSON, options?: TCoverageOptions): TValues {
+    const filteredRanges = Object.entries(coverage.ranges).filter(([parameterId]) => {
+      if (options?.chosenParameter) {
+        const parameterEntry = coverage.parameters[parameterId];
+        if (parameterEntry) {
+          const parameterLabel = parameterEntry.observedProperty.label.en;
+          return parameterLabel === options?.chosenParameter;
+        }
+      }
+
+      if (options?.chosenUnit) {
+        const parameter = coverage.parameters[parameterId];
+        const unit = getParameterUnit(parameter);
+
+        return unit === options?.chosenUnit;
+      }
+
+      return true;
+    });
+
     const keys: TValues = {};
-    let keyValues = Object.keys(coverage.ranges);
+    let keyValues = filteredRanges.map((entry) => entry[0]);
     if (coverage.parameters) {
       keyValues = Object.keys(coverage.parameters);
     }
     for (const key of keyValues) {
-      keys[key] = coverage.ranges[key].values;
+      if (coverage.ranges[key]?.values) {
+        keys[key] = coverage.ranges[key].values;
+      }
     }
     return keys;
   }
