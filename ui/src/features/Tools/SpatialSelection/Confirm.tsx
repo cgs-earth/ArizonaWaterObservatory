@@ -30,7 +30,7 @@ export const Confirm: React.FC<Props> = (props) => {
           Confirm
         </Text>
         <Text ml="var(--default-spacing)">
-          This action will require refetching data for all layers. This may take some time.
+          This action will require re-fetching data for all layers. This may take some time.
         </Text>
         <Group gap="var(--default-spacing)">
           <Button size="xs" variant={Variant.Primary} onClick={onConfirm}>

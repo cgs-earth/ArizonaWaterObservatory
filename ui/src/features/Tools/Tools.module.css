@@ -56,6 +56,11 @@
   }
 }
 
+.info > svg {
+  width: 16px;
+  height: auto;
+}
+
 /* Manual padding to handle component overflow issues */
 .legendContent {
   padding: unset;

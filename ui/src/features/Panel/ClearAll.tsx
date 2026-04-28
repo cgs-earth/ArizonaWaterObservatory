@@ -17,6 +17,9 @@ import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelect
 export const ClearAll: React.FC = () => {
   const setBasemap = useMainStore((state) => state.setBasemap);
   const spatialSelection = useMainStore((state) => state.spatialSelection);
+
+  const hasLayers = useMainStore((state) => state.layers.length > 0);
+
   const { map, draw } = useMap(MAP_ID);
 
   const handleClick = () => {
@@ -47,6 +50,8 @@ export const ClearAll: React.FC = () => {
       ml="var(--default-spacing)"
       mr="auto"
       size="sm"
+      disabled={!hasLayers}
+      data-disabled={!hasLayers}
       variant={Variant.Primary}
       onClick={handleClick}
     >

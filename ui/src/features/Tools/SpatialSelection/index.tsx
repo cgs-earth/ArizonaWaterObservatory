@@ -5,6 +5,7 @@
 
 import { ChangeEvent, useEffect, useState } from 'react';
 import { Divider, Group, Radio, Stack, Text, Title, Tooltip } from '@mantine/core';
+import Info from '@/assets/Info';
 import SpatialSelectionIcon from '@/assets/SpatialSelection';
 import Checkbox from '@/components/Checkbox';
 import IconButton from '@/components/IconButton';
@@ -41,6 +42,12 @@ const SpatialSelection: React.FC = () => {
 
   const [show, setShow] = useState(false);
 
+  useEffect(() => {
+    if (overlay !== Overlay.SpatialSelection) {
+      setShow(false);
+    }
+  }, [overlay]);
+
   const handleShow = (show: boolean) => {
     setOverlay(show ? Overlay.SpatialSelection : null);
     setShow(show);
@@ -75,11 +82,18 @@ const SpatialSelection: React.FC = () => {
     confirmAction.run(() => applyStrictChange(checked));
   };
 
-  useEffect(() => {
-    if (overlay !== Overlay.SpatialSelection) {
-      setShow(false);
+  const getLabel = (boundary: PredefinedBoundary | undefined): string => {
+    if (!boundary) {
+      return 'Data Boundary';
     }
-  }, [overlay]);
+
+    switch (boundary) {
+      case PredefinedBoundary.Arizona:
+        return 'Arizona';
+      case PredefinedBoundary.ColoradoRiverBasin:
+        return 'Colorado River Basin';
+    }
+  };
 
   return (
     <>
@@ -120,12 +134,12 @@ const SpatialSelection: React.FC = () => {
                   <Radio
                     disabled={isLoadingGeography}
                     value={PredefinedBoundary.Arizona}
-                    label="Arizona"
+                    label={getLabel(PredefinedBoundary.Arizona)}
                   />
                   <Radio
                     disabled={isLoadingGeography}
                     value={PredefinedBoundary.ColoradoRiverBasin}
-                    label="Colorado River Basin"
+                    label={getLabel(PredefinedBoundary.ColoradoRiverBasin)}
                   />
                 </Group>
               </Radio.Group>
@@ -134,13 +148,24 @@ const SpatialSelection: React.FC = () => {
               </Text>
             </Stack>
             <Divider size="md" />
-            <Checkbox
-              label="Strict"
-              size="sm"
-              disabled={isLoadingGeography || !spatialSelection}
-              checked={getIsStrict(spatialSelection)}
-              onChange={handleStrictChange}
-            />
+
+            <Tooltip
+              label={`When "Strict" is active, features outside of the ${getLabel(getBoundaryValue(spatialSelection))} will be filtered out.`}
+            >
+              <Group className={styles.info} gap="calc(var(--default-spacing) / 2)">
+                <Checkbox
+                  aria-labelledby="strict-label"
+                  size="sm"
+                  disabled={isLoadingGeography || !spatialSelection}
+                  checked={getIsStrict(spatialSelection)}
+                  onChange={handleStrictChange}
+                />
+                <Text id="strict-label" size="sm">
+                  Strict
+                </Text>
+                <Info />
+              </Group>
+            </Tooltip>
           </Stack>
         }
       />
