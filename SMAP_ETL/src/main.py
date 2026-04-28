@@ -20,6 +20,7 @@ from lib import (
 )
 import minio
 import s3fs
+import zarr
 
 # filter out unnecessary warnings that we don't care about and just refer to future deprecations;
 # some of these can't actually even be addressed so the warning is pointless until future code changes
@@ -59,7 +60,7 @@ def main(
     files = get_smap_data_list_for_arizona(test_mode=test_mode)
 
     LOGGER.info(
-        "Filtering down file list to only those not previously downloaded"
+        f"Filtering down file list of {len(files)} files to only those not previously downloaded"
     )
 
     filtered_to_one_file_per_day = filter_data_to_once_a_day(files)
@@ -105,17 +106,31 @@ def main(
         append_hd5_to_s3_zarr(
             hd5_file_path[0], s3_fs, bucket, s3_store_path, test_mode
         )
+        # ensure the checkpoint is updated before potentially exiting early
 
-        if test_mode and i > 5:
+        update_checkpoint(mc, bucket, hd5_file_path[0].name)
+        if test_mode and i > 10:
             LOGGER.warning("Stopping early since test mode was specified")
             break
 
         LOGGER.info(
             f"Updating checkpoint file with new file {hd5_file_path[0].name}"
         )
-        update_checkpoint(mc, bucket, hd5_file_path[0].name)
 
-    LOGGER.info("Done!")
+    LOGGER.info("Consolidating Zarr metadata...")
+    zarr_mapper = s3_fs.get_mapper(f"{bucket}/{s3_store_path}")
+    zarr.consolidate_metadata(zarr_mapper)
+
+    # assert that .zmetadata exists
+    # this is required for zarr to be usable
+    # by the national water model client which uses
+    # consolidated metadata
+    meta_path = f"{bucket}/{s3_store_path}/.zmetadata"
+    if not s3_fs.exists(meta_path):
+        raise RuntimeError(f".zmetadata not found at {meta_path}")
+
+
+LOGGER.info("Done!")
 
 
 if __name__ == "__main__":

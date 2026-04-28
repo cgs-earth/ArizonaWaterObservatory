@@ -17,6 +17,7 @@ import pandas as pd
 import pyproj
 from pyproj import Transformer
 import xarray as xr
+import zarr
 
 LOGGER = logging.getLogger(__name__)
 
@@ -211,6 +212,21 @@ def parse_time_from_path(hd5_file_path: Path):
     return datetime.datetime.strptime(timestamp_str, "%Y%m%dT%H%M%S")
 
 
+# SMAP variables to keep
+# Note this doesn't include dataset info like coordinates
+# or dataset metadata; this is just the list of timeseries vars
+TIMESERIES_VARIABLES_TO_KEEP = [
+    "sm_profile",
+    "sm_profile_pctl",
+    "sm_profile_wetness",
+    "sm_rootzone",
+    "sm_rootzone_pctl",
+    "sm_rootzone_wetness",
+    "sm_surface",
+    "sm_surface_wetness",
+]
+
+
 def append_hd5_to_s3_zarr(
     hd5_file_path: Path,
     s3_fs,
@@ -273,6 +289,11 @@ def append_hd5_to_s3_zarr(
     # Drop raw lat/lon — redundant now that we have x/y in meters
     ds = ds.drop_vars(["cell_lat", "cell_lon"], errors="ignore")
 
+    vars_to_drop = [
+        v for v in ds.data_vars if v not in TIMESERIES_VARIABLES_TO_KEEP
+    ]
+    ds = ds.drop_vars(vars_to_drop, errors="ignore")
+
     # Extract time from filename; we will use this as the time dimension
     # and serialize it with pandas so it can be used in queries
     time_value = pd.Timestamp(parse_time_from_path(hd5_file_path))
@@ -284,7 +305,11 @@ def append_hd5_to_s3_zarr(
     # Create fsspec mapper for Zarr store
     zarr_mapper = s3_fs.get_mapper(f"{bucket}/{store_name}")
 
-    store_exists = bool(list(zarr_mapper.keys()))
+    try:
+        _ = zarr.open_consolidated(zarr_mapper, mode="r")
+        store_exists = True
+    except Exception:
+        store_exists = False
 
     # ensure the time dimension is encoded as microseconds
     # which keeps it consistent with other datasets in the AWO
@@ -314,7 +339,10 @@ def append_hd5_to_s3_zarr(
             store=zarr_mapper,
             mode="a",
             append_dim="time",
-            consolidated=True,
+            # consolidate at the end of the
+            # pipeline, that improves performance
+            # and memory usage to just do it once
+            consolidated=False,
             zarr_format=2,
         )
     else:
@@ -325,7 +353,7 @@ def append_hd5_to_s3_zarr(
         ds.to_zarr(
             store=zarr_mapper,
             mode="w",
-            consolidated=True,
+            consolidated=False,
             zarr_format=2,
             encoding=time_encoding,
         )
