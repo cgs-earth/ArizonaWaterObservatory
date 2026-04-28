@@ -106,7 +106,9 @@ def main(
         append_hd5_to_s3_zarr(
             hd5_file_path[0], s3_fs, bucket, s3_store_path, test_mode
         )
+        # ensure the checkpoint is updated before potentially exiting early
 
+        update_checkpoint(mc, bucket, hd5_file_path[0].name)
         if test_mode and i > 10:
             LOGGER.warning("Stopping early since test mode was specified")
             break
@@ -114,7 +116,6 @@ def main(
         LOGGER.info(
             f"Updating checkpoint file with new file {hd5_file_path[0].name}"
         )
-        update_checkpoint(mc, bucket, hd5_file_path[0].name)
 
     LOGGER.info("Consolidating Zarr metadata...")
     zarr_mapper = s3_fs.get_mapper(f"{bucket}/{s3_store_path}")
