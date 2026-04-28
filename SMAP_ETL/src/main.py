@@ -119,7 +119,17 @@ def main(
     LOGGER.info("Consolidating Zarr metadata...")
     zarr_mapper = s3_fs.get_mapper(f"{bucket}/{s3_store_path}")
     zarr.consolidate_metadata(zarr_mapper)
-    LOGGER.info("Done!")
+
+    # assert that .zmetadata exists
+    # this is required for zarr to be usable
+    # by the national water model client which uses
+    # consolidated metadata
+    meta_path = f"{bucket}/{s3_store_path}/.zmetadata"
+    if not s3_fs.exists(meta_path):
+        raise RuntimeError(f".zmetadata not found at {meta_path}")
+
+
+LOGGER.info("Done!")
 
 
 if __name__ == "__main__":
