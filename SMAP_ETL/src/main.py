@@ -29,6 +29,13 @@ warnings.filterwarnings(
     "ignore", category=FutureWarning, message=r".*DataGranule\.size.*"
 )
 
+# We ignore this proj error since it isn't relevant to us. we want extra proj4
+# metadata as a string on the zarr dataset
+# "/app/.venv/lib/python3.12/site-packages/pyproj/crs/crs.py:1295: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems"
+warnings.filterwarnings(
+    "ignore", category=UserWarning, message=r".*You will likely.*"
+)
+
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
@@ -129,8 +136,7 @@ def main(
     if not s3_fs.exists(meta_path):
         raise RuntimeError(f".zmetadata not found at {meta_path}")
 
-
-LOGGER.info("Done!")
+    LOGGER.info("Done!")
 
 
 if __name__ == "__main__":
