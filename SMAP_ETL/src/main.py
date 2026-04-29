@@ -33,7 +33,7 @@ warnings.filterwarnings(
 # metadata as a string on the zarr dataset
 # "/app/.venv/lib/python3.12/site-packages/pyproj/crs/crs.py:1295: UserWarning: You will likely lose important projection information when converting to a PROJ string from another format. See: https://proj.org/faq.html#what-is-the-best-format-for-describing-coordinate-reference-systems"
 warnings.filterwarnings(
-    "ignore", category=UserWarning, message=r"*You will likely*"
+    "ignore", category=UserWarning, message=r".*You will likely.*"
 )
 
 logging.basicConfig(level=logging.INFO)

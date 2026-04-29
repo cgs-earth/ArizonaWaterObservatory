@@ -190,12 +190,20 @@ def filter_data_to_only_new_files(
 
     filtered_results: list[earthaccess.DataGranule] = []
 
+    already_found_total = 0
+
     for file in files:
+        # Something like this 'https://data.nsidc.earthdatacloud.nasa.gov/nsidc-cumulus-prod-protected/SMAP/SPL4SMGP/008/2024/12/31/SMAP_L4_SM_gph_20241231T223000_Vv8011_001.h5'
         hd5_link = get_hd5_file_url(file)
+        # Turns into something like 'SMAP_L4_SM_gph_20241231T223000_Vv8011_001.h5'
+        hd5_name = hd5_link.split("/")[-1]
 
-        if hd5_link not in previously_downloaded_files:
+        if hd5_name not in previously_downloaded_files:
             filtered_results.append(file)
+        else:
+            already_found_total += 1
 
+    LOGGER.info(f"Skipping {already_found_total} previously downloaded files")
     return filtered_results
 
 
