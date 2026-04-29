@@ -890,7 +890,7 @@ resources:
         # to use with gcp, set this to https://storage.googleapis.com
         data: ${SMAP_S3_ENDPOINT:-http://localhost:9000}
         # for backwards compatibility, we use the same path as grace so we don't have to make a new bucket
-        remote_dataset: ${SMAP_PATH_IN_S3:-iow/smap_data.zarr}
+        remote_dataset: ${SMAP_PATH_IN_S3:-grace_data_bucket/smap_data.zarr}
         x_field: x
         y_field: y
         time_field: time
