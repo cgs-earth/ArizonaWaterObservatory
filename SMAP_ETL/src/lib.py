@@ -295,12 +295,12 @@ def append_hd5_to_s3_zarr(
     ).rename({phony_x: "x", phony_y: "y"})
 
     # Drop raw lat/lon — redundant now that we have x/y in meters
-    ds = ds.drop_vars(["cell_lat", "cell_lon"], errors="ignore")
+    ds = ds.drop_vars(["cell_lat", "cell_lon"])
 
     vars_to_drop = [
         v for v in ds.data_vars if v not in TIMESERIES_VARIABLES_TO_KEEP
     ]
-    ds = ds.drop_vars(vars_to_drop, errors="ignore")
+    ds = ds.drop_vars(vars_to_drop)
 
     # Extract time from filename; we will use this as the time dimension
     # and serialize it with pandas so it can be used in queries
@@ -347,10 +347,7 @@ def append_hd5_to_s3_zarr(
             store=zarr_mapper,
             mode="a",
             append_dim="time",
-            # consolidate at the end of the
-            # pipeline, that improves performance
-            # and memory usage to just do it once
-            consolidated=False,
+            consolidated=True,
             zarr_format=2,
         )
     else:
@@ -361,7 +358,7 @@ def append_hd5_to_s3_zarr(
         ds.to_zarr(
             store=zarr_mapper,
             mode="w",
-            consolidated=False,
+            consolidated=True,
             zarr_format=2,
             encoding=time_encoding,
         )
