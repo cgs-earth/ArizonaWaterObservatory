@@ -864,40 +864,40 @@ resources:
         drop_duplicate_times: true
 
 
-  # SMAP_SPL4SMGP:
-  #   type: collection
-  #   title: NASA Soil Moisture Active Passive L4 Global 3-hourly 9 km EASE-Grid Surface and Root Zone Soil Moisture Geophysical Data, Version 8 (SPL4SMGP)
-  #   description: contains data for average geophysical land surface fields that are output by the L4_SM algorithm. Contains SMAP L-band brightness temperature data from descending and ascending half-orbit satellite passes assimilated into a land surface model
-  #   keywords: ["NASA"]
-  #   provider-name:  
-  #     - NASA
-  #   extents:
-  #     spatial:
-  #       bbox: [-170, 15, -51, 72]
-  #       crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
-  #   links:
-  #     - type: application/html
-  #       rel: canonical 
-  #       title: Data source
-  #       href: https://nsidc.org/data/data-access-tool/SPL4SMGP/versions/8
-  #     - type: application/html
-  #       rel: documentation
-  #       title: Documentation
-  #       href: https://nsidc.org/data/spl4smgp/versions/8
-  #   providers:
-  #     - type: edr
-  #       name: NationalWaterModel.RasterEDRProvider
-  #       # to use with gcp, set this to https://storage.googleapis.com
-  #       data: ${SMAP_S3_ENDPOINT:-http://localhost:9000}
-  #       # for backwards compatibility, we use the same path as grace so we don't have to make a new bucket
-  #       remote_dataset: ${SMAP_PATH_IN_S3:-grace_data_bucket/smap_data.zarr}
-  #       x_field: x
-  #       y_field: y
-  #       time_field: time
-  #       # these can be set to the same access/secret keys used the smap etl workflow
-  #       s3_access_key: ${SMAP_S3_ACCESS_KEY:-minioadmin} 
-  #       s3_secret_key: ${SMAP_S3_SECRET_KEY:-minioadmin}
-  #       storage_crs: http://www.opengis.net/def/crs/EPSG/0/6933
+  SMAP_SPL4SMGP:
+    type: collection
+    title: NASA Soil Moisture Active Passive L4 Global 3-hourly 9 km EASE-Grid Surface and Root Zone Soil Moisture Geophysical Data, Version 8 (SPL4SMGP)
+    description: contains data for average geophysical land surface fields that are output by the L4_SM algorithm. Contains SMAP L-band brightness temperature data from descending and ascending half-orbit satellite passes assimilated into a land surface model
+    keywords: ["NASA"]
+    provider-name:  
+      - NASA
+    extents:
+      spatial:
+        bbox: [-170, 15, -51, 72]
+        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+    links:
+      - type: application/html
+        rel: canonical 
+        title: Data source
+        href: https://nsidc.org/data/data-access-tool/SPL4SMGP/versions/8
+      - type: application/html
+        rel: documentation
+        title: Documentation
+        href: https://nsidc.org/data/spl4smgp/versions/8
+    providers:
+      - type: edr
+        name: NationalWaterModel.RasterEDRProvider
+        # to use with gcp, set this to https://storage.googleapis.com
+        data: ${SMAP_S3_ENDPOINT:-http://localhost:9000}
+        # for backwards compatibility, we use the same path as grace so we don't have to make a new bucket
+        remote_dataset: ${SMAP_PATH_IN_S3:-iow/smap_data.zarr}
+        x_field: x
+        y_field: y
+        time_field: time
+        # these can be set to the same access/secret keys used the smap etl workflow
+        s3_access_key: ${SMAP_S3_ACCESS_KEY:-minioadmin} 
+        s3_secret_key: ${SMAP_S3_SECRET_KEY:-minioadmin}
+        storage_crs: http://www.opengis.net/def/crs/EPSG/0/6933
 
   config-store:
       type: process

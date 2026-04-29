@@ -332,7 +332,7 @@ def append_hd5_to_s3_zarr(
     else:
         rss_mb = usage.ru_maxrss / 1024  # Linux: kilobytes
 
-    print(f"Peak RSS: {rss_mb:.1f} MB")
+    LOGGER.info(f"Peak RSS: {rss_mb:.1f} MB")
 
     if store_exists:
         ds.to_zarr(

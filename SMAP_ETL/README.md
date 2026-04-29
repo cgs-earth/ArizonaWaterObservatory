@@ -24,4 +24,4 @@ To run the workflow you can run the container `ghcr.io/cgs-earth/asu-awo-smap-et
 
 To retrieve the values for `S3_ACCESS_KEY` and `S3_SECRET_KEY`, create a bucket then go into `settings` -> `interoperability` -> `Access keys for your user account`. Then select the user account that should perform the etl upload operations, and copy the values for `Access Key` and `Secret`. 
 
-![gcp](docs/gcp.png)
+![gcp](../GRACE_ETL/docs/gcp.png)
