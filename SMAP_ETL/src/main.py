@@ -20,7 +20,6 @@ from lib import (
 )
 import minio
 import s3fs
-import zarr
 
 # filter out unnecessary warnings that we don't care about and just refer to future deprecations;
 # some of these can't actually even be addressed so the warning is pointless until future code changes
@@ -123,10 +122,6 @@ def main(
         LOGGER.info(
             f"Updating checkpoint file with new file {hd5_file_path[0].name}"
         )
-
-    LOGGER.info("Consolidating Zarr metadata...")
-    zarr_mapper = s3_fs.get_mapper(f"{bucket}/{s3_store_path}")
-    zarr.consolidate_metadata(zarr_mapper)
 
     # assert that .zmetadata exists
     # this is required for zarr to be usable
