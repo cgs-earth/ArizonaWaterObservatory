@@ -577,7 +577,7 @@ resources:
 
   usgs-national-map_land-cover: 
     type: collection
-    title: USGS National Map Land Cover
+    title: USGS National Map Land Cover as of 2019
     description: provides a raster for classification of land cover types across the Contiguous United States (CONUS), including forests, wetlands, urban areas, agricultural lands, and water bodies. It is derived from satellite imagery and other remote sensing data
     provider-name:
       - USGS
@@ -898,6 +898,7 @@ resources:
         s3_access_key: ${SMAP_S3_ACCESS_KEY:-minioadmin} 
         s3_secret_key: ${SMAP_S3_SECRET_KEY:-minioadmin}
         storage_crs: http://www.opengis.net/def/crs/EPSG/0/6933
+
 
   config-store:
       type: process
