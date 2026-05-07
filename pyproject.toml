@@ -31,16 +31,7 @@ dependencies = [
     "config-store",
     "rioxarray>=0.19.0",
     "geopandas>=1.1.1",
-    "formatters",
     "pgedr==0.2.0",
-    # on linux use anywhere between gdal 3.8 which appears to be the latest on github actions workflow runnings and
-    # gdal 3.10 since that is the latest
-    # gdal version packaged for debian trixie
-    "gdal>=3.8,<3.11 ; platform_system == 'Linux'",
-    # on all other platforms use gdal 3.12 since that is the latest
-    # gdal version on macos packaged by homebrew and is easier to test with locally than downgrading
-    # the system gdal version
-    "gdal>=3.12,<3.13 ; platform_system != 'Linux'",
     "pygeoapi-plugins",
     # pins to the same gcfs version that is compatible to the zarr version used in wwdh
     # mainly just for compatibility; could be bumped in the future
@@ -78,8 +69,8 @@ members = [
 [tool.uv.sources]
 # use dev branch which shares the same features across usbr and asu to keep consistency
 # this is rebased to be at least 0.23.0 for pygeoapi
-pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="2b68ffedd7603f1910adca4fd8d50cdec567685a" }
-pygeoapi-plugins = { git = "https://github.com/cgs-earth/pygeoapi-plugins.git", rev = "3798e584328d9d0908bdcedda77239ebb04d74cb" }
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="dev"}
+pygeoapi-plugins = { url = "https://github.com/cgs-earth/pygeoapi-plugins/archive/refs/heads/master.zip" }
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
@@ -88,7 +79,6 @@ snotel = { git = "https://github.com/internetofwater/Western-Water-Datahub.git",
 awdb_com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_com" , branch="main" }
 awdb_forecasts = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/awdb_forecasts", branch="main" }
 noaa_rfc = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/noaa_rfc" , branch="main" }
-formatters = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/formatters" , rev="70396a4f583aa8949b78612f4223cf1dd4f8bfd3" }
 nationalwatermodel = { workspace = true }
 config-store = { workspace = true }
 
