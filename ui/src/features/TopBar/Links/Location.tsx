@@ -15,8 +15,6 @@ import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import {
-  CollectionRestrictions,
-  RestrictionType,
   StringIdentifierCollections,
 } from '@/consts/collections';
 import { Charts } from '@/features/Charts';
@@ -41,6 +39,8 @@ import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
 import { getParameterUnit } from '@/utils/parameters';
 import { buildLocationUrl } from '@/utils/url';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
+import { CollectionType } from '@/utils/collection';
 
 dayjs.extend(isSameOrBefore);
 
@@ -49,10 +49,11 @@ type Props = {
   collection: ICollection;
   layer: Layer;
   linkLocation?: LocationType | null;
+  collectionType: CollectionType;
 };
 
 export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { location, layer, collection, linkLocation } = props;
+  const { location, layer, collection, linkLocation,collectionType } = props;
 
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
@@ -73,35 +74,11 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
 
-  const [daysLimit, setDaysLimit] = useState<number>();
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
   const [_datasetName, setDatasetName] = useState<string>('');
 
-  const getIsDateRangeOverLimit = () => {
-    if (daysLimit) {
-      if (!from || !to || !dayjs(from).isValid() || !dayjs(to).isValid()) {
-        return true;
-      }
-
-      return dayjs(to).diff(dayjs(from), 'days') > daysLimit;
-    }
-    return false;
-  };
-
-  const isDateRangeOverLimit = getIsDateRangeOverLimit();
-
-  const getDateInputError = () => {
-    // is to >= from?
-    if (isValidRange) {
-      // is there a limit on days and have we exceeded it?
-      if (daysLimit && isDateRangeOverLimit) {
-        return `${dayjs(to).diff(dayjs(from), 'days') - daysLimit} day(s) over limit`;
-      }
-      return false;
-    }
-
-    return 'Invalid date range';
-  };
+  const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
+      collectionType,
+    });
 
   useEffect(() => {
     const url = buildLocationUrl(collection.id, id, layer.parameters, from, to, false, true);
@@ -116,17 +93,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
     const collection = mainManager.getDatasource(layer.datasourceId);
 
     if (collection) {
-      const restrictions = CollectionRestrictions[layer.datasourceId];
-
-      if (restrictions && restrictions.length > 0) {
-        const dateRangeLimitRestriction = restrictions.find(
-          (restriction) => restriction.type === RestrictionType.DateRange
-        );
-
-        if (dateRangeLimitRestriction && dateRangeLimitRestriction.days > 0) {
-          setDaysLimit(dateRangeLimitRestriction.days);
-        }
-      }
       const newDataset = mainManager.getDatasource(layer.datasourceId);
 
       if (newDataset && !getIsDateRangeOverLimit()) {
