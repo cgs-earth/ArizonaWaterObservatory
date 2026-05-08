@@ -25,6 +25,7 @@ COPY packages /opt/pygeoapi/packages/
 ENV NUMCODECS_NO_EXTENSION=1
 
 RUN uv sync --no-group etl --all-groups --all-packages
+RUN uv pip install GDAL==`gdal-config --version`
 
 COPY pygeoapi-deployment/ /opt/pygeoapi/pygeoapi-deployment/
 

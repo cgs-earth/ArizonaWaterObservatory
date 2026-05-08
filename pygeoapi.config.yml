@@ -74,7 +74,7 @@ resources:
       - NOAA
       # define the formatter anchor; this list will be used for all vector 
     formatters: &default-formatters
-      - name: formatters.CSVFormatter
+      - name: CSV
       - name: pygeoapi_plugins.formatter.shape.ShapefileFormatter
       - name: pygeoapi_plugins.formatter.shape.GPKGFormatter
       - name: pygeoapi_plugins.formatter.shape.KMLFormatter
