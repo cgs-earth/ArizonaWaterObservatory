@@ -216,8 +216,8 @@ export const LayerBlock: React.FC<Props> = (props) => {
                   linkLocation={linkLocation}
                   location={location}
                   layer={layer}
-                  collection={collection}
-                />
+                  collection={collection} 
+                  collectionType={CollectionType.EDR}                />
               ))}
             {collectionType === CollectionType.EDRGrid &&
               currentChunk.map((location) => (
