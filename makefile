@@ -13,7 +13,7 @@ dev:
 
 deps:
 	# Using uv, install all Python dependencies needed for local development and spin up necessary docker services
-	uv sync --all-groups --all-packages
+	uv sync --all-groups --all-packages && uv pip install "GDAL==$$(gdal-config --version)"
 
 test:
 	# Run pyright to validate types, then spin up pydist with xdist to run tests in parallel
