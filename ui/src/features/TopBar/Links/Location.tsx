@@ -14,14 +14,13 @@ import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
-import {
-  StringIdentifierCollections,
-} from '@/consts/collections';
+import { StringIdentifierCollections } from '@/consts/collections';
 import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
@@ -34,13 +33,12 @@ import {
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
+import { CollectionType } from '@/utils/collection';
 import { createEmptyCsv } from '@/utils/csv';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
 import { getParameterUnit } from '@/utils/parameters';
 import { buildLocationUrl } from '@/utils/url';
-import { useLayerValidation } from '@/hooks/useLayerValidation';
-import { CollectionType } from '@/utils/collection';
 
 dayjs.extend(isSameOrBefore);
 
@@ -53,7 +51,7 @@ type Props = {
 };
 
 export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { location, layer, collection, linkLocation,collectionType } = props;
+  const { location, layer, collection, linkLocation, collectionType } = props;
 
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
@@ -77,8 +75,8 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [_datasetName, setDatasetName] = useState<string>('');
 
   const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
-      collectionType,
-    });
+    collectionType,
+  });
 
   useEffect(() => {
     const url = buildLocationUrl(collection.id, id, layer.parameters, from, to, false, true);
