@@ -905,11 +905,6 @@ resources:
       processor:
           name: config_store.ConfigStoreProcessor
   
-  wells-analysis:
-      type: process
-      processor: 
-        name: wells_analysis.WellAnalysisProcessor
-
   intersector:
     type: process
     processor:
