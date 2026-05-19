@@ -899,6 +899,34 @@ resources:
         s3_secret_key: ${SMAP_S3_SECRET_KEY:-minioadmin}
         storage_crs: http://www.opengis.net/def/crs/EPSG/0/6933
 
+  ArizonaIrrigationDistricts:
+    type: collection
+    title: Arizona Department of Water Resources Irrigation Districts
+    description: contains boundaries for irrigation districts across Arizona. Irrigation Districts are municipal corporations and political subdivisions established as a special taxing district for either agricultural improvement or irrigation and conservation purposes. Irrigation Districts receive, pump, and distribute water to irrigated lands within their service area.
+      - Arizona Department of Water Resources
+    flask_cache:
+      ttl_seconds: 36000 # cache for 10 hours since the data is static and important for the AWO use cases
+    keywords:
+      - groundwater
+    formatters: *default-formatters
+    links:
+      - type: application/html
+        rel: canonical
+        title: Groundwater Basins
+        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Irrigation_District_2024/FeatureServer/0
+      - type: application/html
+        rel: documentation
+        title: Arizona Department of Water Resources Agriculture Program Summary
+        href: https://www.azwater.gov/ama/agriculture-program
+    extents: 
+      spatial: *az-spatial-extent
+    providers:
+      - type: feature
+        name: ESRI
+        data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Irrigation_District_2024/FeatureServer/0
+        id_field: OBJECTID
+        title_field: LONG_NAME
+
 
   config-store:
       type: process
