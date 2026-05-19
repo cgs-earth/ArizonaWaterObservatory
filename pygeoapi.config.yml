@@ -651,7 +651,7 @@ resources:
       #   TO_CHAR(MIN(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS earliest_observation_utc,
       #   TO_CHAR(MAX(observation_time AT TIME ZONE 'UTC'), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS latest_observation_utc
       #   FROM edr_quickstart.observations;
-      temporal:
+      temporal: &adwr-wells-temporal-extent
         begin: 1902-03-31T00:00:00Z 
         end: 2025-09-09T06:00:00Z
         trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
@@ -927,6 +927,79 @@ resources:
         id_field: OBJECTID
         title_field: LONG_NAME
 
+
+  IndexWellMedians:
+    type: collection
+    visibility: hidden
+    title: Arizona Department of Water Resources Index Well Medians
+    description: contains the median groundwater level by year for each index well in Arizona
+    provider-name:
+      - Arizona Department of Water Resources
+    formatters: *default-formatters
+    links:
+      - type: application/html
+        rel: canonical
+        title: Wells 55 Registry Data Source
+        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
+      - type: application/html
+        rel: canonical
+        title: Groundwater Timeseries Data source
+        href: https://www.azwater.gov/sites/default/files/zip/GWSI_ZIP_20251014.zip
+      - type: application/html
+        rel: documentation
+        title: ADWR Interactive Maps and Data Documentation
+        href: https://www.azwater.gov/gis-data-and-maps
+      - type: application/html
+        rel: documentation 
+        title: Water Resources Open Data Portal
+        href: https://gisdata2016-11-18t150447874z-azwater.opendata.arcgis.com/
+
+    keywords:
+      en:
+        - adwr
+    extents:
+      spatial: *az-spatial-extent
+      temporal: *adwr-wells-temporal-extent
+    providers:
+      - type: feature
+        name: PostgreSQL
+        data:
+          host: ${TF_VAR_POSTGRES_HOST:-localhost}
+          dbname: ${TF_VAR_POSTGRES_DB:-edr}
+          user: ${TF_VAR_POSTGRES_USER:-postgres}
+          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+          search_path: [edr_quickstart]
+        table: index_well_locations
+        id_field: location_id
+        geom_field: geometry
+
+      - type: edr
+        name: pgedr.PostgresEDRProvider
+        data:
+          host: ${TF_VAR_POSTGRES_HOST:-localhost}
+          dbname: ${TF_VAR_POSTGRES_DB:-edr}
+          user: ${TF_VAR_POSTGRES_USER:-postgres}
+          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+          search_path: [edr_quickstart]
+        table: yearly_index_well_depths
+    
+        edr_fields: # Required EDR Fields
+          id_field: observation_id
+          location_field: index_well_locations.location_id
+          geom_field: index_well_locations.geometry # Result geometry field
+          time_field: year
+          result_field: median_depth_to_water
+          parameter_id: index_well_parameter_info.parameter_id
+          parameter_name: index_well_parameter_info.parameter_name
+          parameter_unit: index_well_parameter_info.unit
+
+        external_tables: # Additional table joins
+          index_well_locations:
+            remote: location_id
+            foreign: location_id
+          index_well_parameter_info:
+            remote: parameter_id
+            foreign: parameter_id
 
   config-store:
       type: process
