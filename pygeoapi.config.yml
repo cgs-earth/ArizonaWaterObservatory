@@ -1001,6 +1001,32 @@ resources:
             remote: parameter_id
             foreign: parameter_id
 
+  
+  ArizonaLandSubsidence:
+    type: collection
+    title: Arizona Department of Water Resources Land Subsidence
+    description: contains 
+    provider-name:
+      - Arizona Department of Water Resources
+    flask_cache:
+      ttl_seconds: 36000 # cache for 10 hours since the data is static and important for the AWO use cases
+    keywords:
+      - groundwater
+    formatters: *default-formatters
+    links:
+      - type: application/html
+        rel: canonical
+        title: Groundwater Basins
+        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Historical_Published_Land_Subsidence_Data/FeatureServer/0
+    extents: 
+      spatial: *az-spatial-extent
+    providers:
+      - type: feature
+        name: ESRI
+        data: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Historical_Published_Land_Subsidence_Data/FeatureServer/0
+        id_field: OBJECTID
+        time_field: First_Measurement_DT
+  
   config-store:
       type: process
       processor:

@@ -22,7 +22,6 @@ members = [
     "config-store",
     "nationalwatermodel",
     "nationalwatermodeletlgroundwater",
-    "wells-analysis",
 ]
 
 [[package]]
@@ -3509,11 +3508,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/2c/ee/afaf0f85a9a18fe47
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/52/e465037f5375f43533d1a80b6923955201596a99142ed524d77b571a1418/wcwidth-0.7.0-py3-none-any.whl", hash = "sha256:5d69154c429a82910e241c738cd0e2976fac8a2dd47a1a805f4afed1c0f136f2", size = 110825, upload-time = "2026-05-02T16:04:11.033Z" },
 ]
-
-[[package]]
-name = "wells-analysis"
-version = "0.1.0"
-source = { editable = "packages/wells_analysis" }
 
 [[package]]
 name = "werkzeug"
