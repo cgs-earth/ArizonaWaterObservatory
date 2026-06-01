@@ -1058,6 +1058,74 @@ resources:
           s3_access_key: ${GRACE_S3_ACCESS_KEY:-minioadmin} 
           s3_secret_key: ${GRACE_S3_SECRET_KEY:-minioadmin}
 
+
+  ASU_GRACE:
+    type: collection
+    title: GRACE/FO-derived Lower Colorado Basin Groundwater Storage Levels Changes
+    description: contains a processed version of the CSR GRACE/GRACE-FO RL06.3 Mascon Solutions (RL0603) for the Lower Colorado River Basin, aggregated monthly for trends in groundwater storage changes.
+    provider-name:
+      - Arizona State University
+    formatters: *default-formatters
+    # TODO: Waiting to confirm on other links to add for more documentation
+    links:
+      - type: application/html
+        rel: documentation
+        title: Open GW Portal
+        href: https://opengw.netlify.app/
+    keywords:
+      en:
+        - groundwater
+        - asu 
+        - GRACE
+    extents:
+      spatial:
+        bbox: [-114.816591,31.332177,-109.045172,37.003725]
+        crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+      temporal:
+        begin: 2003-10-01T00:00:00Z 
+        end: 2023-09-01T06:00:00Z
+        trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
+    providers:
+      - type: feature
+        name: PostgreSQL
+        data:
+          host: ${TF_VAR_POSTGRES_HOST:-localhost}
+          dbname: ${TF_VAR_POSTGRES_DB:-edr}
+          user: ${TF_VAR_POSTGRES_USER:-postgres}
+          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+          search_path: [edr_quickstart]
+        table: lower_colorado_river_basin_asu_grace
+        id_field: id
+        geom_field: geom
+
+      - type: edr
+        name: pgedr.PostgresEDRProvider
+        data:
+          host: ${TF_VAR_POSTGRES_HOST:-localhost}
+          dbname: ${TF_VAR_POSTGRES_DB:-edr}
+          user: ${TF_VAR_POSTGRES_USER:-postgres}
+          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+          search_path: [edr_quickstart]
+        table: asu_grace_observations
+    
+        edr_fields: # Required EDR Fields
+          id_field: id
+          location_field: lower_colorado_river_basin_asu_grace.id
+          geom_field: lower_colorado_river_basin_asu_grace.geom
+          time_field: observation_date
+          result_field: value
+          parameter_id: asu_grace_parameter_info.parameter_id
+          parameter_name: asu_grace_parameter_info.parameter_name
+          parameter_unit: asu_grace_parameter_info.unit
+
+        external_tables: # Additional table joins
+          lower_colorado_river_basin_asu_grace:
+            remote: id
+            foreign: location_id
+          asu_grace_parameter_info:
+            remote: parameter_id
+            foreign: parameter_id
+
   config-store:
       type: process
       processor:
