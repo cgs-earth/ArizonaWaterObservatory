@@ -1061,33 +1061,22 @@ resources:
 
   ASU_GRACE:
     type: collection
-    title: Arizona Department of Water Resources Groundwater Site Inventory
-    description: consists of field-verified data regarding wells and springs collected by personnel from the Hydrology Division's Basic Data Section, the U.S. Geological Survey and other co-operating agencies. This collection contains additional info joined from the Arizona Wells 55 Registry to enrich well metadata.
+    title: GRACE/FO-derived Lower Colorado Basin Groundwater Storage Levels Changes
+    description: contains a processed version of the CSR GRACE/GRACE-FO RL06.3 Mascon Solutions (RL0603) for the Lower Colorado River Basin, aggregated monthly for trends in groundwater storage changes.
     provider-name:
-      - Arizona Department of Water Resources
+      - Arizona State University
     formatters: *default-formatters
+    # TODO: Waiting to confirm on other links to add for more documentation
     links:
       - type: application/html
-        rel: canonical
-        title: Wells 55 Registry Data Source
-        href: https://services.arcgis.com/C34zQ7veRS0V1t04/ArcGIS/rest/services/Well_Registry_2024/FeatureServer/0
-      - type: application/html
-        rel: canonical
-        title: Groundwater Timeseries Data source
-        href: https://www.azwater.gov/sites/default/files/zip/GWSI_ZIP_20251014.zip
-      - type: application/html
         rel: documentation
-        title: ADWR Interactive Maps and Data Documentation
-        href: https://www.azwater.gov/gis-data-and-maps
-      - type: application/html
-        rel: documentation 
-        title: Water Resources Open Data Portal
-        href: https://gisdata2016-11-18t150447874z-azwater.opendata.arcgis.com/
-
+        title: Open GW Portal
+        href: https://opengw.netlify.app/
     keywords:
       en:
-        - example
-        - quickstart
+        - groundwater
+        - asu 
+        - GRACE
     extents:
       spatial:
         bbox: [-114.816591,31.332177,-109.045172,37.003725]

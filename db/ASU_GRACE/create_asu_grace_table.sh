@@ -16,14 +16,10 @@ if [ -z "${PGPASSWORD:-}" ]; then
     export PGPASSWORD
 fi
 
-curl -s "https://reference.geoconnex.us/collections/hu02/items/15?f=json" \
-    | jq '{type:"FeatureCollection",features:[.]}' \
-    > /tmp/lower_colorado_river_basin.geojson
-
 ogr2ogr \
     -f PostgreSQL \
     PG:"host=127.0.0.1 port=5432 dbname=edr user=postgres password=${PGPASSWORD}" \
-    /tmp/lower_colorado_river_basin.geojson \
+    /vsicurl/https://reference.geoconnex.us/collections/hu02/items/15 \
     -nln edr_quickstart.lower_colorado_river_basin_asu_grace \
     -lco GEOMETRY_NAME=geom \
     -nlt PROMOTE_TO_MULTI \
