@@ -1,0 +1,1 @@
+This directory contains the logic for ingesting the ASU processed GRACE data and loading into the postgres db. The source data for the time being is retrieved from the ASU team. 
