@@ -1014,37 +1014,37 @@ resources:
         id_field: OBJECTID
 
 
-  TEXAS_GRACE:
-      type: collection
-      title: CSR GRACE/GRACE-FO RL06.3 Mascon Solutions (RL0603)
-      description: contains a processed version of the NASA GRACE dataset hosted by the University of Texas at Austin which uses global equal area mascon solutions to reduce modeling errors, measurement noise, and observability issues in the original dataset. These regularized mascon solutions are developed with a 1° resolution using Tikhonov regularization in a geodesic grid domain. More detail can be found at http://dx.doi.org/10.1002/2016JB013007 and https://doi.org/10.15781/cgq9-nh24
-      provider-name:  
-        - University of Texas at Austin
-      extents: *default-extent
-      keywords:
-        - groundwater
-        - GRACE
-      links:
-        - type: application/html
-          rel: canonical 
-          title: Data source
-          href: https://www2.csr.utexas.edu/grace/RL0603_mascons.html
-        - type: application/html
-          rel: documentation
-          title: Documentation
-          href: http://dx.doi.org/10.1002/2016JB013007
-      providers:
-        - type: edr
-          name: NationalWaterModel.RasterEDRProvider
-          # to use with gcp, set this to https://storage.googleapis.com
-          data: ${GRACE_S3_ENDPOINT:-http://localhost:9000}
-          remote_dataset: ${GRACE_PATH_IN_S3:-grace_data_bucket/texas_grace_data.zarr}
-          x_field: lon
-          y_field: lat
-          time_field: time
-          # these can be set to the same access/secret keys used the grace etl workflow
-          s3_access_key: ${GRACE_S3_ACCESS_KEY:-minioadmin} 
-          s3_secret_key: ${GRACE_S3_SECRET_KEY:-minioadmin}
+  # TEXAS_GRACE:
+  #     type: collection
+  #     title: CSR GRACE/GRACE-FO RL06.3 Mascon Solutions (RL0603)
+  #     description: contains a processed version of the NASA GRACE dataset hosted by the University of Texas at Austin which uses global equal area mascon solutions to reduce modeling errors, measurement noise, and observability issues in the original dataset. These regularized mascon solutions are developed with a 1° resolution using Tikhonov regularization in a geodesic grid domain. More detail can be found at http://dx.doi.org/10.1002/2016JB013007 and https://doi.org/10.15781/cgq9-nh24
+  #     provider-name:  
+  #       - University of Texas at Austin
+  #     extents: *default-extent
+  #     keywords:
+  #       - groundwater
+  #       - GRACE
+  #     links:
+  #       - type: application/html
+  #         rel: canonical 
+  #         title: Data source
+  #         href: https://www2.csr.utexas.edu/grace/RL0603_mascons.html
+  #       - type: application/html
+  #         rel: documentation
+  #         title: Documentation
+  #         href: http://dx.doi.org/10.1002/2016JB013007
+  #     providers:
+  #       - type: edr
+  #         name: NationalWaterModel.RasterEDRProvider
+  #         # to use with gcp, set this to https://storage.googleapis.com
+  #         data: ${GRACE_S3_ENDPOINT:-http://localhost:9000}
+  #         remote_dataset: ${GRACE_PATH_IN_S3:-grace_data_bucket/texas_grace_data.zarr}
+  #         x_field: lon
+  #         y_field: lat
+  #         time_field: time
+  #         # these can be set to the same access/secret keys used the grace etl workflow
+  #         s3_access_key: ${GRACE_S3_ACCESS_KEY:-minioadmin} 
+  #         s3_secret_key: ${GRACE_S3_SECRET_KEY:-minioadmin}
 
 
   ASU_GRACE:
