@@ -1047,7 +1047,7 @@ resources:
           s3_secret_key: ${GRACE_S3_SECRET_KEY:-minioadmin}
 
 
-  ASU_GRACE:
+  ASU_LCRB_GRACE:
     type: collection
     title: GRACE/FO-derived Lower Colorado Basin Groundwater Storage Levels Changes
     description: contains a processed version of the CSR GRACE/GRACE-FO RL06.3 Mascon Solutions (RL0603) for the Lower Colorado River Basin, aggregated monthly for trends in groundwater storage changes.
@@ -1055,7 +1055,7 @@ resources:
       - Arizona State University
     formatters: *default-formatters
     # TODO: Waiting to confirm on other links to add for more documentation
-    links:
+    links: &asu_grace_links
       - type: application/html
         rel: documentation
         title: Open GW Portal
@@ -1069,7 +1069,7 @@ resources:
       spatial:
         bbox: [-114.816591,31.332177,-109.045172,37.003725]
         crs: http://www.opengis.net/def/crs/OGC/1.3/CRS84
-      temporal:
+      temporal: &asu_grace_temporal_range
         begin: 2003-10-01T00:00:00Z 
         end: 2023-09-01T06:00:00Z
         trs: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian 
@@ -1107,6 +1107,31 @@ resources:
           asu_grace_parameter_info:
             remote: parameter_id
             foreign: parameter_id
+
+  ASU_Groundwater_Basins_Aggregated_Grace:
+    type: collection
+    visibility: hidden
+    title: GRACE/FO-derived GWS change by Arizona Groundwater Basin from 2003-2023
+    description: contains a processed version of the CSR GRACE/GRACE-FO RL06.3 Mascon Solutions (RL0603) for each Arizona Groundwater Basin. Each basin has one value `gws` which represents the change in groundwater storage for that basin for the period 2003-2023.
+    provider-name:
+      - Arizona Department of Water Resources
+    formatters: *default-formatters
+    links: *asu_grace_links
+    keywords:
+      en:
+        - adwr
+    extents:
+      spatial: *az-spatial-extent
+      temporal: *asu_grace_temporal_range
+    providers:
+      - type: feature
+        name: PostgreSQL
+        data: 
+          <<: *pg-connection
+          search_path: [edr_quickstart]
+        table: asu_grace_averaged_groundwater_basins
+        id_field: ogc_fid
+        geom_field: geom
 
   config-store:
       type: process
