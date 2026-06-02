@@ -1119,7 +1119,8 @@ resources:
     links: *asu_grace_links
     keywords:
       en:
-        - adwr
+        - groundwater
+        - GRACE
     extents:
       spatial: *az-spatial-extent
       temporal: *asu_grace_temporal_range
