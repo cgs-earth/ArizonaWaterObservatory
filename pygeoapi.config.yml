@@ -1110,7 +1110,6 @@ resources:
 
   ASU_Groundwater_Basins_Aggregated_Grace:
     type: collection
-    visibility: hidden
     title: GRACE/FO-derived GWS change by Arizona Groundwater Basin from 2003-2023
     description: contains a processed version of the CSR GRACE/GRACE-FO RL06.3 Mascon Solutions (RL0603) for each Arizona Groundwater Basin. Each basin has one value `gws` which represents the change in groundwater storage for that basin for the period 2003-2023.
     provider-name:
