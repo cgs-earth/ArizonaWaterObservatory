@@ -22,7 +22,7 @@ server:
   manager:
     name: PostgreSQL
     output_dir: ${PYGEOAPI_JOB_RESULT_DIR:-/tmp}
-    connection:
+    connection: &pg-connection
       host: ${TF_VAR_POSTGRES_HOST:-localhost}
       port: 5432
       database: ${TF_VAR_POSTGRES_DB}
@@ -658,11 +658,8 @@ resources:
     providers:
       - type: feature
         name: PostgreSQL
-        data:
-          host: ${TF_VAR_POSTGRES_HOST:-localhost}
-          dbname: ${TF_VAR_POSTGRES_DB:-edr}
-          user: ${TF_VAR_POSTGRES_USER:-postgres}
-          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+        data: 
+          <<: *pg-connection
           search_path: [edr_quickstart]
         table: locations
         id_field: location_id
@@ -670,11 +667,8 @@ resources:
 
       - type: edr
         name: pgedr.PostgresEDRProvider
-        data:
-          host: ${TF_VAR_POSTGRES_HOST:-localhost}
-          dbname: ${TF_VAR_POSTGRES_DB:-edr}
-          user: ${TF_VAR_POSTGRES_USER:-postgres}
-          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+        data: 
+          <<: *pg-connection
           search_path: [edr_quickstart]
         table: observations
     
@@ -963,11 +957,8 @@ resources:
     providers:
       - type: feature
         name: PostgreSQL
-        data:
-          host: ${TF_VAR_POSTGRES_HOST:-localhost}
-          dbname: ${TF_VAR_POSTGRES_DB:-edr}
-          user: ${TF_VAR_POSTGRES_USER:-postgres}
-          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+        data: 
+          <<: *pg-connection
           search_path: [edr_quickstart]
         table: index_well_locations
         id_field: location_id
@@ -975,11 +966,8 @@ resources:
 
       - type: edr
         name: pgedr.PostgresEDRProvider
-        data:
-          host: ${TF_VAR_POSTGRES_HOST:-localhost}
-          dbname: ${TF_VAR_POSTGRES_DB:-edr}
-          user: ${TF_VAR_POSTGRES_USER:-postgres}
-          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+        data: 
+          <<: *pg-connection
           search_path: [edr_quickstart]
         table: yearly_index_well_depths
     
@@ -1088,11 +1076,8 @@ resources:
     providers:
       - type: feature
         name: PostgreSQL
-        data:
-          host: ${TF_VAR_POSTGRES_HOST:-localhost}
-          dbname: ${TF_VAR_POSTGRES_DB:-edr}
-          user: ${TF_VAR_POSTGRES_USER:-postgres}
-          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+        data: 
+          <<: *pg-connection
           search_path: [edr_quickstart]
         table: lower_colorado_river_basin_asu_grace
         id_field: id
@@ -1101,10 +1086,7 @@ resources:
       - type: edr
         name: pgedr.PostgresEDRProvider
         data:
-          host: ${TF_VAR_POSTGRES_HOST:-localhost}
-          dbname: ${TF_VAR_POSTGRES_DB:-edr}
-          user: ${TF_VAR_POSTGRES_USER:-postgres}
-          password: ${TF_VAR_POSTGRES_PASSWORD:-password}
+          <<: *pg-connection
           search_path: [edr_quickstart]
         table: asu_grace_observations
     
