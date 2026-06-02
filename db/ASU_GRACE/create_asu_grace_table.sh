@@ -26,6 +26,24 @@ ogr2ogr \
     -makevalid \
     -overwrite
 
+# add the shapefile with the average value for the groundwater basin for the 20 years or so
+if [ ! -f Groundwater_Basins.shp ]; then
+    echo "Groundwater_Basins.shp not found; skipping basin load step"
+else
+    ogr2ogr \
+        -f PostgreSQL \
+        PG:"host=127.0.0.1 port=5432 dbname=edr user=postgres password=${PGPASSWORD}" \
+        Groundwater_Basins.shp \
+        -nln edr_quickstart.asu_grace_averaged_groundwater_basins \
+        -lco GEOMETRY_NAME=geom \
+        -lco PRECISION=NO \
+        -t_srs EPSG:4326 \
+        -nlt PROMOTE_TO_MULTI \
+        -makevalid \
+        -overwrite
+fi
+
+
 psql -h 127.0.0.1 -U postgres -d edr <<'SQL'
 
 -- 1. Spatial table
@@ -73,13 +91,17 @@ DROP TABLE IF EXISTS edr_quickstart.asu_grace_observations;
 
 CREATE TABLE edr_quickstart.asu_grace_observations (
     observation_date TEXT,
-    value       NUMERIC
+    value NUMERIC
 );
 
 \copy edr_quickstart.asu_grace_observations FROM 'GWS.csv' CSV HEADER;
 
 ALTER TABLE edr_quickstart.asu_grace_observations
     ADD COLUMN parameter_id TEXT;
+
+ALTER TABLE edr_quickstart.asu_grace_observations
+ALTER COLUMN observation_date TYPE DATE
+USING to_date(observation_date, 'MM/DD/YYYY');
 
 UPDATE edr_quickstart.asu_grace_observations
 SET parameter_id = 'AVERAGE_GROUNDWATER_STORAGE_VARIATION';

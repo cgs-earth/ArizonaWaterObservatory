@@ -31,3 +31,6 @@ zarr.json
 *.7z
 
 *.gdb/
+
+**/ASU_GRACE/*
+!ASU_GRACE/*.sh
