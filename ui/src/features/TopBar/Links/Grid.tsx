@@ -23,7 +23,6 @@ import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import {
   CoverageCollection,
@@ -31,6 +30,7 @@ import {
   ICollection,
   IGetCubeParams,
 } from '@/services/edr.service';
+import { collectionService } from '@/services/init';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
@@ -85,7 +85,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
       return;
     }
 
-    const newDataset = mainManager.getDatasource(layer.datasourceId);
+    const newDataset = collectionService.getDatasource(layer.datasourceId);
 
     if (newDataset) {
       setDatasetName(newDataset.title ?? '');

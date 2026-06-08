@@ -10,7 +10,7 @@ import { Feature, MultiPolygon, Polygon } from 'geojson';
 import debounce from 'lodash.debounce';
 import { Map } from 'mapbox-gl';
 import { v6 } from 'uuid';
-import mainManager from '@/managers/Main.init';
+import { factoryService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { DrawMode } from '@/stores/main/types';
 
@@ -141,7 +141,7 @@ export const useDraw = (map: Map | null, draw: MapboxDraw | null) => {
         // Reactivate drawn layers
         for (const layer of layers) {
           if (layer.visible) {
-            const { pointLayerId, fillLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+            const { pointLayerId, fillLayerId, lineLayerId } = factoryService.getLocationsLayerIds(
               layer.datasourceId,
               layer.id
             );

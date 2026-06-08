@@ -10,10 +10,11 @@ import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import styles from '@/features/Panel/Panel.module.css';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
+import mainManager from '@/managers/main/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import warningManager from '@/managers/Warning.init';
 import { ICollection } from '@/services/edr.service';
+import { collectionService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
@@ -109,7 +110,7 @@ export const Control: React.FC<Props> = (props) => {
   }, []);
 
   useEffect(() => {
-    const hasLayers = mainManager.getDatasourceCount(dataset.id) > 0;
+    const hasLayers = collectionService.getDatasourceCount(dataset.id) > 0;
     setHasLayers(hasLayers);
   }, [layerCount]);
 

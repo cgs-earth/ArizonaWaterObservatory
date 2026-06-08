@@ -30,7 +30,7 @@ import styles from '@/features/Panel/Panel.module.css';
 import { Toggle } from '@/features/Panel/Toggle';
 import { Mobile } from '@/features/TopBar/Mobile';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
+import mainManager from '@/managers/main/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import useMainStore from '@/stores/main';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';

@@ -10,7 +10,7 @@ import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import { Layer } from '@/features/TopBar/Links/Layer';
 import styles from '@/features/TopBar/Links/Links.module.css';
-import mainManager from '@/managers/Main.init';
+import { collectionService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
@@ -29,7 +29,7 @@ const Links: React.FC = () => {
 
   useEffect(() => {
     const isEnabled = layers.some((layer) => {
-      const datasource = mainManager.getDatasource(layer.datasourceId);
+      const datasource = collectionService.getDatasource(layer.datasourceId);
       if (datasource) {
         const collectionType = getCollectionType(datasource);
         if (collectionType === CollectionType.Features) {

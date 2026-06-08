@@ -15,8 +15,9 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useLayerValidation } from '@/hooks/useLayerValidation';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
+import mainManager from '@/managers/main/Main.init';
 import notificationManager from '@/managers/Notification.init';
+import { collectionService } from '@/services/init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
@@ -72,7 +73,7 @@ const Layer: React.FC<Props> = (props) => {
       return;
     }
 
-    const collection = mainManager.getDatasource(layer.datasourceId);
+    const collection = collectionService.getDatasource(layer.datasourceId);
 
     if (collection) {
       const collectionType = getCollectionType(collection);

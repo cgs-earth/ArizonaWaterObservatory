@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import MainManager from '@/managers/Main.manager';
+import MainManager from '@/managers/main/Main.manager';
 import useMainStore from '@/stores/main';
 
 const mainManager = new MainManager(useMainStore);

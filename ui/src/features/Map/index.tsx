@@ -16,8 +16,9 @@ import { sourceConfigs, SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent, getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
 import { useSpatialSelection } from '@/hooks/useSpatialSelection';
-import mainManager from '@/managers/Main.init';
+import mainManager from '@/managers/main/Main.init';
 import notificationManager from '@/managers/Notification.init';
+import { configService, factoryService, locationService, mapService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { Location } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
@@ -91,6 +92,8 @@ const MainMap: React.FC<Props> = (props) => {
     if (initialMapLoad.current) {
       initialMapLoad.current = false;
       mainManager.setMap(map);
+      mapService.setMap(map);
+      configService.setMap(map);
       map.resize();
       map.fitBounds(
         [
@@ -114,7 +117,7 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
-    mainManager.setHoverPopup(hoverPopup);
+    mapService.setHoverPopup(hoverPopup);
   }, [hoverPopup]);
 
   useEffect(() => {
@@ -122,7 +125,7 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
-    mainManager.setPersistentPopup(persistentPopup);
+    mapService.setPersistentPopup(persistentPopup);
   }, [persistentPopup]);
 
   useEffect(() => {
@@ -130,7 +133,7 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
-    mainManager.setContainer(container);
+    mapService.setContainer(container);
   }, [container]);
 
   useEffect(() => {
@@ -138,7 +141,8 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
-    mainManager.setDraw(draw);
+    mapService.setDraw(draw);
+    configService.setDraw(draw);
   }, [draw]);
 
   useEffect(() => {
@@ -160,7 +164,7 @@ const MainMap: React.FC<Props> = (props) => {
 
     const allIds: string[] = [];
     layers.forEach((layer) => {
-      const { pointLayerId, lineLayerId, fillLayerId } = mainManager.getLocationsLayerIds(
+      const { pointLayerId, lineLayerId, fillLayerId } = factoryService.getLocationsLayerIds(
         layer.datasourceId,
         layer.id
       );
@@ -186,7 +190,7 @@ const MainMap: React.FC<Props> = (props) => {
           if (features && features.length > 0) {
             hoverPopup.remove();
 
-            const uniqueFeatures = mainManager.getUniqueIds(features, layer.id);
+            const uniqueFeatures = locationService.getUniqueIds(features, layer.id);
             const locations: Location[] = uniqueFeatures.map(({ id }) => ({
               id,
               layerId: layer.id,
@@ -212,7 +216,7 @@ const MainMap: React.FC<Props> = (props) => {
     }
 
     layers.forEach((layer) => {
-      const { pointLayerId, lineLayerId, fillLayerId } = mainManager.getLocationsLayerIds(
+      const { pointLayerId, lineLayerId, fillLayerId } = factoryService.getLocationsLayerIds(
         layer.datasourceId,
         layer.id
       );
@@ -245,7 +249,7 @@ const MainMap: React.FC<Props> = (props) => {
 
     const allIds: string[] = [];
     layers.forEach((layer) => {
-      const { pointLayerId, lineLayerId, fillLayerId } = mainManager.getLocationsLayerIds(
+      const { pointLayerId, lineLayerId, fillLayerId } = factoryService.getLocationsLayerIds(
         layer.datasourceId,
         layer.id
       );
@@ -298,7 +302,7 @@ const MainMap: React.FC<Props> = (props) => {
     const locationsByCollection = groupLocationIdsByLayer(locations);
     layers.forEach((layer) => {
       const locationIds = locationsByCollection[layer.id] ?? [];
-      const { pointLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+      const { pointLayerId, lineLayerId } = factoryService.getLocationsLayerIds(
         layer.datasourceId,
         layer.id
       );

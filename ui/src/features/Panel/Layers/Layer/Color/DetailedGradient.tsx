@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { ExpressionSpecification } from 'mapbox-gl';
 import { Gradient } from '@/features/Panel/Layers/Layer/Color/Gradient';
-import mainManager from '@/managers/Main.init';
+import { collectionService } from '@/services/init';
 import { Layer, PaletteDefinition } from '@/stores/main/types';
 import { createColorRange } from '@/utils/colors';
 import { getParameterLabel } from '@/utils/parameters';
@@ -61,7 +61,7 @@ export const DetailedGradient: React.FC<Props> = (props) => {
   }, [color]);
 
   useEffect(() => {
-    const collection = mainManager.getDatasource(collectionId);
+    const collection = collectionService.getDatasource(collectionId);
     if (collection) {
       const label = getParameterLabel(collection, paletteDefinition.parameter);
 

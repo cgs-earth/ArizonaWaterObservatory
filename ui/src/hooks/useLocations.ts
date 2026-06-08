@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Feature } from 'geojson';
 import { StringIdentifierCollections } from '@/consts/collections';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
+import mainManager from '@/managers/main/Main.init';
 import { ICollection } from '@/services/edr.service';
 import useMainStore from '@/stores/main';
 import { Layer, Location } from '@/stores/main/types';
