@@ -22,9 +22,7 @@ import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
-import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
-import notificationManager from '@/managers/Notification.init';
 import {
   CoverageCollection,
   CoverageJSON,
@@ -33,24 +31,25 @@ import {
 } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
-import { LoadingType, NotificationVariant } from '@/stores/session/types';
-import { createEmptyCsv } from '@/utils/csv';
 import { getIdStore } from '@/utils/getIdStore';
 import { normalizeBBox } from '@/utils/normalizeBBox';
 import { getParameterUnit } from '@/utils/parameters';
 import { buildCubeUrl } from '@/utils/url';
+import { CollectionType } from '@/utils/collection';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
 
 dayjs.extend(isSameOrBefore);
 
 type Props = {
-  location: Feature;
-  collection: ICollection;
   layer: Layer;
+  isLoading: boolean;
+  collection: ICollection;
+  location: Feature;
   linkLocation?: LocationType | null;
+  collectionType: CollectionType;
 };
 
 export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { location, layer, collection, linkLocation } = props;
 
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
@@ -59,17 +58,19 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [url, setUrl] = useState('');
   const [codeUrl, setCodeUrl] = useState('');
   const [_datasetName, setDatasetName] = useState<string>('');
-  const [parameters, setParameters] = useState<Parameter[]>([]);
 
+  const isMounted = useRef(true);
+  const { layer, location, collection, collectionType, linkLocation } = props;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
+    collectionType,
+  });
+  const [id, setId] = useState<string>(String(location.id));
+  const [parameters, setParameters] = useState<Parameter[]>([]);
   const [from, setFrom] = useState<string | null>(layer.from);
   const [to, setTo] = useState<string | null>(layer.to);
 
-  const [id, setId] = useState<string>(String(location.id));
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const controller = useRef<AbortController>(null);
-  const isMounted = useRef(true);
 
   useEffect(() => {
     const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
@@ -87,7 +88,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
     const newDataset = mainManager.getDatasource(layer.datasourceId);
 
-    if (newDataset) {
+    if (newDataset && !getIsDateRangeOverLimit()) {
       setDatasetName(newDataset.title ?? '');
       const paramObjects = Object.values(newDataset?.parameter_names ?? {});
 
@@ -118,81 +119,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
     }
   }, [location, layer]);
 
-  const getFileName = () => {
-    let name = `data-${location.id}-${layer.parameters.join('_')}`;
-
-    if (from && dayjs(from).isValid()) {
-      name += `-${dayjs(from).format('MM/DD/YYYY')}`;
-    }
-
-    if (to && dayjs(to).isValid()) {
-      name += `-${dayjs(to).format('MM/DD/YYYY')}`;
-    }
-
-    return `${name}.csv`;
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleCSVClick = async () => {
-    if (!location.bbox) {
-      return;
-    }
-
-    const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
-
-    const loadingInstance = loadingManager.add(
-      `Generating csv for location: ${location.id}`,
-      LoadingType.Data
-    );
-    try {
-      setIsLoading(true);
-
-      if (!controller.current) {
-        controller.current = new AbortController();
-      }
-
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        throw new Error(`Error: ${res.statusText.length > 0 ? res.statusText : 'Unknown error'}`);
-      }
-
-      let objectUrl = '';
-      if (res.status === 204) {
-        notificationManager.show(
-          `No data found for location: ${location.id} with the current parameter and date range selection.`,
-          NotificationVariant.Error,
-          10000
-        );
-        objectUrl = createEmptyCsv();
-      } else {
-        const blob = await res.blob();
-        objectUrl = URL.createObjectURL(blob);
-      }
-
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = getFileName();
-      document.body.appendChild(a);
-      a.click();
-
-      URL.revokeObjectURL(objectUrl);
-      a.remove();
-      notificationManager.show('CSV generated successfully.', NotificationVariant.Success, 10000);
-    } catch (err) {
-      if (((err as Error)?.message ?? '').length > 0) {
-        notificationManager.show((err as Error)?.message, NotificationVariant.Error, 10000);
-      } else if (typeof err === 'string') {
-        notificationManager.show(err, NotificationVariant.Error, 10000);
-      }
-    } finally {
-      loadingManager.remove(loadingInstance);
-      if (isMounted.current) {
-        setIsLoading(false);
-      }
-    }
-  };
-
+  
   const parseBBox = (bbox: unknown): BBox | undefined => {
     if (
       typeof bbox === 'object' &&
@@ -251,7 +178,6 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
 
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
 
   return (
     <Paper
@@ -345,7 +271,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
               ]}
               clearable
               disabled={isLoading}
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
             <DateInput
               label="To"
@@ -363,7 +289,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
               ]}
               clearable
               disabled={isLoading}
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
           </Group>
         </Group>
