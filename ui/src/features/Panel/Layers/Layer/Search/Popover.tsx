@@ -9,7 +9,7 @@ import Info from '@/assets/Info';
 import SearchIcon from '@/assets/Search';
 import Search from '@/features/Panel/Layers/Layer/Search';
 import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
-import mainManager from '@/managers/Main.init';
+import { collectionService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
@@ -29,7 +29,7 @@ export const SearchPopover: React.FC<Props> = (props) => {
       (layer) =>
         layer.loaded &&
         [CollectionType.EDR, CollectionType.Features].includes(
-          getCollectionType(mainManager.getDatasource(layer.datasourceId)!)
+          getCollectionType(collectionService.getDatasource(layer.datasourceId)!)
         )
     );
 

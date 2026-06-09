@@ -16,9 +16,9 @@ import { Mobile as MobileTools } from '@/features/Tools/Mobile';
 import TopBar from '@/features/TopBar';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import styles from '@/pages/pages.module.css';
+import { configService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
 
@@ -40,10 +40,13 @@ export const LayoutPage: React.FC = () => {
     const loadingInstance = loadingManager.add('Loading shared config', LoadingType.Share);
     try {
       controller.current = new AbortController();
-      const { success, response } = await mainManager.getConfig(shareId, controller.current.signal);
+      const { success, response } = await configService.getConfig(
+        shareId,
+        controller.current.signal
+      );
       if (success) {
         if (!(typeof response === 'string')) {
-          const loaded = await mainManager.loadConfig(response);
+          const loaded = await configService.loadConfig(response);
           if (loaded) {
             notificationManager.show(
               'Shared configuration loaded successfully.',

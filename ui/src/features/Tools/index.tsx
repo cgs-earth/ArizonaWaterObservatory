@@ -9,8 +9,8 @@ import { Draw } from '@/features/Tools/Draw';
 import { Geocoder } from '@/features/Tools/Geocoder';
 import Legend from '@/features/Tools/Legend';
 import { Screenshot } from '@/features/Tools/Screenshot';
+import SpatialSelection from '@/features/Tools/SpatialSelection';
 import { Warnings } from '@/features/Tools/Warnings';
-import SpatialSelection from './SpatialSelection';
 
 const Tools: React.FC = () => {
   return (

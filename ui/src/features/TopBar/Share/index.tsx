@@ -14,8 +14,8 @@ import { Variant } from '@/components/types';
 import styles from '@/features/TopBar/TopBar.module.css';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
 import { SHARE_VARIABLE } from '@/managers/types';
+import { configService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { LoadingType, Overlay } from '@/stores/session/types';
@@ -42,7 +42,7 @@ const Share: React.FC = () => {
     const loadingInstance = loadingManager.add('Generating share config', LoadingType.Share);
     try {
       controller.current = new AbortController();
-      const { success, response } = await mainManager.saveConfig(controller.current.signal);
+      const { success, response } = await configService.saveConfig(controller.current.signal);
       loadingManager.remove(loadingInstance);
 
       if (success) {

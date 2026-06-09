@@ -5,8 +5,8 @@
 
 import { Map, Point } from 'mapbox-gl';
 import { drawLayers } from '@/features/Map/consts';
-import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
+import { factoryService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';
 
@@ -19,14 +19,14 @@ export const isTopLayer = (
 ) => {
   // As layers can be added in any order, and reordered, perform manual check to ensure popup shows
   // for top layer in visual order
-  const { pointLayerId, fillLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+  const { pointLayerId, fillLayerId, lineLayerId } = factoryService.getLocationsLayerIds(
     collectionId,
     layerId
   );
 
   const allLayers = useMainStore.getState().layers.flatMap((layer) => {
     const layers = [];
-    const { pointLayerId, fillLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+    const { pointLayerId, fillLayerId, lineLayerId } = factoryService.getLocationsLayerIds(
       layer.datasourceId,
       layer.id
     );
