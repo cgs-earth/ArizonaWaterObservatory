@@ -22,9 +22,7 @@ import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
-
 import { useLayerValidation } from '@/hooks/useLayerValidation';
-
 import {
   CoverageCollection,
   CoverageJSON,
