@@ -50,6 +50,8 @@ type Props = {
 };
 
 export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
+  const { layer, location, collection, collectionType, linkLocation } = props;
+
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
   const [openedCharts, { toggle: toggleCharts, close: closeCharts }] = useDisclosure(false);
@@ -59,7 +61,6 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [_datasetName, setDatasetName] = useState<string>('');
 
   const isMounted = useRef(true);
-  const { layer, location, collection, collectionType, linkLocation } = props;
   const [isLoading, setIsLoading] = useState(false);
 
   const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
@@ -67,9 +68,9 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   });
   const [id, setId] = useState<string>(String(location.id));
   const [parameters, setParameters] = useState<Parameter[]>([]);
-  const [from, setFrom] = useState<string | null>(layer.from);
-  const [to, setTo] = useState<string | null>(layer.to);
 
+  const [from, setFrom] = useState<Layer['from']>(layer.from);
+  const [to, setTo] = useState<Layer['to']>(layer.to);
   useEffect(() => {
     const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
 

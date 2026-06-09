@@ -72,8 +72,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
 
-  const [_datasetName, setDatasetName] = useState<string>('');
-
   const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
     collectionType,
   });
@@ -90,28 +88,24 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   useEffect(() => {
     const collection = mainManager.getDatasource(layer.datasourceId);
 
-    if (collection) {
-      const newDataset = mainManager.getDatasource(layer.datasourceId);
+    if (collection && !getIsDateRangeOverLimit()) {
+      const paramObjects = Object.values(collection?.parameter_names ?? {});
 
-      if (newDataset && !getIsDateRangeOverLimit()) {
-        setDatasetName(newDataset.title ?? '');
-        const paramObjects = Object.values(newDataset?.parameter_names ?? {});
+      const parameters = paramObjects
+        .filter((object) => object.type === 'Parameter' && layer.parameters.includes(object.id))
+        .map((object) => ({
+          id: object.id,
+          name: object.observedProperty.label.en,
+          unit: getParameterUnit(object),
+        }));
 
-        const parameters = paramObjects
-          .filter((object) => object.type === 'Parameter' && layer.parameters.includes(object.id))
-          .map((object) => ({
-            id: object.id,
-            name: object.observedProperty.label.en,
-            unit: getParameterUnit(object),
-          }));
-
-        if (parameters.length === 0) {
-          closeChart();
-        }
-
-        setParameters(parameters);
+      if (parameters.length === 0) {
+        closeChart();
       }
+
+      setParameters(parameters);
     }
+
     if (StringIdentifierCollections.includes(layer.datasourceId)) {
       const id = getIdStore(location);
       if (id) {
