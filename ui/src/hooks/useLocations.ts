@@ -14,7 +14,7 @@ import { Layer, Location } from '@/stores/main/types';
 import { LoadingType } from '@/stores/session/types';
 import { getIdStore } from '@/utils/getIdStore';
 
-export const useLocations = (layer?: Layer ) => {
+export const useLocations = (layer?: Layer | Layer[]) => {
   const locations = useMainStore((state) => state.locations);
 
   const [selectedLocations, setSelectedLocations] = useState<Feature[]>([]);
@@ -33,7 +33,7 @@ export const useLocations = (layer?: Layer ) => {
   };
 
   // Get all non-selected locations, rendered or not on map
-  const getOtherLocations = async () => {
+  const getOtherLocations = async (layer:Layer) => {
     if (!layer) {
      return { selectedLocations, otherLocations };
     }
@@ -72,6 +72,47 @@ export const useLocations = (layer?: Layer ) => {
     }
   };
 
+  const getAllOtherLocations = async (layers:Layer[]) => {
+    if (!layer) {
+     return { selectedLocations, otherLocations };
+    }
+    const loadingInstance = loadingManager.add(
+      `Fetching locations`,
+      LoadingType.Locations
+    );
+    try {
+      controller.current = new AbortController();
+      
+        for (const layer of layers) {
+        const allLocations = await mainManager.getFeatures(layer, controller.current.signal);
+      const layerLocations = locations.filter((location) => location.layerId === layer.id);
+
+      const filterFunction = getFilterFunction(layer.datasourceId);
+
+      const selectedLocations = allLocations.features.filter((feature) =>
+        layerLocations.some((location) => filterFunction(location, feature))
+      );
+
+      const otherLocations = allLocations.features.filter(
+        (feature) => !layerLocations.some((location) => filterFunction(location, feature))
+      );
+      }
+
+      
+
+      if (isMounted.current) {
+        setSelectedLocations(selectedLocations);
+        setOtherLocations(otherLocations);
+      }
+    } catch (error) {
+      if ((error as Error)?.name !== 'AbortError') {
+        console.error(error);
+      }
+    } finally {
+      loadingManager.remove(loadingInstance);
+    }
+  };
+
   useEffect(() => {
     if (!layer ||!layer.loaded ) {
       return;
@@ -92,9 +133,3 @@ export const useLocations = (layer?: Layer ) => {
 
   return { selectedLocations, otherLocations, setSelectedLocations,setOtherLocations };
 };
-
-// USGS
-// Discharge in cubic feet/s
-
-// ADWR Groundwater
-// Depth to Water
