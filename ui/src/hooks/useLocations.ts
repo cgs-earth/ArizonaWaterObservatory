@@ -82,20 +82,22 @@ export const useLocations = (layer?: Layer | Layer[]) => {
     );
     try {
       controller.current = new AbortController();
-      
+      const selectedLocations = Feature<Geometry, GeoJsonProperties>[];
+      const selectedLocations = Feature<Geometry, GeoJsonProperties>[];
         for (const layer of layers) {
         const allLocations = await mainManager.getFeatures(layer, controller.current.signal);
       const layerLocations = locations.filter((location) => location.layerId === layer.id);
 
       const filterFunction = getFilterFunction(layer.datasourceId);
 
-      const selectedLocations = allLocations.features.filter((feature) =>
+      const tempSelectedLocations = allLocations.features.filter((feature) =>
         layerLocations.some((location) => filterFunction(location, feature))
       );
 
-      const otherLocations = allLocations.features.filter(
+      const tempOtherLocations = allLocations.features.filter(
         (feature) => !layerLocations.some((location) => filterFunction(location, feature))
       );
+      selectedLocations.concat
       }
 
       
