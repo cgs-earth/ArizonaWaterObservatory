@@ -11,33 +11,44 @@ import { getDefaultGeoJSON } from '@/consts/geojson';
 import { SourceId } from '@/features/Map/sources';
 import { ARIZONA_ID, LOWER_COLORADO_ID, UPPER_COLORADO_ID } from '@/hooks/useSpatialSelection';
 import { getNextLink } from '@/managers/main/Main.utils';
-import notificationManager from '@/managers/Notification.init';
+import NotificationManager from '@/managers/Notification.manager';
 import { SourceOptions } from '@/managers/types';
+import { CollectionService } from '@/services/collection.service';
 import { ICollection } from '@/services/edr.service';
-import {
-  collectionService,
-  factoryService,
-  fetchService,
-  locationService,
-  mapService,
-  spatialService,
-  validationService,
-} from '@/services/init';
+import { FactoryService } from '@/services/factory.service';
+import { FetchService } from '@/services/fetch.service';
+import { LocationService } from '@/services/location.service';
+import { MapService } from '@/services/map.service';
+import { SpatialService } from '@/services/spatial.service';
+import { ValidationService } from '@/services/validation.service';
 import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
 import { Layer, MainState, PredefinedBoundary, TGeometryTypes } from '@/stores/main/types';
 import { NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { joinSentence } from '@/utils/joinSentence';
 
+type DataServiceDependencies = {
+  collectionService: CollectionService;
+  factoryService: FactoryService;
+  fetchService: FetchService;
+  locationService: LocationService;
+  mapService: MapService;
+  notificationManager: NotificationManager;
+  spatialService: SpatialService;
+  validationService: ValidationService;
+};
+
 export class DataService {
   private store: UseBoundStore<StoreApi<MainState>>;
+  private deps: DataServiceDependencies;
 
-  constructor(store: UseBoundStore<StoreApi<MainState>>) {
+  constructor(store: UseBoundStore<StoreApi<MainState>>, deps: DataServiceDependencies) {
     this.store = store;
+    this.deps = deps;
   }
 
   public async addData(collectionId: ICollection['id'], layer: Layer, options?: SourceOptions) {
-    const datasource = collectionService.getDatasource(collectionId);
+    const datasource = this.deps.collectionService.getDatasource(collectionId);
 
     if (datasource) {
       const collectionType = getCollectionType(datasource);
@@ -59,7 +70,7 @@ export class DataService {
     parameterCount: number,
     collectionId: ICollection['id']
   ): string {
-    const datasource = collectionService.getDatasource(collectionId);
+    const datasource = this.deps.collectionService.getDatasource(collectionId);
     if (!datasource) {
       return `No data found for layer: ${name}.`;
     }
@@ -117,24 +128,24 @@ export class DataService {
     layer: Layer,
     options?: SourceOptions
   ): Promise<string> {
-    const sourceId = factoryService.getSourceId(collectionId, layer.id);
+    const sourceId = this.deps.factoryService.getSourceId(collectionId, layer.id);
 
-    const source = mapService.getMapSource<GeoJSONSource>(sourceId);
+    const source = this.deps.mapService.getMapSource<GeoJSONSource>(sourceId);
 
     if (options?.noFetch || !source) {
       return sourceId;
     }
 
-    const bbox = spatialService.getBBox(collectionId);
+    const bbox = this.deps.spatialService.getBBox(collectionId);
     const from = options?.from ?? layer.from;
     const to = options?.to ?? layer.to;
     const parameters = options?.parameterNames ?? layer.parameters;
 
     const geometryTypes = new Set<TGeometryTypes>();
 
-    validationService.checkDateRestrictions(collectionId, from, to);
+    this.deps.validationService.checkDateRestrictions(collectionId, from, to);
 
-    validationService.checkParameterRestrictions(collectionId, parameters);
+    this.deps.validationService.checkParameterRestrictions(collectionId, parameters);
 
     let aggregate = getDefaultGeoJSON();
     let next: string | undefined;
@@ -144,7 +155,7 @@ export class DataService {
         break;
       }
 
-      const page = await fetchService.fetchData(
+      const page = await this.deps.fetchService.fetchData(
         collectionId,
         bbox,
         from,
@@ -165,9 +176,9 @@ export class DataService {
         isSpatialSelectionPredefined(spatialSelection);
 
       if (shouldUseSpatialSelection) {
-        const spatialSelectionCollection = mapService.getMapFeatures<Polygon | MultiPolygon>(
-          SourceId.SpatialSelection
-        );
+        const spatialSelectionCollection = this.deps.mapService.getMapFeatures<
+          Polygon | MultiPolygon
+        >(SourceId.SpatialSelection);
 
         if (spatialSelectionCollection) {
           const allowedIds =
@@ -195,8 +206,8 @@ export class DataService {
         }
       }
 
-      let filtered = spatialService.filterLocations(collectionId, page, filter);
-      locationService.clearInvalidLocations(layer.id, collectionId, filtered);
+      let filtered = this.deps.spatialService.filterLocations(collectionId, page, filter);
+      this.deps.locationService.clearInvalidLocations(layer.id, collectionId, filtered);
       if (Array.isArray(filtered.features)) {
         filtered.features.forEach((feature) => {
           geometryTypes.add(feature.geometry.type);
@@ -212,7 +223,7 @@ export class DataService {
     if (aggregate.features.length === 0) {
       const message = this.getNoDataMessage(layer.name, parameters.length, collectionId);
 
-      notificationManager.show(message, NotificationVariant.Info, 10000);
+      this.deps.notificationManager.show(message, NotificationVariant.Info, 10000);
     }
 
     (aggregate as any) = undefined;

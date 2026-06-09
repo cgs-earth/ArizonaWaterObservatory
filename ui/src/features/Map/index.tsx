@@ -16,9 +16,15 @@ import { sourceConfigs, SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent, getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
 import { useSpatialSelection } from '@/hooks/useSpatialSelection';
-import mainManager from '@/managers/main/Main.init';
 import notificationManager from '@/managers/Notification.init';
-import { configService, factoryService, locationService, mapService } from '@/services/init';
+import {
+  configService,
+  factoryService,
+  locationService,
+  mainManager,
+  mapService,
+  popupService,
+} from '@/services/init';
 import useMainStore from '@/stores/main';
 import { Location } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
@@ -117,7 +123,7 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
-    mapService.setHoverPopup(hoverPopup);
+    popupService.setHoverPopup(hoverPopup);
   }, [hoverPopup]);
 
   useEffect(() => {
@@ -125,7 +131,7 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
-    mapService.setPersistentPopup(persistentPopup);
+    popupService.setPersistentPopup(persistentPopup);
   }, [persistentPopup]);
 
   useEffect(() => {
@@ -133,7 +139,7 @@ const MainMap: React.FC<Props> = (props) => {
       return;
     }
 
-    mapService.setContainer(container);
+    popupService.setContainer(container);
   }, [container]);
 
   useEffect(() => {

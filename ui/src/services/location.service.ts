@@ -7,18 +7,26 @@ import { FeatureCollection, Geometry } from 'geojson';
 import { GeoJSONFeature } from 'mapbox-gl';
 import { StoreApi, UseBoundStore } from 'zustand';
 import { StringIdentifierCollections } from '@/consts/collections';
+import { CollectionService } from '@/services/collection.service';
 import { ICollection } from '@/services/edr.service';
-import { collectionService, mapService } from '@/services/init';
+import { PopupService } from '@/services/popup.service';
 import { Layer, MainState } from '@/stores/main/types';
 import { isEdrGrid } from '@/utils/collection';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
 
+type LocationServiceDependencies = {
+  collectionService: CollectionService;
+  popupService: PopupService;
+};
+
 export class LocationService {
   private store: UseBoundStore<StoreApi<MainState>>;
+  private deps: LocationServiceDependencies;
 
-  constructor(store: UseBoundStore<StoreApi<MainState>>) {
+  constructor(store: UseBoundStore<StoreApi<MainState>>, deps: LocationServiceDependencies) {
     this.store = store;
+    this.deps = deps;
   }
 
   public clearInvalidLocations = (
@@ -26,7 +34,7 @@ export class LocationService {
     collectionId: ICollection['id'],
     featureCollection: FeatureCollection<Geometry>
   ) => {
-    const datasource = collectionService.getDatasource(collectionId);
+    const datasource = this.deps.collectionService.getDatasource(collectionId);
 
     if (datasource && isEdrGrid(datasource)) {
       this.store.getState().setLocations([]);
@@ -42,7 +50,7 @@ export class LocationService {
         return;
       }
 
-      mapService.clearStalePopup((layerId, locationId) =>
+      this.deps.popupService.clearStalePopup((layerId, locationId) =>
         invalidLocations.some(
           (location) => location.layerId === layerId && location.id === locationId
         )
@@ -59,7 +67,7 @@ export class LocationService {
     // Use a Map to maintain uniqueness by id while preserving the final display label.
     const uniques = new Map<string, string>();
 
-    const { datasourceId, label } = collectionService.getLayer(layerId) ?? {
+    const { datasourceId, label } = this.deps.collectionService.getLayer(layerId) ?? {
       datasourceId: '',
       label: null as string | null,
     };

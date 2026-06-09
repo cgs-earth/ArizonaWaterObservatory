@@ -11,22 +11,19 @@ import {
   Map as MapboxMap,
   MapMouseEvent,
   MapTouchEvent,
-  Popup,
   RasterTileSource,
   Source,
 } from 'mapbox-gl';
 import { StoreApi, UseBoundStore } from 'zustand';
 import { getDefaultGeoJSON } from '@/consts/geojson';
-import {
-  DEFAULT_BBOX,
-  drawLayers,
-  LAYER_IDENTIFIER,
-  LOCATION_IDENTIFIER,
-} from '@/features/Map/consts';
+import { DEFAULT_BBOX, drawLayers } from '@/features/Map/consts';
 import { drawnFeatureContainsExtent } from '@/features/Map/utils';
+import { CollectionService } from '@/services/collection.service';
 import { ICollection } from '@/services/edr.service';
-import { collectionService, factoryService, locationService } from '@/services/init';
-import { Layer, Location, MainState } from '@/stores/main/types';
+import { FactoryService } from '@/services/factory.service';
+import { LocationService } from '@/services/location.service';
+import { PopupService } from '@/services/popup.service';
+import { Layer, MainState } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { isTopLayer } from '@/utils/isTopLayer';
 import {
@@ -36,16 +33,22 @@ import {
   getRasterLayerSpecification,
 } from '@/utils/layerDefinitions';
 
+type MapServiceDependencies = {
+  collectionService: CollectionService;
+  factoryService: FactoryService;
+  locationService: LocationService;
+  popupService: PopupService;
+};
+
 export class MapService {
   private store: UseBoundStore<StoreApi<MainState>>;
+  private deps: MapServiceDependencies;
   private map: MapboxMap | null = null;
-  private hoverPopup: Popup | null = null;
-  private persistentPopup: Popup | null = null;
-  private container: HTMLDivElement | null = null;
   private draw: MapboxDraw | null = null;
 
-  constructor(store: UseBoundStore<StoreApi<MainState>>) {
+  constructor(store: UseBoundStore<StoreApi<MainState>>, deps: MapServiceDependencies) {
     this.store = store;
+    this.deps = deps;
   }
 
   /**
@@ -60,38 +63,6 @@ export class MapService {
   }
 
   /**
-   * Setter function to set hoverPopup private variable after map initialization
-   *
-   * @function
-   */
-  public setHoverPopup(popup: Popup): void {
-    if (!this.hoverPopup) {
-      this.hoverPopup = popup;
-    }
-  }
-  /**
-   * Setter function to set container private variable after map initialization
-   *
-   * @function
-   */
-  public setPersistentPopup(popup: Popup): void {
-    if (!this.persistentPopup) {
-      this.persistentPopup = popup;
-    }
-  }
-
-  /**
-   * Setter function to set container private variable after map initialization
-   *
-   * @function
-   */
-  public setContainer(container: HTMLDivElement): void {
-    if (!this.container) {
-      this.container = container;
-    }
-  }
-
-  /**
    * Setter function to set draw private variable after map initialization
    *
    * @function
@@ -102,22 +73,12 @@ export class MapService {
     }
   }
 
-  public clearStalePopup(evaluate: (layerId: Layer['id'], locationId: Location['id']) => boolean) {
-    if (this.container && this.persistentPopup) {
-      const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
-      const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
-      if (locationId && layerId && evaluate(layerId, locationId)) {
-        this.persistentPopup.remove();
-      }
-    }
-  }
-
   /**
    * Adds (or updates) a GeoJSON source and pages through all results,
    * streaming each page into the source as it arrives.
    */
   private addGeoJsonSource(collectionId: ICollection['id'], layerId: Layer['id']): string {
-    const sourceId = factoryService.getSourceId(collectionId, layerId);
+    const sourceId = this.deps.factoryService.getSourceId(collectionId, layerId);
 
     if (!this.map) {
       return sourceId;
@@ -138,7 +99,7 @@ export class MapService {
     const link = collection.links.find(
       (link) => link.rel.includes('map') && link.type === 'image/png'
     );
-    const sourceId = factoryService.getSourceId(collection.id, layerId);
+    const sourceId = this.deps.factoryService.getSourceId(collection.id, layerId);
     if (link && this.map) {
       const source = this.map.getSource(sourceId) as RasterTileSource;
 
@@ -157,8 +118,8 @@ export class MapService {
   }
 
   public addSource(collectionId: ICollection['id'], layerId: Layer['id']) {
-    const datasource = collectionService.getDatasource(collectionId);
-    const sourceId = factoryService.getSourceId(collectionId, layerId);
+    const datasource = this.deps.collectionService.getDatasource(collectionId);
+    const sourceId = this.deps.factoryService.getSourceId(collectionId, layerId);
 
     if (datasource) {
       const collectionType = getCollectionType(datasource);
@@ -178,7 +139,10 @@ export class MapService {
   }
 
   private addRasterLayer(layer: Layer, sourceId: string): void {
-    const { rasterLayerId } = factoryService.getLocationsLayerIds(layer.datasourceId, layer.id);
+    const { rasterLayerId } = this.deps.factoryService.getLocationsLayerIds(
+      layer.datasourceId,
+      layer.id
+    );
 
     if (this.map && !this.map.getLayer(rasterLayerId)) {
       this.map.addLayer(getRasterLayerSpecification(rasterLayerId, sourceId));
@@ -221,10 +185,10 @@ export class MapService {
         });
         if (features.length > 0) {
           // Hack, use the feature id to track this location, fetch id store in consuming features
-          const uniqueFeatures = locationService.getUniqueIds(features, collectionId);
+          const uniqueFeatures = this.deps.locationService.getUniqueIds(features, collectionId);
 
           uniqueFeatures.forEach(({ id }) => {
-            if (collectionService.hasLocation(id)) {
+            if (this.deps.collectionService.hasLocation(id)) {
               this.store.getState().removeLocation({
                 id,
                 layerId,
@@ -273,9 +237,9 @@ export class MapService {
 
       this.map!.getCanvas().style.cursor = 'pointer';
       const { features } = e;
-      const layer = collectionService.getLayer(layerId);
-      if (features && features.length > 0 && layer) {
-        const uniqueFeatures = locationService
+      const layer = this.deps.collectionService.getLayer(layerId);
+      if (features && features.length > 0 && layer && this.map) {
+        const uniqueFeatures = this.deps.locationService
           .getUniqueIds(features, layerId)
           .map(({ label }) => label);
         const html = `
@@ -288,7 +252,7 @@ export class MapService {
               </div>
             </span>
           `;
-        this.hoverPopup!.setLngLat(e.lngLat).setHTML(html).addTo(this.map!);
+        this.deps.popupService.showHoverPopup(e.lngLat, html);
       }
     };
   }
@@ -300,17 +264,15 @@ export class MapService {
   private addStandardLayer(layer: Layer, sourceId: string, collectionType: CollectionType): void {
     const geographyFilter = this.store.getState().geographyFilter;
 
-    const { pointLayerId, fillLayerId, lineLayerId } = factoryService.getLocationsLayerIds(
-      layer.datasourceId,
-      layer.id
-    );
+    const { pointLayerId, fillLayerId, lineLayerId } =
+      this.deps.factoryService.getLocationsLayerIds(layer.datasourceId, layer.id);
     if (this.map) {
       if (
         !this.map.getLayer(pointLayerId) &&
         !this.map.getLayer(lineLayerId) &&
         !this.map.getLayer(pointLayerId)
       ) {
-        const { upperLabel, lowerLabel } = factoryService.getLabels(collectionType);
+        const { upperLabel, lowerLabel } = this.deps.factoryService.getLabels(collectionType);
 
         this.map.addLayer(getFillLayerDefinition(fillLayerId, sourceId, layer.color));
         this.map.addLayer(getLineLayerDefinition(lineLayerId, sourceId, layer.color));
@@ -366,11 +328,13 @@ export class MapService {
         }
         this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
           this.map!.getCanvas().style.cursor = '';
-          this.hoverPopup!.remove();
+          this.deps.popupService.removeHoverPopup();
         });
       }
       if (geographyFilter) {
-        const geoFilterLayerId = factoryService.getFilterLayerId(geographyFilter.collectionId);
+        const geoFilterLayerId = this.deps.factoryService.getFilterLayerId(
+          geographyFilter.collectionId
+        );
         [fillLayerId, lineLayerId, pointLayerId].forEach((layerId) =>
           this.map!.moveLayer(geoFilterLayerId, layerId)
         );
@@ -391,7 +355,7 @@ export class MapService {
 
     for (const layer of layers) {
       const layerIds = Object.values(
-        factoryService.getLocationsLayerIds(layer.datasourceId, layer.id)
+        this.deps.factoryService.getLocationsLayerIds(layer.datasourceId, layer.id)
       );
       for (const layerId of layerIds) {
         if (this.map.getLayer(layerId)) {
@@ -399,13 +363,9 @@ export class MapService {
         }
       }
     }
-    if (this.container && this.persistentPopup) {
-      const locationId = this.container.getAttribute(LOCATION_IDENTIFIER);
-      const layerId = this.container.getAttribute(LAYER_IDENTIFIER);
-      if (locationId && layerId) {
-        this.persistentPopup.remove();
-      }
-    }
+
+    // Force clear popup
+    this.deps.popupService.clearStalePopup(() => true);
   }
 
   public clearSources(): void {
@@ -419,7 +379,7 @@ export class MapService {
     for (const collection of originalCollections) {
       const collectionLayers = layers.filter((layer) => layer.datasourceId === collection.id);
       for (const layer of collectionLayers) {
-        const sourceId = factoryService.getSourceId(collection.id, layer.id);
+        const sourceId = this.deps.factoryService.getSourceId(collection.id, layer.id);
         if (this.map.getSource(sourceId)) {
           this.map.removeSource(sourceId);
         }
@@ -452,7 +412,7 @@ export class MapService {
   }
 
   public addLayer(layer: Layer, sourceId: string): void {
-    const datasource = collectionService.getDatasource(layer.datasourceId);
+    const datasource = this.deps.collectionService.getDatasource(layer.datasourceId);
 
     if (datasource) {
       const collectionType = getCollectionType(datasource);

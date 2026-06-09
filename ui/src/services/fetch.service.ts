@@ -11,13 +11,23 @@ import {
 } from '@/consts/collections';
 import { getDefaultGeoJSON } from '@/consts/geojson';
 import { ExtendedFeatureCollection } from '@/managers/types';
+import { CollectionService } from '@/services/collection.service';
 import { CoverageGeoService } from '@/services/coverageJSON/coverageGeo.service';
-import { ICollection } from '@/services/edr.service';
-import awoService from '@/services/init/awo.init';
+import { EDRService, ICollection } from '@/services/edr.service';
 import { CollectionType, getCollectionType } from '@/utils/collection';
-import { collectionService } from './init';
+
+type FetchServiceDependencies = {
+  awoService: EDRService;
+  collectionService: CollectionService;
+};
 
 export class FetchService {
+  private deps: FetchServiceDependencies;
+
+  constructor(deps: FetchServiceDependencies) {
+    this.deps = deps;
+  }
+
   public async fetchData<
     T extends Geometry = Geometry,
     V extends GeoJsonProperties = GeoJsonProperties,
@@ -30,7 +40,7 @@ export class FetchService {
     signal?: AbortSignal,
     next?: string
   ): Promise<FeatureCollection<T, V>> {
-    const collection = collectionService.getDatasource(collectionId);
+    const collection = this.deps.collectionService.getDatasource(collectionId);
 
     if (!collection) {
       throw new Error('Datasource not found');
@@ -78,7 +88,7 @@ export class FetchService {
     signal?: AbortSignal,
     next?: string
   ): Promise<FeatureCollection<T, V>> {
-    const data = await awoService.getLocations<FeatureCollection<T, V>>(
+    const data = await this.deps.awoService.getLocations<FeatureCollection<T, V>>(
       collectionId,
       {
         signal,
@@ -138,7 +148,7 @@ export class FetchService {
     signal?: AbortSignal,
     next?: string
   ): Promise<ExtendedFeatureCollection<T, V>> {
-    const data = await awoService.getItems<ExtendedFeatureCollection<T, V>>(
+    const data = await this.deps.awoService.getItems<ExtendedFeatureCollection<T, V>>(
       collectionId,
       {
         signal,

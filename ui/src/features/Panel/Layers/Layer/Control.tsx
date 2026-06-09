@@ -7,7 +7,7 @@ import { ActionIcon, Stack, Tooltip } from '@mantine/core';
 import CircleDown from '@/assets/CircleDown';
 import CircleUp from '@/assets/CircleUp';
 import styles from '@/features/Panel/Panel.module.css';
-import mainManager from '@/managers/main/Main.init';
+import { mainManager } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';
 

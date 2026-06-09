@@ -10,7 +10,7 @@ import { Variant } from '@/components/types';
 import { getBBox } from '@/consts/bbox';
 import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
-import mainManager from '@/managers/main/Main.init';
+import { mainManager } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
 

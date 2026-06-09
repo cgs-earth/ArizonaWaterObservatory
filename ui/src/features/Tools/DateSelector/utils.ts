@@ -5,9 +5,8 @@
 
 import { Feature } from 'geojson';
 import { GeoJSONFeature, Map } from 'mapbox-gl';
-import mainManager from '@/managers/main/Main.init';
 import { DATES_PROPERTY } from '@/services/coverageJSON/consts';
-import { factoryService } from '@/services/init';
+import { factoryService, mainManager } from '@/services/init';
 import { Layer } from '@/stores/main/types';
 
 const getDatesFromProperties = (feature: GeoJSONFeature | Feature): string[] => {

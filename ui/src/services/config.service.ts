@@ -6,18 +6,27 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Map as MapboxMap } from 'mapbox-gl';
 import { StoreApi, UseBoundStore } from 'zustand';
-import mainManager from '@/managers/main/Main.init';
+import MainManager from '@/managers/main/Main.manager';
 import { Config, GetConfigResponse, PostConfigResponse } from '@/managers/types';
-import { factoryService, mapService } from '@/services/init';
+import { FactoryService } from '@/services/factory.service';
+import { MapService } from '@/services/map.service';
 import { MainState } from '@/stores/main/types';
+
+type ConfigServiceDependencies = {
+  factoryService: FactoryService;
+  mainManager: MainManager;
+  mapService: MapService;
+};
 
 export class ConfigService {
   private store: UseBoundStore<StoreApi<MainState>>;
+  private deps: ConfigServiceDependencies;
   private map: MapboxMap | null = null;
   private draw: MapboxDraw | null = null;
 
-  constructor(store: UseBoundStore<StoreApi<MainState>>) {
+  constructor(store: UseBoundStore<StoreApi<MainState>>, deps: ConfigServiceDependencies) {
     this.store = store;
+    this.deps = deps;
   }
 
   /**
@@ -266,13 +275,13 @@ export class ConfigService {
           const dataFetches: Promise<void>[] = [];
 
           for (const layer of config.layers) {
-            const sourceId = factoryService.getSourceId(layer.datasourceId, layer.id);
-            mapService.addSource(layer.datasourceId, layer.id);
-            mapService.addLayer(layer, sourceId);
+            const sourceId = this.deps.factoryService.getSourceId(layer.datasourceId, layer.id);
+            this.deps.mapService.addSource(layer.datasourceId, layer.id);
+            this.deps.mapService.addLayer(layer, sourceId);
 
             // Use applySpatialFilter, this will factor in drawn shapes but fallback
             // to addData if none exists
-            dataFetches.push(mainManager.applySpatialFilter(config.drawnShapes));
+            dataFetches.push(this.deps.mainManager.applySpatialFilter(config.drawnShapes));
           }
 
           // Fetch concurrently
@@ -282,7 +291,7 @@ export class ConfigService {
           store.setLocations(config.locations);
 
           // Assert layer order
-          mainManager.reorderLayers();
+          this.deps.mainManager.reorderLayers();
 
           clearTimeout(timer);
           resolve();

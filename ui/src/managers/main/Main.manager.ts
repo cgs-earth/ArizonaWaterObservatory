@@ -18,18 +18,17 @@ import { LayerId } from '@/features/Map/config';
 import { DEFAULT_FILL_OPACITY, DEFAULT_RASTER_OPACITY, drawLayers } from '@/features/Map/consts';
 import { SourceId } from '@/features/Map/sources';
 import { stringifyBBox } from '@/managers/main/Main.utils';
-import notificationManager from '@/managers/Notification.init';
+import NotificationManager from '@/managers/Notification.manager';
 import { ApplySpatialFilterOptions, StyleOptions } from '@/managers/types';
+import { CollectionService } from '@/services/collection.service';
+import { DataService } from '@/services/data.service';
 import { ICollection, ParameterGroup } from '@/services/edr.service';
-import {
-  collectionService,
-  dataService,
-  factoryService,
-  fetchService,
-  mapService,
-  spatialService,
-} from '@/services/init';
+import { FactoryService } from '@/services/factory.service';
+import { FetchService } from '@/services/fetch.service';
 import awoService from '@/services/init/awo.init';
+import { MapService } from '@/services/map.service';
+import { PopupService } from '@/services/popup.service';
+import { SpatialService } from '@/services/spatial.service';
 import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
 import { Layer, MainState, PaletteDefinition, ParameterGroupMembers } from '@/stores/main/types';
 import { NotificationVariant } from '@/stores/session/types';
@@ -38,6 +37,17 @@ import { createDynamicStepExpression, isSamePalette } from '@/utils/colors';
 import { ColorBrewerIndex, isValidColorBrewerIndex } from '@/utils/colors/types';
 import { isSameArray } from '@/utils/compareArrays';
 import { getProvider } from '@/utils/provider';
+
+type MainManagerDependencies = {
+  collectionService: CollectionService;
+  dataService: DataService;
+  factoryService: FactoryService;
+  fetchService: FetchService;
+  mapService: MapService;
+  notificationManager: NotificationManager;
+  popupService: PopupService;
+  spatialService: SpatialService;
+};
 
 /**
  * MainManager is responsible for managing the core logic of the application. It handles functionality
@@ -52,10 +62,12 @@ import { getProvider } from '@/utils/provider';
  */
 class MainManager {
   private store: UseBoundStore<StoreApi<MainState>>;
+  private deps: MainManagerDependencies;
   private map: MapboxMap | null = null;
 
-  constructor(store: UseBoundStore<StoreApi<MainState>>) {
+  constructor(store: UseBoundStore<StoreApi<MainState>>, deps: MainManagerDependencies) {
     this.store = store;
+    this.deps = deps;
   }
 
   /**
@@ -75,13 +87,13 @@ class MainManager {
     parameters: Layer['parameters'],
     signal?: AbortSignal
   ) {
-    const datasource = collectionService.getDatasource(datasourceId);
+    const datasource = this.deps.collectionService.getDatasource(datasourceId);
 
     if (!datasource) {
       throw new Error('Datasource not found');
     }
 
-    const currentDatasourceCount = collectionService.getDatasourceCount(datasource.id);
+    const currentDatasourceCount = this.deps.collectionService.getDatasourceCount(datasource.id);
     const layers = this.store.getState().layers;
 
     if (layers.length === 10) {
@@ -99,18 +111,18 @@ class MainManager {
       name = `${provider} ${title} ${currentDatasourceCount + next++}`;
     }
 
-    const to = factoryService.getTo(datasource);
-    const from = factoryService.getFrom(datasourceId, collectionType, to);
+    const to = this.deps.factoryService.getTo(datasource);
+    const from = this.deps.factoryService.getFrom(datasourceId, collectionType, to);
 
-    const currentBBox = stringifyBBox(spatialService.getBBox(datasourceId));
+    const currentBBox = stringifyBBox(this.deps.spatialService.getBBox(datasourceId));
 
     const label = CollectionDefaultLabels[datasourceId] ?? null;
 
     const layer: Layer = {
-      id: factoryService.createUUID(),
+      id: this.deps.factoryService.createUUID(),
       datasourceId: datasource.id,
       name,
-      color: factoryService.createHexColor(),
+      color: this.deps.factoryService.createHexColor(),
       parameters,
       from: from.format('YYYY-MM-DD'),
       to: to.format('YYYY-MM-DD'),
@@ -129,11 +141,11 @@ class MainManager {
     this.store.getState().addLayer(layer);
 
     const drawnShapes = this.store.getState().drawnShapes;
-    const sourceId = factoryService.getSourceId(datasource.id, layer.id);
+    const sourceId = this.deps.factoryService.getSourceId(datasource.id, layer.id);
 
-    mapService.addSource(datasource.id, layer.id);
-    mapService.addLayer(layer, sourceId);
-    await dataService.addData(datasource.id, layer, {
+    this.deps.mapService.addSource(datasource.id, layer.id);
+    this.deps.mapService.addLayer(layer, sourceId);
+    await this.deps.dataService.addData(datasource.id, layer, {
       filterFeatures: drawnShapes,
       signal,
       noFetch: collectionType === CollectionType.EDRGrid && layer.parameters.length === 0,
@@ -178,7 +190,7 @@ class MainManager {
         newCount = ((expression.length - 3) / 2) as ColorBrewerIndex;
 
         if (isValidColorBrewerIndex(newCount) && newCount !== actualCount) {
-          notificationManager.show(
+          this.deps.notificationManager.show(
             `Duplicate thresholds detected. Reducing to ${newCount} threshold(s)`,
             NotificationVariant.Info,
             5000
@@ -195,10 +207,8 @@ class MainManager {
       });
     }
 
-    const { pointLayerId, fillLayerId, lineLayerId } = factoryService.getLocationsLayerIds(
-      layer.datasourceId,
-      layer.id
-    );
+    const { pointLayerId, fillLayerId, lineLayerId } =
+      this.deps.factoryService.getLocationsLayerIds(layer.datasourceId, layer.id);
 
     if (this.map.getLayer(pointLayerId)) {
       this.map.setPaintProperty(pointLayerId, 'circle-color', expression);
@@ -226,7 +236,7 @@ class MainManager {
 
     if (this.map) {
       const layerIds = Object.values(
-        factoryService.getLocationsLayerIds(layer.datasourceId, layer.id)
+        this.deps.factoryService.getLocationsLayerIds(layer.datasourceId, layer.id)
       );
       for (const layerId of layerIds) {
         if (this.map.getLayer(layerId)) {
@@ -234,7 +244,7 @@ class MainManager {
         }
       }
 
-      mapService.clearStalePopup((layerId) => layerId === layer.id);
+      this.deps.popupService.clearStalePopup((layerId) => layerId === layer.id);
     }
 
     this.store.getState().setCharts(charts);
@@ -259,7 +269,7 @@ class MainManager {
 
     for (const layer of layers) {
       const { rasterLayerId, fillLayerId, lineLayerId, pointLayerId } =
-        factoryService.getLocationsLayerIds(layer.datasourceId, layer.id);
+        this.deps.factoryService.getLocationsLayerIds(layer.datasourceId, layer.id);
 
       // Intentional ordering of sub-layers
       for (const layerId of [pointLayerId, lineLayerId, fillLayerId, rasterLayerId]) {
@@ -284,9 +294,9 @@ class MainManager {
     V extends GeoJsonProperties = GeoJsonProperties,
   >(layer: Layer, signal?: AbortSignal): Promise<FeatureCollection<T, V>> {
     try {
-      const sourceId = factoryService.getSourceId(layer.datasourceId, layer.id);
+      const sourceId = this.deps.factoryService.getSourceId(layer.datasourceId, layer.id);
 
-      const featureCollection = mapService.getMapFeatures<T, V>(sourceId);
+      const featureCollection = this.deps.mapService.getMapFeatures<T, V>(sourceId);
       if (featureCollection) {
         return featureCollection;
       }
@@ -294,9 +304,9 @@ class MainManager {
       console.error(error);
     }
 
-    const bbox = spatialService.getBBox(layer.datasourceId);
+    const bbox = this.deps.spatialService.getBBox(layer.datasourceId);
 
-    const data = await fetchService.fetchData<T, V>(
+    const data = await this.deps.fetchService.fetchData<T, V>(
       layer.datasourceId,
       bbox,
       layer.from,
@@ -315,7 +325,7 @@ class MainManager {
       isSpatialSelectionPredefined(spatialSelection)
     ) {
       try {
-        const featureCollection = mapService.getMapFeatures<Polygon | MultiPolygon>(
+        const featureCollection = this.deps.mapService.getMapFeatures<Polygon | MultiPolygon>(
           SourceId.SpatialSelection
         );
         if (featureCollection) {
@@ -326,7 +336,7 @@ class MainManager {
       }
     }
 
-    const filteredData = spatialService.filterLocations(layer.datasourceId, data, filter);
+    const filteredData = this.deps.spatialService.filterLocations(layer.datasourceId, data, filter);
 
     return filteredData;
   }
@@ -348,7 +358,7 @@ class MainManager {
           const collectionId = layer.datasourceId;
 
           // addData should return the layerId
-          return dataService.addData(collectionId, layer, {
+          return this.deps.dataService.addData(collectionId, layer, {
             filterFeatures: drawnShapes,
           });
         })
@@ -364,7 +374,7 @@ class MainManager {
             }
 
             const layerId = result.value;
-            const layer = collectionService.getLayer(layerId);
+            const layer = this.deps.collectionService.getLayer(layerId);
             if (!layer || !layer.paletteDefinition) {
               return null;
             }
@@ -377,7 +387,7 @@ class MainManager {
 
       for (const result of settled) {
         if (result.status === 'rejected') {
-          notificationManager.show(
+          this.deps.notificationManager.show(
             'An error occurred while applying a spatial filter, check the console for more details.',
             NotificationVariant.Error,
             10000
@@ -417,8 +427,8 @@ class MainManager {
   }
 
   public clearAllData(): void {
-    mapService.clearLayers();
-    mapService.clearSources();
+    this.deps.mapService.clearLayers();
+    this.deps.mapService.clearSources();
 
     this.store.getState().setLocations([]);
 
@@ -441,7 +451,7 @@ class MainManager {
     opacity: Layer['opacity'],
     paletteDefinition: Layer['paletteDefinition']
   ): Promise<void> {
-    const layerIds = factoryService.getLocationsLayerIds(layer.datasourceId, layer.id);
+    const layerIds = this.deps.factoryService.getLocationsLayerIds(layer.datasourceId, layer.id);
 
     if (color !== layer.color) {
       if (this.map) {
@@ -487,13 +497,13 @@ class MainManager {
       }
     }
 
-    const datasource = collectionService.getDatasource(layer.datasourceId);
+    const datasource = this.deps.collectionService.getDatasource(layer.datasourceId);
 
     const parametersChanged = !isSameArray(layer.parameters, parameters);
     const temporalRangeChanged =
       datasource && isEdrGrid(datasource) && (layer.from !== from || layer.to !== to);
 
-    const currentBBox = stringifyBBox(spatialService.getBBox(layer.datasourceId));
+    const currentBBox = stringifyBBox(this.deps.spatialService.getBBox(layer.datasourceId));
     const paletteChanged = !isSamePalette(paletteDefinition, layer.paletteDefinition);
     const repalette =
       paletteChanged ||
@@ -505,7 +515,7 @@ class MainManager {
     let _color = color;
     if (parametersChanged || temporalRangeChanged || paletteChanged) {
       const drawnShapes = this.store.getState().drawnShapes;
-      await dataService.addData(layer.datasourceId, layer, {
+      await this.deps.dataService.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,
         from,
@@ -534,7 +544,7 @@ class MainManager {
               actualCount: newCount,
             };
             if (paletteDefinition.actualCount !== newCount) {
-              notificationManager.show(
+              this.deps.notificationManager.show(
                 `Duplicate thresholds detected. Reducing to ${newCount} threshold(s)`,
                 NotificationVariant.Info,
                 5000

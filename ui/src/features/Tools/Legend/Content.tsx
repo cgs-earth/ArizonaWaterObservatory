@@ -6,8 +6,7 @@
 import { Fragment } from 'react';
 import { Box, Divider } from '@mantine/core';
 import { Entry } from '@/features/Tools/Legend/Entry';
-import mainManager from '@/managers/main/Main.init';
-import { collectionService } from '@/services/init';
+import { collectionService, mainManager } from '@/services/init';
 import { Layer, MainState } from '@/stores/main/types';
 
 type Props = {
