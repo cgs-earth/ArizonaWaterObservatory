@@ -63,14 +63,17 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const isMounted = useRef(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
-    collectionType,
-  });
   const [id, setId] = useState<string>(String(location.id));
   const [parameters, setParameters] = useState<Parameter[]>([]);
 
   const [from, setFrom] = useState<Layer['from']>(layer.from);
   const [to, setTo] = useState<Layer['to']>(layer.to);
+
+  const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
+    collectionType,
+    from,
+    to,
+  });
   useEffect(() => {
     const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
 

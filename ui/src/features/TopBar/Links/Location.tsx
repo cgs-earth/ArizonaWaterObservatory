@@ -74,6 +74,8 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
   const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
     collectionType,
+    from,
+    to,
   });
 
   useEffect(() => {
