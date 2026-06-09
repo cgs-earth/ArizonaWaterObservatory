@@ -11,6 +11,7 @@ import Legend from '@/features/Tools/Legend';
 import { Screenshot } from '@/features/Tools/Screenshot';
 import { Warnings } from '@/features/Tools/Warnings';
 import SpatialSelection from './SpatialSelection';
+import LayerAreaFilter from './LayerAreaFilter';
 
 const Tools: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ const Tools: React.FC = () => {
       <Legend />
       <SpatialSelection />
       <Draw />
+      <LayerAreaFilter />
       <Screenshot />
       <BasemapSelector />
       <Geocoder />

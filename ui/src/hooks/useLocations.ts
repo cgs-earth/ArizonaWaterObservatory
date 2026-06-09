@@ -14,7 +14,7 @@ import { Layer, Location } from '@/stores/main/types';
 import { LoadingType } from '@/stores/session/types';
 import { getIdStore } from '@/utils/getIdStore';
 
-export const useLocations = (layer: Layer) => {
+export const useLocations = (layer?: Layer ) => {
   const locations = useMainStore((state) => state.locations);
 
   const [selectedLocations, setSelectedLocations] = useState<Feature[]>([]);
@@ -22,6 +22,7 @@ export const useLocations = (layer: Layer) => {
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
+  
 
   const getFilterFunction = (datasourceId: ICollection['id']) => {
     if (StringIdentifierCollections.includes(datasourceId)) {
@@ -33,6 +34,9 @@ export const useLocations = (layer: Layer) => {
 
   // Get all non-selected locations, rendered or not on map
   const getOtherLocations = async () => {
+    if (!layer) {
+     return { selectedLocations, otherLocations };
+    }
     const loadingInstance = loadingManager.add(
       `Fetching locations for: ${layer.name}`,
       LoadingType.Locations
@@ -44,14 +48,16 @@ export const useLocations = (layer: Layer) => {
       const layerLocations = locations.filter((location) => location.layerId === layer.id);
 
       const filterFunction = getFilterFunction(layer.datasourceId);
-
-      const selectedLocations = allLocations.features.filter((feature) =>
+      
+        const selectedLocations = allLocations.features.filter((feature) =>
         layerLocations.some((location) => filterFunction(location, feature))
       );
 
       const otherLocations = allLocations.features.filter(
         (feature) => !layerLocations.some((location) => filterFunction(location, feature))
       );
+      
+      
 
       if (isMounted.current) {
         setSelectedLocations(selectedLocations);
@@ -67,12 +73,12 @@ export const useLocations = (layer: Layer) => {
   };
 
   useEffect(() => {
-    if (!layer.loaded) {
+    if (!layer ||!layer.loaded ) {
       return;
     }
 
     void getOtherLocations();
-  }, [layer.loaded, locations]);
+  }, [layer?.loaded, locations]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -84,7 +90,7 @@ export const useLocations = (layer: Layer) => {
     };
   }, []);
 
-  return { selectedLocations, otherLocations };
+  return { selectedLocations, otherLocations, setSelectedLocations,setOtherLocations };
 };
 
 // USGS
