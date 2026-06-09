@@ -97,6 +97,7 @@ const MainMap: React.FC<Props> = (props) => {
       mainManager.setMap(map);
       mapService.setMap(map);
       configService.setMap(map);
+      popupService.setMap(map);
       map.resize();
       map.fitBounds(
         [
