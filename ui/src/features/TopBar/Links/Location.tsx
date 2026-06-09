@@ -22,7 +22,6 @@ import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
 import { useLayerValidation } from '@/hooks/useLayerValidation';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import {
   CoverageCollection,
@@ -30,6 +29,7 @@ import {
   ICollection,
   IGetLocationParams,
 } from '@/services/edr.service';
+import { collectionService } from '@/services/init';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
@@ -86,7 +86,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   }, [id, from, to]);
 
   useEffect(() => {
-    const collection = mainManager.getDatasource(layer.datasourceId);
+    const collection = collectionService.getDatasource(layer.datasourceId);
 
     if (collection && !getIsDateRangeOverLimit()) {
       const paramObjects = Object.values(collection?.parameter_names ?? {});

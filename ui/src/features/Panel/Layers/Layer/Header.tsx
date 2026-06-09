@@ -7,8 +7,8 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { Group, Stack, Text, Title } from '@mantine/core';
 import { useLoading } from '@/hooks/useLoading';
-import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
+import { collectionService } from '@/services/init';
 import { Layer } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getProvider } from '@/utils/provider';
@@ -32,7 +32,7 @@ export const Header: React.FC<Props> = (props) => {
       return;
     }
 
-    const newDataset = mainManager.getDatasource(layer.datasourceId);
+    const newDataset = collectionService.getDatasource(layer.datasourceId);
 
     if (newDataset) {
       setDataset(newDataset);

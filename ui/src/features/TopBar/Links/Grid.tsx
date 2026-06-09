@@ -22,14 +22,16 @@ import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
+
 import { useLayerValidation } from '@/hooks/useLayerValidation';
-import mainManager from '@/managers/Main.init';
+
 import {
   CoverageCollection,
   CoverageJSON,
   ICollection,
   IGetCubeParams,
 } from '@/services/edr.service';
+import { collectionService } from '@/services/init';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
@@ -85,7 +87,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
       return;
     }
 
-    const newDataset = mainManager.getDatasource(layer.datasourceId);
+    const newDataset = collectionService.getDatasource(layer.datasourceId);
 
     if (newDataset && !getIsDateRangeOverLimit()) {
       setDatasetName(newDataset.title ?? '');

@@ -14,8 +14,8 @@ import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
 import { getDates } from '@/features/Tools/DateSelector/utils';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
+import { mainManager } from '@/services/init';
 import { Layer } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
 

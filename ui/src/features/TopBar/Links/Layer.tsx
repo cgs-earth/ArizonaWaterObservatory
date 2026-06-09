@@ -16,8 +16,8 @@ import { LayerBlock } from '@/features/TopBar/Links/LayerBlock';
 import styles from '@/features/TopBar/Links/Links.module.css';
 import { Menu } from '@/features/TopBar/Links/Menu';
 import { useLocations } from '@/hooks/useLocations';
-import mainManager from '@/managers/Main.init';
 import { ICollection } from '@/services/edr.service';
+import { collectionService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { Layer as LayerType } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
@@ -68,7 +68,7 @@ export const Layer: React.FC<Props> = (props) => {
   }, [linkLocation]);
 
   useEffect(() => {
-    const collection = mainManager.getDatasource(layer.datasourceId);
+    const collection = collectionService.getDatasource(layer.datasourceId);
 
     if (collection) {
       const collectionType = getCollectionType(collection);
