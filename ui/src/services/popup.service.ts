@@ -14,6 +14,17 @@ export class PopupService {
   private container: HTMLDivElement | null = null;
 
   /**
+   * Setter function to set map private variable after map initialization
+   *
+   * @function
+   */
+  public setMap(map: Map): void {
+    if (!this.map) {
+      this.map = map;
+    }
+  }
+
+  /**
    * Setter function to set hoverPopup private variable after map initialization
    *
    * @function
