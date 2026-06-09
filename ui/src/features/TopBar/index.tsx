@@ -9,6 +9,7 @@ import Info from '@/features/TopBar/Info';
 import Links from '@/features/TopBar/Links';
 import Share from '@/features/TopBar/Share';
 import styles from '@/features/TopBar/TopBar.module.css';
+import Compare from '../Tools/Compare';
 
 const TopBar: React.FC = () => {
   return (
@@ -17,6 +18,7 @@ const TopBar: React.FC = () => {
         <Info />
         <Share />
         <Links />
+        <Compare />
       </Group>
       <Tools />
     </Group>

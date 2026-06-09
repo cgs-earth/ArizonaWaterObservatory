@@ -3,18 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
 import { Box, Stack, Text, Title, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import { Layer } from '@/features/TopBar/Links/Layer';
 import styles from '@/features/TopBar/Links/Links.module.css';
-import { collectionService } from '@/services/init';
+import { useAreDataToolsEnabled } from '@/hooks/useAreDataToolsEnabled';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
-import { CollectionType, getCollectionType } from '@/utils/collection';
 
 const Links: React.FC = () => {
   const layers = useMainStore((store) => store.layers);
@@ -23,25 +21,9 @@ const Links: React.FC = () => {
   const setOverlay = useSessionStore((store) => store.setOverlay);
   const setLinkLocation = useSessionStore((store) => store.setLinkLocation);
 
-  const [isEnabled, setIsEnabled] = useState(false);
+  const { areDataToolsEnabled } = useAreDataToolsEnabled();
 
   const opened = overlay === Overlay.Links;
-
-  useEffect(() => {
-    const isEnabled = layers.some((layer) => {
-      const datasource = collectionService.getDatasource(layer.datasourceId);
-      if (datasource) {
-        const collectionType = getCollectionType(datasource);
-        if (collectionType === CollectionType.Features) {
-          return true;
-        } else if ([CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType)) {
-          return layer.parameters.length > 0;
-        }
-      }
-      return false;
-    });
-    setIsEnabled(isEnabled);
-  }, [layers]);
 
   const handleOpen = () => {
     setOverlay(Overlay.Links);
@@ -64,8 +46,8 @@ const Links: React.FC = () => {
     <>
       <Tooltip label={helpText}>
         <Button
-          disabled={!isEnabled}
-          data-disabled={!isEnabled}
+          disabled={!areDataToolsEnabled}
+          data-disabled={!areDataToolsEnabled}
           size="sm"
           variant={opened ? Variant.Selected : Variant.Secondary}
           onClick={handleOpen}
