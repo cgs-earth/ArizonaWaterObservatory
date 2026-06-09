@@ -22,6 +22,7 @@ import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
 import mainManager from '@/managers/Main.init';
 import {
   CoverageCollection,
@@ -31,12 +32,11 @@ import {
 } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
+import { CollectionType } from '@/utils/collection';
 import { getIdStore } from '@/utils/getIdStore';
 import { normalizeBBox } from '@/utils/normalizeBBox';
 import { getParameterUnit } from '@/utils/parameters';
 import { buildCubeUrl } from '@/utils/url';
-import { CollectionType } from '@/utils/collection';
-import { useLayerValidation } from '@/hooks/useLayerValidation';
 
 dayjs.extend(isSameOrBefore);
 
@@ -50,7 +50,6 @@ type Props = {
 };
 
 export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
-
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
   const [openedCharts, { toggle: toggleCharts, close: closeCharts }] = useDisclosure(false);
@@ -70,7 +69,6 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [parameters, setParameters] = useState<Parameter[]>([]);
   const [from, setFrom] = useState<string | null>(layer.from);
   const [to, setTo] = useState<string | null>(layer.to);
-
 
   useEffect(() => {
     const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
@@ -119,7 +117,6 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
     }
   }, [location, layer]);
 
-  
   const parseBBox = (bbox: unknown): BBox | undefined => {
     if (
       typeof bbox === 'object' &&
@@ -177,7 +174,6 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
   const code = `curl -X GET ${codeUrl} \n
 -H "Content-Type: application/json"`;
-
 
   return (
     <Paper

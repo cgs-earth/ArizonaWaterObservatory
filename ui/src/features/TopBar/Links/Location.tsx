@@ -20,6 +20,7 @@ import { Parameter } from '@/features/Popup';
 import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
@@ -32,13 +33,12 @@ import {
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
+import { CollectionType } from '@/utils/collection';
 import { createEmptyCsv } from '@/utils/csv';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
 import { getParameterUnit } from '@/utils/parameters';
 import { buildLocationUrl } from '@/utils/url';
-import { CollectionType } from '@/utils/collection';
-import { useLayerValidation } from '@/hooks/useLayerValidation';
 
 dayjs.extend(isSameOrBefore);
 
@@ -77,7 +77,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
     collectionType,
   });
-  
+
   useEffect(() => {
     const url = buildLocationUrl(collection.id, id, layer.parameters, from, to, false, true);
 
@@ -92,8 +92,8 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
     if (collection) {
       const newDataset = mainManager.getDatasource(layer.datasourceId);
-    
-     if (newDataset && !getIsDateRangeOverLimit()) {
+
+      if (newDataset && !getIsDateRangeOverLimit()) {
         setDatasetName(newDataset.title ?? '');
         const paramObjects = Object.values(newDataset?.parameter_names ?? {});
 
