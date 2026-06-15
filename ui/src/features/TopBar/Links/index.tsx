@@ -9,7 +9,7 @@ import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import { Layer } from '@/features/TopBar/Links/Layer';
 import styles from '@/features/TopBar/Links/Links.module.css';
-import { useAreDataToolsEnabled } from '@/hooks/useAreDataToolsEnabled';
+import { useDataTools } from '@/hooks/useAreDataToolsEnabled';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
@@ -21,7 +21,7 @@ const Links: React.FC = () => {
   const setOverlay = useSessionStore((store) => store.setOverlay);
   const setLinkLocation = useSessionStore((store) => store.setLinkLocation);
 
-  const { areDataToolsEnabled } = useAreDataToolsEnabled();
+  const { areDataToolsEnabled } = useDataTools();
 
   const opened = overlay === Overlay.Links;
 

@@ -3,21 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dayjs from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { Text, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import styles from '@/features/Tools/Compare/Compare.module.css';
-import { useAreDataToolsEnabled } from '@/hooks/useAreDataToolsEnabled';
+import { useDataTools } from '@/hooks/useAreDataToolsEnabled';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 import { Body } from './Body';
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const Compare: React.FC = () => {
   const overlay = useSessionStore((store) => store.overlay);
   const setOverlay = useSessionStore((store) => store.setOverlay);
 
-  const { areDataToolsEnabled } = useAreDataToolsEnabled();
+  const { layers, areDataToolsEnabled } = useDataTools();
 
   const opened = overlay === Overlay.Compare;
 
@@ -51,7 +57,7 @@ const Compare: React.FC = () => {
         </Button>
       </Tooltip>
       <Modal size="1222px" opened={opened} onClose={handleClose} className={styles.root}>
-        <Body />
+        <Body layers={layers} />
       </Modal>
     </>
   );

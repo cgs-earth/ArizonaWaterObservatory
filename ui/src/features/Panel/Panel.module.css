@@ -61,6 +61,13 @@
   width: 200rem;
 }
 
+.entry {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  padding: var(--default-spacing) calc(var(--default-spacing) * 2);
+}
+
 .fullWidth {
   width: 100%;
 }
