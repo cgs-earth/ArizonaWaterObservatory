@@ -113,6 +113,11 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
 
   const showSearchTool = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
   const showLabelTool = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
+  const showLocationsTool = [
+    CollectionType.EDR,
+    CollectionType.Features,
+    CollectionType.EDRGrid,
+  ].includes(collectionType);
 
   /**
    * This layer is a grid type which requires at least one selected parameter
@@ -298,6 +303,7 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
     showPalette,
     showSearchTool,
     showLabelTool,
+    showLocationsTool,
     getIsDateRangeOverLimit,
     getDateInputError,
     getParameterError,
