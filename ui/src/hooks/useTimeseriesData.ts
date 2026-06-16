@@ -79,6 +79,7 @@ export const useTimeseriesData = (args: Args) => {
         to,
         locationIds,
         parameters: parameters.map((p) => p.id),
+        coverageLabels,
       }),
     [collectionId, from, to, locationIds, parameters]
   );

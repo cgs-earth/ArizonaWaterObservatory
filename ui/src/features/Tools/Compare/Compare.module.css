@@ -11,8 +11,11 @@
 }
 
 .body {
-  height: calc(100vh - 8.75rem);
-  padding: 0;
+  height: calc(100% - 3.75rem);
+}
+
+.dataWrapper {
+  overflow-y: auto;
 }
 
 .dataWrapperPartial {
@@ -28,6 +31,16 @@
   padding-bottom: calc(var(--default-spacing) / 2);
 }
 
+.fullscreenButton svg {
+  width: 22px;
+  height: auto;
+}
+
+.main {
+  height: calc(100vh - 5.75rem);
+  padding: 0;
+}
+
 .miniMapWrapper {
   border-top: 2px solid var(--border);
 
@@ -35,6 +48,25 @@
   height: 40%;
 }
 
+.dataWrapper,
 .panelWrapper {
   height: 100%;
+  max-height: 100%;
+}
+
+.tabContent {
+  padding: var(--default-spacing);
+  background: var(--mantine-color-body);
+}
+
+.tabsList {
+  position: sticky;
+  top: 0;
+  background: var(--mantine-color-body);
+  z-index: 1;
+}
+
+.tableWrapper {
+  max-width: 100%;
+  overflow-x: auto;
 }

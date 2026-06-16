@@ -7,9 +7,9 @@ import { Feature } from 'geojson';
 import { Box, Group, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
+import Table from '@/components/Table';
 import { Variant } from '@/components/types';
 import styles from '@/features/Popup/Popup.module.css';
-import Table from '@/features/Table';
 import { Location as LocationType } from '@/stores/main/types';
 
 type Props = {
@@ -26,7 +26,7 @@ export const Item: React.FC<Props> = (props) => {
   return (
     <>
       <Box className={styles.tableWrapper}>
-        {feature && <Table size="xs" properties={feature.properties} />}
+        {feature && <Table size="xs" json={feature.properties} />}
       </Box>
       <Group
         justify="space-between"

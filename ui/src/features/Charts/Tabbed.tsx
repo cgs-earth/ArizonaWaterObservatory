@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tabs, Text } from '@mantine/core';
 import LineChart from '@/components/Charts/LineChart';
 import styles from '@/features/Charts/Charts.module.css';
@@ -19,6 +19,7 @@ type Props = {
   tabs: TTypedOption[];
   chartClassname?: string;
   tabHeight?: number;
+  showTabs?: boolean;
 };
 
 export const Tabbed: React.FC<Props> = (props) => {
@@ -31,9 +32,18 @@ export const Tabbed: React.FC<Props> = (props) => {
     tabs,
     chartClassname,
     tabHeight = 20,
+    showTabs = true,
   } = props;
 
   const [tab, setTab] = useState<string | null>(tabs.length > 0 ? tabs[0].value : null);
+
+  useEffect(() => {
+    if ((tab ?? '').length > 0 || tabs.length === 0 || data.length === 0) {
+      return;
+    }
+
+    setTab(tabs[0].value);
+  }, [tabs, data]);
 
   return (
     <Tabs
@@ -46,15 +56,17 @@ export const Tabbed: React.FC<Props> = (props) => {
       }}
       keepMounted={false}
     >
-      <Tabs.List>
-        {tabs.map((tab) => (
-          <Tabs.Tab key={`${collectionId}-${tab.value}-tab`} value={tab.value}>
-            <Text size="xs" p={0}>
-              {tab.label}
-            </Text>
-          </Tabs.Tab>
-        ))}
-      </Tabs.List>
+      {showTabs && (
+        <Tabs.List>
+          {tabs.map((tab) => (
+            <Tabs.Tab key={`${collectionId}-${tab.value}-tab`} value={tab.value}>
+              <Text size="xs" p={0}>
+                {tab.label}
+              </Text>
+            </Tabs.Tab>
+          ))}
+        </Tabs.List>
+      )}
       {tabs
         .filter((tab) => tab.type === ETabTypes.Parameter)
         .map((tab) => (

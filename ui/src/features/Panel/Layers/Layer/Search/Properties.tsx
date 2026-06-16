@@ -8,9 +8,9 @@ import { GeoJsonProperties } from 'geojson';
 import { Box, Divider, Group, Stack, Text } from '@mantine/core';
 import Button from '@/components/Button';
 import IconButton from '@/components/IconButton';
+import Table from '@/components/Table';
 import { Variant } from '@/components/types';
 import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
-import Table from '@/features/Table';
 
 type Props = {
   properties: GeoJsonProperties;
@@ -92,7 +92,7 @@ export const Properties: React.FC<Props> = (props) => {
           {showTable ? 'Hide Sample Feature' : 'Show Sample Feature'}
         </Button>
       </Box>
-      {showTable && <Table properties={properties} search size="xs" />}
+      {showTable && <Table json={properties} search size="xs" />}
     </>
   );
 };

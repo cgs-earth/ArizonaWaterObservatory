@@ -21,7 +21,10 @@ const Data: React.FC<Props> = (props) => {
   return (
     <Tabs
       defaultValue="layer"
-      className={panelOpen ? styles.dataWrapperPartial : styles.dataWrapperFull}
+      className={`${styles.dataWrapper} ${panelOpen ? styles.dataWrapperPartial : styles.dataWrapperFull}`}
+      classNames={{
+        list: styles.tabsList,
+      }}
     >
       <Tabs.List>
         <Tabs.Tab value="layer">By Layer</Tabs.Tab>

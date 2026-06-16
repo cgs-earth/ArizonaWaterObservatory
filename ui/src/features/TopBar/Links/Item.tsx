@@ -12,9 +12,9 @@ import { useDisclosure } from '@mantine/hooks';
 import Button from '@/components/Button';
 import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
+import Table from '@/components/Table';
 import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
-import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
 import { ICollection } from '@/services/edr.service';
@@ -121,7 +121,7 @@ export const Item = forwardRef<HTMLDivElement, Props>((props, ref) => {
           <Group align="flex-start" gap="calc(var(--default-spacing) * 2)" grow>
             {openedProps && (
               <Collapse in={openedProps}>
-                <Table properties={location.properties} search />
+                <Table json={location.properties} search />
               </Collapse>
             )}
             {openedGeo && (

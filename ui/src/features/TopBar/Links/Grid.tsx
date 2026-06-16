@@ -15,11 +15,11 @@ import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
+import Table from '@/components/Table';
 import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
-import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
 import loadingManager from '@/managers/Loading.init';
@@ -386,7 +386,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
           <Group align="flex-start" gap="calc(var(--default-spacing) * 2)" grow>
             {openedProps && (
               <Collapse in={openedProps}>
-                <Table properties={location.properties} />
+                <Table json={location.properties} />
               </Collapse>
             )}
             {openedGeo && (

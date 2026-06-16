@@ -116,7 +116,7 @@ export const Body: React.FC<Props> = (props) => {
   };
 
   return (
-    <Stack className={styles.body} p={0} gap={0}>
+    <Stack className={styles.main} p={0} gap={0}>
       <Header
         from={from}
         onFromChange={handleFromChange}
@@ -124,7 +124,7 @@ export const Body: React.FC<Props> = (props) => {
         onToChange={handleToChange}
         onReset={handleReset}
       />
-      <Group h="100%" gap={0} align="flex-start" wrap="nowrap">
+      <Group h="calc(100% - 3.75rem)" gap={0} align="flex-start" wrap="nowrap">
         <Panel
           layers={layers}
           locations={locations}

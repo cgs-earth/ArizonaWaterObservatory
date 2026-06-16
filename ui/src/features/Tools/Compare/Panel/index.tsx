@@ -55,6 +55,7 @@ const Panel: React.FC<Props> = (props) => {
               .map((layer) => (
                 <Accordion
                   key={`layers-accordion-${layer.id}`}
+                  sticky="top"
                   items={[
                     {
                       id: `layers-accordion-${layer.id}`,

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.table {
+.fixed {
   table-layout: fixed;
   width: 100%;
 }
@@ -13,8 +13,9 @@
   overflow-y: scroll;
 }
 
-.propertyColumn {
+.fitColumn {
   width: fit-content;
+  max-width: fit-content;
 }
 
 .valueColumn {

@@ -23,7 +23,7 @@ const Compare: React.FC = () => {
   const overlay = useSessionStore((store) => store.overlay);
   const setOverlay = useSessionStore((store) => store.setOverlay);
 
-  const { layers, areDataToolsEnabled } = useDataTools();
+  const { layers, areDataToolsEnabled } = useDataTools(true);
 
   const opened = overlay === Overlay.Compare;
 
@@ -56,7 +56,14 @@ const Compare: React.FC = () => {
           Compare
         </Button>
       </Tooltip>
-      <Modal size="1222px" opened={opened} onClose={handleClose} className={styles.root}>
+      <Modal
+        size="100%"
+        maw="94.375rem"
+        yOffset="1dvh"
+        opened={opened}
+        onClose={handleClose}
+        className={styles.root}
+      >
         <Body layers={layers} />
       </Modal>
     </>

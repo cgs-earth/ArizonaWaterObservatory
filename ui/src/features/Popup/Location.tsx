@@ -8,12 +8,12 @@ import { Feature } from 'geojson';
 import { Box, Group, Stack, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
+import Table from '@/components/Table';
 import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
 import styles from '@/features/Popup/Popup.module.css';
-import Table from '@/features/Table';
 import {
   CoverageCollection,
   CoverageJSON,
@@ -113,7 +113,7 @@ export const Location: React.FC<Props> = (props) => {
         )}
       </Box>
       <Box style={{ display: tab === 'table' ? 'block' : 'none' }} className={styles.tableWrapper}>
-        {feature && <Table size="xs" properties={feature.properties} />}
+        {feature && <Table size="xs" json={feature.properties} />}
       </Box>
       <Stack
         gap="calc(var(--default-spacing) * 2)"

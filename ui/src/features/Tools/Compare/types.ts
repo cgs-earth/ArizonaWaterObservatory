@@ -4,11 +4,10 @@
  */
 
 import { Parameter } from '@/features/Popup';
+import { Layer } from '@/stores/main/types';
 
 export type TSimplifiedEntry = {
-  layerId: string;
-  datasourceId: string;
-  name: string;
+  layer: Layer;
   parameters: Parameter[];
   locations: string[];
 };
