@@ -133,7 +133,7 @@ export const Body: React.FC<Props> = (props) => {
           onOpen={() => handlePanelChange(true)}
           onClose={() => handlePanelChange(false)}
         />
-        <Data locations={locations} panelOpen={panelOpen} />
+        <Data locations={locations} panelOpen={panelOpen} from={from} to={to} />
       </Group>
     </Stack>
   );
