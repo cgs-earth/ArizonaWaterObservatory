@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Feature } from 'geojson';
+import { Feature, GeoJsonProperties, Geometry } from 'geojson';
 import { StringIdentifierCollections } from '@/consts/collections';
 import loadingManager from '@/managers/Loading.init';
 import mainManager from '@/managers/Main.init';
@@ -22,7 +22,6 @@ export const useLocations = (layer?: Layer | Layer[]) => {
 
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
-  
 
   const getFilterFunction = (datasourceId: ICollection['id']) => {
     if (StringIdentifierCollections.includes(datasourceId)) {
@@ -33,9 +32,9 @@ export const useLocations = (layer?: Layer | Layer[]) => {
   };
 
   // Get all non-selected locations, rendered or not on map
-  const getOtherLocations = async (layer:Layer) => {
+  const getOtherLocations = async (layer: Layer) => {
     if (!layer) {
-     return { selectedLocations, otherLocations };
+      return { selectedLocations, otherLocations };
     }
     const loadingInstance = loadingManager.add(
       `Fetching locations for: ${layer.name}`,
@@ -48,16 +47,14 @@ export const useLocations = (layer?: Layer | Layer[]) => {
       const layerLocations = locations.filter((location) => location.layerId === layer.id);
 
       const filterFunction = getFilterFunction(layer.datasourceId);
-      
-        const selectedLocations = allLocations.features.filter((feature) =>
+
+      const selectedLocations = allLocations.features.filter((feature) =>
         layerLocations.some((location) => filterFunction(location, feature))
       );
 
       const otherLocations = allLocations.features.filter(
         (feature) => !layerLocations.some((location) => filterFunction(location, feature))
       );
-      
-      
 
       if (isMounted.current) {
         setSelectedLocations(selectedLocations);
@@ -72,35 +69,31 @@ export const useLocations = (layer?: Layer | Layer[]) => {
     }
   };
 
-  const getAllOtherLocations = async (layers:Layer[]) => {
-    if (!layer) {
-     return { selectedLocations, otherLocations };
+  const getAllOtherLocations = async (layers: Layer[]) => {
+    if (layers.length === 0) {
+      return { selectedLocations, otherLocations };
     }
-    const loadingInstance = loadingManager.add(
-      `Fetching locations`,
-      LoadingType.Locations
-    );
+    const loadingInstance = loadingManager.add(`Fetching locations`, LoadingType.Locations);
     try {
       controller.current = new AbortController();
-      const selectedLocations = Feature<Geometry, GeoJsonProperties>[];
-      const selectedLocations = Feature<Geometry, GeoJsonProperties>[];
-        for (const layer of layers) {
+      const selectedLocations: Feature<Geometry, GeoJsonProperties>[] = [];
+      const otherLocations: Feature<Geometry, GeoJsonProperties>[] = [];
+      for (const layer of layers) {
         const allLocations = await mainManager.getFeatures(layer, controller.current.signal);
-      const layerLocations = locations.filter((location) => location.layerId === layer.id);
+        const layerLocations = locations.filter((location) => location.layerId === layer.id);
+        const filterFunction = getFilterFunction(layer.datasourceId);
 
-      const filterFunction = getFilterFunction(layer.datasourceId);
+        const tempSelectedLocations = allLocations.features.filter((feature) =>
+          layerLocations.some((location) => filterFunction(location, feature))
+        );
 
-      const tempSelectedLocations = allLocations.features.filter((feature) =>
-        layerLocations.some((location) => filterFunction(location, feature))
-      );
+        const tempOtherLocations = allLocations.features.filter(
+          (feature) => !layerLocations.some((location) => filterFunction(location, feature))
+        );
 
-      const tempOtherLocations = allLocations.features.filter(
-        (feature) => !layerLocations.some((location) => filterFunction(location, feature))
-      );
-      selectedLocations.concat
+        selectedLocations.push(...tempSelectedLocations);
+        otherLocations.push(...tempOtherLocations);
       }
-
-      
 
       if (isMounted.current) {
         setSelectedLocations(selectedLocations);
@@ -116,12 +109,16 @@ export const useLocations = (layer?: Layer | Layer[]) => {
   };
 
   useEffect(() => {
-    if (!layer ||!layer.loaded ) {
+    if (Array.isArray(layer)) {
+      void getAllOtherLocations(layer);
+    }
+    if (!layer) {
       return;
     }
-
-    void getOtherLocations();
-  }, [layer?.loaded, locations]);
+    if (!Array.isArray(layer)) {
+      void getOtherLocations(layer);
+    }
+  }, [locations]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -133,5 +130,5 @@ export const useLocations = (layer?: Layer | Layer[]) => {
     };
   }, []);
 
-  return { selectedLocations, otherLocations, setSelectedLocations,setOtherLocations };
+  return { selectedLocations, otherLocations };
 };

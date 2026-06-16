@@ -9,6 +9,9 @@ import Checkbox from '@/components/Checkbox';
 import { Fallback } from '@/features/Panel/Layers/Layer/Fallback';
 import { useLocations } from '@/hooks/useLocations';
 import { Layer } from '@/stores/main/types';
+import { StringIdentifierCollections } from '@/consts/collections';
+import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
+import useMainStore from '@/stores/main';
 
 type Props = {
   layer: Layer;
@@ -16,28 +19,29 @@ type Props = {
 
 export const LocationsCheckList: React.FC<Props> = (props) => {
   const { layer } = props; 
-  const { selectedLocations, otherLocations, setSelectedLocations, setOtherLocations } =
+  const { selectedLocations, otherLocations } =
     useLocations(layer);
-
+  const isStringIdentifierCollection = StringIdentifierCollections.includes(layer.datasourceId);
+  const addLocation = useMainStore((state) => state.addLocation);
+  const removeLocation = useMainStore((state) => state.removeLocation);
   const handleDontShowClick = (
     event: React.ChangeEvent<HTMLInputElement>,
     location: Feature<Geometry, GeoJsonProperties>
   ) => {
     const { checked } = event.currentTarget;
-    console.log("location:",location);
-    if (checked && !selectedLocations.includes(location)) {
-      selectedLocations.push(location);
-      console.log("Filtered OtherLOcations:",otherLocations.filter((filterLocation) => !(filterLocation.id === location.id)));
-      setOtherLocations(
-        otherLocations.filter((filterLocation) => !(filterLocation.id === location.id))
-      );
-    } 
-    if(!checked && !otherLocations.includes(location)) {
-      console.log("filtered SleectedLocations:", selectedLocations.filter((filterLocation) => filterLocation.id === location.id));
-      otherLocations.push(location);
-      setSelectedLocations(
-        selectedLocations.filter((filterLocation) => !(filterLocation.id === location.id))
-      );
+
+    const id = getId(location,isStringIdentifierCollection);
+
+    if(checked){
+      addLocation({
+        id,
+        layerId:layer.id
+      })
+    }else{
+      removeLocation({
+        id,
+        layerId:layer.id
+      })
     }
   };
 
@@ -49,6 +53,7 @@ export const LocationsCheckList: React.FC<Props> = (props) => {
         {selectedLocations.length > 0 ? (
           [...selectedLocations].map((location) => (
             <Checkbox
+              key={`layer-area-selected-${layer.id}-${location.id}`}
               size="sm"
               checked
               onChange={(event) => handleDontShowClick(event, location)}
@@ -62,6 +67,7 @@ export const LocationsCheckList: React.FC<Props> = (props) => {
         {otherLocations.length > 0 ? (
           [...otherLocations].map((location) => (
             <Checkbox
+              key={`layer-area-other-${layer.id}-${location.id}`}
               size="sm"
               onChange={(event) => handleDontShowClick(event, location)}
               label={location.id}

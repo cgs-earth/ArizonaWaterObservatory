@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Tooltip } from '@mantine/core';
 import SpatialSelectionIcon from '@/assets/SpatialSelection';
 import Accordion from '@/components/Accordion';
@@ -19,28 +19,55 @@ import { useConfirmableAction } from '@/hooks/useConfirmableAction';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
-import { Overlay } from '@/stores/session/types';
+import { LoadingType, NotificationVariant, Overlay } from '@/stores/session/types';
 import { LocationsCheckList } from './Content';
 import Button from '@/components/Button';
 import { useLocations } from '@/hooks/useLocations';
-import { Feature, GeoJsonProperties, Geometry } from 'geojson';
+import { Feature, GeoJsonProperties, Geometry, MultiPolygon, Polygon } from 'geojson';
+import notificationManager from '@/managers/Notification.init';
+import mainManager from '@/managers/Main.init';
+import loadingManager from '@/managers/Loading.init';
 
 
 const LayerAreaFilter: React.FC = () => {
   const overlay = useSessionStore((state) => state.overlay);
   const setOverlay = useSessionStore((state) => state.setOverlay);
+  
 
   const hasLayers = useMainStore((state) => state.layers.length > 0);
 
   const layers = useMainStore((state) => state.layers);
   const [validLayers, setValidLayers] = useState<Layer[]>([]);
+  const [validLocations, setValidLocations] = useState<Feature<Geometry, GeoJsonProperties>[]>([]);
   const confirmAction = useConfirmableAction(hasLayers);
-  const { selectedLocations } = useLocations();
-  const [validLocations, setValidLocations] = useState(selectedLocations);
+  const { selectedLocations,otherLocations } = useLocations(layers);
+  
   const [show, setShow] = useState(false);
 
-  const handleClick = () => {
+  const loadingInstance = useRef<string>(null);
 
+  const handleClick = () => {
+      //applySpatialFilter(validLocations)
+  };
+  
+  const applySpatialFilter = async (drawnShapes: Feature<Polygon | MultiPolygon>[]) => {
+    const message =
+      drawnShapes.length > 0 ? 'Applying spatial filters' : 'Clearing spatial filters';
+
+    loadingInstance.current = loadingManager.add(message, LoadingType.Geography);
+
+    try {
+      await mainManager.applySpatialFilter(drawnShapes);
+    } catch (error) {
+      if ((error as Error)?.message) {
+        const _error = error as Error;
+        notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
+      } else if (typeof error === 'string') {
+        notificationManager.show(`Error: ${error}`, NotificationVariant.Error, 10000);
+      }
+    } finally {
+      loadingInstance.current = loadingManager.remove(loadingInstance.current);
+    }
   };
 
   useEffect(() => {
@@ -58,14 +85,12 @@ const LayerAreaFilter: React.FC = () => {
     const validLayers = layers.filter((layer) => layer.geometryTypes.includes('Polygon'))
     setValidLayers(validLayers);
   }, [ layers ]);
+  
   useEffect(() => {
-    const tempLocations: Array<Feature<Geometry, GeoJsonProperties>> = [];
-    for ( const layer of layers) {
-       useLocations(layer);
-      tempLocations.push(...selectedLocations);
-    }
-    setValidLocations(tempLocations);
-  }, [ validLocations ]);
+   
+   setValidLocations(validLocations);
+    
+  }, [ layers,selectedLocations,otherLocations ]);
 
   return (
     <>
@@ -111,12 +136,12 @@ const LayerAreaFilter: React.FC = () => {
                 ))
             ) : (
               <Fallback />
-            )}
-            <Button
+            )} 
+            <Button  
         size="xs"
-        disabled={validLocations.length === 0}
-        data-disabled={validLocations.length === 0}
-        variant={Variant.Tertiary}
+        disabled={selectedLocations.length === 0}
+        data-disabled={selectedLocations.length === 0}
+        variant={Variant.Primary}
         onClick={handleClick}
       >
         Filter
