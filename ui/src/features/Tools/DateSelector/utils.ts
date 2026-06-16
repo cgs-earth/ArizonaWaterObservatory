@@ -5,8 +5,8 @@
 
 import { Feature } from 'geojson';
 import { GeoJSONFeature, Map } from 'mapbox-gl';
-import mainManager from '@/managers/Main.init';
 import { DATES_PROPERTY } from '@/services/coverageJSON/consts';
+import { factoryService, mainManager } from '@/services/init';
 import { Layer } from '@/stores/main/types';
 
 const getDatesFromProperties = (feature: GeoJSONFeature | Feature): string[] => {
@@ -25,7 +25,7 @@ const getDatesFromProperties = (feature: GeoJSONFeature | Feature): string[] => 
 };
 
 export const getDates = async (map: Map, layer: Layer): Promise<string[]> => {
-  const { pointLayerId, lineLayerId, fillLayerId } = mainManager.getLocationsLayerIds(
+  const { pointLayerId, lineLayerId, fillLayerId } = factoryService.getLocationsLayerIds(
     layer.datasourceId,
     layer.id
   );

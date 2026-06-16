@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { ComboboxData } from '@mantine/core';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import { useLoading } from '@/hooks/useLoading';
-import mainManager from '@/managers/Main.init';
+import { collectionService } from '@/services/init';
 import { Layer } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
 import { isSamePalette, isValidPalette } from '@/utils/colors';
@@ -82,7 +82,7 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
       return;
     }
 
-    const collection = mainManager.getDatasource(layer.datasourceId);
+    const collection = collectionService.getDatasource(layer.datasourceId);
 
     if (collection) {
       const temporalExtent = getTemporalExtent(collection);
@@ -113,6 +113,11 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
 
   const showSearchTool = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
   const showLabelTool = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
+  const showLocationsTool = [
+    CollectionType.EDR,
+    CollectionType.Features,
+    CollectionType.EDRGrid,
+  ].includes(collectionType);
 
   /**
    * This layer is a grid type which requires at least one selected parameter
@@ -298,6 +303,7 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
     showPalette,
     showSearchTool,
     showLabelTool,
+    showLocationsTool,
     getIsDateRangeOverLimit,
     getDateInputError,
     getParameterError,

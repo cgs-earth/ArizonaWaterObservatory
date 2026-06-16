@@ -18,8 +18,8 @@ import styles from '@/features/Tools/Tools.module.css';
 import { useDraw } from '@/hooks/useDraw';
 import { useMeasure } from '@/hooks/useMeasure';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
+import { factoryService, mainManager } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { DrawMode } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
@@ -89,7 +89,7 @@ export const Draw: React.FC = () => {
       // Deactivate visible layers to prevent conflicts with draw tool
       for (const layer of layers) {
         if (layer.visible) {
-          const { pointLayerId, fillLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+          const { pointLayerId, fillLayerId, lineLayerId } = factoryService.getLocationsLayerIds(
             layer.datasourceId,
             layer.id
           );
@@ -158,7 +158,7 @@ export const Draw: React.FC = () => {
         // Reactivate visible layers
         for (const layer of layers) {
           if (layer.visible) {
-            const { pointLayerId, fillLayerId, lineLayerId } = mainManager.getLocationsLayerIds(
+            const { pointLayerId, fillLayerId, lineLayerId } = factoryService.getLocationsLayerIds(
               layer.datasourceId,
               layer.id
             );
