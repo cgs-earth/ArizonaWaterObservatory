@@ -86,7 +86,7 @@ const Label: React.FC<Props> = (props) => {
               {showTable ? 'Hide Sample Feature' : 'Show Sample Feature'}
             </Button>
           </Box>
-          {showTable && <Table json={sampleProperties} search size="xs" />}
+          {showTable && <Table id={layer.id} json={sampleProperties} search size="xs" />}
         </>
       )}
     </Stack>

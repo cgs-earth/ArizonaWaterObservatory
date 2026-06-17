@@ -13,6 +13,7 @@ import styles from '@/features/Popup/Popup.module.css';
 import { Location as LocationType } from '@/stores/main/types';
 
 type Props = {
+  id: string;
   location: LocationType;
   locations: LocationType[];
   feature: Feature;
@@ -21,12 +22,12 @@ type Props = {
 };
 
 export const Item: React.FC<Props> = (props) => {
-  const { location, locations, feature, handleLocationChange, handleLinkClick } = props;
+  const { id, location, locations, feature, handleLocationChange, handleLinkClick } = props;
 
   return (
     <>
       <Box className={styles.tableWrapper}>
-        {feature && <Table size="xs" json={feature.properties} />}
+        {feature && <Table id={id} size="xs" json={feature.properties} />}
       </Box>
       <Group
         justify="space-between"

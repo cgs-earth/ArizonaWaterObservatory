@@ -13,15 +13,16 @@ import { CoverageRow } from './CoverageRow';
 export type Coverage = CoverageCollection | CoverageJSON | (CoverageCollection | CoverageJSON)[];
 
 type Props = {
+  id: string;
   coverage: Coverage;
   labels: string[];
-  type: 'Grid' | 'Item' | 'Location';
+  type?: 'Grid' | 'Item' | 'Location';
   size?: TextProps['size'];
   options: TTypedOption[];
 };
 
 export const CoverageJSONTable: React.FC<Props> = (props) => {
-  const { coverage, labels = [], options, size, type = 'Location' } = props;
+  const { id, coverage, labels = [], options, size, type = 'Location' } = props;
 
   const xAxis = useMemo(() => {
     const data = Array.isArray(coverage) ? coverage[0] : coverage;
@@ -45,8 +46,8 @@ export const CoverageJSONTable: React.FC<Props> = (props) => {
               {type}
             </Text>
           </Table.Th>
-          {xAxis.map((axisPoint) => (
-            <Table.Th>
+          {xAxis.map((axisPoint, index) => (
+            <Table.Th key={`${id}-cj-table-th-${index}`}>
               <Text size={size}>{axisPoint}</Text>
             </Table.Th>
           ))}
@@ -54,7 +55,14 @@ export const CoverageJSONTable: React.FC<Props> = (props) => {
       </Table.Thead>
       <Table.Tbody>
         {options.map((option, index) => (
-          <CoverageRow coverage={coverage} labels={labels} option={option} size={size} />
+          <CoverageRow
+            key={`${id}-cj-table-td-${index}`}
+            coverage={coverage}
+            labels={labels}
+            option={option}
+            size={size}
+            options={options}
+          />
         ))}
       </Table.Tbody>
     </>

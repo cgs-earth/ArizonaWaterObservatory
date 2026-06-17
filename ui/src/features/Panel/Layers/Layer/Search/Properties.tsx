@@ -13,11 +13,12 @@ import { Variant } from '@/components/types';
 import styles from '@/features/Panel/Layers/Layer/Search/Search.module.css';
 
 type Props = {
+  id: string;
   properties: GeoJsonProperties;
 };
 
 export const Properties: React.FC<Props> = (props) => {
-  const { properties } = props;
+  const { id, properties } = props;
 
   const [showTable, setShowTable] = useState(false);
   const [list, setList] = useState<string[]>([]);
@@ -92,7 +93,7 @@ export const Properties: React.FC<Props> = (props) => {
           {showTable ? 'Hide Sample Feature' : 'Show Sample Feature'}
         </Button>
       </Box>
-      {showTable && <Table json={properties} search size="xs" />}
+      {showTable && <Table id={id} json={properties} search size="xs" />}
     </>
   );
 };

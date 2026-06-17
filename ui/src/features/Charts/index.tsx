@@ -101,6 +101,7 @@ export const Charts: React.FC<Props> = ({
           tabs={options}
           chartClassname={className}
           tabHeight={tabHeight}
+          disabled={isLoading}
         />
       )}
 

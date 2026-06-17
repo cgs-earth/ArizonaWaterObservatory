@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
-import { Table as TableComponent } from '@mantine/core';
+import { Table as TableComponent, TableProps } from '@mantine/core';
 import styles from '@/components/Table/Table.module.css';
 import TextInput from '@/components/TextInput';
 // TODO: Find a better location for this type
@@ -15,13 +15,15 @@ import { isCoverageCollection, isCoverageJSON } from '@/utils/isTypeObject';
 import { CoverageJSONTable } from './CoverageJSON';
 import { GeoJSONTable } from './GeoJSON';
 
-type Props = {
+type Props = TableProps & {
+  id: string;
   json?:
     | GeoJsonProperties
     | CoverageJSON
     | CoverageCollection
     | (CoverageJSON | CoverageCollection)[];
   labels?: string[];
+  type?: 'Grid' | 'Item' | 'Location';
   options?: TTypedOption[];
   size?: string;
   search?: boolean;
@@ -40,7 +42,16 @@ const isCoverageObjOrArray = (
 };
 
 const Table: React.FC<Props> = (props) => {
-  const { json = {}, size = 'sm', labels = [], options = [], search = false, fixed = true } = props;
+  const {
+    id,
+    json = {},
+    size = 'sm',
+    type,
+    labels = [],
+    options = [],
+    search = false,
+    fixed = true,
+  } = props;
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -65,9 +76,18 @@ const Table: React.FC<Props> = (props) => {
         withColumnBorders
         className={fixed ? styles.fixed : ''}
       >
-        {!isCoverage && <GeoJSONTable searchTerm={searchTerm} properties={json} size={size} />}
+        {!isCoverage && (
+          <GeoJSONTable id={id} searchTerm={searchTerm} properties={json} size={size} />
+        )}
         {isCoverage && (
-          <CoverageJSONTable coverage={json} labels={labels} options={options} size={size} />
+          <CoverageJSONTable
+            id={id}
+            coverage={json}
+            type={type}
+            labels={labels}
+            options={options}
+            size={size}
+          />
         )}
       </TableComponent>
     </>

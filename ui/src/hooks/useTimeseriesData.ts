@@ -200,12 +200,18 @@ export const useTimeseriesData = (args: Args) => {
     void fetchData();
 
     return () => {
-      // isMounted = false;
+      isMounted = false;
       if (controller.current) {
         // controller.current.abort('Effect closure');
       }
     };
   }, [requestKey]);
+
+  useEffect(() => {
+    return () => {
+      lastRequestKey.current = null;
+    };
+  }, []);
 
   const locationSet = useMemo(() => new Set(locationIds), [locationIds]);
 

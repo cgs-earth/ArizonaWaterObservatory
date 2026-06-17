@@ -32,7 +32,7 @@
 }
 
 .fullscreenButton svg {
-  width: 22px;
+  width: 1.375rem;
   height: auto;
 }
 
@@ -57,6 +57,11 @@
 .tabContent {
   padding: var(--default-spacing);
   background: var(--mantine-color-body);
+}
+
+.tabContent:fullscreen {
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
 .tabsList {

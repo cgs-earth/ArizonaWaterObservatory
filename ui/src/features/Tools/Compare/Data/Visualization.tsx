@@ -24,8 +24,10 @@ import {
 } from '@/services/edr.service';
 import awoService from '@/services/init/awo.init';
 import { Location } from '@/stores/main/types';
+import { CollectionType } from '@/utils/collection';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
+import { normalizeBBox } from '@/utils/normalizeBBox';
 import { TSimplifiedEntry } from '../types';
 
 type Props = {
@@ -84,12 +86,38 @@ export const Visualization: React.FC<Props> = (props: Props) => {
       locationId: Location['id'],
       params: IGetLocationParams,
       signal?: AbortSignal
-    ) =>
-      awoService.getLocation<CoverageCollection | CoverageJSON>(collectionId, locationId, {
-        signal,
-        params,
-      }),
-    []
+    ): Promise<CoverageCollection | CoverageJSON> => {
+      if (entry.collectionType === CollectionType.EDR) {
+        return awoService.getLocation(collectionId, locationId, {
+          signal,
+          params,
+        });
+      }
+
+      if (entry.collectionType === CollectionType.EDRGrid) {
+        const location = features.find((feature) => {
+          const id = isStringIdentifierCollection
+            ? (getIdStore(feature) ?? feature.id)
+            : feature.id;
+
+          return String(id) === locationId;
+        });
+
+        const bbox = location?.bbox;
+
+        if (bbox) {
+          return awoService.getCube(collectionId, {
+            signal,
+            params: { ...params, bbox: normalizeBBox(bbox) },
+          });
+        }
+
+        throw new Error('Missing bbox for EDRGrid location');
+      }
+
+      throw new Error(`Unsupported collection type: ${entry.collectionType}`);
+    },
+    [entry.collectionType, features]
   );
 
   const { chartData, seriesLabels, isLoading } = useTimeseriesData({
@@ -117,6 +145,17 @@ export const Visualization: React.FC<Props> = (props: Props) => {
 
     setOptions([...paramOptions, ...unitOptions]);
   }, [entry.parameters]);
+
+  const getType = (collectionType: CollectionType) => {
+    switch (collectionType) {
+      case CollectionType.EDR:
+        return 'Location';
+      case CollectionType.EDRGrid:
+        return 'Grid';
+      default:
+        return 'Item';
+    }
+  };
 
   return (
     <Stack>
@@ -162,11 +201,20 @@ export const Visualization: React.FC<Props> = (props: Props) => {
           seriesLabels={seriesLabels}
           tabs={options}
           showTabs={areControlsActive}
+          disabled={isLoading}
         />
       )}
       {showTable && (
         <Box className={styles.tableWrapper}>
-          <Table size="xs" fixed={false} json={chartData} labels={seriesLabels} options={options} />
+          <Table
+            id={entry.layer.id}
+            type={getType(entry.collectionType)}
+            size="xs"
+            fixed={false}
+            json={chartData}
+            labels={seriesLabels}
+            options={options}
+          />
         </Box>
       )}
     </Stack>

@@ -386,7 +386,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
           <Group align="flex-start" gap="calc(var(--default-spacing) * 2)" grow>
             {openedProps && (
               <Collapse in={openedProps}>
-                <Table json={location.properties} />
+                <Table id={layer.id} json={location.properties} />
               </Collapse>
             )}
             {openedGeo && (

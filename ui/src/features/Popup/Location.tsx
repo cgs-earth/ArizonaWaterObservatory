@@ -113,7 +113,7 @@ export const Location: React.FC<Props> = (props) => {
         )}
       </Box>
       <Box style={{ display: tab === 'table' ? 'block' : 'none' }} className={styles.tableWrapper}>
-        {feature && <Table size="xs" json={feature.properties} />}
+        {feature && <Table id={layer.id} size="xs" json={feature.properties} />}
       </Box>
       <Stack
         gap="calc(var(--default-spacing) * 2)"

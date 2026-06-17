@@ -20,6 +20,7 @@ type Props = {
   chartClassname?: string;
   tabHeight?: number;
   showTabs?: boolean;
+  disabled: boolean;
 };
 
 export const Tabbed: React.FC<Props> = (props) => {
@@ -33,6 +34,7 @@ export const Tabbed: React.FC<Props> = (props) => {
     chartClassname,
     tabHeight = 20,
     showTabs = true,
+    disabled,
   } = props;
 
   const [tab, setTab] = useState<string | null>(tabs.length > 0 ? tabs[0].value : null);
@@ -59,7 +61,11 @@ export const Tabbed: React.FC<Props> = (props) => {
       {showTabs && (
         <Tabs.List>
           {tabs.map((tab) => (
-            <Tabs.Tab key={`${collectionId}-${tab.value}-tab`} value={tab.value}>
+            <Tabs.Tab
+              key={`${collectionId}-${tab.value}-tab`}
+              value={tab.value}
+              disabled={disabled || data.length === 0}
+            >
               <Text size="xs" p={0}>
                 {tab.label}
               </Text>

@@ -9,13 +9,14 @@ import { Table as TableComponent, Text, TextProps } from '@mantine/core';
 import styles from '@/components/Table/Table.module.css';
 
 type Props = {
+  id: string;
   properties: GeoJsonProperties;
   size?: TextProps['size'];
   searchTerm?: string;
 };
 
 export const GeoJSONTable: React.FC<Props> = (props) => {
-  const { properties, size = 'sm', searchTerm = '' } = props;
+  const { id, properties, size = 'sm', searchTerm = '' } = props;
 
   const [filteredProperties, setFilteredProperties] = useState<GeoJsonProperties>(properties);
 
@@ -53,7 +54,7 @@ export const GeoJSONTable: React.FC<Props> = (props) => {
       </TableComponent.Thead>
       <TableComponent.Tbody>
         {Object.entries(filteredProperties ?? {}).map(([property, value]) => (
-          <TableComponent.Tr key={property}>
+          <TableComponent.Tr key={`${id}-gj-table-${property}`}>
             <TableComponent.Td className={styles.fitColumn}>
               <Text size={size} lineClamp={1}>
                 {property}

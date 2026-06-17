@@ -101,7 +101,7 @@ const Search: React.FC<Props> = (props) => {
               locationLimit={10}
             />
           )}
-          {showProperties && <Properties properties={sampleProperties} />}
+          {showProperties && <Properties id={layer.id} properties={sampleProperties} />}
           {!showMatches && !showProperties && (
             <Text size="sm" ta="center" mt="calc(var(--default-spacing) * 1)">
               No locations found.

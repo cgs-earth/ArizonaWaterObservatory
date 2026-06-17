@@ -11,6 +11,7 @@ import styles from '@/features/Tools/Compare/Compare.module.css';
 import { useDataTools } from '@/hooks/useAreDataToolsEnabled';
 import { collectionService } from '@/services/init';
 import { Location } from '@/stores/main/types';
+import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getParameterUnit } from '@/utils/parameters';
 import { TSimplifiedEntry } from '../types';
 import { FullscreenButton } from './FullscreenButton';
@@ -56,9 +57,14 @@ export const Tab: React.FC<Props> = (props) => {
               unit: getParameterUnit(object),
             }));
 
+          const collectionType = datasource
+            ? getCollectionType(datasource)
+            : CollectionType.Unknown;
+
           return {
             layer,
             parameters,
+            collectionType,
             locations: layerLocations,
           };
         }
@@ -106,7 +112,7 @@ export const Tab: React.FC<Props> = (props) => {
   const allControlsActive = layerEntries.every((entry) => activeControls.includes(entry.layer.id));
 
   return (
-    <Stack gap="calc(var(--default-spacing * 2))" className={styles.tabContent} ref={element}>
+    <Stack gap="calc(var(--default-spacing) * 2)" className={styles.tabContent} ref={element}>
       <Group justify="space-between" align="flex-end">
         <Select
           multiple
@@ -117,8 +123,6 @@ export const Tab: React.FC<Props> = (props) => {
           onChange={setActiveVisualizations}
         />
         <Group gap="var(--default-spacing)" align="flex-end">
-          {element.current && <FullscreenButton element={element.current} />}
-
           <Checkbox
             label="Show All Controls"
             mb="0.5rem"
@@ -126,8 +130,10 @@ export const Tab: React.FC<Props> = (props) => {
             indeterminate={!allControlsActive && activeControls.length > 0}
             onChange={(event) => handleAllControlsActiveChange(event.currentTarget.checked)}
           />
+          {element.current && <FullscreenButton element={element.current} />}
         </Group>
       </Group>
+      <Divider size="md" />
       {layerEntries
         .filter((entry) => activeVisualizations.includes(entry.layer.id))
         .map((entry, index) => (

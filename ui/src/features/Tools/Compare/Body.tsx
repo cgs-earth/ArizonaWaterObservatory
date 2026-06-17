@@ -77,10 +77,10 @@ export const Body: React.FC<Props> = (props) => {
     for (const layer of otherLayers) {
       const { to: otherTo, from: otherFrom } = getLayerTemporalExtent(layer);
 
-      if (otherFrom.isSameOrAfter(from)) {
+      if (otherFrom.isSameOrAfter(from) && otherFrom.isSameOrBefore(to)) {
         from = otherFrom;
       }
-      if (otherTo.isSameOrBefore(to)) {
+      if (otherTo.isSameOrBefore(to) && otherTo.isSameOrAfter(from)) {
         to = otherTo;
       }
     }
