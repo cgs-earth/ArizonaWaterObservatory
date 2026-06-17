@@ -26,7 +26,7 @@ type Props = {
 export const Tab: React.FC<Props> = (props) => {
   const { locations, from, to } = props;
 
-  const layers = useDataTools(true);
+  const { layers } = useDataTools(true);
 
   const [activeControls, setActiveControls] = useState<string[]>([]);
   const [activeVisualizations, setActiveVisualizations] = useState<string[]>([]);
@@ -102,11 +102,11 @@ export const Tab: React.FC<Props> = (props) => {
   // Memoize to prevent unnecessary rerender
   const options = useMemo(
     () =>
-      layerEntries.map((entry) => ({
-        value: entry.layer.id,
-        label: entry.layer.name,
+      layers.map((layer) => ({
+        value: layer.id,
+        label: layer.name,
       })),
-    [layerEntries]
+    [layers]
   );
 
   const allControlsActive = layerEntries.every((entry) => activeControls.includes(entry.layer.id));
@@ -116,11 +116,13 @@ export const Tab: React.FC<Props> = (props) => {
       <Group justify="space-between" align="flex-end">
         <Select
           multiple
+          classNames={{ input: styles.activeVisualizationDropdown }}
           size="sm"
           label="Layer Visualizations"
           data={options}
           value={activeVisualizations}
           onChange={setActiveVisualizations}
+          placeholder="Select..."
         />
         <Group gap="var(--default-spacing)" align="flex-end">
           <Checkbox

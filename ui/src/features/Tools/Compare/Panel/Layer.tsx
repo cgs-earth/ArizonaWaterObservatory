@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { Feature } from 'geojson';
+import { Box } from '@mantine/core';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
 import { Menu } from '@/features/TopBar/Links/Menu';
@@ -76,27 +77,29 @@ export const Layer: React.FC<Props> = (props) => {
   };
 
   return (
-    <Menu
-      collectionId={layer.datasourceId}
-      collectionType={collectionType}
-      mapLocations={mapLocations
-        .filter((feature) => hasSearchTerm(searchTerm, feature))
-        .map((feature) => ({
-          id: getId(feature, isStringIdentifierCollection),
-          label: getFeatureLabel(feature),
-        }))}
-      otherLocations={otherLocations
-        .filter((feature) => hasSearchTerm(searchTerm, feature))
-        .map((feature) => ({
-          id: getId(feature, isStringIdentifierCollection),
-          label: getFeatureLabel(feature),
-        }))}
-      selectedLocations={locations.map((location) => location.id)}
-      addLocation={handleLocationAdd}
-      removeLocation={handleLocationRemove}
-      searchTerm={searchTerm}
-      onSearchTermChange={handleSearchTermChange}
-      linkLocation={null}
-    />
+    <Box p="var(--default-spacing)">
+      <Menu
+        collectionId={layer.datasourceId}
+        collectionType={collectionType}
+        mapLocations={mapLocations
+          .filter((feature) => hasSearchTerm(searchTerm, feature))
+          .map((feature) => ({
+            id: getId(feature, isStringIdentifierCollection),
+            label: getFeatureLabel(feature),
+          }))}
+        otherLocations={otherLocations
+          .filter((feature) => hasSearchTerm(searchTerm, feature))
+          .map((feature) => ({
+            id: getId(feature, isStringIdentifierCollection),
+            label: getFeatureLabel(feature),
+          }))}
+        selectedLocations={locations.map((location) => location.id)}
+        addLocation={handleLocationAdd}
+        removeLocation={handleLocationRemove}
+        searchTerm={searchTerm}
+        onSearchTermChange={handleSearchTermChange}
+        linkLocation={null}
+      />
+    </Box>
   );
 };

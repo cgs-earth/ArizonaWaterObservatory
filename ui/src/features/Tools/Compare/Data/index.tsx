@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Tabs } from '@mantine/core';
+import { useEffect, useRef } from 'react';
+import { Box } from '@mantine/core';
 import styles from '@/features/Tools/Compare/Compare.module.css';
 import { Location } from '@/stores/main/types';
 import { Tab } from './Tab';
@@ -18,23 +19,18 @@ type Props = {
 const Data: React.FC<Props> = (props) => {
   const { locations, panelOpen, from, to } = props;
 
+  const test = useRef<string>(null);
+
+  useEffect(() => {
+    test.current = null;
+  }, [test]);
+
   return (
-    <Tabs
-      defaultValue="layer"
+    <Box
       className={`${styles.dataWrapper} ${panelOpen ? styles.dataWrapperPartial : styles.dataWrapperFull}`}
-      classNames={{
-        list: styles.tabsList,
-      }}
     >
-      <Tabs.List>
-        <Tabs.Tab value="layer">By Layer</Tabs.Tab>
-        <Tabs.Tab value="unit">By Unit</Tabs.Tab>
-      </Tabs.List>
-      <Tabs.Panel value="layer">
-        <Tab locations={locations} from={from} to={to} />
-      </Tabs.Panel>
-      <Tabs.Panel value="unit">{JSON.stringify(locations)}</Tabs.Panel>
-    </Tabs>
+      <Tab locations={locations} from={from} to={to} />
+    </Box>
   );
 };
 

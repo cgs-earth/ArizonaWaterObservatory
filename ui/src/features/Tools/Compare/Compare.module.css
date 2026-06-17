@@ -10,6 +10,10 @@
   overflow-y: auto;
 }
 
+.activeVisualizationDropdown {
+  width: 17rem;
+}
+
 .body {
   height: calc(100% - 3.75rem);
 }
@@ -55,6 +59,7 @@
 }
 
 .tabContent {
+  width: 100%;
   padding: var(--default-spacing);
   background: var(--mantine-color-body);
 }

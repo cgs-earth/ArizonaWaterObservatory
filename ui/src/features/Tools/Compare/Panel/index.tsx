@@ -78,7 +78,7 @@ const Panel: React.FC<Props> = (props) => {
           )}
         </Box>
         <Box className={styles.miniMapWrapper}>
-          <MiniMap />
+          <MiniMap locations={locations} />
         </Box>
       </Box>
     </Collapsible>

@@ -7,13 +7,25 @@ import { useEffect } from 'react';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
 import { useMap } from '@/contexts/MapContexts';
+// import { MAP_ID } from '@/features/Map/config';
 import { INITIAL_CENTER, INITIAL_ZOOM } from '@/features/Map/consts';
 import useMainStore from '@/stores/main';
+import { Location } from '@/stores/main/types';
 import { MINI_MAP_ID } from './consts';
 
-const MiniMap: React.FC = () => {
-  const basemap = useMainStore((state) => state.basemap);
+type Props = {
+  locations: Location[];
+};
 
+const MiniMap: React.FC<Props> = () => {
+  // const { locations } = props;
+
+  const basemap = useMainStore((state) => state.basemap);
+  // const layers = useMainStore((state) => state.layers);
+
+  // const [data, setData] = useState<TWrappedCoverage[]>([]);
+
+  // const { map: mainMap } = useMap(MAP_ID);
   const { map } = useMap(MINI_MAP_ID);
 
   useEffect(() => {
@@ -32,6 +44,50 @@ const MiniMap: React.FC = () => {
       }
     );
   }, [map]);
+
+  // useEffect(() => {
+  //   if (!map || !mainMap) {
+  //     console.log('early return', !map, !mainMap);
+  //     return;
+  //   }
+
+  //   console.log('y');
+  //   let existingLayers = new Set(map.getStyle().layers.map((layer) => layer.id));
+
+  //   // Listen for style data updates
+  //   map.on('styledata', () => {
+  //     console.log('HELLO');
+  //     const currentLayers = map.getStyle().layers;
+
+  //     currentLayers.forEach((layer) => {
+  //       // If the layer wasn't in our tracker, it was just added!
+  //       if (!existingLayers.has(layer.id)) {
+  //         console.log(`Layer added: ${layer.id}`);
+
+  //         // Execute your custom logic here
+  //       }
+  //     });
+
+  //     // Update the tracker with the current state
+  //     existingLayers = new Set(currentLayers.map((layer) => layer.id));
+  //   });
+
+  //   if (layers.every((layer) => layer.loaded)) {
+  //     map.setStyle(mainMap.getStyle());
+  //   }
+  // }, [map, layers]);
+
+  // useEffect(() => {
+  //   if (!map) {
+  //     return;
+  //   }
+
+  //   for (const location of locations) {
+
+  //   }
+
+  //   if (map)
+  // }, [locations])
 
   useEffect(() => {
     if (!map) {

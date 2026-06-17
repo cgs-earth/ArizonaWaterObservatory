@@ -52,12 +52,13 @@ export const Visualization: React.FC<Props> = (props: Props) => {
     entry.layer.datasourceId
   );
 
+  console.log('asdfasdf', selectedLocations, otherLocations);
   const features = useMemo(() => {
     const allLocations = [...selectedLocations, ...otherLocations];
     return allLocations.filter((feature) =>
       entry.locations.includes(getId(feature, isStringIdentifierCollection))
     );
-  }, [entry.locations]);
+  }, [selectedLocations, otherLocations, entry.locations]);
 
   const { organizedLabels } = useMemo(() => {
     const { layer } = entry;
@@ -102,6 +103,8 @@ export const Visualization: React.FC<Props> = (props: Props) => {
 
           return String(id) === locationId;
         });
+
+        console.log('HERE', location, features, locationId);
 
         const bbox = location?.bbox;
 

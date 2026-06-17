@@ -80,12 +80,13 @@ export const useTimeseriesData = (args: Args) => {
         locationIds,
         parameters: parameters.map((p) => p.id),
         coverageLabels,
+        getData: Date.now(),
       }),
-    [collectionId, from, to, locationIds, parameters]
+    [collectionId, from, to, locationIds, parameters, getData]
   );
 
   useEffect(() => {
-    let isMounted = true;
+    const isMounted = true;
 
     if (lastRequestKey.current === requestKey) {
       return;
@@ -200,7 +201,6 @@ export const useTimeseriesData = (args: Args) => {
     void fetchData();
 
     return () => {
-      isMounted = false;
       if (controller.current) {
         // controller.current.abort('Effect closure');
       }

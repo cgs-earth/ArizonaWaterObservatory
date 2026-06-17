@@ -103,9 +103,9 @@ export const Body: React.FC<Props> = (props) => {
     setLocations([...locations, newLocation]);
   };
 
-  const handleLocationRemove = (newLocation: Location) => {
+  const handleLocationRemove = (oldLocation: Location) => {
     const newLocations = locations.filter(
-      (location) => location.layerId === newLocation.layerId && location.id === newLocation.id
+      (location) => location.layerId !== oldLocation.layerId || location.id !== oldLocation.id
     );
 
     setLocations(newLocations);
