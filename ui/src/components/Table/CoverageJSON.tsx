@@ -25,6 +25,11 @@ export const CoverageJSONTable: React.FC<Props> = (props) => {
   const { id, coverage, labels = [], options, size, type = 'Location' } = props;
 
   const xAxis = useMemo(() => {
+    const coverageObjectEmpty = !coverage || (Array.isArray(coverage) && coverage.length === 0);
+    if (coverageObjectEmpty) {
+      return [];
+    }
+
     const data = Array.isArray(coverage) ? coverage[0] : coverage;
 
     const { x } = new CoverageChartService().coverageJSONToSeries(data);

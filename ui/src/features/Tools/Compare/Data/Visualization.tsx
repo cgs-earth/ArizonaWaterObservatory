@@ -52,7 +52,6 @@ export const Visualization: React.FC<Props> = (props: Props) => {
     entry.layer.datasourceId
   );
 
-  console.log('asdfasdf', selectedLocations, otherLocations);
   const features = useMemo(() => {
     const allLocations = [...selectedLocations, ...otherLocations];
     return allLocations.filter((feature) =>
@@ -80,7 +79,7 @@ export const Visualization: React.FC<Props> = (props: Props) => {
     return { organizedLocations, organizedLabels };
   }, [entry.locations, entry.layer, isStringIdentifierCollection]);
 
-  //   TODO: move this to a hook, account for grid fetch which requires a bbox
+  //   TODO: move this to a hook, better stability on
   const getData = useCallback(
     (
       collectionId: ICollection['id'],
@@ -103,8 +102,6 @@ export const Visualization: React.FC<Props> = (props: Props) => {
 
           return String(id) === locationId;
         });
-
-        console.log('HERE', location, features, locationId);
 
         const bbox = location?.bbox;
 
@@ -173,7 +170,7 @@ export const Visualization: React.FC<Props> = (props: Props) => {
                 size="sm"
                 variant={showChart ? Variant.Selected : Variant.Secondary}
                 onClick={() => setShowChart(!showChart)}
-                disabled={isLoading}
+                disabled={entry.locations.length === 0}
               >
                 Chart
               </Button>
@@ -181,7 +178,7 @@ export const Visualization: React.FC<Props> = (props: Props) => {
                 size="sm"
                 variant={showTable ? Variant.Selected : Variant.Secondary}
                 onClick={() => setShowTable(!showTable)}
-                disabled={isLoading}
+                disabled={entry.locations.length === 0}
               >
                 Table
               </Button>
@@ -195,30 +192,40 @@ export const Visualization: React.FC<Props> = (props: Props) => {
           />
         </Group>
       </Group>
-      {showChart && (
-        <Tabbed
-          collectionId={entry.layer.datasourceId}
-          data={chartData}
-          locationIds={entry.locations}
-          theme={computedColorScheme}
-          seriesLabels={seriesLabels}
-          tabs={options}
-          showTabs={areControlsActive}
-          disabled={isLoading}
-        />
-      )}
-      {showTable && (
-        <Box className={styles.tableWrapper}>
-          <Table
-            id={entry.layer.id}
-            type={getType(entry.collectionType)}
-            size="xs"
-            fixed={false}
-            json={chartData}
-            labels={seriesLabels}
-            options={options}
-          />
-        </Box>
+      {entry.locations.length === 0 ? (
+        <Group justify="center" align="center">
+          Select locations from the panel on the left.
+        </Group>
+      ) : (
+        <>
+          {showChart && (
+            <Tabbed
+              collectionId={entry.layer.datasourceId}
+              data={chartData}
+              locationIds={entry.locations}
+              theme={computedColorScheme}
+              seriesLabels={seriesLabels}
+              tabs={options}
+              showTabs={areControlsActive}
+              disabled={isLoading}
+              isLoading={isLoading && chartData.length === 0}
+            />
+          )}
+          {showTable && (
+            <Box className={styles.tableWrapper}>
+              <Table
+                id={entry.layer.id}
+                type={getType(entry.collectionType)}
+                size="xs"
+                fixed={false}
+                json={chartData}
+                labels={seriesLabels}
+                options={options}
+                disabled={isLoading}
+              />
+            </Box>
+          )}
+        </>
       )}
     </Stack>
   );

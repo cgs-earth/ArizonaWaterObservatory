@@ -35,16 +35,14 @@ export const Tab: React.FC<Props> = (props) => {
 
   const layerEntries = useMemo(() => {
     // Get All unique layer Id's
-    const uniqueLayerIds = [...new Set(locations.map((l) => l.layerId))];
-
-    const layers = uniqueLayerIds
-      .map((layerId) => {
-        const layer = collectionService.getLayer(layerId);
+    const layerEntries = layers
+      .map(({ id }) => {
+        const layer = collectionService.getLayer(id);
 
         if (layer) {
           const datasource = collectionService.getDatasource(layer.datasourceId);
           const layerLocations = locations
-            .filter((location) => location.layerId === layerId)
+            .filter((location) => location.layerId === id)
             .map((location) => location.id);
 
           const paramObjects = Object.values(datasource?.parameter_names ?? {});
@@ -72,12 +70,20 @@ export const Tab: React.FC<Props> = (props) => {
       })
       .filter(Boolean) as TSimplifiedEntry[];
 
-    return layers;
+    return layerEntries;
   }, [locations, layers]);
 
   useEffect(() => {
     setActiveControls(activeVisualizations);
   }, [activeVisualizations]);
+
+  useEffect(() => {
+    for (const entry of layerEntries) {
+      if (entry.locations.length > 0 && !activeVisualizations.includes(entry.layer.id)) {
+        setActiveVisualizations([...activeVisualizations, entry.layer.id]);
+      }
+    }
+  }, [layerEntries]);
 
   const handleAllControlsActiveChange = (checked: boolean) => {
     if (checked) {

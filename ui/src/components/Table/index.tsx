@@ -28,6 +28,7 @@ type Props = TableProps & {
   size?: string;
   search?: boolean;
   fixed?: boolean;
+  disabled?: boolean;
 };
 
 const isCoverageObjOrArray = (
@@ -51,6 +52,7 @@ const Table: React.FC<Props> = (props) => {
     options = [],
     search = false,
     fixed = true,
+    disabled = false,
   } = props;
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,6 +69,7 @@ const Table: React.FC<Props> = (props) => {
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.currentTarget.value)}
           mb="var(--default-spacing)"
+          disabled={disabled}
         />
       )}
       <TableComponent

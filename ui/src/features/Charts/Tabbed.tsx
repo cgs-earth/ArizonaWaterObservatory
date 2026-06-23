@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Tabs, Text } from '@mantine/core';
+import { Skeleton, Tabs, Text } from '@mantine/core';
 import LineChart from '@/components/Charts/LineChart';
 import styles from '@/features/Charts/Charts.module.css';
 import { ETabTypes, TTypedOption } from '@/features/Charts/types';
@@ -20,7 +20,8 @@ type Props = {
   chartClassname?: string;
   tabHeight?: number;
   showTabs?: boolean;
-  disabled: boolean;
+  isLoading?: boolean;
+  disabled?: boolean;
 };
 
 export const Tabbed: React.FC<Props> = (props) => {
@@ -34,7 +35,8 @@ export const Tabbed: React.FC<Props> = (props) => {
     chartClassname,
     tabHeight = 20,
     showTabs = true,
-    disabled,
+    disabled = false,
+    isLoading = false,
   } = props;
 
   const [tab, setTab] = useState<string | null>(tabs.length > 0 ? tabs[0].value : null);
@@ -73,44 +75,50 @@ export const Tabbed: React.FC<Props> = (props) => {
           ))}
         </Tabs.List>
       )}
-      {tabs
-        .filter((tab) => tab.type === ETabTypes.Parameter)
-        .map((tab) => (
-          <Tabs.Panel
-            key={`${collectionId}-${tab.value}-tab-panel`}
-            value={tab.value}
-            h={`${tabHeight}rem`}
-          >
-            <LineChart
-              data={data}
-              legend
-              prettyLabels={tabs.filter(({ type }) => type === ETabTypes.Parameter)}
-              theme={theme}
-              filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-              seriesLabels={seriesLabels}
-              chosenParameter={tab.value}
-            />
-          </Tabs.Panel>
-        ))}
-      {tabs
-        .filter((tab) => tab.type === ETabTypes.Unit)
-        .map((tab) => (
-          <Tabs.Panel
-            key={`${collectionId}-${tab.value}-tab-panel`}
-            value={tab.value}
-            h={`${tabHeight}rem`}
-          >
-            <LineChart
-              data={data}
-              legend
-              prettyLabels={tabs.filter(({ type }) => type === ETabTypes.Parameter)}
-              theme={theme}
-              filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-              seriesLabels={seriesLabels}
-              chosenUnit={tab.value}
-            />
-          </Tabs.Panel>
-        ))}
+      {isLoading ? (
+        <Skeleton h={`${tabHeight}rem`} w="auto" radius={0} />
+      ) : (
+        <>
+          {tabs
+            .filter((tab) => tab.type === ETabTypes.Parameter)
+            .map((tab) => (
+              <Tabs.Panel
+                key={`${collectionId}-${tab.value}-tab-panel`}
+                value={tab.value}
+                h={`${tabHeight}rem`}
+              >
+                <LineChart
+                  data={data}
+                  legend
+                  prettyLabels={tabs.filter(({ type }) => type === ETabTypes.Parameter)}
+                  theme={theme}
+                  filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
+                  seriesLabels={seriesLabels}
+                  chosenParameter={tab.value}
+                />
+              </Tabs.Panel>
+            ))}
+          {tabs
+            .filter((tab) => tab.type === ETabTypes.Unit)
+            .map((tab) => (
+              <Tabs.Panel
+                key={`${collectionId}-${tab.value}-tab-panel`}
+                value={tab.value}
+                h={`${tabHeight}rem`}
+              >
+                <LineChart
+                  data={data}
+                  legend
+                  prettyLabels={tabs.filter(({ type }) => type === ETabTypes.Parameter)}
+                  theme={theme}
+                  filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
+                  seriesLabels={seriesLabels}
+                  chosenUnit={tab.value}
+                />
+              </Tabs.Panel>
+            ))}
+        </>
+      )}
     </Tabs>
   );
 };
