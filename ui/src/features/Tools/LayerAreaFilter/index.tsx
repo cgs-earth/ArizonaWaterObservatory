@@ -17,16 +17,21 @@ import styles from '@/features/Panel/Panel.module.css';
 import { Confirm } from '@/features/Tools/SpatialSelection/Confirm';
 import { useConfirmableAction } from '@/hooks/useConfirmableAction';
 import useMainStore from '@/stores/main';
-import { Layer } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { LoadingType, NotificationVariant, Overlay } from '@/stores/session/types';
-import { LocationsCheckList } from './Content';
 import Button from '@/components/Button';
 import { useLocations } from '@/hooks/useLocations';
 import { Feature, GeoJsonProperties, Geometry, MultiPolygon, Polygon } from 'geojson';
-import notificationManager from '@/managers/Notification.init';
-import mainManager from '@/managers/Main.init';
+import { Layer as LayerType } from '@/stores/main/types';
+import Layer from '@/features/Panel/Layers/Layer';
 import loadingManager from '@/managers/Loading.init';
+import { mainManager } from '@/services/init';
+import notificationManager from '@/managers/Notification.init';
+import { isPolygonFeature } from '@/utils/isTypeFeature';
+import { polygon } from '@turf/turf';
+
+
+
 
 
 const LayerAreaFilter: React.FC = () => {
@@ -37,7 +42,7 @@ const LayerAreaFilter: React.FC = () => {
   const hasLayers = useMainStore((state) => state.layers.length > 0);
 
   const layers = useMainStore((state) => state.layers);
-  const [validLayers, setValidLayers] = useState<Layer[]>([]);
+  const [validLayers, setValidLayers] = useState<LayerType[]>([]);
   const [validLocations, setValidLocations] = useState<Feature<Geometry, GeoJsonProperties>[]>([]);
   const confirmAction = useConfirmableAction(hasLayers);
   const { selectedLocations,otherLocations } = useLocations(layers);
@@ -47,7 +52,13 @@ const LayerAreaFilter: React.FC = () => {
   const loadingInstance = useRef<string>(null);
 
   const handleClick = () => {
-      //applySpatialFilter(validLocations)
+    const drawnShapes : Feature<Polygon>[] = [];
+    for (const location of selectedLocations){
+      if(isPolygonFeature(location)){
+        drawnShapes.push(location)
+      }
+    }
+    applySpatialFilter(drawnShapes);
   };
   
   const applySpatialFilter = async (drawnShapes: Feature<Polygon | MultiPolygon>[]) => {
@@ -91,6 +102,7 @@ const LayerAreaFilter: React.FC = () => {
    setValidLocations(validLocations);
     
   }, [ layers,selectedLocations,otherLocations ]);
+  
 
   return (
     <>
@@ -127,7 +139,7 @@ const LayerAreaFilter: React.FC = () => {
                       {
                         id: `layers-accordion-${layer.id}`,
                         title: <Header layer={layer} />,
-                        content: <LocationsCheckList layer={layer} />,
+                        content: <Layer layer={layer} includedTabs={[ 'search','locations']} flatTabs />,
                         control: <Control layer={layer} />,
                       },
                     ]}
