@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Group, Stack, Title, useComputedColorScheme } from '@mantine/core';
+import { Box, Group, Loader, Stack, Title, useComputedColorScheme } from '@mantine/core';
 import Button from '@/components/Button';
 import Checkbox from '@/components/Checkbox';
 import Table from '@/components/Table';
@@ -160,9 +160,13 @@ export const Visualization: React.FC<Props> = (props: Props) => {
   return (
     <Stack>
       <Group justify="space-between">
-        <Title variant="h4" size="h5">
-          {entry.layer.name}
-        </Title>
+        <Group gap="var(--default-spacing)">
+          <Title variant="h4" size="h5">
+            {entry.layer.name}
+          </Title>
+          {isLoading && <Loader color="#0183a1" type="dots" />}
+        </Group>
+
         <Group gap="var(--default-spacing)">
           {areControlsActive && (
             <>
