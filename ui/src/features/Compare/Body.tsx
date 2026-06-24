@@ -6,7 +6,7 @@
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Group, Stack } from '@mantine/core';
 import styles from '@/features/Compare/Compare.module.css';
 import Data from '@/features/Compare/Data';
@@ -17,7 +17,9 @@ import notificationManager from '@/managers/Notification.init';
 import { collectionService, factoryService } from '@/services/init';
 import { Layer, Location } from '@/stores/main/types';
 import { NotificationVariant } from '@/stores/session/types';
-import { getCollectionType } from '@/utils/collection';
+import { CollectionType, getCollectionType } from '@/utils/collection';
+import { getParameterUnit } from '@/utils/parameters';
+import { TSimplifiedEntry } from './types';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -92,6 +94,46 @@ export const Body: React.FC<Props> = (props) => {
     setTo(to.format('YYYY-MM-DD'));
   }, [layers]);
 
+  const layerEntries = useMemo(() => {
+    // Get All unique layer Id's
+    const layerEntries = layers
+      .map(({ id }) => {
+        const layer = collectionService.getLayer(id);
+
+        if (layer) {
+          const datasource = collectionService.getDatasource(layer.datasourceId);
+          const layerLocations = locations
+            .filter((location) => location.layerId === id)
+            .map((location) => location.id);
+
+          const paramObjects = Object.values(datasource?.parameter_names ?? {});
+
+          const parameters = paramObjects
+            .filter((object) => object.type === 'Parameter' && layer.parameters.includes(object.id))
+            .map((object) => ({
+              id: object.id,
+              name: object.name,
+              unit: getParameterUnit(object),
+            }));
+
+          const collectionType = datasource
+            ? getCollectionType(datasource)
+            : CollectionType.Unknown;
+
+          return {
+            layer,
+            parameters,
+            collectionType,
+            locations: layerLocations,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as TSimplifiedEntry[];
+
+    return layerEntries;
+  }, [locations, layers]);
+
   const handleFromChange = (from: string) => {
     setFrom(from);
   };
@@ -131,6 +173,7 @@ export const Body: React.FC<Props> = (props) => {
         <Panel
           layers={layers}
           locations={locations}
+          layerEntries={layerEntries}
           layerLocationGroups={layerLocationGroups}
           onLocationAdd={handleLocationAdd}
           onLocationRemove={handleLocationRemove}
@@ -138,6 +181,7 @@ export const Body: React.FC<Props> = (props) => {
           onClose={() => handlePanelChange(false)}
         />
         <Data
+          layerEntries={layerEntries}
           layerLocationGroups={layerLocationGroups}
           locations={locations}
           panelOpen={panelOpen}

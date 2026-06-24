@@ -16,11 +16,13 @@ import { Fallback } from '@/features/Panel/Layers/Layer/Fallback';
 import { Header } from '@/features/Panel/Layers/Layer/Header';
 import { LayerLocationGroups } from '@/hooks/useAllLocations';
 import { Layer as LayerType, Location } from '@/stores/main/types';
+import { TSimplifiedEntry } from '../types';
 
 type Props = {
   layers: LayerType[];
   locations: Location[];
   layerLocationGroups: LayerLocationGroups;
+  layerEntries: TSimplifiedEntry[];
   onLocationAdd: (location: Location) => void;
   onLocationRemove: (location: Location) => void;
   onOpen: () => void;
@@ -31,6 +33,7 @@ const Panel: React.FC<Props> = (props) => {
   const {
     layers,
     locations,
+    layerEntries,
     layerLocationGroups,
     onLocationAdd,
     onLocationRemove,
@@ -90,6 +93,7 @@ const Panel: React.FC<Props> = (props) => {
         <Box className={styles.miniMapWrapper}>
           <MiniMap
             layers={layers}
+            layerEntries={layerEntries}
             locations={locations}
             layerLocationGroups={layerLocationGroups}
           />

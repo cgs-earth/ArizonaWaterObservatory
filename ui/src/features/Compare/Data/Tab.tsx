@@ -13,20 +13,18 @@ import { Visualization } from '@/features/Compare/Data/Visualization';
 import { TSimplifiedEntry } from '@/features/Compare/types';
 import { LayerLocationGroups } from '@/hooks/useAllLocations';
 import { useDataTools } from '@/hooks/useAreDataToolsEnabled';
-import { collectionService } from '@/services/init';
 import { Location } from '@/stores/main/types';
-import { CollectionType, getCollectionType } from '@/utils/collection';
-import { getParameterUnit } from '@/utils/parameters';
 
 type Props = {
   locations: Location[];
+  layerEntries: TSimplifiedEntry[];
   layerLocationGroups: LayerLocationGroups;
   from: string;
   to: string;
 };
 
 export const Tab: React.FC<Props> = (props) => {
-  const { locations, layerLocationGroups, from, to } = props;
+  const { layerEntries, layerLocationGroups, from, to } = props;
 
   const { layers } = useDataTools(true);
 
@@ -34,46 +32,6 @@ export const Tab: React.FC<Props> = (props) => {
   const [activeVisualizations, setActiveVisualizations] = useState<string[]>([]);
 
   const element = useRef<HTMLDivElement>(null);
-
-  const layerEntries = useMemo(() => {
-    // Get All unique layer Id's
-    const layerEntries = layers
-      .map(({ id }) => {
-        const layer = collectionService.getLayer(id);
-
-        if (layer) {
-          const datasource = collectionService.getDatasource(layer.datasourceId);
-          const layerLocations = locations
-            .filter((location) => location.layerId === id)
-            .map((location) => location.id);
-
-          const paramObjects = Object.values(datasource?.parameter_names ?? {});
-
-          const parameters = paramObjects
-            .filter((object) => object.type === 'Parameter' && layer.parameters.includes(object.id))
-            .map((object) => ({
-              id: object.id,
-              name: object.name,
-              unit: getParameterUnit(object),
-            }));
-
-          const collectionType = datasource
-            ? getCollectionType(datasource)
-            : CollectionType.Unknown;
-
-          return {
-            layer,
-            parameters,
-            collectionType,
-            locations: layerLocations,
-          };
-        }
-        return null;
-      })
-      .filter(Boolean) as TSimplifiedEntry[];
-
-    return layerEntries;
-  }, [locations, layers]);
 
   useEffect(() => {
     setActiveControls(activeVisualizations);
