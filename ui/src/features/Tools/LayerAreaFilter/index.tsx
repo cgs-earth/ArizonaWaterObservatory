@@ -28,7 +28,6 @@ import loadingManager from '@/managers/Loading.init';
 import { factoryService, mainManager } from '@/services/init';
 import notificationManager from '@/managers/Notification.init';
 import { isPolygonFeature } from '@/utils/isTypeFeature';
-import { polygon } from '@turf/turf';
 import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
 
