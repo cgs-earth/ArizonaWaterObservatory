@@ -3,11 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { XAXisOption } from 'echarts/types/dist/shared';
 import { EChartsSeries } from '@/components/Charts/types';
 import notificationManager from '@/managers/Notification.init';
 import { CoverageService } from '@/services/coverageJSON/coverage.service';
-import { TChartData, TCoverageOptions, TOptions, TValues } from '@/services/coverageJSON/types';
+import {
+  TChartData,
+  TCoverageOptions,
+  TOptions,
+  TValues,
+  XAXisOption,
+} from '@/services/coverageJSON/types';
 import { CoverageAxesValues, CoverageCollection, CoverageJSON } from '@/services/edr.service';
 import { NotificationVariant } from '@/stores/session/types';
 import { isAxesValues, isCoverageCollection } from '@/utils/isTypeObject';

@@ -40,6 +40,12 @@ export const mapService = new MapService(useMainStore, {
   popupService,
 });
 
+export const miniMapService = new MapService(useMainStore, {
+  collectionService,
+  factoryService,
+  locationService,
+});
+
 export const spatialService = new SpatialService(useMainStore);
 
 export const validationService = new ValidationService();

@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import { Box } from '@mantine/core';
+import { Box, Skeleton } from '@mantine/core';
 import LineChart from '@/components/Charts/LineChart';
 import styles from '@/features/Charts/Charts.module.css';
 import { ETabTypes, TTypedOption } from '@/features/Charts/types';
@@ -19,6 +19,7 @@ type Props = {
   entries: TTypedOption[];
   chartClassname?: string;
   value: string;
+  isLoading?: boolean;
 };
 
 export const Unmanaged: React.FC<Props> = (props) => {
@@ -31,6 +32,7 @@ export const Unmanaged: React.FC<Props> = (props) => {
     entries: entries,
     chartClassname,
     value,
+    isLoading = false,
   } = props;
 
   const filteredEntries = useMemo(
@@ -40,45 +42,52 @@ export const Unmanaged: React.FC<Props> = (props) => {
 
   return (
     <>
-      {filteredEntries
-        .filter((tab) => tab.value === value)
-        .map((tab) => (
-          <Box
-            key={`${collectionId}-${tab.value}-unmanaged-panel`}
-            className={`${styles.panel} ${chartClassname}`}
-            style={{ display: value === tab.value ? 'block' : 'none' }}
-          >
-            <LineChart
-              data={data}
-              legend
-              prettyLabels={filteredEntries}
-              theme={theme}
-              filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-              seriesLabels={seriesLabels}
-              chosenParameter={tab.value}
-            />
-          </Box>
-        ))}
-      {entries
-        .filter((tab) => tab.type === ETabTypes.Unit)
-        .filter((tab) => tab.value === value)
-        .map((tab) => (
-          <Box
-            key={`${collectionId}-${tab.value}-unmanaged-panel`}
-            className={`${styles.panel} ${chartClassname}`}
-            style={{ display: value === tab.value ? 'block' : 'none' }}
-          >
-            <LineChart
-              data={data}
-              legend
-              prettyLabels={filteredEntries}
-              theme={theme}
-              filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-              seriesLabels={seriesLabels}
-              chosenUnit={tab.value}
-            />
-          </Box>
-        ))}
+      {isLoading ? (
+        <Skeleton height="12rem" width="auto" />
+      ) : (
+        <>
+          {filteredEntries
+            .filter((tab) => tab.value === value)
+            .map((tab) => (
+              <Box
+                key={`${collectionId}-${tab.value}-unmanaged-panel`}
+                className={`${styles.panel} ${chartClassname}`}
+                style={{ display: value === tab.value ? 'block' : 'none' }}
+              >
+                <LineChart
+                  data={data}
+                  legend
+                  prettyLabels={filteredEntries}
+                  theme={theme}
+                  filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
+                  seriesLabels={seriesLabels}
+                  chosenParameter={tab.value}
+                />
+              </Box>
+            ))}
+
+          {entries
+            .filter((tab) => tab.type === ETabTypes.Unit)
+            .filter((tab) => tab.value === value)
+            .map((tab) => (
+              <Box
+                key={`${collectionId}-${tab.value}-unmanaged-panel`}
+                className={`${styles.panel} ${chartClassname}`}
+                style={{ display: value === tab.value ? 'block' : 'none' }}
+              >
+                <LineChart
+                  data={data}
+                  legend
+                  prettyLabels={filteredEntries}
+                  theme={theme}
+                  filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
+                  seriesLabels={seriesLabels}
+                  chosenUnit={tab.value}
+                />
+              </Box>
+            ))}
+        </>
+      )}
     </>
   );
 };

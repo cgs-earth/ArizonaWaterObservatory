@@ -5,6 +5,7 @@
 
 import { PropsWithChildren } from 'react';
 import { MapProvider } from '@/contexts/MapContexts';
+import { MINI_MAP_ID } from '@/features/Compare/MiniMap/consts';
 import { MAP_ID } from '@/features/Map/config';
 
 // import { MAP_ID } from '@/features/Map/consts';
@@ -15,7 +16,7 @@ import { MAP_ID } from '@/features/Map/config';
  * @component
  */
 export const Map: React.FC<PropsWithChildren> = ({ children }) => {
-  const mapIds: string[] = [MAP_ID];
+  const mapIds: string[] = [MAP_ID, MINI_MAP_ID];
 
   return <MapProvider mapIds={mapIds}>{children}</MapProvider>;
 };

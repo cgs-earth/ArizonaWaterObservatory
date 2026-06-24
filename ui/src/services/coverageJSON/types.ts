@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { XAXisOption } from 'echarts/types/dist/shared';
 import { EChartsSeries } from '@/components/Charts/types';
 import { CoverageJSON } from '@/services/edr.service';
 
@@ -30,6 +29,16 @@ export type TFilteredRange = [
     values: number[];
   },
 ];
+
+// Stricter type than the Echarts union type
+export type XAXisOption = {
+  type?: string;
+  boundaryGap?: boolean;
+  data?: string[] | number[];
+  name?: string;
+  nameLocation?: string;
+  nameGap?: number;
+};
 
 export type TChartData = {
   x: XAXisOption;

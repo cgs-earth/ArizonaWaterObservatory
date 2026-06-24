@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FeatureCollection } from 'geojson';
 import {
   CoverageAxesSegments,
   CoverageAxesValues,
@@ -12,25 +11,21 @@ import {
 } from '@/services/edr.service';
 
 export const isCoverageCollection = (
-  object: CoverageCollection | CoverageJSON | FeatureCollection
+  object: Record<string, any> | null
 ): object is CoverageCollection => {
-  return object?.type === 'CoverageCollection';
+  return Boolean(object) && object?.type === 'CoverageCollection';
 };
 
-export const isCoverageJSON = (
-  object: CoverageCollection | CoverageJSON | FeatureCollection
-): object is CoverageJSON => {
-  return Boolean(object?.type) && object.type === 'Coverage';
+export const isCoverageJSON = (object: Record<string, any> | null): object is CoverageJSON => {
+  return Boolean(object) && Boolean(object?.type) && object?.type === 'Coverage';
 };
 
 export const isAxesValues = (
   object: CoverageAxesSegments | CoverageAxesValues
 ): object is CoverageAxesValues => {
-  return 'values' in object && Array.isArray(object.values);
+  return object && 'values' in object && Array.isArray(object.values);
 };
 
-export const isFeatureCollection = (
-  object: CoverageCollection | CoverageJSON | FeatureCollection
-): object is CoverageJSON => {
-  return Boolean(object?.type) && object.type === 'FeatureCollection';
+export const isFeatureCollection = (object: Record<string, any> | null): object is CoverageJSON => {
+  return Boolean(object) && Boolean(object?.type) && object?.type === 'FeatureCollection';
 };

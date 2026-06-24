@@ -170,6 +170,7 @@ const Popup: React.FC<Props> = (props) => {
       )}
       {collectionType === CollectionType.Features && feature && (
         <Item
+          id={layer.id}
           location={location}
           locations={locations}
           feature={feature}

@@ -177,6 +177,10 @@ const LineChart = (props: Props) => {
     chosenUnit,
   ]);
 
+  if (data.length === 0) {
+    return null;
+  }
+
   return (
     <ReactEChartsCore
       className={styles.smoothTransition}
