@@ -360,9 +360,11 @@ export class MapService {
         );
       }
 
-      drawLayers.forEach((layerId) => {
-        this.map!.moveLayer(layerId);
-      });
+      if (this.draw) {
+        drawLayers.forEach((layerId) => {
+          this.map!.moveLayer(layerId);
+        });
+      }
     }
   }
 
