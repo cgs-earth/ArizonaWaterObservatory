@@ -8,7 +8,7 @@ import Reset from '@/assets/Reset';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
 import IconButton from '@/components/IconButton';
-import styles from '@/features/Tools/Compare/Compare.module.css';
+import styles from '@/features/Compare/Compare.module.css';
 
 type Props = {
   from: string;

@@ -8,17 +8,19 @@ import Accordion from '@/components/Accordion';
 import Collapsible from '@/components/Collapsible';
 import { Variant } from '@/components/types';
 import { useMap } from '@/contexts/MapContexts';
+import styles from '@/features/Compare/Compare.module.css';
+import MiniMap from '@/features/Compare/MiniMap';
+import { MINI_MAP_ID } from '@/features/Compare/MiniMap/consts';
+import { Layer } from '@/features/Compare/Panel/Layer';
 import { Fallback } from '@/features/Panel/Layers/Layer/Fallback';
 import { Header } from '@/features/Panel/Layers/Layer/Header';
-import styles from '@/features/Tools/Compare/Compare.module.css';
+import { LayerLocationGroups } from '@/hooks/useAllLocations';
 import { Layer as LayerType, Location } from '@/stores/main/types';
-import MiniMap from '../MiniMap';
-import { MINI_MAP_ID } from '../MiniMap/consts';
-import { Layer } from './Layer';
 
 type Props = {
   layers: LayerType[];
   locations: Location[];
+  layerLocationGroups: LayerLocationGroups;
   onLocationAdd: (location: Location) => void;
   onLocationRemove: (location: Location) => void;
   onOpen: () => void;
@@ -26,7 +28,15 @@ type Props = {
 };
 
 const Panel: React.FC<Props> = (props) => {
-  const { layers, locations, onLocationAdd, onLocationRemove, onOpen, onClose } = props;
+  const {
+    layers,
+    locations,
+    layerLocationGroups,
+    onLocationAdd,
+    onLocationRemove,
+    onOpen,
+    onClose,
+  } = props;
 
   const { map } = useMap(MINI_MAP_ID);
 
@@ -78,7 +88,11 @@ const Panel: React.FC<Props> = (props) => {
           )}
         </Box>
         <Box className={styles.miniMapWrapper}>
-          <MiniMap locations={locations} />
+          <MiniMap
+            layers={layers}
+            locations={locations}
+            layerLocationGroups={layerLocationGroups}
+          />
         </Box>
       </Box>
     </Collapsible>

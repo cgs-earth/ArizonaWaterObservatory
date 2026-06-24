@@ -3,33 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef } from 'react';
 import { Box } from '@mantine/core';
-import styles from '@/features/Tools/Compare/Compare.module.css';
+import styles from '@/features/Compare/Compare.module.css';
+import { Tab } from '@/features/Compare/Data/Tab';
+import { LayerLocationGroups } from '@/hooks/useAllLocations';
 import { Location } from '@/stores/main/types';
-import { Tab } from './Tab';
 
 type Props = {
   locations: Location[];
+  layerLocationGroups: LayerLocationGroups;
   panelOpen: boolean;
   from: string;
   to: string;
 };
 
 const Data: React.FC<Props> = (props) => {
-  const { locations, panelOpen, from, to } = props;
-
-  const test = useRef<string>(null);
-
-  useEffect(() => {
-    test.current = null;
-  }, [test]);
+  const { locations, layerLocationGroups, panelOpen, from, to } = props;
 
   return (
     <Box
       className={`${styles.dataWrapper} ${panelOpen ? styles.dataWrapperPartial : styles.dataWrapperFull}`}
     >
-      <Tab locations={locations} from={from} to={to} />
+      <Tab locations={locations} layerLocationGroups={layerLocationGroups} from={from} to={to} />
     </Box>
   );
 };

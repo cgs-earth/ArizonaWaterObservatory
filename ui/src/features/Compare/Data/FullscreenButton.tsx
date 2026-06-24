@@ -7,7 +7,7 @@ import { useState } from 'react';
 import Fullscreen from '@/assets/Fullscreen';
 import FullscreenExit from '@/assets/FullscreenExit';
 import IconButton from '@/components/IconButton';
-import styles from '@/features/Tools/Compare/Compare.module.css';
+import styles from '@/features/Compare/Compare.module.css';
 
 /**
  *

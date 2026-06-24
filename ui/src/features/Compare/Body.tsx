@@ -8,15 +8,16 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useEffect, useState } from 'react';
 import { Group, Stack } from '@mantine/core';
-import styles from '@/features/Tools/Compare/Compare.module.css';
+import styles from '@/features/Compare/Compare.module.css';
+import Data from '@/features/Compare/Data';
+import { Header } from '@/features/Compare/Header';
+import Panel from '@/features/Compare/Panel';
+import { useAllLocations } from '@/hooks/useAllLocations';
 import notificationManager from '@/managers/Notification.init';
 import { collectionService, factoryService } from '@/services/init';
 import { Layer, Location } from '@/stores/main/types';
 import { NotificationVariant } from '@/stores/session/types';
 import { getCollectionType } from '@/utils/collection';
-import Data from './Data';
-import { Header } from './Header';
-import Panel from './Panel';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -56,6 +57,8 @@ export const Body: React.FC<Props> = (props) => {
   const [from, setFrom] = useState(dayjs().subtract(1, 'day').format('YYYY-MM-DD'));
   const [to, setTo] = useState(dayjs().format('YYYY-MM-DD'));
   const [panelOpen, setPanelOpen] = useState(true);
+
+  const { layerLocationGroups } = useAllLocations(layers);
 
   const [locations, setLocations] = useState<Location[]>([]);
 
@@ -128,12 +131,19 @@ export const Body: React.FC<Props> = (props) => {
         <Panel
           layers={layers}
           locations={locations}
+          layerLocationGroups={layerLocationGroups}
           onLocationAdd={handleLocationAdd}
           onLocationRemove={handleLocationRemove}
           onOpen={() => handlePanelChange(true)}
           onClose={() => handlePanelChange(false)}
         />
-        <Data locations={locations} panelOpen={panelOpen} from={from} to={to} />
+        <Data
+          layerLocationGroups={layerLocationGroups}
+          locations={locations}
+          panelOpen={panelOpen}
+          from={from}
+          to={to}
+        />
       </Group>
     </Stack>
   );

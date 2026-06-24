@@ -7,24 +7,26 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Divider, Group, Stack } from '@mantine/core';
 import Checkbox from '@/components/Checkbox';
 import Select from '@/components/Select';
-import styles from '@/features/Tools/Compare/Compare.module.css';
+import styles from '@/features/Compare/Compare.module.css';
+import { FullscreenButton } from '@/features/Compare/Data/FullscreenButton';
+import { Visualization } from '@/features/Compare/Data/Visualization';
+import { TSimplifiedEntry } from '@/features/Compare/types';
+import { LayerLocationGroups } from '@/hooks/useAllLocations';
 import { useDataTools } from '@/hooks/useAreDataToolsEnabled';
 import { collectionService } from '@/services/init';
 import { Location } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getParameterUnit } from '@/utils/parameters';
-import { TSimplifiedEntry } from '../types';
-import { FullscreenButton } from './FullscreenButton';
-import { Visualization } from './Visualization';
 
 type Props = {
   locations: Location[];
+  layerLocationGroups: LayerLocationGroups;
   from: string;
   to: string;
 };
 
 export const Tab: React.FC<Props> = (props) => {
-  const { locations, from, to } = props;
+  const { locations, layerLocationGroups, from, to } = props;
 
   const { layers } = useDataTools(true);
 
@@ -151,6 +153,7 @@ export const Tab: React.FC<Props> = (props) => {
               entry={entry}
               from={from}
               to={to}
+              locationGroup={layerLocationGroups[entry.layer.id]}
               areControlsActive={activeControls.includes(entry.layer.id)}
               onControlsActiveChange={handleControlsActiveChange}
             />

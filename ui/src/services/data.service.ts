@@ -232,6 +232,7 @@ export class DataService {
       ...layer,
       loaded: true,
       geometryTypes: Array.from(geometryTypes),
+      timeDataUpdated: Date.now(),
     });
 
     return sourceId;

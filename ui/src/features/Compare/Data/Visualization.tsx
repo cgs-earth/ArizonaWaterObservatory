@@ -12,9 +12,10 @@ import { Variant } from '@/components/types';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { Tabbed } from '@/features/Charts/Tabbed';
 import { ETabTypes, TTypedOption } from '@/features/Charts/types';
+import styles from '@/features/Compare/Compare.module.css';
+import { TSimplifiedEntry } from '@/features/Compare/types';
 import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
-import styles from '@/features/Tools/Compare/Compare.module.css';
-import { useLocations } from '@/hooks/useLocations';
+import { LayerLocationGroup } from '@/hooks/useAllLocations';
 import { useTimeseriesData } from '@/hooks/useTimeseriesData';
 import {
   CoverageCollection,
@@ -28,21 +29,28 @@ import { CollectionType } from '@/utils/collection';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
 import { normalizeBBox } from '@/utils/normalizeBBox';
-import { TSimplifiedEntry } from '../types';
 
 type Props = {
   entry: TSimplifiedEntry;
+  locationGroup: LayerLocationGroup | undefined;
   from: string;
   to: string;
   areControlsActive: boolean;
   onControlsActiveChange: (layerId: string) => void;
 };
 export const Visualization: React.FC<Props> = (props: Props) => {
-  const { entry, from, to, areControlsActive, onControlsActiveChange } = props;
+  const {
+    entry,
+    from,
+    to,
+    locationGroup = { selectedFeatures: [], otherFeatures: [] },
+    areControlsActive,
+    onControlsActiveChange,
+  } = props;
 
   const computedColorScheme = useComputedColorScheme();
 
-  const { selectedLocations, otherLocations } = useLocations(entry.layer);
+  const { selectedFeatures, otherFeatures } = locationGroup;
 
   const [options, setOptions] = useState<TTypedOption[]>([]);
   const [showChart, setShowChart] = useState(true);
@@ -53,11 +61,11 @@ export const Visualization: React.FC<Props> = (props: Props) => {
   );
 
   const features = useMemo(() => {
-    const allLocations = [...selectedLocations, ...otherLocations];
+    const allLocations = [...selectedFeatures, ...otherFeatures];
     return allLocations.filter((feature) =>
       entry.locations.includes(getId(feature, isStringIdentifierCollection))
     );
-  }, [selectedLocations, otherLocations, entry.locations]);
+  }, [selectedFeatures, otherFeatures, entry.locations]);
 
   const { organizedLabels } = useMemo(() => {
     const { layer } = entry;

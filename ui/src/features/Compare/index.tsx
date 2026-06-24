@@ -10,11 +10,11 @@ import { Text, Tooltip } from '@mantine/core';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
-import styles from '@/features/Tools/Compare/Compare.module.css';
+import { Body } from '@/features/Compare/Body';
+import styles from '@/features/Compare/Compare.module.css';
 import { useDataTools } from '@/hooks/useAreDataToolsEnabled';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
-import { Body } from './Body';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);

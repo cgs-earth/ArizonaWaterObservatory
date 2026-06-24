@@ -7,18 +7,22 @@ import { useEffect } from 'react';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
 import { useMap } from '@/contexts/MapContexts';
+import { MINI_MAP_ID } from '@/features/Compare/MiniMap/consts';
 // import { MAP_ID } from '@/features/Map/config';
 import { INITIAL_CENTER, INITIAL_ZOOM } from '@/features/Map/consts';
+import { LayerLocationGroups } from '@/hooks/useAllLocations';
 import useMainStore from '@/stores/main';
-import { Location } from '@/stores/main/types';
-import { MINI_MAP_ID } from './consts';
+import { Layer, Location } from '@/stores/main/types';
 
 type Props = {
+  layers: Layer[];
   locations: Location[];
+  layerLocationGroups: LayerLocationGroups;
 };
 
-const MiniMap: React.FC<Props> = () => {
-  // const { locations } = props;
+const MiniMap: React.FC<Props> = (props) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { layerLocationGroups } = props;
 
   const basemap = useMainStore((state) => state.basemap);
   // const layers = useMainStore((state) => state.layers);

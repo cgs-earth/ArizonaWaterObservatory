@@ -5,8 +5,8 @@
 
 import { PropsWithChildren } from 'react';
 import { MapProvider } from '@/contexts/MapContexts';
+import { MINI_MAP_ID } from '@/features/Compare/MiniMap/consts';
 import { MAP_ID } from '@/features/Map/config';
-import { MINI_MAP_ID } from '@/features/Tools/Compare/MiniMap/consts';
 
 // import { MAP_ID } from '@/features/Map/consts';
 
