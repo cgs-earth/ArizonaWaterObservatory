@@ -8,9 +8,9 @@ import { GeoJsonProperties } from 'geojson';
 import { Box, Loader, Stack, Text } from '@mantine/core';
 import Button from '@/components/Button';
 import Select from '@/components/Select';
+import Table from '@/components/Table';
 import { Variant } from '@/components/types';
 import styles from '@/features/Panel/Layers/Layer/Label/Label.module.css';
-import Table from '@/features/Table';
 import { useLocations } from '@/hooks/useLocations';
 import useMainStore from '@/stores/main';
 import { Layer } from '@/stores/main/types';
@@ -86,7 +86,7 @@ const Label: React.FC<Props> = (props) => {
               {showTable ? 'Hide Sample Feature' : 'Show Sample Feature'}
             </Button>
           </Box>
-          {showTable && <Table properties={sampleProperties} search size="xs" />}
+          {showTable && <Table id={layer.id} json={sampleProperties} search size="xs" />}
         </>
       )}
     </Stack>

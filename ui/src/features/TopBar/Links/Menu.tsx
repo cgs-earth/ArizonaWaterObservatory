@@ -23,7 +23,7 @@ type Props = {
   removeLocation: (location: string) => void;
   searchTerm: string;
   onSearchTermChange: (searchTerm: string) => void;
-  onClear: () => void;
+  onClear?: () => void;
   linkLocation?: Location | null;
 };
 
@@ -100,15 +100,17 @@ export const Menu: React.FC<Props> = (props) => {
           No {getLabel()}s
         </Text>
       )}
-      <Button
-        size="xs"
-        disabled={selectedLocations.length === 0}
-        data-disabled={selectedLocations.length === 0}
-        variant={Variant.Tertiary}
-        onClick={onClear}
-      >
-        Deselect All
-      </Button>
+      {onClear && (
+        <Button
+          size="xs"
+          disabled={selectedLocations.length === 0}
+          data-disabled={selectedLocations.length === 0}
+          variant={Variant.Tertiary}
+          onClick={onClear}
+        >
+          Deselect All
+        </Button>
+      )}
     </Stack>
   );
 };

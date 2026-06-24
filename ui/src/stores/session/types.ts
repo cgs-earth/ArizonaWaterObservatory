@@ -30,6 +30,7 @@ export enum Tool {
 
 export enum Overlay {
   Basemap = 'basemap',
+  Compare = 'compare',
   Date = 'date',
   Draw = 'draw',
   Download = 'download',

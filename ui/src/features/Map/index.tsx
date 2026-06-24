@@ -11,7 +11,7 @@ import { basemaps } from '@/components/Map/consts';
 import { LayerType } from '@/components/Map/types';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
-import { DEFAULT_BBOX, drawLayers } from '@/features/Map/consts';
+import { DEFAULT_BBOX, drawLayers, INITIAL_CENTER, INITIAL_ZOOM } from '@/features/Map/consts';
 import { sourceConfigs, SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent, getSelectedColor, getSortKey } from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
@@ -31,9 +31,6 @@ import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
 import { isTopLayer } from '@/utils/isTopLayer';
 import { getDefaultFilter, getFilter } from '@/utils/layerDefinitions';
-
-const INITIAL_CENTER: [number, number] = [-98.5795, 39.8282];
-const INITIAL_ZOOM = 4;
 
 type Props = {
   accessToken: string;

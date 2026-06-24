@@ -118,6 +118,7 @@ export type Layer = {
   bbox: string; // String identifier to indicate AOI change
   label: string | null; // Used in place of a unique identifier in places like the popups or download modal
   loaded: boolean;
+  timeDataUpdated: number; // Used to track when this layer has had its data update (ex via applySpatialFilter)
 };
 
 export type Table = {

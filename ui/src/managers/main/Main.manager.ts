@@ -136,6 +136,7 @@ class MainManager {
       bbox: currentBBox,
       label,
       loaded: false,
+      timeDataUpdated: Date.now(),
     };
 
     this.store.getState().addLayer(layer);

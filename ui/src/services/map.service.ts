@@ -37,7 +37,11 @@ type MapServiceDependencies = {
   collectionService: CollectionService;
   factoryService: FactoryService;
   locationService: LocationService;
-  popupService: PopupService;
+  popupService?: PopupService;
+};
+
+type AddLayerOptions = {
+  includeEvents?: boolean;
 };
 
 export class MapService {
@@ -138,17 +142,6 @@ export class MapService {
     return sourceId;
   }
 
-  private addRasterLayer(layer: Layer, sourceId: string): void {
-    const { rasterLayerId } = this.deps.factoryService.getLocationsLayerIds(
-      layer.datasourceId,
-      layer.id
-    );
-
-    if (this.map && !this.map.getLayer(rasterLayerId)) {
-      this.map.addLayer(getRasterLayerSpecification(rasterLayerId, sourceId));
-    }
-  }
-
   private getClickEventHandler<T extends MapMouseEvent | MapTouchEvent>(
     mapLayerId: string,
     layerId: string,
@@ -212,6 +205,10 @@ export class MapService {
     lowerLabel: string
   ): (e: MapMouseEvent) => void {
     return (e) => {
+      if (!this.deps.popupService) {
+        return;
+      }
+
       const drawMode = this.store.getState().drawMode;
 
       const drawActive = drawMode !== null;
@@ -257,11 +254,29 @@ export class MapService {
     };
   }
 
+  private addRasterLayer(layer: Layer, sourceId: string): void {
+    const { rasterLayerId } = this.deps.factoryService.getLocationsLayerIds(
+      layer.datasourceId,
+      layer.id
+    );
+
+    if (this.map && !this.map.getLayer(rasterLayerId)) {
+      this.map.addLayer(getRasterLayerSpecification(rasterLayerId, sourceId));
+    }
+  }
+
   /**
    *
    * @function
    */
-  private addStandardLayer(layer: Layer, sourceId: string, collectionType: CollectionType): void {
+  private addStandardLayer(
+    layer: Layer,
+    sourceId: string,
+    collectionType: CollectionType,
+    options: AddLayerOptions = {}
+  ): void {
+    const { includeEvents = true } = options;
+
     const geographyFilter = this.store.getState().geographyFilter;
 
     const { pointLayerId, fillLayerId, lineLayerId } =
@@ -278,58 +293,63 @@ export class MapService {
         this.map.addLayer(getLineLayerDefinition(lineLayerId, sourceId, layer.color));
         this.map.addLayer(getPointLayerDefinition(pointLayerId, sourceId, layer.color));
 
-        this.map.on(
-          'click',
-          pointLayerId,
-          this.getClickEventHandler<MapMouseEvent>(pointLayerId, layer.id, layer.datasourceId)
-        );
-
-        this.map.on(
-          'click',
-          fillLayerId,
-          this.getClickEventHandler<MapMouseEvent>(fillLayerId, layer.id, layer.datasourceId)
-        );
-
-        this.map.on(
-          'click',
-          lineLayerId,
-          this.getClickEventHandler<MapMouseEvent>(lineLayerId, layer.id, layer.datasourceId)
-        );
-
-        this.map.on(
-          'touchend',
-          pointLayerId,
-          this.getClickEventHandler<MapTouchEvent>(pointLayerId, layer.id, layer.datasourceId)
-        );
-
-        this.map.on(
-          'touchend',
-          fillLayerId,
-          this.getClickEventHandler<MapTouchEvent>(fillLayerId, layer.id, layer.datasourceId)
-        );
-
-        this.map.on(
-          'touchend',
-          lineLayerId,
-          this.getClickEventHandler<MapTouchEvent>(lineLayerId, layer.id, layer.datasourceId)
-        );
-
-        if (collectionType !== CollectionType.Map) {
+        // Allow exclusion for things like the minimap
+        if (includeEvents) {
           this.map.on(
-            'mouseenter',
-            [pointLayerId, fillLayerId, lineLayerId],
-            this.getHoverEventHandler(layer.id, layer.datasourceId, upperLabel, lowerLabel)
+            'click',
+            pointLayerId,
+            this.getClickEventHandler<MapMouseEvent>(pointLayerId, layer.id, layer.datasourceId)
           );
+
           this.map.on(
-            'mousemove',
-            [pointLayerId, fillLayerId, lineLayerId],
-            this.getHoverEventHandler(layer.id, layer.datasourceId, upperLabel, lowerLabel)
+            'click',
+            fillLayerId,
+            this.getClickEventHandler<MapMouseEvent>(fillLayerId, layer.id, layer.datasourceId)
           );
+
+          this.map.on(
+            'click',
+            lineLayerId,
+            this.getClickEventHandler<MapMouseEvent>(lineLayerId, layer.id, layer.datasourceId)
+          );
+
+          this.map.on(
+            'touchend',
+            pointLayerId,
+            this.getClickEventHandler<MapTouchEvent>(pointLayerId, layer.id, layer.datasourceId)
+          );
+
+          this.map.on(
+            'touchend',
+            fillLayerId,
+            this.getClickEventHandler<MapTouchEvent>(fillLayerId, layer.id, layer.datasourceId)
+          );
+
+          this.map.on(
+            'touchend',
+            lineLayerId,
+            this.getClickEventHandler<MapTouchEvent>(lineLayerId, layer.id, layer.datasourceId)
+          );
+
+          if (collectionType !== CollectionType.Map) {
+            this.map.on(
+              'mouseenter',
+              [pointLayerId, fillLayerId, lineLayerId],
+              this.getHoverEventHandler(layer.id, layer.datasourceId, upperLabel, lowerLabel)
+            );
+            this.map.on(
+              'mousemove',
+              [pointLayerId, fillLayerId, lineLayerId],
+              this.getHoverEventHandler(layer.id, layer.datasourceId, upperLabel, lowerLabel)
+            );
+          }
+          this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
+            this.map!.getCanvas().style.cursor = '';
+            if (this.deps.popupService) {
+              this.deps.popupService.removeHoverPopup();
+            }
+          });
         }
-        this.map.on('mouseleave', [pointLayerId, fillLayerId, lineLayerId], () => {
-          this.map!.getCanvas().style.cursor = '';
-          this.deps.popupService.removeHoverPopup();
-        });
       }
       if (geographyFilter) {
         const geoFilterLayerId = this.deps.factoryService.getFilterLayerId(
@@ -340,9 +360,29 @@ export class MapService {
         );
       }
 
-      drawLayers.forEach((layerId) => {
-        this.map!.moveLayer(layerId);
-      });
+      if (this.draw) {
+        drawLayers.forEach((layerId) => {
+          this.map!.moveLayer(layerId);
+        });
+      }
+    }
+  }
+
+  public addLayer(layer: Layer, sourceId: string, options: AddLayerOptions = {}): void {
+    const datasource = this.deps.collectionService.getDatasource(layer.datasourceId);
+
+    if (datasource) {
+      const collectionType = getCollectionType(datasource);
+
+      if (
+        [CollectionType.EDR, CollectionType.Features, CollectionType.EDRGrid].includes(
+          collectionType
+        )
+      ) {
+        this.addStandardLayer(layer, sourceId, collectionType, options);
+      } else if (collectionType === CollectionType.Map) {
+        this.addRasterLayer(layer, sourceId);
+      }
     }
   }
 
@@ -364,8 +404,10 @@ export class MapService {
       }
     }
 
-    // Force clear popup
-    this.deps.popupService.clearStalePopup(() => true);
+    if (this.deps.popupService) {
+      // Force clear popup
+      this.deps.popupService.clearStalePopup(() => true);
+    }
   }
 
   public clearSources(): void {
@@ -408,24 +450,6 @@ export class MapService {
       );
 
       return featureCollection;
-    }
-  }
-
-  public addLayer(layer: Layer, sourceId: string): void {
-    const datasource = this.deps.collectionService.getDatasource(layer.datasourceId);
-
-    if (datasource) {
-      const collectionType = getCollectionType(datasource);
-
-      if (
-        [CollectionType.EDR, CollectionType.Features, CollectionType.EDRGrid].includes(
-          collectionType
-        )
-      ) {
-        this.addStandardLayer(layer, sourceId, collectionType);
-      } else if (collectionType === CollectionType.Map) {
-        this.addRasterLayer(layer, sourceId);
-      }
     }
   }
 }
