@@ -25,10 +25,12 @@ import { Feature, GeoJsonProperties, Geometry, MultiPolygon, Polygon } from 'geo
 import { Layer as LayerType } from '@/stores/main/types';
 import Layer from '@/features/Panel/Layers/Layer';
 import loadingManager from '@/managers/Loading.init';
-import { mainManager } from '@/services/init';
+import { factoryService, mainManager } from '@/services/init';
 import notificationManager from '@/managers/Notification.init';
 import { isPolygonFeature } from '@/utils/isTypeFeature';
 import { polygon } from '@turf/turf';
+import { useMap } from '@/contexts/MapContexts';
+import { MAP_ID } from '@/features/Map/config';
 
 
 
@@ -51,6 +53,8 @@ const LayerAreaFilter: React.FC = () => {
 
   const loadingInstance = useRef<string>(null);
 
+  const { map } = useMap(MAP_ID)
+
   const handleClick = () => {
     const drawnShapes : Feature<Polygon>[] = [];
     for (const location of selectedLocations){
@@ -66,7 +70,26 @@ const LayerAreaFilter: React.FC = () => {
       drawnShapes.length > 0 ? 'Applying spatial filters' : 'Clearing spatial filters';
 
     loadingInstance.current = loadingManager.add(message, LoadingType.Geography);
-
+     if (map){
+      for (const layer of layers){
+      const layerIds =  Object.values(
+        factoryService.getLocationsLayerIds(layer.datasourceId, layer.id)
+      );
+        for (const layerId of layerIds) {
+          if (map.getLayer(layerId)) {
+            console.log(map.getLayer(layerId))
+          }
+        }
+        
+        
+      }
+// set filter on all layers matching layerId
+// Check factory service for helper function to get all connected layers
+// apply filter that excludes all locations that are not the selected location
+// remember to check for id_store layers to get correct feature id
+// Clear all filters if no drawn shapes
+// Check for collisions with existing filter logic on layers (should be in the main map component)
+   }
     try {
       await mainManager.applySpatialFilter(drawnShapes);
     } catch (error) {
