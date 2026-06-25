@@ -4,23 +4,22 @@
  */
 
 import { Feature, GeoJsonProperties, Geometry } from 'geojson';
-import { Stack,Text } from '@mantine/core';
+import { Stack, Text } from '@mantine/core';
 import Checkbox from '@/components/Checkbox';
-import { Fallback } from '@/features/Panel/Layers/Layer/Fallback';
-import { useLocations } from '@/hooks/useLocations';
-import { Layer } from '@/stores/main/types';
 import { StringIdentifierCollections } from '@/consts/collections';
+import { Fallback } from '@/features/Panel/Layers/Layer/Fallback';
 import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
+import { useLocations } from '@/hooks/useLocations';
 import useMainStore from '@/stores/main';
+import { Layer } from '@/stores/main/types';
 
 type Props = {
   layer: Layer;
 };
 
 export const LocationsCheckList: React.FC<Props> = (props) => {
-  const { layer } = props; 
-  const { selectedLocations, otherLocations } =
-    useLocations(layer);
+  const { layer } = props;
+  const { selectedLocations, otherLocations } = useLocations(layer);
   const isStringIdentifierCollection = StringIdentifierCollections.includes(layer.datasourceId);
   const addLocation = useMainStore((state) => state.addLocation);
   const removeLocation = useMainStore((state) => state.removeLocation);
@@ -30,18 +29,18 @@ export const LocationsCheckList: React.FC<Props> = (props) => {
   ) => {
     const { checked } = event.currentTarget;
 
-    const id = getId(location,isStringIdentifierCollection);
+    const id = getId(location, isStringIdentifierCollection);
 
-    if(checked){
+    if (checked) {
       addLocation({
         id,
-        layerId:layer.id
-      })
-    }else{
+        layerId: layer.id,
+      });
+    } else {
       removeLocation({
         id,
-        layerId:layer.id
-      })
+        layerId: layer.id,
+      });
     }
   };
 
