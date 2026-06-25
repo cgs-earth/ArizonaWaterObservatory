@@ -30,6 +30,7 @@ import notificationManager from '@/managers/Notification.init';
 import { isPolygonFeature } from '@/utils/isTypeFeature';
 import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
+import { useAllLocations } from '@/hooks/useAllLocations';
 
 
 
@@ -50,6 +51,8 @@ const LayerAreaFilter: React.FC = () => {
   
   const [show, setShow] = useState(false);
 
+  const { layerLocationGroups } = useAllLocations(validLayers);
+
   const loadingInstance = useRef<string>(null);
 
   const { map } = useMap(MAP_ID)
@@ -69,14 +72,27 @@ const LayerAreaFilter: React.FC = () => {
       drawnShapes.length > 0 ? 'Applying spatial filters' : 'Clearing spatial filters';
 
     loadingInstance.current = loadingManager.add(message, LoadingType.Geography);
-     if (map){
-      for (const layer of layers){
+
+    try {
+      await mainManager.applySpatialFilter(drawnShapes);
+    } catch (error) {
+      if ((error as Error)?.message) {
+        const _error = error as Error;
+        notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
+      } else if (typeof error === 'string') {
+        notificationManager.show(`Error: ${error}`, NotificationVariant.Error, 10000);
+      }
+    } finally {
+      if (map){
+      for (const layer of validLayers){
       const layerIds =  Object.values(
         factoryService.getLocationsLayerIds(layer.datasourceId, layer.id)
       );
         for (const layerId of layerIds) {
           if (map.getLayer(layerId)) {
-            console.log(map.getLayer(layerId))
+            for (const location in selectedLocations){
+              map.setFilter(layerId,['in', location, ...selectedLocations])
+            }
           }
         }
         
@@ -89,16 +105,6 @@ const LayerAreaFilter: React.FC = () => {
 // Clear all filters if no drawn shapes
 // Check for collisions with existing filter logic on layers (should be in the main map component)
    }
-    try {
-      await mainManager.applySpatialFilter(drawnShapes);
-    } catch (error) {
-      if ((error as Error)?.message) {
-        const _error = error as Error;
-        notificationManager.show(`Error: ${_error.message}`, NotificationVariant.Error, 10000);
-      } else if (typeof error === 'string') {
-        notificationManager.show(`Error: ${error}`, NotificationVariant.Error, 10000);
-      }
-    } finally {
       loadingInstance.current = loadingManager.remove(loadingInstance.current);
     }
   };
