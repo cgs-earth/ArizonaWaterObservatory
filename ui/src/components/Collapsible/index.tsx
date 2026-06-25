@@ -35,12 +35,7 @@ const Collapsible: React.FC<PropsWithChildren<Props>> = (props) => {
 
   return (
     <Group gap={0} align="flex-start" className={styles.panelGroup} wrap="nowrap" {...groupProps}>
-      <Collapse
-        in={opened}
-        transitionDuration={0}
-        className={styles.body}
-        {...collapseProps}
-      >
+      <Collapse in={opened} transitionDuration={0} className={styles.body} {...collapseProps}>
         <Box style={{ width: opened ? width : 0, maxWidth: opened ? 'unset' : 0, height: '100%' }}>
           {children}
         </Box>
