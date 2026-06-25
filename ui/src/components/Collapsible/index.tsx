@@ -36,7 +36,6 @@ const Collapsible: React.FC<PropsWithChildren<Props>> = (props) => {
   return (
     <Group gap={0} align="flex-start" className={styles.panelGroup} wrap="nowrap" {...groupProps}>
       <Collapse
-        keepMounted
         in={opened}
         transitionDuration={0}
         className={styles.body}
