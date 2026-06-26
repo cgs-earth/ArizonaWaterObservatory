@@ -100,7 +100,9 @@ const LayerAreaFilter: React.FC = () => {
       loadingInstance.current = loadingManager.remove(loadingInstance.current);
     }
   };
-
+  const handleTrash = async () => {
+    void applySpatialFilter([]);
+  };
   useEffect(() => {
     if (overlay !== Overlay.SpatialSelection) {
       setShow(false);
@@ -169,13 +171,22 @@ const LayerAreaFilter: React.FC = () => {
               <Fallback />
             )}
             <Button
-              size="xs"
+              size="sm"
               disabled={selectedLocations.length === 0}
               data-disabled={selectedLocations.length === 0}
               variant={Variant.Primary}
               onClick={handleClick}
+              style={{ float: 'left' }}
             >
               Filter
+            </Button>
+            <Button
+              size="sm"
+              variant={Variant.Primary}
+              onClick={handleTrash}
+              style={{ float: 'right' }}
+            >
+              Clear All
             </Button>
           </Box>
         }
