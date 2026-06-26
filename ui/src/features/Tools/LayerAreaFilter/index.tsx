@@ -159,7 +159,7 @@ const LayerAreaFilter: React.FC = () => {
                         id: `layers-accordion-${layer.id}`,
                         title: <Header layer={layer} />,
                         content: (
-                          <Layer layer={layer} includedTabs={['search', 'locations']} flatTabs />
+                          <Layer layer={layer} includedTabs={['locations', 'search']} flatTabs />
                         ),
                         control: <Control layer={layer} />,
                       },
