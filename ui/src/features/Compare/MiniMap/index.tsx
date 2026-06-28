@@ -5,18 +5,19 @@
 
 import { useEffect } from 'react';
 import { featureCollection } from '@turf/turf';
-import { GeoJSONSource, LngLatLike } from 'mapbox-gl';
+import { GeoJSONSource, LngLatBoundsLike, LngLatLike } from 'mapbox-gl';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
+import { getBBox } from '@/consts/bbox';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { useMap } from '@/contexts/MapContexts';
 import { MINI_MAP_ID } from '@/features/Compare/MiniMap/consts';
-// import { MAP_ID } from '@/features/Map/config';
-import { INITIAL_CENTER, INITIAL_ZOOM } from '@/features/Map/consts';
+import { DEFAULT_FILL_OPACITY, INITIAL_CENTER, INITIAL_ZOOM } from '@/features/Map/consts';
 import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
 import { LayerLocationGroups } from '@/hooks/useAllLocations';
 import { collectionService, factoryService, miniMapService } from '@/services/init';
 import useMainStore from '@/stores/main';
+import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
 import { Layer, Location } from '@/stores/main/types';
 import { TSimplifiedEntry } from '../types';
 
@@ -33,16 +34,11 @@ const DEFAULT_BOUNDS: [LngLatLike, LngLatLike] = [
 ];
 
 const MiniMap: React.FC<Props> = (props) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { layers, layerLocationGroups, layerEntries } = props;
 
   const basemap = useMainStore((state) => state.basemap);
-  // const layers = useMainStore((state) => state.layers);
+  const spatialSelection = useMainStore((state) => state.spatialSelection);
 
-  // const [data, setData] = useState<TWrappedCoverage[]>([]);
-  // const [layers, setLayers] = useState<string[]>([]);
-
-  // const { map: mainMap } = useMap(MAP_ID);
   const { map } = useMap(MINI_MAP_ID);
 
   useEffect(() => {
@@ -59,6 +55,20 @@ const MiniMap: React.FC<Props> = (props) => {
   }, [map]);
 
   useEffect(() => {
+    if (!spatialSelection || !map) {
+      return;
+    }
+
+    if (isSpatialSelectionPredefined(spatialSelection)) {
+      const { boundary } = spatialSelection;
+
+      const bbox = getBBox(boundary) as LngLatBoundsLike;
+
+      map.fitBounds(bbox, { padding: 40 });
+    }
+  }, []);
+
+  useEffect(() => {
     if (!map) {
       return;
     }
@@ -68,6 +78,32 @@ const MiniMap: React.FC<Props> = (props) => {
 
       miniMapService.addSource(layer.datasourceId, layer.id);
       miniMapService.addLayer(layer, sourceId);
+
+      // Clear data from last compare tool use
+      const source = map.getSource<GeoJSONSource>(sourceId);
+      if (source) {
+        source.setData(featureCollection([]));
+      }
+
+      const { pointLayerId, lineLayerId, fillLayerId } = factoryService.getLocationsLayerIds(
+        layer.datasourceId,
+        layer.id
+      );
+
+      // Update to latest settings
+      if (map.getLayer(pointLayerId)) {
+        map.setPaintProperty(pointLayerId, 'circle-color', layer.color);
+      }
+      if (map.getLayer(fillLayerId)) {
+        map.setPaintProperty(fillLayerId, 'fill-color', layer.color);
+        let fillOpacity = layer.opacity;
+        fillOpacity = Math.max(0, layer.opacity * DEFAULT_FILL_OPACITY);
+        map.setPaintProperty(fillLayerId, 'fill-opacity', fillOpacity);
+      }
+      if (map.getLayer(lineLayerId)) {
+        map.setPaintProperty(lineLayerId, 'line-color', layer.color);
+        map.setPaintProperty(lineLayerId, 'line-opacity', layer.opacity);
+      }
     }
   }, [map, layers]);
 
