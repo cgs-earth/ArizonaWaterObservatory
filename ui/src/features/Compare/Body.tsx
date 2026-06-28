@@ -6,7 +6,7 @@
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Group, Stack } from '@mantine/core';
 import styles from '@/features/Compare/Compare.module.css';
 import Data from '@/features/Compare/Data';
@@ -14,7 +14,7 @@ import { Header } from '@/features/Compare/Header';
 import Panel from '@/features/Compare/Panel';
 import { useAllLocations } from '@/hooks/useAllLocations';
 import notificationManager from '@/managers/Notification.init';
-import { collectionService, factoryService } from '@/services/init';
+import { collectionService } from '@/services/init';
 import { Layer, Location } from '@/stores/main/types';
 import { NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
@@ -25,28 +25,7 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
 const getLayerTemporalExtent = (layer: Layer): { from: dayjs.Dayjs; to: dayjs.Dayjs } => {
-  const datasource = collectionService.getDatasource(layer.datasourceId);
-  if (!datasource) {
-    notificationManager.show(
-      `Unable to locate datasource for layer: ${layer.name}`,
-      NotificationVariant.Error
-    );
-
-    const to = dayjs();
-    const from = to.subtract(1, 'week');
-
-    return {
-      from,
-      to,
-    };
-  }
-
-  const collectionType = getCollectionType(datasource);
-
-  const to = factoryService.getTo(datasource);
-  const from = factoryService.getFrom(layer.datasourceId, collectionType, to);
-
-  return { from, to };
+  return { from: dayjs(layer.from), to: dayjs(layer.to) };
 };
 
 type Props = {
@@ -58,40 +37,37 @@ export const Body: React.FC<Props> = (props) => {
 
   const [from, setFrom] = useState(dayjs().subtract(1, 'day').format('YYYY-MM-DD'));
   const [to, setTo] = useState(dayjs().format('YYYY-MM-DD'));
+
+  const [initialFrom, setInitialFrom] = useState<string>();
+  const [initialTo, setInitialTo] = useState<string>();
+
+  const [activeVisualizations, setActiveVisualizations] = useState<string[]>([]);
+
   const [panelOpen, setPanelOpen] = useState(true);
 
   const { layerLocationGroups } = useAllLocations(layers);
 
   const [locations, setLocations] = useState<Location[]>([]);
 
+  const element = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (layers.length === 0) {
       return;
     }
 
-    const [firstLayer, ...otherLayers] = layers;
+    const firstLayer = layers[0];
 
-    let { to, from } = getLayerTemporalExtent(firstLayer);
+    const { to, from } = getLayerTemporalExtent(firstLayer);
 
-    if (otherLayers.length === 0) {
-      setFrom(from.format('YYYY-MM-DD'));
-      setTo(to.format('YYYY-MM-DD'));
-      return;
-    }
+    const formattedFrom = from.format('YYYY-MM-DD');
+    const formattedTo = to.format('YYYY-MM-DD');
 
-    for (const layer of otherLayers) {
-      const { to: otherTo, from: otherFrom } = getLayerTemporalExtent(layer);
+    setFrom(formattedFrom);
+    setTo(formattedTo);
 
-      if (otherFrom.isSameOrAfter(from) && otherFrom.isSameOrBefore(to)) {
-        from = otherFrom;
-      }
-      if (otherTo.isSameOrBefore(to) && otherTo.isSameOrAfter(from)) {
-        to = otherTo;
-      }
-    }
-
-    setFrom(from.format('YYYY-MM-DD'));
-    setTo(to.format('YYYY-MM-DD'));
+    setInitialFrom(formattedFrom);
+    setInitialTo(formattedTo);
   }, [layers]);
 
   const layerEntries = useMemo(() => {
@@ -134,14 +110,26 @@ export const Body: React.FC<Props> = (props) => {
     return layerEntries;
   }, [locations, layers]);
 
-  const handleFromChange = (from: string) => {
+  const handleDateUpdate = (from: string, to: string) => {
     setFrom(from);
-  };
-  const handleToChange = (to: string) => {
     setTo(to);
   };
   const handleReset = () => {
-    // TODO: placeholder
+    if (initialFrom) {
+      setFrom(initialFrom);
+    }
+
+    if (initialTo) {
+      setTo(initialTo);
+    }
+
+    setActiveVisualizations([]);
+
+    notificationManager.show(
+      'Compare tool reset to initial settings.',
+      NotificationVariant.Info,
+      5000
+    );
   };
 
   const handleLocationAdd = (newLocation: Location) => {
@@ -160,13 +148,16 @@ export const Body: React.FC<Props> = (props) => {
     setPanelOpen(open);
   };
 
+  const handleActiveVisualizationsChange = (activeVisualizations: string[]) =>
+    setActiveVisualizations(activeVisualizations);
+
   return (
-    <Stack className={styles.main} p={0} gap={0}>
+    <Stack className={styles.main} p={0} gap={0} ref={element}>
       <Header
         from={from}
-        onFromChange={handleFromChange}
         to={to}
-        onToChange={handleToChange}
+        onDateUpdate={handleDateUpdate}
+        element={element.current}
         onReset={handleReset}
       />
       <Group h="calc(100% - 3.75rem)" gap={0} align="flex-start" wrap="nowrap">
@@ -183,7 +174,8 @@ export const Body: React.FC<Props> = (props) => {
         <Data
           layerEntries={layerEntries}
           layerLocationGroups={layerLocationGroups}
-          locations={locations}
+          activeVisualizations={activeVisualizations}
+          handleActiveVisualizationsChange={handleActiveVisualizationsChange}
           panelOpen={panelOpen}
           from={from}
           to={to}
