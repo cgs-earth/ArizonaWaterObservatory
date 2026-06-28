@@ -35,7 +35,6 @@ export const FullscreenButton: React.FC<Props> = (props) => {
   return (
     <IconButton
       title={!open ? 'Open Fullscreen' : 'Exit Fullscreen'}
-      mb="0.5rem"
       onClick={handleClick}
       className={styles.fullscreenButton}
     >
