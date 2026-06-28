@@ -4,7 +4,7 @@
  */
 
 .notificationsWrapper {
-  position: absolute;
+  position: fixed;
   bottom: 1.875rem;
   right: 3.125rem;
   z-index: 9999;
