@@ -21,7 +21,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import styles from '@/components/Charts/Charts.module.css';
 import { EChartsSeries, PrettyLabel } from '@/components/Charts/types';
 import { CoverageChartService } from '@/services/coverageJSON/coverageChart.service';
-import { TCoverageOptions } from '@/services/coverageJSON/types';
+import { TCoverageOptions, XAXisOption } from '@/services/coverageJSON/types';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
 
 echarts.use([
@@ -50,6 +50,7 @@ type Props = {
   chosenUnit?: string;
   parserOptions?: TCoverageOptions;
   useDataZoom?: boolean;
+  xAxisOverride?: XAXisOption;
 };
 
 const extractPrettyLabel = (target: string, prettyLabels: PrettyLabel[] = []): string => {
@@ -75,6 +76,7 @@ const LineChart = (props: Props) => {
     chosenUnit,
     parserOptions,
     useDataZoom = false,
+    xAxisOverride,
   } = props;
 
   const option: echarts.EChartsCoreOption = useMemo(() => {
@@ -202,7 +204,7 @@ const LineChart = (props: Props) => {
         },
       },
       grid: {
-        left: '10%',
+        left: '5%',
         right: '4%',
         top: '18%',
         bottom: '15%',
@@ -232,6 +234,10 @@ const LineChart = (props: Props) => {
 
   if (data.length === 0) {
     return null;
+  }
+
+  if (xAxisOverride) {
+    option.xAxis = xAxisOverride;
   }
 
   return (

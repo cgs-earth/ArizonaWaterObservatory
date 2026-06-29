@@ -11,7 +11,7 @@ import { ETabTypes, TCoverageLabel, TTypedOption, TWrappedCoverage } from '@/fea
 import { Unmanaged } from '@/features/Charts/Unmanaged';
 import { Parameter } from '@/features/Popup';
 import { useTimeseriesData } from '@/hooks/useTimeseriesData';
-import { TCoverageOptions } from '@/services/coverageJSON/types';
+import { TCoverageOptions, XAXisOption } from '@/services/coverageJSON/types';
 import { CoverageCollection, CoverageJSON, ICollection } from '@/services/edr.service';
 import { Location } from '@/stores/main/types';
 
@@ -28,6 +28,7 @@ type Props = {
   tabHeight?: number;
   parserOptions?: TCoverageOptions;
   useDataZoom?: boolean;
+  xAxisOverride?: XAXisOption;
   onData?: (data?: TWrappedCoverage[]) => void;
   onLoading?: (isLoading: boolean) => void;
   getData: <T extends IRequestParams>(
@@ -52,6 +53,7 @@ export const Charts: React.FC<Props> = ({
   tabHeight,
   parserOptions,
   useDataZoom,
+  xAxisOverride,
   onData = () => null,
   onLoading = () => null,
   getData,
@@ -110,6 +112,7 @@ export const Charts: React.FC<Props> = ({
           isLoading={isLoading}
           parserOptions={parserOptions}
           useDataZoom={useDataZoom}
+          xAxisOverride={xAxisOverride}
         />
       )}
 
@@ -126,6 +129,7 @@ export const Charts: React.FC<Props> = ({
           isLoading={isLoading}
           parserOptions={parserOptions}
           useDataZoom={useDataZoom}
+          xAxisOverride={xAxisOverride}
         />
       )}
 
