@@ -158,9 +158,9 @@ const LineChart = (props: Props) => {
 
     const dataZoomFeature = useDataZoom
       ? {
-          dataZoom: {
-            yAxisIndex: 'none',
-          },
+          // dataZoom: { // This Adds the chart buttons, leaving commented for now
+          //   yAxisIndex: 'none',
+          // },
           restore: {},
         }
       : {};
@@ -204,8 +204,8 @@ const LineChart = (props: Props) => {
         },
       },
       grid: {
-        left: '5%',
-        right: '4%',
+        left: '8%',
+        right: '5%',
         top: '18%',
         bottom: '15%',
       },
