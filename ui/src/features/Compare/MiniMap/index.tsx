@@ -192,6 +192,7 @@ const MiniMap: React.FC<Props> = (props) => {
       sources={[]}
       layers={[]}
       options={{
+        bounds: DEFAULT_BOUNDS,
         interactive: false,
         style: basemaps[basemap],
         projection: 'mercator',

@@ -8,6 +8,8 @@ import ReactEChartsCore from 'echarts-for-react/lib/core';
 import { LineChart as _LineChart } from 'echarts/charts';
 import {
   DatasetComponent,
+  DataZoomComponent,
+  DataZoomSliderComponent,
   GridComponent,
   LegendComponent,
   TitleComponent,
@@ -19,6 +21,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import styles from '@/components/Charts/Charts.module.css';
 import { EChartsSeries, PrettyLabel } from '@/components/Charts/types';
 import { CoverageChartService } from '@/services/coverageJSON/coverageChart.service';
+import { TCoverageOptions } from '@/services/coverageJSON/types';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
 
 echarts.use([
@@ -28,6 +31,8 @@ echarts.use([
   DatasetComponent,
   LegendComponent,
   ToolboxComponent,
+  DataZoomComponent,
+  DataZoomSliderComponent,
   _LineChart,
   CanvasRenderer,
 ]);
@@ -41,8 +46,19 @@ type Props = {
   theme?: 'light' | 'dark';
   legendEntries?: string[];
   seriesLabels?: string[];
-  chosenParameter?: string;
+  chosenParameter?: string; // TODO: move these into parserOptions and deprecate
   chosenUnit?: string;
+  parserOptions?: TCoverageOptions;
+  useDataZoom?: boolean;
+};
+
+const extractPrettyLabel = (target: string, prettyLabels: PrettyLabel[] = []): string => {
+  const pretty = prettyLabels.find((pl) => pl.value === target)?.label ?? target;
+  if (pretty) {
+    return pretty;
+  }
+
+  return target;
 };
 
 const LineChart = (props: Props) => {
@@ -57,12 +73,17 @@ const LineChart = (props: Props) => {
     seriesLabels,
     chosenParameter,
     chosenUnit,
+    parserOptions,
+    useDataZoom = false,
   } = props;
 
   const option: echarts.EChartsCoreOption = useMemo(() => {
     const allSeries: EChartsSeries[] = [];
     const legendNames: string[] = [];
     let x;
+
+    const parameter = chosenParameter ?? parserOptions?.chosenParameter;
+    const unit = chosenUnit ?? parserOptions?.chosenUnit;
 
     // Validate seriesLabels alignment
     const useSeriesLabels = Array.isArray(seriesLabels) && seriesLabels.length === data.length;
@@ -75,8 +96,7 @@ const LineChart = (props: Props) => {
 
     data.forEach((entry, coverageIdx) => {
       const chartData = new CoverageChartService().coverageJSONToSeries(entry, {
-        chosenParameter,
-        chosenUnit,
+        ...parserOptions,
       });
       let { series } = chartData;
       // TODO: determine if/how to handle differences in the x axis
@@ -84,8 +104,7 @@ const LineChart = (props: Props) => {
 
       if (prettyLabels.length > 0 && prettyLabels.length >= series.length) {
         series = series.map((entrySeries) => {
-          const pretty =
-            prettyLabels.find((pl) => pl.value === entrySeries.name)?.label ?? entrySeries.name;
+          const pretty = extractPrettyLabel(entrySeries.name, prettyLabels);
           return {
             ...entrySeries,
             name: pretty,
@@ -102,8 +121,8 @@ const LineChart = (props: Props) => {
           // Construct a stable id
           // This gets used to determine which series need to update
           const stableId = [
-            chosenParameter ?? 'param',
-            chosenUnit ?? 'unit',
+            parameter ?? 'param',
+            unit ?? 'unit',
             coverageLabel ?? `cov-${coverageIdx}`,
             series.name,
             index,
@@ -130,6 +149,34 @@ const LineChart = (props: Props) => {
           ? prettyLabels.map((pl) => pl.label)
           : legendEntries;
 
+    const name =
+      parameter || unit
+        ? { name: extractPrettyLabel(String(parameter ?? unit), prettyLabels) }
+        : {};
+
+    const dataZoomFeature = useDataZoom
+      ? {
+          dataZoom: {
+            yAxisIndex: 'none',
+          },
+          restore: {},
+        }
+      : {};
+
+    const dataZoom = useDataZoom
+      ? {
+          dataZoom: [
+            {
+              type: 'slider',
+              xAxisIndex: 0,
+              top: 10,
+              start: 0,
+              end: 100,
+            },
+          ],
+        }
+      : {};
+
     return {
       title: title ? { text: title } : undefined,
       tooltip: {
@@ -146,6 +193,7 @@ const LineChart = (props: Props) => {
         : undefined,
       toolbox: {
         feature: {
+          ...dataZoomFeature,
           saveAsImage: {
             show: true,
             type: 'png',
@@ -156,14 +204,19 @@ const LineChart = (props: Props) => {
       grid: {
         left: '10%',
         right: '4%',
-        top: '12%',
-        bottom: '20%',
+        top: '18%',
+        bottom: '15%',
       },
       xAxis: x,
       yAxis: {
         type: 'value',
+        nameLocation: 'middle',
+        nameRotate: 90,
+        nameGap: 50,
+        ...name,
       },
       series: allSeries,
+      ...dataZoom,
     };
   }, [
     data,

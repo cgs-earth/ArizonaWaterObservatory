@@ -20,6 +20,7 @@ export type TOptions = {
 
 export type TCoverageOptions = TOptions & {
   parameters?: CoverageJSON['parameters'];
+  axisStyle?: 'values' | 'time';
 };
 
 export type TFilteredRange = [
@@ -31,14 +32,23 @@ export type TFilteredRange = [
 ];
 
 // Stricter type than the Echarts union type
-export type XAXisOption = {
-  type?: string;
-  boundaryGap?: boolean;
-  data?: string[] | number[];
-  name?: string;
-  nameLocation?: string;
-  nameGap?: number;
-};
+export type XAXisOption =
+  | {
+      type: 'category';
+      boundaryGap?: boolean;
+      data?: string[] | number[];
+      name?: string;
+      nameLocation?: string;
+      nameGap?: number;
+    }
+  | {
+      type: 'time';
+      min?: string;
+      max?: string;
+    }
+  | {
+      type: 'unknown';
+    };
 
 export type TChartData = {
   x: XAXisOption;

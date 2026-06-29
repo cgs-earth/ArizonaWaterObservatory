@@ -221,6 +221,9 @@ export const Visualization: React.FC<Props> = (props: Props) => {
               showTabs={areControlsActive}
               disabled={isLoading}
               isLoading={isLoading && chartData.length === 0}
+              parserOptions={{ axisStyle: 'time' }}
+              tabHeight={25}
+              useDataZoom
             />
           )}
           {showTable && (

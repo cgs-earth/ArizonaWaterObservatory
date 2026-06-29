@@ -17,15 +17,24 @@ import { CoverageAxesValues, CoverageCollection, CoverageJSON } from '@/services
 import { NotificationVariant } from '@/stores/session/types';
 import { isAxesValues, isCoverageCollection } from '@/utils/isTypeObject';
 import { getParameterUnit } from '@/utils/parameters';
+import { isTimeAxis } from './utils';
 
 export class CoverageChartService extends CoverageService {
+  private associateDataWithTime(
+    values: (string | number | null)[],
+    times: (string | number)[]
+  ): EChartsSeries['data'] {
+    return values.map((value, index) => [times[index], value]);
+  }
+
   private addGridValuesConstructor(
     xValues: number[],
     yValues: number[],
     series: EChartsSeries[],
     parameters: CoverageJSON['parameters'],
     times: (string | number)[],
-    values: TValues
+    values: TValues,
+    options: TCoverageOptions = {}
   ) {
     const count = times.length;
 
@@ -41,18 +50,25 @@ export class CoverageChartService extends CoverageService {
         return;
       }
 
-      const [parameterId, data] = Object.entries(currentValues)[0];
-      if (Object.values(data).every((value) => value === null)) {
+      const [parameterId, values] = Object.entries(currentValues)[0];
+
+      // This grid entry would have no values to display
+      if (Object.values(values).every((value) => value === null)) {
         return;
       }
-      // This grid entry would have no values to display
+
+      let data: EChartsSeries['data'] = values;
+      if (isTimeAxis(options)) {
+        data = this.associateDataWithTime(values, times);
+      }
+
       const parameter = parameters[parameterId];
       const unit = getParameterUnit(parameter);
       series.push({
         name: `${parameterId} Sub-grid ${id}`,
         parameter: parameterId,
         unit,
-        data: data as number[],
+        data,
         type: 'line',
       });
       id += 1;
@@ -78,7 +94,8 @@ export class CoverageChartService extends CoverageService {
       series,
       coverageParameters,
       timesObj.values,
-      values
+      values,
+      options
     );
 
     for (let y = 0; y < yObj.values.length; y++) {
@@ -110,7 +127,7 @@ export class CoverageChartService extends CoverageService {
     return [];
   }
 
-  private processVerticalProfile(coverage: CoverageJSON, options?: TCoverageOptions) {
+  private processVerticalProfile(coverage: CoverageJSON, options: TCoverageOptions = {}) {
     const coverageParameters = coverage.parameters ?? options?.parameters;
 
     if (!coverage.ranges) {
@@ -152,19 +169,29 @@ export class CoverageChartService extends CoverageService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const unit = getParameterUnit(parameter);
 
+      let data: EChartsSeries['data'] = range.values;
+      if (isTimeAxis(options)) {
+        const dates = this.extractDates(coverage);
+
+        data = this.associateDataWithTime(range.values, dates);
+      }
+
       series.push({
         name: parameterId,
         parameter: parameter.id,
         unit,
         type: 'line',
-        data: range.values,
+        data,
       });
     }
 
     return series;
   }
 
-  private processPointSeries(coverage: CoverageJSON, options?: TCoverageOptions) {
+  private processPointSeries(
+    coverage: CoverageJSON,
+    options: TCoverageOptions = { axisStyle: 'values' }
+  ) {
     const dates = (coverage.domain.axes.t as { values: string[] }).values;
     const coverageParameters = coverage.parameters ?? options?.parameters;
 
@@ -207,12 +234,19 @@ export class CoverageChartService extends CoverageService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const unit = getParameterUnit(parameter);
 
+      let data: EChartsSeries['data'] = range.values;
+      if (isTimeAxis(options)) {
+        const dates = this.extractDates(coverage);
+
+        data = this.associateDataWithTime(range.values, dates);
+      }
+
       series.push({
         name: parameterId,
         parameter: parameter.id,
         unit,
         type: 'line',
-        data: range.values,
+        data,
       });
     }
 
@@ -224,7 +258,8 @@ export class CoverageChartService extends CoverageService {
     series: EChartsSeries[],
     parameters: CoverageJSON['parameters'],
     times: (string | number)[],
-    values: TValues
+    values: TValues,
+    options: TCoverageOptions = {}
   ) {
     const count = times.length;
 
@@ -241,9 +276,15 @@ export class CoverageChartService extends CoverageService {
         return;
       }
 
-      const [parameterId, data] = Object.entries(currentValues)[0];
-      if (Object.values(data).every((value) => value === null)) {
+      const [parameterId, values] = Object.entries(currentValues)[0];
+
+      if (Object.values(values).every((value) => value === null)) {
         return;
+      }
+
+      let data: EChartsSeries['data'] = values;
+      if (isTimeAxis(options)) {
+        data = this.associateDataWithTime(values, times);
       }
 
       const parameter = parameters[parameterId];
@@ -252,7 +293,7 @@ export class CoverageChartService extends CoverageService {
         name: `${parameterId} point ${id}`,
         parameter: parameterId,
         unit,
-        data: data as number[],
+        data,
         type: 'line',
       });
       id += 1;
@@ -315,8 +356,7 @@ export class CoverageChartService extends CoverageService {
     const curryCoverageToSeries = (coverage: CoverageJSON) => {
       return this.coverageToSeries(coverage, {
         parameters,
-        chosenParameter: options?.chosenParameter,
-        chosenUnit: options?.chosenUnit,
+        ...options,
       });
     };
 
@@ -347,7 +387,27 @@ export class CoverageChartService extends CoverageService {
     return [];
   }
 
-  private processXAxis(coverage: CoverageJSON): XAXisOption {
+  private extractDates(coverage: CoverageJSON): string[] {
+    return isCoverageCollection(coverage)
+      ? (coverage.coverages[0]?.domain.axes.t as { values: string[] }).values
+      : (coverage.domain.axes.t as { values: string[] }).values;
+  }
+
+  private extractMinMax(values: string[] | number[]): { min: string; max: string } {
+    const length = values.length;
+
+    if (length === 0) {
+      return { min: '', max: '' };
+    }
+    const min = String(values[0]);
+    const max = String(values[length - 1]);
+
+    return { min, max };
+  }
+
+  private processXAxis(coverage: CoverageJSON, options: TCoverageOptions = {}): XAXisOption {
+    const { axisStyle = 'values' } = options;
+
     const { ranges } = coverage;
 
     const organizedAxisNames = this.getAxisNames(ranges);
@@ -358,14 +418,14 @@ export class CoverageChartService extends CoverageService {
 
       if (!isAxesValues(axes)) {
         console.warn('Unable to process: ', axes);
-        return {};
+        return { type: 'unknown' };
       }
 
       const values = axes.values;
 
       if (values.length === 0) {
         console.warn('No values: ', axes);
-        return {};
+        return { type: 'unknown' };
       }
 
       let name = undefined;
@@ -383,6 +443,15 @@ export class CoverageChartService extends CoverageService {
         }
       }
 
+      if (axisStyle === 'time') {
+        const { min, max } = this.extractMinMax(values);
+        return {
+          type: 'time',
+          min,
+          max,
+        };
+      }
+
       return {
         type: 'category',
         boundaryGap: false,
@@ -393,10 +462,17 @@ export class CoverageChartService extends CoverageService {
       };
     }
 
-    if (coverage.domain.domainType === 'PointSeries') {
-      const dates = isCoverageCollection(coverage)
-        ? (coverage.coverages[0]?.domain.axes.t as { values: string[] }).values
-        : (coverage.domain.axes.t as { values: string[] }).values;
+    if (['PointSeries', 'Grid'].includes(coverage.domain.domainType)) {
+      const dates = this.extractDates(coverage);
+
+      if (axisStyle === 'time') {
+        const { min, max } = this.extractMinMax(dates);
+        return {
+          type: 'time',
+          min,
+          max,
+        };
+      }
 
       return {
         type: 'category',
@@ -405,32 +481,23 @@ export class CoverageChartService extends CoverageService {
       };
     }
 
-    if (coverage.domain.domainType === 'Grid') {
-      const dates = isCoverageCollection(coverage)
-        ? (coverage.coverages[0]?.domain.axes.t as { values: string[] }).values
-        : (coverage.domain.axes.t as { values: string[] }).values;
-
-      return {
-        type: 'category',
-        boundaryGap: false,
-        data: dates,
-      };
-    }
-
-    return {};
+    return { type: 'unknown' };
   }
 
   public coverageJSONToSeries(
     coverage: CoverageCollection | CoverageJSON,
-    options?: TOptions
+    options?: TCoverageOptions
   ): TChartData {
     if (isCoverageCollection(coverage)) {
       return {
-        x: this.processXAxis(coverage.coverages[0]),
+        x: this.processXAxis(coverage.coverages[0], options),
         series: this.coverageCollectionToSeries(coverage, options),
       };
     }
 
-    return { x: this.processXAxis(coverage), series: this.coverageToSeries(coverage, options) };
+    return {
+      x: this.processXAxis(coverage, options),
+      series: this.coverageToSeries(coverage, options),
+    };
   }
 }
