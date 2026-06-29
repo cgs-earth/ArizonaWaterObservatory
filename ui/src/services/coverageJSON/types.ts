@@ -31,24 +31,27 @@ export type TFilteredRange = [
   },
 ];
 
+export type TCategoryAxisOption = {
+  type: 'category';
+  boundaryGap?: boolean;
+  data?: string[] | number[];
+  name?: string;
+  nameLocation?: string;
+  nameGap?: number;
+};
+
+export type TTimeAxisOption = {
+  type: 'time';
+  min?: string;
+  max?: string;
+};
+
+export type TUnknownAxisOption = {
+  type: 'unknown';
+};
+
 // Stricter type than the Echarts union type
-export type XAXisOption =
-  | {
-      type: 'category';
-      boundaryGap?: boolean;
-      data?: string[] | number[];
-      name?: string;
-      nameLocation?: string;
-      nameGap?: number;
-    }
-  | {
-      type: 'time';
-      min?: string;
-      max?: string;
-    }
-  | {
-      type: 'unknown';
-    };
+export type XAXisOption = TCategoryAxisOption | TTimeAxisOption | TUnknownAxisOption;
 
 export type TChartData = {
   x: XAXisOption;
