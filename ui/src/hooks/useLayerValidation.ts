@@ -30,7 +30,7 @@ type Data = {
   parameterOptions?: ComboboxData;
 };
 
-export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data) => {
+export const useLayerValidation = (layer?: Layer, isLoading: boolean = false, data: Data = {}) => {
   const {
     parameters = [],
     from = null,
@@ -50,6 +50,10 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
   const { isFetchingCollections, isLoadingGeography } = useLoading();
 
   useEffect(() => {
+    if (!layer) {
+      return;
+    }
+
     const restrictions = CollectionRestrictions[layer.datasourceId];
 
     if (restrictions && restrictions.length > 0) {
@@ -78,7 +82,7 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
   }, [layer]);
 
   useEffect(() => {
-    if (isFetchingCollections || data) {
+    if (isFetchingCollections || data || !layer) {
       return;
     }
 
@@ -192,11 +196,11 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
    * @constant
    */
   const hasUnsavedChanges =
-    !isSameArray(parameters, layer.parameters) ||
-    (collectionType === CollectionType.EDRGrid && from !== layer.from) ||
-    to !== layer.to ||
-    !isSamePalette(paletteDefinition, layer.paletteDefinition);
-
+    layer &&
+    (!isSameArray(parameters, layer.parameters) ||
+      (collectionType === CollectionType.EDRGrid && from !== layer.from) ||
+      to !== layer.to ||
+      !isSamePalette(paletteDefinition, layer.paletteDefinition));
   /**
    * This layer has validation issues or there are blocking actions
    *

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dayjs from 'dayjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Group, Loader, Stack, Title, useComputedColorScheme } from '@mantine/core';
 import Button from '@/components/Button';
@@ -17,6 +18,7 @@ import { TSimplifiedEntry } from '@/features/Compare/types';
 import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
 import { LayerLocationGroup } from '@/hooks/useAllLocations';
 import { useTimeseriesData } from '@/hooks/useTimeseriesData';
+import { XAXisOption } from '@/services/coverageJSON/types';
 import {
   CoverageCollection,
   CoverageJSON,
@@ -165,6 +167,12 @@ export const Visualization: React.FC<Props> = (props: Props) => {
     }
   };
 
+  const xAxisOverride: XAXisOption = {
+    type: 'time',
+    min: dayjs(from).format(),
+    max: dayjs(to).format(),
+  };
+
   return (
     <Stack>
       <Group justify="space-between">
@@ -221,6 +229,10 @@ export const Visualization: React.FC<Props> = (props: Props) => {
               showTabs={areControlsActive}
               disabled={isLoading}
               isLoading={isLoading && chartData.length === 0}
+              parserOptions={{ axisStyle: 'time' }}
+              tabHeight={25}
+              useDataZoom
+              xAxisOverride={xAxisOverride}
             />
           )}
           {showTable && (

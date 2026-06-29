@@ -12,11 +12,13 @@ export type Series<T extends GeoJsonProperties> = {
 
 export type PrettyLabel = { value: string; label: string };
 
+type TValue = string | number | null;
+
 // TODO: consilidate, make generic?
 export type EChartsSeries = {
   name: string;
   parameter: string;
   unit: string;
   type: 'line';
-  data: number[];
+  data: (TValue[] | TValue)[];
 };

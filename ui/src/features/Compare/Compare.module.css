@@ -36,8 +36,9 @@
 }
 
 .headerControls {
-  width: 73%;
-  margin-left: 17.8125rem;
+  width: calc(100% - 27.25rem);
+  margin-right: var(--default-spacing);
+  margin-left: auto;
 }
 
 .fullscreenButton svg {

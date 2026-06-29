@@ -12,6 +12,7 @@ import { DatePreset } from '@/components/DateInput/DateInput.types';
 import IconButton from '@/components/IconButton';
 import { Variant } from '@/components/types';
 import styles from '@/features/Compare/Compare.module.css';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
 import { FullscreenButton } from './Data/FullscreenButton';
 
 type Props = {
@@ -28,6 +29,11 @@ export const Header: React.FC<Props> = (props) => {
   const [tempFrom, setTempFrom] = useState(from);
   const [tempTo, setTempTo] = useState(to);
 
+  const { getDateInputError } = useLayerValidation(undefined, false, {
+    from: tempFrom,
+    to: tempTo,
+  });
+
   useEffect(() => {
     setTempFrom(from);
   }, [from]);
@@ -35,6 +41,8 @@ export const Header: React.FC<Props> = (props) => {
   useEffect(() => {
     setTempTo(to);
   }, [to]);
+
+  const dateInputError = getDateInputError();
 
   return (
     <Group className={styles.header} align="center">
@@ -62,6 +70,7 @@ export const Header: React.FC<Props> = (props) => {
                 DatePreset.FifteenYears,
                 DatePreset.ThirtyYears,
               ]}
+              error={dateInputError}
             />
             <DateInput
               label="To"
@@ -81,14 +90,15 @@ export const Header: React.FC<Props> = (props) => {
                 DatePreset.FifteenYears,
                 DatePreset.ThirtyYears,
               ]}
+              error={dateInputError}
             />
           </Group>
           <Button
             variant={Variant.Primary}
             size="xs"
-            mb="0.15rem"
+            mb={dateInputError ? '1.1rem' : '0.12rem'}
             onClick={() => onDateUpdate(tempFrom, tempTo)}
-            disabled={from === tempFrom && to === tempTo}
+            disabled={(from === tempFrom && to === tempTo) || Boolean(dateInputError)}
           >
             Update
           </Button>

@@ -337,6 +337,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 getData={getData}
                 onLoading={onLoading}
                 tabs
+                parserOptions={{ axisStyle: 'time' }}
               />
             </Collapse>
           )}

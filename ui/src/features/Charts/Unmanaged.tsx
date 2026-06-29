@@ -8,6 +8,7 @@ import { Box, Skeleton } from '@mantine/core';
 import LineChart from '@/components/Charts/LineChart';
 import styles from '@/features/Charts/Charts.module.css';
 import { ETabTypes, TTypedOption } from '@/features/Charts/types';
+import { TCoverageOptions, XAXisOption } from '@/services/coverageJSON/types';
 import { CoverageCollection, CoverageJSON, ICollection } from '@/services/edr.service';
 
 type Props = {
@@ -20,6 +21,9 @@ type Props = {
   chartClassname?: string;
   value: string;
   isLoading?: boolean;
+  parserOptions?: TCoverageOptions;
+  useDataZoom?: boolean;
+  xAxisOverride?: XAXisOption;
 };
 
 export const Unmanaged: React.FC<Props> = (props) => {
@@ -33,6 +37,9 @@ export const Unmanaged: React.FC<Props> = (props) => {
     chartClassname,
     value,
     isLoading = false,
+    parserOptions,
+    useDataZoom,
+    xAxisOverride,
   } = props;
 
   const filteredEntries = useMemo(
@@ -61,7 +68,9 @@ export const Unmanaged: React.FC<Props> = (props) => {
                   theme={theme}
                   filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
                   seriesLabels={seriesLabels}
-                  chosenParameter={tab.value}
+                  parserOptions={{ ...parserOptions, chosenParameter: tab.value }}
+                  useDataZoom={useDataZoom}
+                  xAxisOverride={xAxisOverride}
                 />
               </Box>
             ))}
@@ -82,7 +91,9 @@ export const Unmanaged: React.FC<Props> = (props) => {
                   theme={theme}
                   filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
                   seriesLabels={seriesLabels}
-                  chosenUnit={tab.value}
+                  parserOptions={{ ...parserOptions, chosenUnit: tab.value }}
+                  useDataZoom={useDataZoom}
+                  xAxisOverride={xAxisOverride}
                 />
               </Box>
             ))}

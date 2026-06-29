@@ -233,6 +233,7 @@ export const LocationsChart: React.FC<Props> = (props) => {
           className={styles.bigChart}
           tabs
           tabHeight={31.875}
+          parserOptions={{ axisStyle: 'time' }}
         />
       )}
 

@@ -243,6 +243,7 @@ export const Grid: React.FC<Props> = (props) => {
             value={selectedParameter}
             className={styles.chartWrapper}
             onData={onData}
+            parserOptions={{ axisStyle: 'time' }}
           />
         )}
       </Box>

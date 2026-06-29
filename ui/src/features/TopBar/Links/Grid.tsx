@@ -380,6 +380,7 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 getData={getData}
                 tabs
                 onLoading={onLoading}
+                parserOptions={{ axisStyle: 'time' }}
               />
             </Collapse>
           )}
