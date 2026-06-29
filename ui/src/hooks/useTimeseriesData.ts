@@ -80,7 +80,7 @@ export const useTimeseriesData = (args: Args) => {
         locationIds,
         parameters: parameters.map((p) => p.id),
         coverageLabels,
-        getData: Date.now(),
+        getData: JSON.stringify(getData),
       }),
     [collectionId, from, to, locationIds, parameters, getData]
   );

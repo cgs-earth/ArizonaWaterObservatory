@@ -109,6 +109,7 @@ export const Location: React.FC<Props> = (props) => {
             onLoading={onLoading}
             value={selectedParameter}
             className={styles.chartWrapper}
+            parserOptions={{ axisStyle: 'time' }}
           />
         )}
       </Box>

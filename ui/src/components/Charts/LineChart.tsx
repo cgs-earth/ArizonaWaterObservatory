@@ -206,8 +206,8 @@ const LineChart = (props: Props) => {
       grid: {
         left: '8%',
         right: '5%',
-        top: '18%',
-        bottom: '15%',
+        top: useDataZoom ? '18%' : '12%',
+        bottom: useDataZoom ? '15%' : '20%',
       },
       xAxis: x,
       yAxis: {
