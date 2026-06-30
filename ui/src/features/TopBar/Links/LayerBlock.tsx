@@ -217,6 +217,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
                   location={location}
                   layer={layer}
                   collection={collection}
+                  collectionType={collectionType}
                 />
               ))}
             {collectionType === CollectionType.EDRGrid &&
@@ -227,6 +228,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
                   location={location}
                   layer={layer}
                   collection={collection}
+                  collectionType={collectionType}
                 />
               ))}
             {collectionType === CollectionType.Features &&

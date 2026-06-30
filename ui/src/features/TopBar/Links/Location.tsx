@@ -20,6 +20,7 @@ import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
 import loadingManager from '@/managers/Loading.init';
 import notificationManager from '@/managers/Notification.init';
 import {
@@ -32,6 +33,7 @@ import { collectionService } from '@/services/init';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
+import { CollectionType } from '@/utils/collection';
 import { createEmptyCsv } from '@/utils/csv';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
@@ -45,10 +47,11 @@ type Props = {
   collection: ICollection;
   layer: Layer;
   linkLocation?: LocationType | null;
+  collectionType: CollectionType;
 };
 
 export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { location, layer, collection, linkLocation } = props;
+  const { location, layer, collection, linkLocation, collectionType } = props;
 
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
@@ -69,6 +72,12 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
 
+  const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
+    collectionType,
+    from,
+    to,
+  });
+
   useEffect(() => {
     const url = buildLocationUrl(collection.id, id, layer.parameters, from, to, false, true);
 
@@ -81,7 +90,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   useEffect(() => {
     const collection = collectionService.getDatasource(layer.datasourceId);
 
-    if (collection) {
+    if (collection && !getIsDateRangeOverLimit()) {
       const paramObjects = Object.values(collection?.parameter_names ?? {});
 
       const parameters = paramObjects
@@ -223,8 +232,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const handleFromChange = (from: Layer['from']) => setFrom(from);
   const handleToChange = (to: Layer['to']) => setTo(to);
 
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
-
   const locationIds = useMemo(() => [id], [id]);
 
   return (
@@ -302,7 +309,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               ]}
               clearable
               disabled={isLoading}
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
             <DateInput
               label="To"
@@ -320,7 +327,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               ]}
               clearable
               disabled={isLoading}
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
           </Group>
         </Group>
