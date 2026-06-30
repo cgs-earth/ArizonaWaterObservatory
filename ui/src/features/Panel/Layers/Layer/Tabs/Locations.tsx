@@ -9,13 +9,13 @@ import Checkbox from '@/components/Checkbox';
 import NumberInput from '@/components/NumberInput';
 import Pagination from '@/components/Pagination';
 import { StringIdentifierCollections } from '@/consts/collections';
+import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
 import styles from '@/features/Panel/Panel.module.css';
 import { useLocations } from '@/hooks/useLocations';
 import useMainStore from '@/stores/main';
 import { Layer, Location } from '@/stores/main/types';
 import { chunk } from '@/utils/chunk';
 import { getLabel } from '@/utils/getLabel';
-import { getId } from '../Search/utils';
 
 type Props = {
   layer: Layer;

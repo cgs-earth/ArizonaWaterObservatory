@@ -7,7 +7,7 @@ import { PropsWithChildren } from 'react';
 import { Box, ButtonProps, Collapse, CollapseProps, Group, GroupProps } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import styles from '@/components/Collapsible/Collapsible.module.css';
-import { Toggle } from './Toggle';
+import { Toggle } from '@/components/Collapsible/Toggle';
 
 type Props = {
   defaultOpen?: boolean;

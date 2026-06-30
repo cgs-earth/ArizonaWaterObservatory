@@ -12,6 +12,7 @@ import styles from '@/features/Compare/Compare.module.css';
 import Data from '@/features/Compare/Data';
 import { Header } from '@/features/Compare/Header';
 import Panel from '@/features/Compare/Panel';
+import { TSimplifiedEntry } from '@/features/Compare/types';
 import { useAllLocations } from '@/hooks/useAllLocations';
 import notificationManager from '@/managers/Notification.init';
 import { collectionService } from '@/services/init';
@@ -19,7 +20,6 @@ import { Layer, Location } from '@/stores/main/types';
 import { NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getParameterUnit } from '@/utils/parameters';
-import { TSimplifiedEntry } from './types';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);

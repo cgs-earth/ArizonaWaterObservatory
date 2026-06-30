@@ -13,11 +13,11 @@ import {
   TValues,
   XAXisOption,
 } from '@/services/coverageJSON/types';
+import { isTimeAxis } from '@/services/coverageJSON/utils';
 import { CoverageAxesValues, CoverageCollection, CoverageJSON } from '@/services/edr.service';
 import { NotificationVariant } from '@/stores/session/types';
 import { isAxesValues, isCoverageCollection } from '@/utils/isTypeObject';
 import { getParameterUnit } from '@/utils/parameters';
-import { isTimeAxis } from './utils';
 
 export class CoverageChartService extends CoverageService {
   private associateDataWithTime(

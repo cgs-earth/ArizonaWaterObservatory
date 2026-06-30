@@ -6,14 +6,14 @@
 import { useState } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Table as TableComponent, TableProps } from '@mantine/core';
+import { CoverageJSONTable } from '@/components/Table/CoverageJSON';
+import { GeoJSONTable } from '@/components/Table/GeoJSON';
 import styles from '@/components/Table/Table.module.css';
 import TextInput from '@/components/TextInput';
 // TODO: Find a better location for this type
 import { TTypedOption } from '@/features/Charts/types';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
 import { isCoverageCollection, isCoverageJSON } from '@/utils/isTypeObject';
-import { CoverageJSONTable } from './CoverageJSON';
-import { GeoJSONTable } from './GeoJSON';
 
 type Props = TableProps & {
   id: string;

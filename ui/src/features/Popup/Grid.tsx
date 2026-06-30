@@ -292,7 +292,7 @@ export const Grid: React.FC<Props> = (props) => {
               onChange={(value, _option) => handleLocationChange(value)}
             />
           )}
-          {times.length > 1 && time && (
+          {tab === 'table' && times.length > 1 && time && (
             <Select
               className={styles.timesDropdown}
               size="xs"
