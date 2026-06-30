@@ -46,9 +46,7 @@ export type TTimeAxisOption = {
   max?: string;
 };
 
-export type TUnknownAxisOption = {
-  type: 'unknown';
-};
+export type TUnknownAxisOption = {};
 
 // Stricter type than the Echarts union type
 export type XAXisOption = TCategoryAxisOption | TTimeAxisOption | TUnknownAxisOption;

@@ -418,14 +418,14 @@ export class CoverageChartService extends CoverageService {
 
       if (!isAxesValues(axes)) {
         console.warn('Unable to process: ', axes);
-        return { type: 'unknown' };
+        return {};
       }
 
       const values = axes.values;
 
       if (values.length === 0) {
         console.warn('No values: ', axes);
-        return { type: 'unknown' };
+        return {};
       }
 
       let name = undefined;
@@ -481,7 +481,7 @@ export class CoverageChartService extends CoverageService {
       };
     }
 
-    return { type: 'unknown' };
+    return {};
   }
 
   public coverageJSONToSeries(
