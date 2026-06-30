@@ -42,7 +42,7 @@ dayjs.extend(isSameOrBefore);
 
 type Props = {
   layer: Layer;
-  isLoading: boolean;
+  isLoading?: boolean;
   collection: ICollection;
   location: Feature;
   linkLocation?: LocationType | null;

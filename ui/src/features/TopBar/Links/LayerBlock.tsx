@@ -228,7 +228,6 @@ export const LayerBlock: React.FC<Props> = (props) => {
                   location={location}
                   layer={layer}
                   collection={collection}
-                  isLoading={false}
                   collectionType={collectionType}
                 />
               ))}
