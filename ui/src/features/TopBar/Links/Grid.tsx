@@ -59,7 +59,6 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [codeUrl, setCodeUrl] = useState('');
   const [_datasetName, setDatasetName] = useState<string>('');
 
-  const isMounted = useRef(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const [id, setId] = useState<string>(String(location.id));
@@ -68,11 +67,14 @@ export const Grid = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const [from, setFrom] = useState<Layer['from']>(layer.from);
   const [to, setTo] = useState<Layer['to']>(layer.to);
 
+  const isMounted = useRef(true);
+
   const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
     collectionType,
     from,
     to,
   });
+
   useEffect(() => {
     const url = buildCubeUrl(collection.id, layer.parameters, from, to, false, true, location);
 
