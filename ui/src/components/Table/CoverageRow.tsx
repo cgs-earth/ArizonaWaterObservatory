@@ -6,11 +6,11 @@
 import { useMemo, useState } from 'react';
 import { Group, Table, Text, TextProps } from '@mantine/core';
 import Arrow from '@/assets/Arrow';
+import { EChartsSeries } from '@/components/Charts/types';
 import styles from '@/components/Table/Table.module.css';
 import { TTypedOption } from '@/features/Charts/types';
 import { CoverageChartService } from '@/services/coverageJSON/coverageChart.service';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
-import { EChartsSeries } from '../Charts/types';
 
 type Coverage = CoverageCollection | CoverageJSON | (CoverageCollection | CoverageJSON)[];
 

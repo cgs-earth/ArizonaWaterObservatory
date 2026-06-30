@@ -7,7 +7,10 @@ import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { ComboboxData, Tabs } from '@mantine/core';
+import Label from '@/features/Panel/Layers/Layer/Label';
+import Search from '@/features/Panel/Layers/Layer/Search';
 import { Data } from '@/features/Panel/Layers/Layer/Tabs/Data';
+import { Locations } from '@/features/Panel/Layers/Layer/Tabs/Locations';
 import { Settings } from '@/features/Panel/Layers/Layer/Tabs/Settings';
 import { Tools } from '@/features/Panel/Layers/Layer/Tabs/Tools';
 import styles from '@/features/Panel/Panel.module.css';
@@ -22,9 +25,6 @@ import { LoadingType, NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getRandomHexColor } from '@/utils/hexColor';
 import { getParameterUnit } from '@/utils/parameters';
-import Label from './Label';
-import Search from './Search';
-import { Locations } from './Tabs/Locations';
 
 dayjs.extend(isSameOrBefore);
 

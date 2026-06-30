@@ -12,8 +12,8 @@ import { DatePreset } from '@/components/DateInput/DateInput.types';
 import IconButton from '@/components/IconButton';
 import { Variant } from '@/components/types';
 import styles from '@/features/Compare/Compare.module.css';
+import { FullscreenButton } from '@/features/Compare/Data/FullscreenButton';
 import { useLayerValidation } from '@/hooks/useLayerValidation';
-import { FullscreenButton } from './Data/FullscreenButton';
 
 type Props = {
   from: string;

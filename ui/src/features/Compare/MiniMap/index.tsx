@@ -12,6 +12,7 @@ import { getBBox } from '@/consts/bbox';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { useMap } from '@/contexts/MapContexts';
 import { MINI_MAP_ID } from '@/features/Compare/MiniMap/consts';
+import { TSimplifiedEntry } from '@/features/Compare/types';
 import { DEFAULT_FILL_OPACITY, INITIAL_CENTER, INITIAL_ZOOM } from '@/features/Map/consts';
 import { getId } from '@/features/Panel/Layers/Layer/Search/utils';
 import { LayerLocationGroups } from '@/hooks/useAllLocations';
@@ -19,7 +20,6 @@ import { collectionService, factoryService, miniMapService } from '@/services/in
 import useMainStore from '@/stores/main';
 import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
 import { Layer, Location } from '@/stores/main/types';
-import { TSimplifiedEntry } from '../types';
 
 type Props = {
   layers: Layer[];

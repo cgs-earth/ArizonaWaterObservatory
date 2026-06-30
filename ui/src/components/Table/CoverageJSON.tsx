@@ -5,11 +5,11 @@
 
 import { useMemo } from 'react';
 import { Table, Text, TextProps } from '@mantine/core';
+import { CoverageRow } from '@/components/Table/CoverageRow';
 import { TTypedOption } from '@/features/Charts/types';
 import { CoverageChartService } from '@/services/coverageJSON/coverageChart.service';
 import { TCategoryAxisOption } from '@/services/coverageJSON/types';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
-import { CoverageRow } from './CoverageRow';
 
 export type Coverage = CoverageCollection | CoverageJSON | (CoverageCollection | CoverageJSON)[];
 

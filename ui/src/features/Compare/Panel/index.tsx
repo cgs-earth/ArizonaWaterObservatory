@@ -12,11 +12,11 @@ import styles from '@/features/Compare/Compare.module.css';
 import MiniMap from '@/features/Compare/MiniMap';
 import { MINI_MAP_ID } from '@/features/Compare/MiniMap/consts';
 import { Layer } from '@/features/Compare/Panel/Layer';
+import { TSimplifiedEntry } from '@/features/Compare/types';
 import { Fallback } from '@/features/Panel/Layers/Layer/Fallback';
 import { Header } from '@/features/Panel/Layers/Layer/Header';
 import { LayerLocationGroups } from '@/hooks/useAllLocations';
 import { Layer as LayerType, Location } from '@/stores/main/types';
-import { TSimplifiedEntry } from '../types';
 
 type Props = {
   layers: LayerType[];
