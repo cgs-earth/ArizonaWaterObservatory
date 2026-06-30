@@ -5,7 +5,7 @@
 
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Box, Group, Loader, Stack, Title, useComputedColorScheme } from '@mantine/core';
+import { Box, Group, Loader, Stack, Text, Title, useComputedColorScheme } from '@mantine/core';
 import Button from '@/components/Button';
 import Checkbox from '@/components/Checkbox';
 import Table from '@/components/Table';
@@ -130,7 +130,7 @@ export const Visualization: React.FC<Props> = (props: Props) => {
     [entry.collectionType, features]
   );
 
-  const { chartData, seriesLabels, isLoading } = useTimeseriesData({
+  const { chartData, seriesLabels, isLoading, error } = useTimeseriesData({
     collectionId: entry.layer.datasourceId, // Placeholder
     locationIds: entry.locations,
     parameters: entry.parameters,
@@ -172,6 +172,8 @@ export const Visualization: React.FC<Props> = (props: Props) => {
     min: dayjs(from).format(),
     max: dayjs(to).format(),
   };
+
+  console.log('error', error, isLoading);
 
   return (
     <Stack>
@@ -250,6 +252,11 @@ export const Visualization: React.FC<Props> = (props: Props) => {
             </Box>
           )}
         </>
+      )}
+      {(error ?? '').length > 0 && (
+        <Text c="red" size="sm" fw={700} ta="center">
+          {error}
+        </Text>
       )}
     </Stack>
   );

@@ -8,7 +8,7 @@ import { collectionService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 
-export const useDataTools = (strict: boolean = false) => {
+export const useAreDataToolEnabled = (strict: boolean = false) => {
   const layers = useMainStore((store) => store.layers);
 
   const validLayers = useMemo(

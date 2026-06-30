@@ -11,7 +11,7 @@ import styles from '@/features/Compare/Compare.module.css';
 import { Visualization } from '@/features/Compare/Data/Visualization';
 import { TSimplifiedEntry } from '@/features/Compare/types';
 import { LayerLocationGroups } from '@/hooks/useAllLocations';
-import { useDataTools } from '@/hooks/useAreDataToolsEnabled';
+import { useAreDataToolEnabled } from '@/hooks/useAreDataToolsEnabled';
 
 type Props = {
   layerLocationGroups: LayerLocationGroups;
@@ -34,7 +34,7 @@ const Data: React.FC<Props> = (props) => {
     to,
   } = props;
 
-  const { layers } = useDataTools(true);
+  const { layers } = useAreDataToolEnabled(true);
 
   const [activeControls, setActiveControls] = useState<string[]>([]);
 

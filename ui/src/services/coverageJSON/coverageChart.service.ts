@@ -364,23 +364,25 @@ export class CoverageChartService extends CoverageService {
   }
 
   private coverageToSeries(coverage: CoverageJSON, options?: TCoverageOptions) {
-    if (coverage.domain.domainType === 'PointSeries') {
+    const domainType = this.getDomainType(coverage);
+
+    if (domainType === 'PointSeries') {
       return this.processPointSeries(coverage, options);
     }
 
-    if (coverage.domain.domainType === 'VerticalProfile') {
+    if (domainType === 'VerticalProfile') {
       return this.processVerticalProfile(coverage, options);
     }
 
-    if (coverage.domain.domainType === 'Grid') {
+    if (domainType === 'Grid') {
       return this.processGrid(coverage, options);
     }
 
-    if (coverage.domain.domainType === 'Point') {
+    if (domainType === 'Point') {
       return this.processPoint(coverage, options);
     }
     notificationManager.show(
-      `Domain type ${coverage.domain.domainType} is not currently supported.`,
+      `Domain type ${domainType} is not currently supported.`,
       NotificationVariant.Error,
       10000
     );
@@ -412,6 +414,8 @@ export class CoverageChartService extends CoverageService {
 
     const organizedAxisNames = this.getAxisNames(ranges);
 
+    const domainType = this.getDomainType(coverage);
+
     if (organizedAxisNames.length === 1 && organizedAxisNames[0].axisNames.length === 1) {
       const axis = organizedAxisNames[0].axisNames[0];
       const axes = coverage.domain.axes[axis];
@@ -429,7 +433,7 @@ export class CoverageChartService extends CoverageService {
       }
 
       let name = undefined;
-      if (coverage.domain.domainType === 'VerticalProfile') {
+      if (domainType === 'VerticalProfile') {
         const { referencing } = coverage.domain;
 
         const reference = referencing.find((reference) =>
@@ -462,7 +466,7 @@ export class CoverageChartService extends CoverageService {
       };
     }
 
-    if (['PointSeries', 'Grid'].includes(coverage.domain.domainType)) {
+    if (['PointSeries', 'Grid'].includes(domainType)) {
       const dates = this.extractDates(coverage);
 
       if (axisStyle === 'time') {

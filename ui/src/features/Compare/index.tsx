@@ -12,7 +12,7 @@ import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import { Body } from '@/features/Compare/Body';
 import styles from '@/features/Compare/Compare.module.css';
-import { useDataTools } from '@/hooks/useAreDataToolsEnabled';
+import { useAreDataToolEnabled } from '@/hooks/useAreDataToolsEnabled';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 
@@ -23,7 +23,7 @@ const Compare: React.FC = () => {
   const overlay = useSessionStore((store) => store.overlay);
   const setOverlay = useSessionStore((store) => store.setOverlay);
 
-  const { layers, areDataToolsEnabled } = useDataTools(true);
+  const { layers, areDataToolsEnabled } = useAreDataToolEnabled(true);
 
   const opened = overlay === Overlay.Compare;
 
