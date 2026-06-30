@@ -1108,6 +1108,8 @@ export type CoverageAxesValues = {
 
 export interface CoverageJSON {
   type: string;
+  domainType?: string;
+
   domain: {
     type: string;
     domainType: string;

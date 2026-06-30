@@ -73,6 +73,10 @@ export class CoverageService {
     return coverage.domain.axes as TAxes;
   }
 
+  getDomainType(coverage: CoverageJSON): string {
+    return coverage.domain.domainType ?? coverage?.domainType ?? '';
+  }
+
   getCurrentValuesConstructor(count: number, values: TValues, xCount: number, yCount: number) {
     const keys = Object.keys(values);
 
