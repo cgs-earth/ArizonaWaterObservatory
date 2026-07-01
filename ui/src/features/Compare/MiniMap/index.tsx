@@ -77,7 +77,7 @@ const MiniMap: React.FC<Props> = (props) => {
       const sourceId = factoryService.getSourceId(layer.datasourceId, layer.id);
 
       miniMapService.addSource(layer.datasourceId, layer.id);
-      miniMapService.addLayer(layer, sourceId);
+      miniMapService.addLayer(layer, sourceId, { includeEvents: false });
 
       // Clear data from last compare tool use
       const source = map.getSource<GeoJSONSource>(sourceId);
