@@ -9,7 +9,7 @@ import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import { Layer } from '@/features/TopBar/Links/Layer';
 import styles from '@/features/TopBar/Links/Links.module.css';
-import { useAreDataToolEnabled } from '@/hooks/useAreDataToolsEnabled';
+import { useAreDataToolsEnabled } from '@/hooks/useAreDataToolsEnabled';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
@@ -21,7 +21,7 @@ const Links: React.FC = () => {
   const setOverlay = useSessionStore((store) => store.setOverlay);
   const setLinkLocation = useSessionStore((store) => store.setLinkLocation);
 
-  const { areDataToolsEnabled } = useAreDataToolEnabled();
+  const { areDataToolsEnabled } = useAreDataToolsEnabled();
 
   const opened = overlay === Overlay.Links;
 
@@ -34,17 +34,19 @@ const Links: React.FC = () => {
     setOverlay(null);
   };
 
-  const helpText = (
-    <>
-      <Text size="sm">Access the API links used to fetch data for each location.</Text>
-      <br />
-      <Text size="sm">At least one layer must have viable locations and parameters selected.</Text>
-    </>
-  );
-
   return (
     <>
-      <Tooltip label={helpText}>
+      <Tooltip
+        label={
+          <>
+            <Text size="sm">Access the API links used to fetch data for each location.</Text>
+            <br />
+            <Text size="sm">
+              At least one layer must have parameters selected to enable this tool.
+            </Text>
+          </>
+        }
+      >
         <Button
           disabled={!areDataToolsEnabled}
           data-disabled={!areDataToolsEnabled}

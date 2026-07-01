@@ -72,7 +72,7 @@ const Panel: React.FC<Props> = (props) => {
                   items={[
                     {
                       id: `layers-accordion-${layer.id}`,
-                      title: <Header layer={layer} />,
+                      title: <Header layer={layer} includeDates={false} />,
                       content: (
                         <Layer
                           layer={layer}

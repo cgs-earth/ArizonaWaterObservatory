@@ -42,63 +42,38 @@ export const Unmanaged: React.FC<Props> = (props) => {
     xAxisOverride,
   } = props;
 
-  const filteredEntries = useMemo(
-    () => entries.filter(({ type }) => type === ETabTypes.Parameter),
-    [entries]
+  const parameters = entries.filter((e) => e.type === ETabTypes.Parameter);
+  const activeEntry = entries.find((e) => e.value === value);
+
+  const chartParserOptions = useMemo(
+    () => ({ ...parserOptions, chosenParameter: value }),
+    [parserOptions, value]
   );
 
-  return (
-    <>
-      {isLoading ? (
-        <Skeleton height="12rem" width="auto" />
-      ) : (
-        <>
-          {filteredEntries
-            .filter((tab) => tab.value === value)
-            .map((tab) => (
-              <Box
-                key={`${collectionId}-${tab.value}-unmanaged-panel`}
-                className={`${styles.panel} ${chartClassname}`}
-                style={{ display: value === tab.value ? 'block' : 'none' }}
-              >
-                <LineChart
-                  data={data}
-                  legend
-                  prettyLabels={filteredEntries}
-                  theme={theme}
-                  filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-                  seriesLabels={seriesLabels}
-                  parserOptions={{ ...parserOptions, chosenParameter: tab.value }}
-                  useDataZoom={useDataZoom}
-                  xAxisOverride={xAxisOverride}
-                />
-              </Box>
-            ))}
+  if (isLoading) {
+    return <Skeleton height="12rem" width="auto" />;
+  }
 
-          {entries
-            .filter((tab) => tab.type === ETabTypes.Unit)
-            .filter((tab) => tab.value === value)
-            .map((tab) => (
-              <Box
-                key={`${collectionId}-${tab.value}-unmanaged-panel`}
-                className={`${styles.panel} ${chartClassname}`}
-                style={{ display: value === tab.value ? 'block' : 'none' }}
-              >
-                <LineChart
-                  data={data}
-                  legend
-                  prettyLabels={filteredEntries}
-                  theme={theme}
-                  filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-                  seriesLabels={seriesLabels}
-                  parserOptions={{ ...parserOptions, chosenUnit: tab.value }}
-                  useDataZoom={useDataZoom}
-                  xAxisOverride={xAxisOverride}
-                />
-              </Box>
-            ))}
-        </>
-      )}
-    </>
+  if (!activeEntry) {
+    return null;
+  }
+
+  return (
+    <Box
+      key={`${collectionId}-${activeEntry.value}-unmanaged-panel`}
+      className={`${styles.panel} ${chartClassname}`}
+    >
+      <LineChart
+        data={data}
+        legend
+        prettyLabels={parameters}
+        theme={theme}
+        filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${activeEntry.value}`}
+        seriesLabels={seriesLabels}
+        parserOptions={chartParserOptions}
+        useDataZoom={useDataZoom}
+        xAxisOverride={xAxisOverride}
+      />
+    </Box>
   );
 };
