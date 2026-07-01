@@ -31,9 +31,7 @@ export const CoverageRow: React.FC<Props> = (props) => {
   const [showData, setShowData] = useState(true);
 
   const getFullLabel = (parameter: string, unit?: string) => {
-    const option = allOptions
-      .filter((opt) => opt.type === 'parameter')
-      .find((opt) => opt.value === parameter);
+    const option = allOptions.find((opt) => opt.type === 'parameter' && opt.value === parameter);
 
     if (option) {
       return (unit ?? '').length > 0 ? option.label.replace(` (${unit})`, '') : option.label;

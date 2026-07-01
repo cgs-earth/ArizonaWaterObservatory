@@ -15,10 +15,12 @@ import { getProvider } from '@/utils/provider';
 
 type Props = {
   layer: Layer;
+  includeParameters?: boolean;
+  includeDates?: boolean;
 };
 
 export const Header: React.FC<Props> = (props) => {
-  const { layer } = props;
+  const { layer, includeParameters = true, includeDates = true } = props;
 
   const [dataset, setDataset] = useState<ICollection>();
   const [parameters, setParameters] = useState<string[]>([]);
@@ -71,8 +73,10 @@ export const Header: React.FC<Props> = (props) => {
       </Title>
       {[CollectionType.EDR, CollectionType.EDRGrid].includes(collectionType) && (
         <Group justify="space-between" gap="var(--default-spacing)">
-          {parameters.length > 0 && <Text size="xs">{parameters.join(', ')}</Text>}
-          {(layer.from || layer.to) && (
+          {includeParameters && parameters.length > 0 && (
+            <Text size="xs">{parameters.join(', ')}</Text>
+          )}
+          {includeDates && (layer.from || layer.to) && (
             <Text size="xs">
               {layer.from ? dayjs(layer.from).format('MM/DD/YYYY') : '..'} -{' '}
               {layer.to ? dayjs(layer.to).format('MM/DD/YYYY') : '..'}

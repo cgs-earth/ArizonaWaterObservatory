@@ -12,7 +12,7 @@ import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import { Body } from '@/features/Compare/Body';
 import styles from '@/features/Compare/Compare.module.css';
-import { useAreDataToolEnabled } from '@/hooks/useAreDataToolsEnabled';
+import { useAreDataToolsEnabled } from '@/hooks/useAreDataToolsEnabled';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
 
@@ -23,7 +23,7 @@ const Compare: React.FC = () => {
   const overlay = useSessionStore((store) => store.overlay);
   const setOverlay = useSessionStore((store) => store.setOverlay);
 
-  const { layers, areDataToolsEnabled } = useAreDataToolEnabled(true);
+  const { layers, areDataToolsEnabled } = useAreDataToolsEnabled(true);
 
   const opened = overlay === Overlay.Compare;
 
@@ -35,17 +35,19 @@ const Compare: React.FC = () => {
     setOverlay(null);
   };
 
-  const helpText = (
-    <>
-      <Text size="sm">Compare data from multiple layers in a shared space.</Text>
-      <br />
-      <Text size="sm">At least one layer must have viable locations and parameters selected.</Text>
-    </>
-  );
-
   return (
     <>
-      <Tooltip label={helpText}>
+      <Tooltip
+        label={
+          <>
+            <Text size="sm">Compare data from multiple layers in a shared space.</Text>
+            <br />
+            <Text size="sm">
+              At least one layer must have parameters selected to enable this tool.
+            </Text>
+          </>
+        }
+      >
         <Button
           disabled={!areDataToolsEnabled}
           data-disabled={!areDataToolsEnabled}

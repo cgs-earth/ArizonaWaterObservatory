@@ -173,8 +173,6 @@ export const Visualization: React.FC<Props> = (props: Props) => {
     max: dayjs(to).format(),
   };
 
-  console.log('error', error, isLoading);
-
   return (
     <Stack>
       <Group justify="space-between">

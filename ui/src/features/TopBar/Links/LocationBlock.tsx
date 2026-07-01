@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Flex, Stack } from '@mantine/core';
 import Checkbox from '@/components/Checkbox';
 import NumberInput from '@/components/NumberInput';
@@ -37,16 +37,11 @@ export const LocationBlock: React.FC<Props> = (props) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(locations.length > 10 ? 10 : locations.length);
   const [chunkedLocations, setChunkedLocations] = useState<{ id: string; label: string }[][]>([]);
-  const [currentChunk, setCurrentChunk] = useState<{ id: string; label: string }[]>([]);
 
   const handlePageSizeChange = (pageSize: number) => {
     setPageSize(pageSize);
     setPage(1);
   };
-
-  useEffect(() => {
-    setPageSize(locations.length > 10 ? 10 : locations.length);
-  }, [locations]);
 
   useEffect(() => {
     const chunkedLocations = chunk(locations, pageSize);
@@ -69,16 +64,6 @@ export const LocationBlock: React.FC<Props> = (props) => {
     }
   }, [chunkedLocations]);
 
-  useEffect(() => {
-    if (chunkedLocations.length === 0 || chunkedLocations.length < page) {
-      setCurrentChunk([]);
-      return;
-    }
-
-    const currentChunk = chunkedLocations[page - 1];
-    setCurrentChunk(currentChunk);
-  }, [chunkedLocations, page]);
-
   const handleChange = (checked: boolean, locationId: string) => {
     if (checked) {
       addLocation(locationId);
@@ -98,6 +83,14 @@ export const LocationBlock: React.FC<Props> = (props) => {
     }
   };
 
+  const currentChunk = useMemo(
+    () =>
+      chunkedLocations.length > 0 && chunkedLocations.length >= page
+        ? chunkedLocations[page - 1]
+        : [],
+    [chunkedLocations, page]
+  );
+
   return (
     <Stack component="section" gap="var(--default-spacing)">
       <Flex className={styles.locationList} gap="var(--default-spacing)">
@@ -112,7 +105,7 @@ export const LocationBlock: React.FC<Props> = (props) => {
           />
         ))}
       </Flex>
-      {locations.length > pageSize && (
+      {locations.length > 10 && (
         <>
           <NumberInput
             size="xs"

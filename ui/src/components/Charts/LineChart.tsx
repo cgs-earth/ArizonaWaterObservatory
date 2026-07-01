@@ -54,12 +54,7 @@ type Props = {
 };
 
 const extractPrettyLabel = (target: string, prettyLabels: PrettyLabel[] = []): string => {
-  const pretty = prettyLabels.find((pl) => pl.value === target)?.label ?? target;
-  if (pretty) {
-    return pretty;
-  }
-
-  return target;
+  return prettyLabels.find((pl) => pl.value === target)?.label ?? target;
 };
 
 const LineChart = (props: Props) => {
