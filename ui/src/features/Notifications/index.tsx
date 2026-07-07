@@ -54,6 +54,7 @@ const Notifications: React.FC = () => {
               .map((notification) => (
                 <Notification
                   key={notification.id}
+                  withBorder
                   className={styles.notification}
                   color={getColor(notification.type)}
                   onClose={() => notificationManager.hide(notification.id)}

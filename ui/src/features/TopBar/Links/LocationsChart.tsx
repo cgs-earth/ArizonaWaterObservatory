@@ -15,7 +15,6 @@ import { StringIdentifierCollections } from '@/consts/collections';
 import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
 import styles from '@/features/TopBar/Links/Links.module.css';
-import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { TZipLink, ZipService } from '@/services/csv.service';
 import {
@@ -24,6 +23,7 @@ import {
   ICollection,
   IGetLocationParams,
 } from '@/services/edr.service';
+import { collectionService } from '@/services/init';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location } from '@/stores/main/types';
 import { NotificationVariant } from '@/stores/session/types';
@@ -179,7 +179,7 @@ export const LocationsChart: React.FC<Props> = (props) => {
   };
 
   useEffect(() => {
-    const collection = mainManager.getDatasource(layer.datasourceId);
+    const collection = collectionService.getDatasource(layer.datasourceId);
 
     if (collection) {
       const paramObjects = Object.values(collection?.parameter_names ?? {});
@@ -233,6 +233,7 @@ export const LocationsChart: React.FC<Props> = (props) => {
           className={styles.bigChart}
           tabs
           tabHeight={31.875}
+          parserOptions={{ axisStyle: 'time' }}
         />
       )}
 

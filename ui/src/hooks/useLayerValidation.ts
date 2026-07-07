@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { ComboboxData } from '@mantine/core';
 import { CollectionRestrictions, RestrictionType } from '@/consts/collections';
 import { useLoading } from '@/hooks/useLoading';
-import mainManager from '@/managers/Main.init';
+import { collectionService } from '@/services/init';
 import { Layer } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
 import { isSamePalette, isValidPalette } from '@/utils/colors';
@@ -30,7 +30,7 @@ type Data = {
   parameterOptions?: ComboboxData;
 };
 
-export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data) => {
+export const useLayerValidation = (layer?: Layer, isLoading: boolean = false, data: Data = {}) => {
   const {
     parameters = [],
     from = null,
@@ -50,6 +50,10 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
   const { isFetchingCollections, isLoadingGeography } = useLoading();
 
   useEffect(() => {
+    if (!layer) {
+      return;
+    }
+
     const restrictions = CollectionRestrictions[layer.datasourceId];
 
     if (restrictions && restrictions.length > 0) {
@@ -78,11 +82,11 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
   }, [layer]);
 
   useEffect(() => {
-    if (isFetchingCollections || data) {
+    if (isFetchingCollections || data || !layer) {
       return;
     }
 
-    const collection = mainManager.getDatasource(layer.datasourceId);
+    const collection = collectionService.getDatasource(layer.datasourceId);
 
     if (collection) {
       const temporalExtent = getTemporalExtent(collection);
@@ -113,6 +117,11 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
 
   const showSearchTool = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
   const showLabelTool = [CollectionType.EDR, CollectionType.Features].includes(collectionType);
+  const showLocationsTool = [
+    CollectionType.EDR,
+    CollectionType.Features,
+    CollectionType.EDRGrid,
+  ].includes(collectionType);
 
   /**
    * This layer is a grid type which requires at least one selected parameter
@@ -187,11 +196,11 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
    * @constant
    */
   const hasUnsavedChanges =
-    !isSameArray(parameters, layer.parameters) ||
-    (collectionType === CollectionType.EDRGrid && from !== layer.from) ||
-    to !== layer.to ||
-    !isSamePalette(paletteDefinition, layer.paletteDefinition);
-
+    layer &&
+    (!isSameArray(parameters, layer.parameters) ||
+      (collectionType === CollectionType.EDRGrid && from !== layer.from) ||
+      to !== layer.to ||
+      !isSamePalette(paletteDefinition, layer.paletteDefinition));
   /**
    * This layer has validation issues or there are blocking actions
    *
@@ -298,6 +307,7 @@ export const useLayerValidation = (layer: Layer, isLoading: boolean, data: Data)
     showPalette,
     showSearchTool,
     showLabelTool,
+    showLocationsTool,
     getIsDateRangeOverLimit,
     getDateInputError,
     getParameterError,

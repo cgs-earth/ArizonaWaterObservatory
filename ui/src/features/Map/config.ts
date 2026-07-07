@@ -9,7 +9,7 @@ import { Root } from 'react-dom/client';
 import { CustomListenerFunction, LayerType, MainLayerDefinition } from '@/components/Map/types';
 import { SourceId } from '@/features/Map/sources';
 import { drawnFeatureContainsExtent, getMessage } from '@/features/Map/utils';
-import { getLocationsLayerIds } from '@/managers/Main.utils';
+import { getLocationsLayerIds } from '@/managers/main/Main.utils';
 import useMainStore from '@/stores/main';
 
 export const MAP_ID = 'main-map';

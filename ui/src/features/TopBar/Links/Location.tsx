@@ -14,14 +14,14 @@ import Code from '@/components/Code';
 import CopyInput from '@/components/CopyInput';
 import DateInput from '@/components/DateInput';
 import { DatePreset } from '@/components/DateInput/DateInput.types';
+import Table from '@/components/Table';
 import { StringIdentifierCollections } from '@/consts/collections';
 import { Charts } from '@/features/Charts';
 import { Parameter } from '@/features/Popup';
-import Table from '@/features/Table';
 import { GeoJSON } from '@/features/TopBar/Links/GeoJSON';
 import styles from '@/features/TopBar/Links/Links.module.css';
+import { useLayerValidation } from '@/hooks/useLayerValidation';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import {
   CoverageCollection,
@@ -29,9 +29,11 @@ import {
   ICollection,
   IGetLocationParams,
 } from '@/services/edr.service';
+import { collectionService } from '@/services/init';
 import awoService from '@/services/init/awo.init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
+import { CollectionType } from '@/utils/collection';
 import { createEmptyCsv } from '@/utils/csv';
 import { getIdStore } from '@/utils/getIdStore';
 import { getLabel } from '@/utils/getLabel';
@@ -45,10 +47,11 @@ type Props = {
   collection: ICollection;
   layer: Layer;
   linkLocation?: LocationType | null;
+  collectionType: CollectionType;
 };
 
 export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { location, layer, collection, linkLocation } = props;
+  const { location, layer, collection, linkLocation, collectionType } = props;
 
   const [openedProps, { toggle: toggleProps }] = useDisclosure(false);
   const [openedGeo, { toggle: toggleGeo }] = useDisclosure(false);
@@ -69,6 +72,12 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const controller = useRef<AbortController>(null);
   const isMounted = useRef(true);
 
+  const { getDateInputError, getIsDateRangeOverLimit } = useLayerValidation(layer, isLoading, {
+    collectionType,
+    from,
+    to,
+  });
+
   useEffect(() => {
     const url = buildLocationUrl(collection.id, id, layer.parameters, from, to, false, true);
 
@@ -79,9 +88,9 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   }, [id, from, to]);
 
   useEffect(() => {
-    const collection = mainManager.getDatasource(layer.datasourceId);
+    const collection = collectionService.getDatasource(layer.datasourceId);
 
-    if (collection) {
+    if (collection && !getIsDateRangeOverLimit()) {
       const paramObjects = Object.values(collection?.parameter_names ?? {});
 
       const parameters = paramObjects
@@ -223,8 +232,6 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const handleFromChange = (from: Layer['from']) => setFrom(from);
   const handleToChange = (to: Layer['to']) => setTo(to);
 
-  const isValidRange = from && to ? dayjs(from).isSameOrBefore(dayjs(to)) : true;
-
   const locationIds = useMemo(() => [id], [id]);
 
   return (
@@ -302,7 +309,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               ]}
               clearable
               disabled={isLoading}
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
             <DateInput
               label="To"
@@ -320,7 +327,7 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
               ]}
               clearable
               disabled={isLoading}
-              error={isValidRange ? false : 'Invalid date range'}
+              error={getDateInputError()}
             />
           </Group>
         </Group>
@@ -337,13 +344,14 @@ export const Location = forwardRef<HTMLDivElement, Props>((props, ref) => {
                 getData={getData}
                 onLoading={onLoading}
                 tabs
+                parserOptions={{ axisStyle: 'time' }}
               />
             </Collapse>
           )}
           <Group align="flex-start" gap="calc(var(--default-spacing) * 2)" grow>
             {openedProps && (
               <Collapse in={openedProps}>
-                <Table properties={location.properties} search />
+                <Table id={layer.id} json={location.properties} search />
               </Collapse>
             )}
             {openedGeo && (

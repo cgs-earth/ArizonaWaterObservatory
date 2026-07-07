@@ -9,7 +9,7 @@ import Info from '@/assets/Info';
 import LabelIcon from '@/assets/Label';
 import Label from '@/features/Panel/Layers/Layer/Label';
 import styles from '@/features/Panel/Layers/Layer/Label/Label.module.css';
-import mainManager from '@/managers/Main.init';
+import { collectionService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import useSessionStore from '@/stores/session';
 import { Overlay } from '@/stores/session/types';
@@ -20,7 +20,7 @@ export const LabelPopover: React.FC = () => {
     (layer) =>
       layer.loaded &&
       [CollectionType.EDR, CollectionType.Features].includes(
-        getCollectionType(mainManager.getDatasource(layer.datasourceId)!)
+        getCollectionType(collectionService.getDatasource(layer.datasourceId)!)
       )
   );
 

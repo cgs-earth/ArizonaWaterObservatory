@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { XAXisOption } from 'echarts/types/dist/shared';
 import { EChartsSeries } from '@/components/Charts/types';
 import { CoverageJSON } from '@/services/edr.service';
 
@@ -21,6 +20,7 @@ export type TOptions = {
 
 export type TCoverageOptions = TOptions & {
   parameters?: CoverageJSON['parameters'];
+  axisStyle?: 'values' | 'time';
 };
 
 export type TFilteredRange = [
@@ -30,6 +30,26 @@ export type TFilteredRange = [
     values: number[];
   },
 ];
+
+export type TCategoryAxisOption = {
+  type: 'category';
+  boundaryGap?: boolean;
+  data?: string[] | number[];
+  name?: string;
+  nameLocation?: string;
+  nameGap?: number;
+};
+
+export type TTimeAxisOption = {
+  type: 'time';
+  min?: string;
+  max?: string;
+};
+
+export type TUnknownAxisOption = {};
+
+// Stricter type than the Echarts union type
+export type XAXisOption = TCategoryAxisOption | TTimeAxisOption | TUnknownAxisOption;
 
 export type TChartData = {
   x: XAXisOption;

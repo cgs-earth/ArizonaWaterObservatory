@@ -15,9 +15,9 @@ import { Item } from '@/features/TopBar/Links/Item';
 import styles from '@/features/TopBar/Links/Links.module.css';
 import { Location } from '@/features/TopBar/Links/Location';
 import { LocationsChart } from '@/features/TopBar/Links/LocationsChart';
-import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
 import { ICollection } from '@/services/edr.service';
+import { spatialService } from '@/services/init';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { NotificationVariant } from '@/stores/session/types';
@@ -62,7 +62,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
       if (collectionType === CollectionType.EDR) {
         url = buildLocationsUrl(collection.id, layer.parameters);
       } else if (collectionType === CollectionType.EDRGrid) {
-        const bbox = mainManager.getBBox(collection.id, true);
+        const bbox = spatialService.getBBox(collection.id, true);
         url = buildCubeUrl(
           collection.id,
           layer.parameters,
@@ -217,6 +217,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
                   location={location}
                   layer={layer}
                   collection={collection}
+                  collectionType={collectionType}
                 />
               ))}
             {collectionType === CollectionType.EDRGrid &&
@@ -227,6 +228,7 @@ export const LayerBlock: React.FC<Props> = (props) => {
                   location={location}
                   layer={layer}
                   collection={collection}
+                  collectionType={collectionType}
                 />
               ))}
             {collectionType === CollectionType.Features &&

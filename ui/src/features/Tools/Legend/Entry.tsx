@@ -11,7 +11,7 @@ import { Grid } from '@/features/Tools/Legend/Grid';
 import { OpacitySlider } from '@/features/Tools/Legend/OpacitySlider';
 import { Shapes } from '@/features/Tools/Legend/Shapes';
 import styles from '@/features/Tools/Tools.module.css';
-import mainManager from '@/managers/Main.init';
+import { collectionService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { DrawMode, Layer } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
@@ -40,7 +40,7 @@ export const Entry: React.FC<Props> = (props) => {
   const drawMode = useMainStore((store) => store.drawMode);
 
   useEffect(() => {
-    const collection = mainManager.getDatasource(layer.datasourceId);
+    const collection = collectionService.getDatasource(layer.datasourceId);
 
     if (collection) {
       const collectionType = getCollectionType(collection);

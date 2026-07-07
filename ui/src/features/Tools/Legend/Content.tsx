@@ -6,7 +6,7 @@
 import { Fragment } from 'react';
 import { Box, Divider } from '@mantine/core';
 import { Entry } from '@/features/Tools/Legend/Entry';
-import mainManager from '@/managers/Main.init';
+import { collectionService, mainManager } from '@/services/init';
 import { Layer, MainState } from '@/stores/main/types';
 
 type Props = {
@@ -20,7 +20,7 @@ export const Content: React.FC<Props> = (props) => {
   const { layers, showControls = true, className, direction = 'row' } = props;
 
   const handleColorChange = (color: Layer['color'], layerId: Layer['id']) => {
-    const layer = mainManager.getLayer(layerId);
+    const layer = collectionService.getLayer(layerId);
 
     if (layer) {
       void mainManager.updateLayer(
@@ -38,7 +38,7 @@ export const Content: React.FC<Props> = (props) => {
   };
 
   const handleVisibilityChange = (visible: boolean, layerId: Layer['id']) => {
-    const layer = mainManager.getLayer(layerId);
+    const layer = collectionService.getLayer(layerId);
 
     if (layer) {
       void mainManager.updateLayer(
@@ -56,7 +56,7 @@ export const Content: React.FC<Props> = (props) => {
   };
 
   const handleOpacityChange = (opacity: number, layerId: Layer['id']) => {
-    const layer = mainManager.getLayer(layerId);
+    const layer = collectionService.getLayer(layerId);
 
     if (layer) {
       void mainManager.updateLayer(

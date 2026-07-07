@@ -4,6 +4,7 @@
  */
 
 import { Group } from '@mantine/core';
+import Compare from '@/features/Compare';
 import Tools from '@/features/Tools';
 import Info from '@/features/TopBar/Info';
 import Links from '@/features/TopBar/Links';
@@ -17,6 +18,7 @@ const TopBar: React.FC = () => {
         <Info />
         <Share />
         <Links />
+        <Compare />
       </Group>
       <Tools />
     </Group>

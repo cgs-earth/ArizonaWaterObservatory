@@ -12,7 +12,7 @@ import { Header } from '@/features/Popup/Header';
 import { Item } from '@/features/Popup/Item';
 import { Location } from '@/features/Popup/Location';
 import styles from '@/features/Popup/Popup.module.css';
-import mainManager from '@/managers/Main.init';
+import { collectionService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import { Layer, Location as LocationType } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
@@ -88,7 +88,7 @@ const Popup: React.FC<Props> = (props) => {
       return;
     }
 
-    const newDataset = mainManager.getDatasource(layer.datasourceId);
+    const newDataset = collectionService.getDatasource(layer.datasourceId);
 
     if (newDataset) {
       setDatasetName(newDataset.title ?? '');
@@ -170,6 +170,7 @@ const Popup: React.FC<Props> = (props) => {
       )}
       {collectionType === CollectionType.Features && feature && (
         <Item
+          id={layer.id}
           location={location}
           locations={locations}
           feature={feature}

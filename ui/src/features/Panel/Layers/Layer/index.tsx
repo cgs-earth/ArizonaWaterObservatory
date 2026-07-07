@@ -5,9 +5,12 @@
 
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { useCallback, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { ComboboxData, Tabs } from '@mantine/core';
+import Label from '@/features/Panel/Layers/Layer/Label';
+import Search from '@/features/Panel/Layers/Layer/Search';
 import { Data } from '@/features/Panel/Layers/Layer/Tabs/Data';
+import { Locations } from '@/features/Panel/Layers/Layer/Tabs/Locations';
 import { Settings } from '@/features/Panel/Layers/Layer/Tabs/Settings';
 import { Tools } from '@/features/Panel/Layers/Layer/Tabs/Tools';
 import styles from '@/features/Panel/Panel.module.css';
@@ -15,8 +18,8 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useLayerValidation } from '@/hooks/useLayerValidation';
 import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
-import mainManager from '@/managers/Main.init';
 import notificationManager from '@/managers/Notification.init';
+import { collectionService, mainManager } from '@/services/init';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
@@ -25,12 +28,24 @@ import { getParameterUnit } from '@/utils/parameters';
 
 dayjs.extend(isSameOrBefore);
 
+type TabNode = {
+  value: string;
+  label: string;
+  render: () => ReactNode;
+};
+
 type Props = {
   layer: LayerType;
+  includedTabs?: ('settings' | 'data' | 'tools' | 'search' | 'label' | 'locations')[];
+  flatTabs?: boolean;
 };
 
 const Layer: React.FC<Props> = (props) => {
-  const { layer } = props;
+  const {
+    layer,
+    includedTabs = ['settings', 'data', 'tools', 'search', 'label', 'locations'],
+    flatTabs = false,
+  } = props;
 
   const [name, setName] = useState(layer.name);
   const debouncedName = useDebounce(name, 300);
@@ -47,14 +62,15 @@ const Layer: React.FC<Props> = (props) => {
   const [parameterOptions, setParameterOptions] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [tab, setTab] = useState<string | null>();
+  // TODO: handle if settings not included
+  const [tab, setTab] = useState<string | null>(
+    includedTabs.includes('settings') ? 'settings' : (includedTabs?.[0] ?? null)
+  );
 
   const { isFetchingCollections } = useLoading();
 
-  const { showSearchTool, showLabelTool, getDateInputError } = useLayerValidation(
-    layer,
-    isLoading,
-    {
+  const { showSearchTool, showLabelTool, showLocationsTool, getDateInputError } =
+    useLayerValidation(layer, isLoading, {
       name,
       parameters,
       color,
@@ -64,15 +80,14 @@ const Layer: React.FC<Props> = (props) => {
       paletteDefinition,
       collectionType,
       parameterOptions,
-    }
-  );
+    });
 
   useEffect(() => {
     if (isFetchingCollections || parameterOptions) {
       return;
     }
 
-    const collection = mainManager.getDatasource(layer.datasourceId);
+    const collection = collectionService.getDatasource(layer.datasourceId);
 
     if (collection) {
       const collectionType = getCollectionType(collection);
@@ -312,33 +327,15 @@ const Layer: React.FC<Props> = (props) => {
 
   const showToolsTab = showSearchTool;
 
-  return (
-    <Tabs
-      value={tab}
-      color="var(--asu-color-primary)"
-      classNames={{
-        panel: tab === 'tools' ? styles.contentBorder : `${styles.content} ${styles.contentBorder}`,
-      }}
-      onChange={handleTabChange}
-      defaultValue="settings"
-    >
-      <Tabs.List>
-        <Tabs.Tab value="settings">Settings</Tabs.Tab>
-        {showDataTab && <Tabs.Tab value="data">Data</Tabs.Tab>}
-        {showToolsTab && <Tabs.Tab value="tools">Tools</Tabs.Tab>}
-      </Tabs.List>
-      <Tabs.Panel value="settings">
+  const tabs = [
+    includedTabs.includes('settings') && {
+      value: 'settings',
+      label: 'Settings',
+      render: () => (
         <Settings
           layer={layer}
           collectionType={collectionType}
-          attributes={{
-            name,
-            parameters,
-            color,
-            from,
-            to,
-            opacity,
-          }}
+          attributes={{ name, parameters, color, from, to, opacity }}
           attributeHandlers={{
             onNameChange: handleNameChange,
             onColorChange: handleColorChange,
@@ -346,25 +343,22 @@ const Layer: React.FC<Props> = (props) => {
             onToChange: handleToChange,
             onOpacityChange: handleOpacityChange,
           }}
-          updateHandlers={{
-            onDelete: handleDelete,
-          }}
+          updateHandlers={{ onDelete: handleDelete }}
         />
-      </Tabs.Panel>
-      {showDataTab && (
-        <Tabs.Panel value="data">
+      ),
+    },
+
+    showDataTab &&
+      includedTabs.includes('data') && {
+        value: 'data',
+        label: 'Data',
+        render: () => (
           <Data
             layer={layer}
             isLoading={isLoading}
             parameterOptions={parameterOptions}
             collectionType={collectionType}
-            attributes={{
-              parameters,
-              from,
-              to,
-              paletteDefinition,
-              color,
-            }}
+            attributes={{ parameters, from, to, paletteDefinition, color }}
             attributeHandlers={{
               onFromChange: handleFromChange,
               onToChange: handleToChange,
@@ -377,18 +371,75 @@ const Layer: React.FC<Props> = (props) => {
               onCancel: handleCancel,
             }}
           />
-        </Tabs.Panel>
-      )}
-      {showToolsTab && (
-        <Tabs.Panel value="tools">
+        ),
+      },
+
+    showToolsTab &&
+      includedTabs.includes('tools') && {
+        value: 'tools',
+        label: 'Tools',
+        render: () => (
           <Tools
             showSearchTool={showSearchTool}
             showLabelTool={showLabelTool}
             isLoading={isLoading}
             layer={layer}
           />
+        ),
+      },
+
+    showSearchTool &&
+      flatTabs &&
+      !includedTabs.includes('tools') &&
+      includedTabs.includes('search') && {
+        value: 'search',
+        label: 'Search',
+        render: () => <Search layer={layer} isLoading={isLoading} />,
+      },
+    showLabelTool &&
+      flatTabs &&
+      !includedTabs.includes('tools') &&
+      includedTabs.includes('label') && {
+        value: 'label',
+        label: 'Label',
+        render: () => <Label layer={layer} isLoading={isLoading} />,
+      },
+    showLocationsTool &&
+      flatTabs &&
+      !includedTabs.includes('tools') &&
+      includedTabs.includes('locations') && {
+        value: 'locations',
+        label: 'Locations',
+        render: () => <Locations layer={layer} isLoading={isLoading} />,
+      },
+  ].filter(Boolean) as TabNode[];
+
+  return (
+    <Tabs
+      value={tab}
+      color="var(--asu-color-primary)"
+      classNames={{
+        panel:
+          flatTabs || tab === 'tools'
+            ? styles.contentBorder
+            : `${styles.content} ${styles.contentBorder}`,
+      }}
+      onChange={handleTabChange}
+      defaultValue="settings"
+    >
+      <Tabs.List>
+        {tabs.map((tab) => (
+          <Tabs.Tab key={tab.value} value={tab.value}>
+            {tab.label}
+          </Tabs.Tab>
+        ))}
+      </Tabs.List>
+
+      {tabs.map((tab) => (
+        <Tabs.Panel key={tab.value} value={tab.value}>
+          {tab.render()}
         </Tabs.Panel>
-      )}
+      ))}
     </Tabs>
   );
 };

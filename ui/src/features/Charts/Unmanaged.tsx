@@ -4,10 +4,11 @@
  */
 
 import { useMemo } from 'react';
-import { Box } from '@mantine/core';
+import { Box, Skeleton } from '@mantine/core';
 import LineChart from '@/components/Charts/LineChart';
 import styles from '@/features/Charts/Charts.module.css';
 import { ETabTypes, TTypedOption } from '@/features/Charts/types';
+import { TCoverageOptions, XAXisOption } from '@/services/coverageJSON/types';
 import { CoverageCollection, CoverageJSON, ICollection } from '@/services/edr.service';
 
 type Props = {
@@ -19,6 +20,10 @@ type Props = {
   entries: TTypedOption[];
   chartClassname?: string;
   value: string;
+  isLoading?: boolean;
+  parserOptions?: TCoverageOptions;
+  useDataZoom?: boolean;
+  xAxisOverride?: XAXisOption;
 };
 
 export const Unmanaged: React.FC<Props> = (props) => {
@@ -31,54 +36,44 @@ export const Unmanaged: React.FC<Props> = (props) => {
     entries: entries,
     chartClassname,
     value,
+    isLoading = false,
+    parserOptions,
+    useDataZoom,
+    xAxisOverride,
   } = props;
 
-  const filteredEntries = useMemo(
-    () => entries.filter(({ type }) => type === ETabTypes.Parameter),
-    [entries]
+  const parameters = entries.filter((e) => e.type === ETabTypes.Parameter);
+  const activeEntry = entries.find((e) => e.value === value);
+
+  const chartParserOptions = useMemo(
+    () => ({ ...parserOptions, chosenParameter: value }),
+    [parserOptions, value]
   );
 
+  if (isLoading) {
+    return <Skeleton height="12rem" width="auto" />;
+  }
+
+  if (!activeEntry) {
+    return null;
+  }
+
   return (
-    <>
-      {filteredEntries
-        .filter((tab) => tab.value === value)
-        .map((tab) => (
-          <Box
-            key={`${collectionId}-${tab.value}-unmanaged-panel`}
-            className={`${styles.panel} ${chartClassname}`}
-            style={{ display: value === tab.value ? 'block' : 'none' }}
-          >
-            <LineChart
-              data={data}
-              legend
-              prettyLabels={filteredEntries}
-              theme={theme}
-              filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-              seriesLabels={seriesLabels}
-              chosenParameter={tab.value}
-            />
-          </Box>
-        ))}
-      {entries
-        .filter((tab) => tab.type === ETabTypes.Unit)
-        .filter((tab) => tab.value === value)
-        .map((tab) => (
-          <Box
-            key={`${collectionId}-${tab.value}-unmanaged-panel`}
-            className={`${styles.panel} ${chartClassname}`}
-            style={{ display: value === tab.value ? 'block' : 'none' }}
-          >
-            <LineChart
-              data={data}
-              legend
-              prettyLabels={filteredEntries}
-              theme={theme}
-              filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${tab.value}`}
-              seriesLabels={seriesLabels}
-              chosenUnit={tab.value}
-            />
-          </Box>
-        ))}
-    </>
+    <Box
+      key={`${collectionId}-${activeEntry.value}-unmanaged-panel`}
+      className={`${styles.panel} ${chartClassname}`}
+    >
+      <LineChart
+        data={data}
+        legend
+        prettyLabels={parameters}
+        theme={theme}
+        filename={`line-chart-${locationIds.join('_')}-${String(collectionId)}-${activeEntry.value}`}
+        seriesLabels={seriesLabels}
+        parserOptions={chartParserOptions}
+        useDataZoom={useDataZoom}
+        xAxisOverride={xAxisOverride}
+      />
+    </Box>
   );
 };
