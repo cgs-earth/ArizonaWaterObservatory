@@ -96,7 +96,8 @@ export class ConfigService {
       return;
     }
 
-    const layers = this.store.getState().layers;
+    // Unset loaded for this layer to prevent accidental reads on unloaded layer
+    const layers = this.store.getState().layers.map((layer) => ({ ...layer, loaded: false }));
     const provider = this.store.getState().provider;
     const category = this.store.getState().category;
     const collection = this.store.getState().collection;
@@ -272,20 +273,15 @@ export class ConfigService {
 
       this.map!.once('idle', async () => {
         try {
-          const dataFetches: Promise<void>[] = [];
-
           for (const layer of config.layers) {
             const sourceId = this.deps.factoryService.getSourceId(layer.datasourceId, layer.id);
             this.deps.mapService.addSource(layer.datasourceId, layer.id);
             this.deps.mapService.addLayer(layer, sourceId);
-
-            // Use applySpatialFilter, this will factor in drawn shapes but fallback
-            // to addData if none exists
-            dataFetches.push(this.deps.mainManager.applySpatialFilter(config.drawnShapes));
           }
 
-          // Fetch concurrently
-          await Promise.all(dataFetches);
+          // Use applySpatialFilter, this will factor in drawn shapes but fallback
+          // to addData if none exists
+          await this.deps.mainManager.applySpatialFilter(config.drawnShapes);
 
           // Set locations after layers are present so the map can reflect selected state
           store.setLocations(config.locations);

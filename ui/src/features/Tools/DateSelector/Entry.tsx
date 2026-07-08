@@ -115,12 +115,12 @@ export const Entry: React.FC<Props> = (props) => {
   }, []);
 
   useEffect(() => {
-    if (!map) {
+    if (!map || data.length > 0 || !layer.loaded) {
       return;
     }
 
     void handleDatesFetch(map, layer);
-  }, []);
+  }, [layer.loaded]);
 
   const handleChange = (value: string | null) => {
     const index = Number(value);

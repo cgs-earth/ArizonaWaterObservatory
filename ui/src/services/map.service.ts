@@ -442,14 +442,15 @@ export class MapService {
     V extends GeoJsonProperties = GeoJsonProperties,
   >(sourceId: string): FeatureCollection<T, V> | undefined {
     const source = this.map?.getSource(sourceId) as GeoJSONSource;
+    if (source) {
+      const data = source._data;
+      if (typeof data !== 'string') {
+        const featureCollection = turf.featureCollection<T, V>(
+          (data as FeatureCollection<T, V>).features as Feature<T, V>[]
+        );
 
-    const data = source._data;
-    if (typeof data !== 'string') {
-      const featureCollection = turf.featureCollection<T, V>(
-        (data as FeatureCollection<T, V>).features as Feature<T, V>[]
-      );
-
-      return featureCollection;
+        return featureCollection;
+      }
     }
   }
 }
