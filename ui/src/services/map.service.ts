@@ -218,13 +218,18 @@ export class MapService {
       // Check if the edges of the drawn feature are visible
       const drawnFeature = drawnFeatures[0];
 
-      const includeDrawLayers =
+      const isWithinExtent =
         drawnFeatures.length > 0 &&
         !drawnFeatureContainsExtent(drawnFeature, this.draw!, this.map!);
 
+      // This feature is inside of drawn feature and the drawn feature is fully within the map extent
+      if (isWithinExtent) {
+        return;
+      }
+
       // As layers can be added in any order, and reordered, perform manual check to ensure popup shows
       // for top layer in visual order
-      if (!isTopLayer(layerId, collectionId, this.map!, e.point, includeDrawLayers)) {
+      if (!isTopLayer(layerId, collectionId, this.map!, e.point)) {
         return;
       }
 
