@@ -4,7 +4,7 @@
  */
 
 import { EChartsSeries } from '@/components/Charts/types';
-import notificationManager from '@/managers/Notification.init';
+import NotificationManager from '@/managers/Notification.manager';
 import { CoverageService } from '@/services/coverageJSON/coverage.service';
 import {
   TChartData,
@@ -19,7 +19,18 @@ import { NotificationVariant } from '@/stores/session/types';
 import { isAxesValues, isCoverageCollection } from '@/utils/isTypeObject';
 import { getParameterUnit } from '@/utils/parameters';
 
+type CoverageChartServiceDependencies = {
+  notificationManager: NotificationManager;
+};
+
 export class CoverageChartService extends CoverageService {
+  private deps: CoverageChartServiceDependencies;
+
+  constructor(deps: CoverageChartServiceDependencies) {
+    super();
+    this.deps = deps;
+  }
+
   private associateDataWithTime(
     values: (string | number | null)[],
     times: (string | number)[]
@@ -112,11 +123,13 @@ export class CoverageChartService extends CoverageService {
     const { t, x: xObj, y: yObj } = this.getAxes(coverage);
 
     if (this.isSegments(xObj) && this.isSegments(yObj)) {
-      notificationManager.show(
-        `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
-        NotificationVariant.Error,
-        10000
-      );
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
+          NotificationVariant.Error,
+          10000
+        );
+      }
       return [];
     }
 
@@ -131,7 +144,13 @@ export class CoverageChartService extends CoverageService {
     const coverageParameters = coverage.parameters ?? options?.parameters;
 
     if (!coverage.ranges) {
-      notificationManager.show('Missing ranges in coverage data', NotificationVariant.Error, 10000);
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          'Missing ranges in coverage data',
+          NotificationVariant.Error,
+          10000
+        );
+      }
       return [];
     }
 
@@ -195,12 +214,14 @@ export class CoverageChartService extends CoverageService {
     const dates = (coverage.domain.axes.t as { values: string[] }).values;
     const coverageParameters = coverage.parameters ?? options?.parameters;
 
-    if (!coverage.ranges || !dates) {
-      notificationManager.show(
-        'Missing ranges or date axis in coverage data',
-        NotificationVariant.Error,
-        10000
-      );
+    if (!coverage.ranges || Object.keys(coverage.ranges).length === 0 || !dates) {
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          'Missing ranges or date axis in coverage data. There may be no data for this date range.',
+          NotificationVariant.Error,
+          10000
+        );
+      }
       return [];
     }
 
@@ -334,12 +355,25 @@ export class CoverageChartService extends CoverageService {
   private processSingleton(coverage: CoverageJSON, options?: TCoverageOptions) {
     const { t, x: xObj, y: yObj } = this.getAxes(coverage);
 
+    if (!coverage.ranges || Object.keys(coverage.ranges).length === 0) {
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          'Missing ranges in coverage data. There may be no data for this date range.',
+          NotificationVariant.Error,
+          10000
+        );
+      }
+      return [];
+    }
+
     if (this.isSegments(xObj) && this.isSegments(yObj)) {
-      notificationManager.show(
-        `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
-        NotificationVariant.Error,
-        10000
-      );
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
+          NotificationVariant.Error,
+          10000
+        );
+      }
       return [];
     }
 
@@ -381,11 +415,13 @@ export class CoverageChartService extends CoverageService {
     if (['Polygon', 'Point'].includes(domainType)) {
       return this.processSingleton(coverage, options);
     }
-    notificationManager.show(
-      `Domain type ${domainType} is not currently supported.`,
-      NotificationVariant.Error,
-      10000
-    );
+    if (this.deps.notificationManager) {
+      this.deps.notificationManager.show(
+        `Domain type ${domainType} is not currently supported.`,
+        NotificationVariant.Error,
+        10000
+      );
+    }
     return [];
   }
 

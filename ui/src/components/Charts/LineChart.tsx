@@ -20,9 +20,9 @@ import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import styles from '@/components/Charts/Charts.module.css';
 import { EChartsSeries, PrettyLabel } from '@/components/Charts/types';
-import { CoverageChartService } from '@/services/coverageJSON/coverageChart.service';
 import { TCoverageOptions, XAXisOption } from '@/services/coverageJSON/types';
 import { CoverageCollection, CoverageJSON } from '@/services/edr.service';
+import { coverageChartService } from '@/services/init/coverage.init';
 
 echarts.use([
   TitleComponent,
@@ -92,10 +92,10 @@ const LineChart = (props: Props) => {
     }
 
     data.forEach((entry, coverageIdx) => {
-      const chartData = new CoverageChartService().coverageJSONToSeries(entry, {
+      const chartData = coverageChartService.coverageJSONToSeries(entry, {
         ...parserOptions,
       });
-      console.log('chartData', chartData);
+
       let { series } = chartData;
       // TODO: determine if/how to handle differences in the x axis
       x = chartData.x;
