@@ -63,6 +63,7 @@ const Layer: React.FC<Props> = (props) => {
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
   const [paletteDefinition, setPaletteDefinition] = useState(layer.paletteDefinition);
 
+  const [categoryFilterExcludesCollection, setCategoryFilterExcludesCollection] = useState(false);
   const [parameterOptions, setParameterOptions] = useState<ComboboxData>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -87,7 +88,7 @@ const Layer: React.FC<Props> = (props) => {
     });
 
   useEffect(() => {
-    if (isFetchingCollections || parameterOptions) {
+    if (isFetchingCollections) {
       return;
     }
 
@@ -101,10 +102,12 @@ const Layer: React.FC<Props> = (props) => {
 
       let categoryFilter: string[] = [];
       if (category) {
-        const validGroups = parameterGroupMembers[category.label];
+        const validGroups = parameterGroupMembers?.[category.label];
 
-        categoryFilter = validGroups[collection.id];
+        categoryFilter = validGroups?.[collection.id] ?? [];
       }
+
+      setCategoryFilterExcludesCollection(categoryFilter.length === 0);
 
       const data = paramObjects
         .filter((object) => categoryFilter.length === 0 || categoryFilter.includes(object.id))
@@ -119,7 +122,7 @@ const Layer: React.FC<Props> = (props) => {
         .sort((a, b) => a.label.localeCompare(b.label));
       setParameterOptions(data);
     }
-  }, [isFetchingCollections]);
+  }, [category, isFetchingCollections]);
 
   // If user updates color through the legend, update it here
   useEffect(() => {
@@ -371,6 +374,7 @@ const Layer: React.FC<Props> = (props) => {
             parameterOptions={parameterOptions}
             collectionType={collectionType}
             category={category}
+            categoryFilterExcludesCollection={categoryFilterExcludesCollection}
             attributes={{ parameters, from, to, paletteDefinition, color }}
             attributeHandlers={{
               onFromChange: handleFromChange,

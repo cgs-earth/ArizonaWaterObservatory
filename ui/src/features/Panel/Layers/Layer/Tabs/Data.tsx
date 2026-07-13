@@ -48,6 +48,7 @@ type Props = {
   collectionType: CollectionType;
   parameterOptions: ComboboxData | undefined;
   category: Category | null;
+  categoryFilterExcludesCollection: boolean;
   attributes: Attributes;
   attributeHandlers: AttributeHandlers;
   updateHandlers: UpdateHandlers;
@@ -60,6 +61,7 @@ export const Data: React.FC<Props> = (props) => {
     collectionType,
     parameterOptions,
     category,
+    categoryFilterExcludesCollection,
     attributes: { from, to, parameters, paletteDefinition, color },
     attributeHandlers: {
       onFromChange,
@@ -92,10 +94,15 @@ export const Data: React.FC<Props> = (props) => {
 
   const { isLoadingGeography } = useLoading();
 
-  const getCategoryNote = (category: Category | null) => {
+  const getCategoryNote = (
+    categoryFilterExcludesCollection: boolean,
+    category: Category | null
+  ) => {
+    if (categoryFilterExcludesCollection) {
+      return 'Selected category does not apply to this dataset. Showing all parameters.';
+    }
     return category ? `Showing parameters within selected category: ${category.label}` : null;
   };
-
   const showDateInput = collectionType === CollectionType.EDRGrid;
 
   return (
@@ -160,7 +167,7 @@ export const Data: React.FC<Props> = (props) => {
         />
         {category && (
           <Text c="dimmed" size="sm">
-            {getCategoryNote(category)}
+            {getCategoryNote(categoryFilterExcludesCollection, category)}
           </Text>
         )}
         {showPalette && parameterOptions && (
