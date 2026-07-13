@@ -17,6 +17,7 @@ import { UserGuide } from '@/features/TopBar/Info/UserGuide';
 import styles from '@/features/TopBar/TopBar.module.css';
 import useSessionStore from '@/stores/session';
 import { HelpTab, Overlay } from '@/stores/session/types';
+import { Contact } from './Contact';
 
 export const INFO_LOCAL_KEY = 'awo-show-info';
 
@@ -101,11 +102,11 @@ const Info: React.FC = () => {
                 User Guide
               </Text>
             </Tabs.Tab>
-            {/* <Tabs.Tab value={HelpTab.Contact}>
+             <Tabs.Tab value={HelpTab.Contact}>
               <Text size="md" fw={700}>
                 Contact Us
               </Text>
-            </Tabs.Tab> */}
+            </Tabs.Tab> 
           </Tabs.List>
 
           <Tabs.Panel value={HelpTab.About}>
@@ -120,9 +121,9 @@ const Info: React.FC = () => {
           <Tabs.Panel value={HelpTab.UserGuide}>
             <UserGuide />
           </Tabs.Panel>
-          {/* <Tabs.Panel value={HelpTab.Contact}>
+          <Tabs.Panel value={HelpTab.Contact}>
             <Contact />
-          </Tabs.Panel> */}
+          </Tabs.Panel> 
         </Tabs>
       </Modal>
     </>

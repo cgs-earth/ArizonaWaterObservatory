@@ -6,6 +6,7 @@
 import { ReactNode } from 'react';
 import { Anchor, Text } from '@mantine/core';
 import GitHub from '@/assets/logos/Github';
+import CHILogo from '@/assets/logos/CHILogo';
 
 const description = {
   size: 'md',
@@ -217,15 +218,15 @@ export const contacts: Contact[] = [
     link: 'https://github.com/cgs-earth/ArizonaWaterObservatory',
   },
   {
-    id: 'github',
-    image: <GitHub />,
-    body: 'Access the repository containing the source code for the AWO. Contribute new features, report issues, and learn more about how this application was built.',
-    link: 'https://github.com/cgs-earth/ArizonaWaterObservatory',
+    id: 'Center For Hydrologic Innovations',
+    image: <CHILogo />,
+    body: 'Contact the Center For Hydrologic Innovations with any questions about the Arizona Water Observatory.',
+    link: 'mailto:chi-center@asu.edu',
   },
   {
-    id: 'github',
+    id: 'Center For Geospatial Solutions',
     image: <GitHub />,
     body: 'Access the repository containing the source code for the AWO. Contribute new features, report issues, and learn more about how this application was built.',
-    link: 'https://github.com/cgs-earth/ArizonaWaterObservatory',
+    link: 'https://cgsearth.org/',
   },
 ];
