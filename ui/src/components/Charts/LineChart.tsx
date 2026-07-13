@@ -95,6 +95,7 @@ const LineChart = (props: Props) => {
       const chartData = new CoverageChartService().coverageJSONToSeries(entry, {
         ...parserOptions,
       });
+      console.log('chartData', chartData);
       let { series } = chartData;
       // TODO: determine if/how to handle differences in the x axis
       x = chartData.x;
