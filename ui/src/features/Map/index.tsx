@@ -183,10 +183,14 @@ const MainMap: React.FC<Props> = (props) => {
           // Check if the edges of the drawn feature are visible
           const drawnFeature = drawnFeatures[0];
 
-          const includeDrawLayers =
+          const isWithinExtent =
             drawnFeatures.length > 0 && !drawnFeatureContainsExtent(drawnFeature, draw, map);
 
-          if (!isTopLayer(layer.id, layer.datasourceId, map, e.point, includeDrawLayers)) {
+          if (isWithinExtent) {
+            return;
+          }
+
+          if (!isTopLayer(layer.id, layer.datasourceId, map, e.point)) {
             return;
           }
 
