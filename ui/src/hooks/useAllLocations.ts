@@ -91,19 +91,21 @@ export const useAllLocations = (layers: Layer[]) => {
     controller.current = new AbortController();
 
     const results = await Promise.all(
-      layers.map(async (layer) => {
-        const existing = layerLocationGroups[layer.id];
+      layers
+        .filter((layer) => layer.loaded)
+        .map(async (layer) => {
+          const existing = layerLocationGroups[layer.id];
 
-        if (existing && existing.timeDataUpdated === layer.timeDataUpdated) {
-          return [layer.id, existing] as const;
-        }
+          if (existing && existing.timeDataUpdated === layer.timeDataUpdated) {
+            return [layer.id, existing] as const;
+          }
 
-        const res = await mainManager.getFeatures(layer, controller.current!.signal);
+          const res = await mainManager.getFeatures(layer, controller.current!.signal);
 
-        const group = buildGroup(layer, res.features, locations, existing);
+          const group = buildGroup(layer, res.features, locations, existing);
 
-        return [layer.id, group] as const;
-      })
+          return [layer.id, group] as const;
+        })
     );
 
     return Object.fromEntries(results);

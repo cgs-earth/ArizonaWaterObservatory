@@ -344,7 +344,7 @@ class MainManager {
 
   public async applySpatialFilter(
     drawnShapes: Feature<Polygon | MultiPolygon>[],
-    _options?: ApplySpatialFilterOptions
+    options?: ApplySpatialFilterOptions
   ): Promise<void> {
     const layers = this.store.getState().layers;
 
@@ -361,6 +361,7 @@ class MainManager {
           // addData should return the layerId
           return this.deps.dataService.addData(collectionId, layer, {
             filterFeatures: drawnShapes,
+            signal: options?.signal,
           });
         })
       );
@@ -516,6 +517,7 @@ class MainManager {
     let _color = color;
     if (parametersChanged || temporalRangeChanged || paletteChanged) {
       const drawnShapes = this.store.getState().drawnShapes;
+
       await this.deps.dataService.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,

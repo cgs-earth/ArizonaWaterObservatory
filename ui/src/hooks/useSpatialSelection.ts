@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { bboxPolygon, featureCollection } from '@turf/turf';
 import { BBox, Feature, MultiPolygon, Polygon } from 'geojson';
 import { FilterSpecification, GeoJSONSource, LngLatBoundsLike, Map } from 'mapbox-gl';
@@ -38,35 +38,21 @@ export const useSpatialSelection = (map: Map | null) => {
   const spatialSelection = useMainStore((state) => state.spatialSelection);
   const layerCount = useMainStore((state) => state.layers.length);
 
-  const controller = useRef<AbortController>(null);
-  const isMounted = useRef(true);
-  const loadingInstance = useRef<string>(null);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-      if (controller.current) {
-        controller.current.abort('Component unmount');
-      }
-    };
-  }, []);
-
-  const fetchLowerColoradoBasin = () => {
+  const fetchLowerColoradoBasin = (signal: AbortSignal) => {
     return geoconnexService.getItem<Feature<Polygon | MultiPolygon>>('hu02', LOWER_COLORADO_ID, {
-      signal: controller.current?.signal,
+      signal,
     });
   };
 
-  const fetchUpperColoradoBasin = () => {
+  const fetchUpperColoradoBasin = (signal: AbortSignal) => {
     return geoconnexService.getItem<Feature<Polygon | MultiPolygon>>('hu02', UPPER_COLORADO_ID, {
-      signal: controller.current?.signal,
+      signal,
     });
   };
 
-  const fetchArizona = () => {
+  const fetchArizona = (signal: AbortSignal) => {
     return geoconnexService.getItem<Feature<Polygon | MultiPolygon>>('states', ARIZONA_ID, {
-      signal: controller.current?.signal,
+      signal,
     });
   };
 
@@ -96,97 +82,67 @@ export const useSpatialSelection = (map: Map | null) => {
     }
   };
 
-  const loadPredefinedBoundaries = async (map: Map) => {
-    const bboxes: { id: number; bbox: BBox }[] = [
-      { id: ARIZONA_ID_NUMERIC, bbox: getBBox(PredefinedBoundary.Arizona) },
-      { id: COLORADO_RIVER_BASIN_ID_NUMERIC, bbox: getBBox(PredefinedBoundary.ColoradoRiverBasin) },
-    ];
-    loadingInstance.current = loadingManager.add(
-      'Loading Predefined Boundary data',
-      LoadingType.Geography
-    );
-
-    const [azResult, lcResult, ucResult] = await Promise.allSettled([
-      fetchArizona(),
-      fetchLowerColoradoBasin(),
-      fetchUpperColoradoBasin(),
-    ]);
-
-    const has: PredefinedBoundary[] = [];
-
-    const features: Feature<Polygon | MultiPolygon>[] = [];
-    if (azResult.status === 'fulfilled') {
-      features.push(azResult.value);
-      has.push(PredefinedBoundary.Arizona);
-    }
-    if (lcResult.status === 'fulfilled' && ucResult.status === 'fulfilled') {
-      features.push(lcResult.value, ucResult.value);
-      has.push(PredefinedBoundary.ColoradoRiverBasin);
-    }
-
-    const spatialSelectionSource = map.getSource<GeoJSONSource>(SourceId.SpatialSelection);
-    const spatialSelectionBBoxSource = map.getSource<GeoJSONSource>(SourceId.SpatialSelectionBBox);
-
-    const detailedFeatureCollection = featureCollection(features);
-
-    const bboxFeatureCollection = featureCollection(
-      bboxes.map(({ id, bbox }) => bboxPolygon(bbox, { id }))
-    );
-
-    if (spatialSelectionSource) {
-      spatialSelectionSource.setData(detailedFeatureCollection);
-    }
-
-    if (spatialSelectionBBoxSource) {
-      spatialSelectionBBoxSource.setData(bboxFeatureCollection);
-    }
-
-    loadingInstance.current = loadingManager.remove(loadingInstance.current);
-  };
-
-  const switchPredefinedBoundaries = async (boundary: PredefinedBoundary, strict: boolean) => {
-    // There is no data that needs to refetch
-    if (layerCount === 0) {
-      return;
-    }
-
-    const getTitle = () => {
-      if (boundary === PredefinedBoundary.ColoradoRiverBasin) {
-        return 'Colorado River Basin';
-      }
-
-      return 'Arizona';
-    };
-
-    const message = `Updating data boundaries to: ${getTitle()}${strict ? ', in strict mode.' : '.'}`;
-
-    loadingInstance.current = loadingManager.add(message, LoadingType.Geography);
-    try {
-      await mainManager.applySpatialFilter([], { rethrow: true });
-    } catch (error) {
-      if ((error as Error)?.message) {
-        const _error = error as Error;
-        notificationManager.show(`${_error.message}`, NotificationVariant.Error, 10000);
-      } else if (typeof error === 'string') {
-        notificationManager.show(`${error}`, NotificationVariant.Error, 10000);
-      }
-    } finally {
-      loadingInstance.current = loadingManager.remove(loadingInstance.current);
-      notificationManager.show(
-        `Data boundaries updated to: ${getTitle()}`,
-        NotificationVariant.Success
-      );
-    }
-  };
-
   useEffect(() => {
     if (!map) {
       return;
     }
 
-    void loadPredefinedBoundaries(map);
-  }, [map]);
+    const bboxes: { id: number; bbox: BBox }[] = [
+      { id: ARIZONA_ID_NUMERIC, bbox: getBBox(PredefinedBoundary.Arizona) },
+      {
+        id: COLORADO_RIVER_BASIN_ID_NUMERIC,
+        bbox: getBBox(PredefinedBoundary.ColoradoRiverBasin),
+      },
+    ];
 
+    const loadingInstance = loadingManager.add(
+      'Loading Predefined Boundary data',
+      LoadingType.Geography
+    );
+    const controller = new AbortController();
+
+    Promise.allSettled([
+      fetchArizona(controller.signal),
+      fetchLowerColoradoBasin(controller.signal),
+      fetchUpperColoradoBasin(controller.signal),
+    ])
+      .then(([azResult, lcResult, ucResult]) => {
+        const has: PredefinedBoundary[] = [];
+        const features: Feature<Polygon | MultiPolygon>[] = [];
+
+        if (azResult.status === 'fulfilled') {
+          features.push(azResult.value);
+          has.push(PredefinedBoundary.Arizona);
+        }
+
+        if (lcResult.status === 'fulfilled' && ucResult.status === 'fulfilled') {
+          features.push(lcResult.value, ucResult.value);
+          has.push(PredefinedBoundary.ColoradoRiverBasin);
+        }
+
+        const spatialSelectionSource = map.getSource<GeoJSONSource>(SourceId.SpatialSelection);
+
+        const spatialSelectionBBoxSource = map.getSource<GeoJSONSource>(
+          SourceId.SpatialSelectionBBox
+        );
+
+        const detailedFeatureCollection = featureCollection(features);
+
+        const bboxFeatureCollection = featureCollection(
+          bboxes.map(({ id, bbox }) => bboxPolygon(bbox, { id }))
+        );
+
+        spatialSelectionSource?.setData(detailedFeatureCollection);
+        spatialSelectionBBoxSource?.setData(bboxFeatureCollection);
+      })
+      .finally(() => {
+        loadingManager.remove(loadingInstance);
+      });
+
+    return () => {
+      controller.abort('Component unmount');
+    };
+  }, [map]);
   useEffect(() => {
     if (!map) {
       return;
@@ -196,6 +152,8 @@ export const useSpatialSelection = (map: Map | null) => {
       // TODO: what needs to occur if all spatial selections cleared
       return;
     }
+
+    const controller = new AbortController();
 
     const { strict } = spatialSelection;
     if (isSpatialSelectionPredefined(spatialSelection)) {
@@ -213,17 +171,62 @@ export const useSpatialSelection = (map: Map | null) => {
         map.setFilter(LayerId.SpatialSelectionBBox, bboxFilter);
       }
 
+      // Special case: actively loading a share config object
+      // let configService.loadConfig apply the spatial filter
+      if (loadingManager.has({ type: LoadingType.Share })) {
+        return;
+      }
+
       const bbox = getBBox(boundary) as LngLatBoundsLike;
 
       map.fitBounds(bbox, { padding: 40 });
 
-      void switchPredefinedBoundaries(boundary, strict);
+      // There is no data that needs to refetch
+      if (layerCount === 0) {
+        return;
+      }
+
+      const getTitle = () => {
+        if (boundary === PredefinedBoundary.ColoradoRiverBasin) {
+          return 'Colorado River Basin';
+        }
+
+        return 'Arizona';
+      };
+
+      const message = `Updating data boundaries to: ${getTitle()}${strict ? ', in strict mode.' : '.'}`;
+
+      const loadingInstance = loadingManager.add(message, LoadingType.Geography);
+
+      // Reapply spatial filters for all layers to include new bounds
+      mainManager
+        .applySpatialFilter([], { rethrow: true, signal: controller.signal })
+        .catch((error) => {
+          if ((error as Error)?.message) {
+            const _error = error as Error;
+            notificationManager.show(`${_error.message}`, NotificationVariant.Error, 10000);
+          } else if (typeof error === 'string') {
+            notificationManager.show(`${error}`, NotificationVariant.Error, 10000);
+          }
+        })
+        .finally(() => {
+          loadingManager.remove(loadingInstance);
+          notificationManager.show(
+            `Data boundaries updated to: ${getTitle()}`,
+            NotificationVariant.Success
+          );
+        });
     }
 
+    // Toggle visibility of bounding box
     const visibility = strict ? 'none' : 'visible';
 
     if (map.getLayer(LayerId.SpatialSelectionBBox)) {
       map.setLayoutProperty(LayerId.SpatialSelectionBBox, 'visibility', visibility);
     }
+
+    return () => {
+      controller.abort('Component unmount');
+    };
   }, [map, spatialSelection]);
 };
