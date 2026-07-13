@@ -33,7 +33,7 @@ export const filterCollections = (
     filterFunctions.push(filterFunction);
   }
   if (category) {
-    const categoryMembers = parameterGroupMembers[category.value];
+    const categoryMembers = Object.keys(parameterGroupMembers[category.value]);
     filterFunctions.push((collection) => categoryMembers.includes(collection.id));
   }
 

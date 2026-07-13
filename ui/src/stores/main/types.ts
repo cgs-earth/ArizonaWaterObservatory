@@ -151,7 +151,7 @@ export type TSearch = {
   matchedLocations: string[];
 };
 
-export type ParameterGroupMembers = Record<string, string[]>;
+export type ParameterGroupMembers = Record<string, Record<string, string[]>>;
 
 export type MainState = {
   geographyFilter: any | null;

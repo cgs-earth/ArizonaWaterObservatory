@@ -20,6 +20,7 @@ import { useLoading } from '@/hooks/useLoading';
 import loadingManager from '@/managers/Loading.init';
 import notificationManager from '@/managers/Notification.init';
 import { collectionService, mainManager } from '@/services/init';
+import useMainStore from '@/stores/main';
 import { Layer as LayerType } from '@/stores/main/types';
 import { LoadingType, NotificationVariant } from '@/stores/session/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
@@ -46,6 +47,9 @@ const Layer: React.FC<Props> = (props) => {
     includedTabs = ['settings', 'data', 'tools', 'search', 'label', 'locations'],
     flatTabs = false,
   } = props;
+
+  const category = useMainStore((state) => state.category);
+  const parameterGroupMembers = useMainStore((state) => state.parameterGroupMembers);
 
   const [name, setName] = useState(layer.name);
   const debouncedName = useDebounce(name, 300);
@@ -95,7 +99,15 @@ const Layer: React.FC<Props> = (props) => {
 
       const paramObjects = Object.values(collection?.parameter_names ?? {});
 
+      let categoryFilter: string[] = [];
+      if (category) {
+        const validGroups = parameterGroupMembers[category.label];
+
+        categoryFilter = validGroups[collection.id];
+      }
+
       const data = paramObjects
+        .filter((object) => categoryFilter.length === 0 || categoryFilter.includes(object.id))
         .map((object) => {
           const unit = getParameterUnit(object);
 
@@ -358,6 +370,7 @@ const Layer: React.FC<Props> = (props) => {
             isLoading={isLoading}
             parameterOptions={parameterOptions}
             collectionType={collectionType}
+            category={category}
             attributes={{ parameters, from, to, paletteDefinition, color }}
             attributeHandlers={{
               onFromChange: handleFromChange,

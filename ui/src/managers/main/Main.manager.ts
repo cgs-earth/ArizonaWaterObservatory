@@ -403,7 +403,7 @@ class MainManager {
   private createParameterGroupMembers(parameterGroups: ParameterGroup[]): void {
     const parameterGroupMembers: ParameterGroupMembers = {};
     parameterGroups.forEach((parameterGroup) => {
-      parameterGroupMembers[parameterGroup.label] = Object.keys(parameterGroup.members);
+      parameterGroupMembers[parameterGroup.label] = parameterGroup.members;
     });
 
     this.store.getState().setParameterGroupMembers(parameterGroupMembers);

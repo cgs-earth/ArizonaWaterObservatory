@@ -17,7 +17,7 @@ import { Popover } from '@/features/Panel/Layers/Layer/Color/Popover';
 import styles from '@/features/Panel/Panel.module.css';
 import { useLayerValidation } from '@/hooks/useLayerValidation';
 import { useLoading } from '@/hooks/useLoading';
-import { Layer } from '@/stores/main/types';
+import { Category, Layer } from '@/stores/main/types';
 import { CollectionType } from '@/utils/collection';
 import { isSamePalette, isValidPalette } from '@/utils/colors';
 
@@ -47,6 +47,7 @@ type Props = {
   isLoading: boolean;
   collectionType: CollectionType;
   parameterOptions: ComboboxData | undefined;
+  category: Category | null;
   attributes: Attributes;
   attributeHandlers: AttributeHandlers;
   updateHandlers: UpdateHandlers;
@@ -58,6 +59,7 @@ export const Data: React.FC<Props> = (props) => {
     isLoading,
     collectionType,
     parameterOptions,
+    category,
     attributes: { from, to, parameters, paletteDefinition, color },
     attributeHandlers: {
       onFromChange,
@@ -89,6 +91,10 @@ export const Data: React.FC<Props> = (props) => {
   });
 
   const { isLoadingGeography } = useLoading();
+
+  const getCategoryNote = (category: Category | null) => {
+    return category ? `Showing parameters within selected category: ${category.label}` : null;
+  };
 
   const showDateInput = collectionType === CollectionType.EDRGrid;
 
@@ -152,6 +158,11 @@ export const Data: React.FC<Props> = (props) => {
           onChange={onParametersChange}
           error={getParameterError()}
         />
+        {category && (
+          <Text c="dimmed" size="sm">
+            {getCategoryNote(category)}
+          </Text>
+        )}
         {showPalette && parameterOptions && (
           <Group align="flex-start" gap="var(--default-spacing)" mt="var(--default-spacing)">
             <Text size="sm" fw={700}>
