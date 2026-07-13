@@ -115,6 +115,7 @@ export const Entry: React.FC<Props> = (props) => {
   }, []);
 
   useEffect(() => {
+    // Check for data, no need to refetch
     if (!map || data.length > 0 || !layer.loaded) {
       return;
     }
