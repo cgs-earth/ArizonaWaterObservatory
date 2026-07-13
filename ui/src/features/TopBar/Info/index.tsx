@@ -102,11 +102,11 @@ const Info: React.FC = () => {
                 User Guide
               </Text>
             </Tabs.Tab>
-             <Tabs.Tab value={HelpTab.Contact}>
+            <Tabs.Tab value={HelpTab.Contact}>
               <Text size="md" fw={700}>
                 Contact Us
               </Text>
-            </Tabs.Tab> 
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value={HelpTab.About}>
@@ -123,7 +123,7 @@ const Info: React.FC = () => {
           </Tabs.Panel>
           <Tabs.Panel value={HelpTab.Contact}>
             <Contact />
-          </Tabs.Panel> 
+          </Tabs.Panel>
         </Tabs>
       </Modal>
     </>

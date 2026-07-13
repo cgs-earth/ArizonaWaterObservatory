@@ -5,8 +5,8 @@
 
 import { ReactNode } from 'react';
 import { Anchor, Text } from '@mantine/core';
-import GitHub from '@/assets/logos/Github';
 import CHILogo from '@/assets/logos/CHILogo';
+import GitHub from '@/assets/logos/Github';
 
 const description = {
   size: 'md',
