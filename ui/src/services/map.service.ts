@@ -15,15 +15,17 @@ import {
   Source,
 } from 'mapbox-gl';
 import { StoreApi, UseBoundStore } from 'zustand';
+import { getBBox } from '@/consts/bbox';
 import { getDefaultGeoJSON } from '@/consts/geojson';
-import { DEFAULT_BBOX, drawLayers } from '@/features/Map/consts';
+import { drawLayers } from '@/features/Map/consts';
 import { drawnFeatureContainsExtent } from '@/features/Map/utils';
 import { CollectionService } from '@/services/collection.service';
 import { ICollection } from '@/services/edr.service';
 import { FactoryService } from '@/services/factory.service';
 import { LocationService } from '@/services/location.service';
 import { PopupService } from '@/services/popup.service';
-import { Layer, MainState } from '@/stores/main/types';
+import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
+import { Layer, MainState, PredefinedBoundary } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { isTopLayer } from '@/utils/isTopLayer';
 import {
@@ -99,6 +101,15 @@ export class MapService {
     return sourceId;
   }
 
+  private useCurrentBBox() {
+    const spatialSelection = this.store.getState().spatialSelection;
+    if (spatialSelection && isSpatialSelectionPredefined(spatialSelection)) {
+      return getBBox(spatialSelection.boundary);
+    }
+
+    return getBBox(PredefinedBoundary.Arizona);
+  }
+
   private addRasterSource(collection: ICollection, layerId: Layer['id']) {
     const link = collection.links.find(
       (link) => link.rel.includes('map') && link.type === 'image/png'
@@ -110,7 +121,7 @@ export class MapService {
       if (!source) {
         this.map.addSource(sourceId, {
           type: 'raster',
-          bounds: DEFAULT_BBOX,
+          bounds: this.useCurrentBBox(),
           tiles: [
             `${link.href}&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/3857&bbox={bbox-epsg-3857}`,
           ],
