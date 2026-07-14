@@ -4,12 +4,14 @@
  */
 
 import { useEffect } from 'react';
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { bboxPolygon, featureCollection } from '@turf/turf';
 import { BBox, Feature, MultiPolygon, Polygon } from 'geojson';
-import { FilterSpecification, GeoJSONSource, LngLatBoundsLike, Map } from 'mapbox-gl';
+import { FilterSpecification, GeoJSONSource, Map } from 'mapbox-gl';
 import { getBBox } from '@/consts/bbox';
 import { LayerId } from '@/features/Map/config';
 import { SourceId } from '@/features/Map/sources';
+import { getGeocoderFilterFunction } from '@/features/Map/utils';
 import loadingManager from '@/managers/Loading.init';
 import notificationManager from '@/managers/Notification.init';
 import { mainManager } from '@/services/init';
@@ -34,7 +36,7 @@ export const ARIZONA_ID_NUMERIC = Number(ARIZONA_ID);
  * @param map Map | null
  * @returns void
  */
-export const useSpatialSelection = (map: Map | null) => {
+export const useSpatialSelection = (map: Map | null, geocoder: MapboxGeocoder | null) => {
   const spatialSelection = useMainStore((state) => state.spatialSelection);
   const layerCount = useMainStore((state) => state.layers.length);
 
@@ -171,13 +173,19 @@ export const useSpatialSelection = (map: Map | null) => {
         map.setFilter(LayerId.SpatialSelectionBBox, bboxFilter);
       }
 
+      const bbox = getBBox(boundary);
+
+      if (geocoder) {
+        geocoder.setBbox(bbox);
+        const filterFunction = getGeocoderFilterFunction(boundary, strict);
+        geocoder.setFilter(filterFunction);
+      }
+
       // Special case: actively loading a share config object
       // let configService.loadConfig apply the spatial filter
       if (loadingManager.has({ type: LoadingType.Share })) {
         return;
       }
-
-      const bbox = getBBox(boundary) as LngLatBoundsLike;
 
       map.fitBounds(bbox, { padding: 40 });
 

@@ -4,11 +4,13 @@
  */
 
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { bboxPolygon, booleanContains } from '@turf/turf';
 import { ExpressionSpecification, GeoJSONFeature, Map } from 'mapbox-gl';
+import { getStateList } from '@/consts/bbox';
 import { idStoreProperty } from '@/consts/collections';
 import { LayerId, SubLayerId } from '@/features/Map/config';
-import { Location } from '@/stores/main/types';
+import { Location, PredefinedBoundary } from '@/stores/main/types';
 
 const getSimpleSelectMessage = (layerId: LayerId | SubLayerId): string => {
   switch (layerId) {
@@ -185,4 +187,11 @@ export const loadImages = (map: Map) => {
   // }
 
   map.triggerRepaint();
+};
+
+export const getGeocoderFilterFunction = (boundary: PredefinedBoundary, strict: boolean) => {
+  const list = getStateList(boundary, strict);
+  return (item: MapboxGeocoder.Result) => {
+    return list.some((state) => item.place_name.toLowerCase().includes(state));
+  };
 };
