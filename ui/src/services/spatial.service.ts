@@ -49,29 +49,36 @@ export class SpatialService {
   }
 
   private validateBBox(bbox: BBox, collectionId: ICollection['id']) {
+    const spatialSelection = this.store.getState().spatialSelection;
+
+    const boundaryBBox =
+      spatialSelection && isSpatialSelectionPredefined(spatialSelection)
+        ? getBBox(spatialSelection.boundary)
+        : DEFAULT_BBOX;
+
     const userBBox = turf.bboxPolygon(bbox);
-    const AZBBox = turf.bboxPolygon(DEFAULT_BBOX);
+    const boundaryBBoxPolygon = turf.bboxPolygon(boundaryBBox);
 
     const userBBoxArea = turf.area(userBBox);
-    const AZBBoxArea = turf.area(AZBBox);
+    const boundaryBBoxArea = turf.area(boundaryBBoxPolygon);
 
     // Valid bbox should touch the AZ bbox, not contain it fully, and be smaller than the size limit
     // Certain collections have additional size restrictions due to large datasets
     // Throw errors to stop process and provide feedback to user
     this.checkCollectionBBoxRestrictions(collectionId, userBBoxArea);
 
-    const intersectsAZ = turf.booleanIntersects(userBBox, AZBBox);
-    const containsAZ = turf.booleanContains(userBBox, AZBBox);
-    const smaller = userBBoxArea <= AZBBoxArea;
+    const intersectsBoundary = turf.booleanIntersects(userBBox, boundaryBBoxPolygon);
+    const containsBoundary = turf.booleanContains(userBBox, boundaryBBoxPolygon);
+    const smaller = userBBoxArea <= boundaryBBoxArea;
 
-    if (!intersectsAZ) {
-      throw new Error('Target area not connected to Arizona.');
+    if (!intersectsBoundary) {
+      throw new Error('Target area not connected to Data Boundary.');
     }
-    if (containsAZ) {
-      throw new Error('Target area can not contain Arizona.');
+    if (containsBoundary) {
+      throw new Error('Target area can not contain Data Boundary.');
     }
     if (!smaller) {
-      throw new Error('Target area must be smaller than Arizona.');
+      throw new Error('Target area must be smaller than Data Boundary.');
     }
   }
 
