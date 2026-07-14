@@ -4,6 +4,7 @@
  */
 
 import { ChangeEvent, useEffect, useState } from 'react';
+import { bbox } from '@turf/turf';
 import { Divider, Group, Radio, Stack, Text, Title, Tooltip } from '@mantine/core';
 import Info from '@/assets/Info';
 import SpatialSelectionIcon from '@/assets/SpatialSelection';
@@ -11,12 +12,14 @@ import Checkbox from '@/components/Checkbox';
 import IconButton from '@/components/IconButton';
 import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
+import { getBBox } from '@/consts/bbox';
 import { useMap } from '@/contexts/MapContexts';
 import { MAP_ID } from '@/features/Map/config';
 import { Confirm } from '@/features/Tools/SpatialSelection/Confirm';
 import styles from '@/features/Tools/Tools.module.css';
 import { useConfirmableAction } from '@/hooks/useConfirmableAction';
 import { useLoading } from '@/hooks/useLoading';
+import { spatialService } from '@/services/init';
 import useMainStore from '@/stores/main';
 import {
   isPredefinedBoundary,
@@ -36,6 +39,7 @@ const SpatialSelection: React.FC = () => {
   const setSpatialSelectionPredefinedBoundary = useMainStore(
     (state) => state.setSpatialSelectionPredefinedBoundary
   );
+  const drawnShapes = useMainStore((state) => state.drawnShapes);
   const setDrawnShapes = useMainStore((state) => state.setDrawnShapes);
   const setSpatialSelectionStrict = useMainStore((state) => state.setSpatialSelectionStrict);
 
@@ -102,12 +106,25 @@ const SpatialSelection: React.FC = () => {
 
   const handleConfirm = (drawnShapesAreInvalid: boolean) => {
     if (drawnShapesAreInvalid) {
+      const azBBox = getBBox(PredefinedBoundary.Arizona);
+      // Find all shapes that are within the new boundary
+      const validShapes = drawnShapes.filter((shape) => {
+        const shapeBBox = bbox(shape);
+        const { intersectsBoundary, smaller } = spatialService.validateBBox(shapeBBox, azBBox);
+
+        return intersectsBoundary && smaller;
+      });
+
       // Clear shapes
-      setDrawnShapes([]);
+      setDrawnShapes(validShapes);
 
       if (draw) {
-        draw.trash();
-        draw.deleteAll();
+        // Find all shapes that are no longer valid and remove them from the draw instance
+        const invalidShapeIds = drawnShapes
+          .filter((shape) => !validShapes.some((validShape) => validShape.id === shape.id))
+          .map((shape) => String(shape.id));
+
+        draw.delete(invalidShapeIds);
       }
     }
     confirmAction.confirm();
