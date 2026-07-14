@@ -35,7 +35,7 @@ export class CoverageGeoService extends CoverageService {
     const xLength = xValues.length;
     const yLength = yValues.length;
 
-    const getCurrentValues = this.getCurrentValuesConstructor(count, values, xLength, yLength);
+    const getCurrentValues = this.getCurrentRangeValueConstructor(count, values, xLength, yLength);
     let id = 1;
 
     return (x: number, y: number) => {
@@ -71,7 +71,7 @@ export class CoverageGeoService extends CoverageService {
     coverage: CoverageJSON,
     currentId?: number
   ): FeatureCollection<Polygon> {
-    let values: TValues | null = this.getValues(coverage);
+    let values: TValues | null = this.getRange(coverage);
 
     const featureCollection = getDefaultGeoJSON<Polygon>();
 
@@ -108,7 +108,7 @@ export class CoverageGeoService extends CoverageService {
   ) {
     const count = times.length;
 
-    const getCurrentValues = this.getCurrentValuesConstructor(count, values, xCount, yCount);
+    const getCurrentValues = this.getCurrentRangeValueConstructor(count, values, xCount, yCount);
 
     let id = 1;
 
@@ -148,7 +148,7 @@ export class CoverageGeoService extends CoverageService {
     const xLength = this.getLength(xObj);
     const yLength = this.getLength(yObj);
 
-    let values: TValues | null = this.getValues(coverage);
+    let values: TValues | null = this.getRange(coverage);
 
     const featureCollection = getDefaultGeoJSON<Polygon>();
 
@@ -218,7 +218,7 @@ export class CoverageGeoService extends CoverageService {
     const xLength = xValues.length;
     const yLength = yValues.length;
 
-    const getCurrentValues = this.getCurrentValuesConstructor(count, values, xLength, yLength);
+    const getCurrentValues = this.getCurrentRangeValueConstructor(count, values, xLength, yLength);
     let id = 1;
 
     return (x: number, y: number) => {
@@ -256,7 +256,7 @@ export class CoverageGeoService extends CoverageService {
     coverage: CoverageJSON,
     id?: number
   ): FeatureCollection<Point> {
-    let values: TValues | null = this.getValues(coverage);
+    let values: TValues | null = this.getRange(coverage);
 
     const featureCollection = getDefaultGeoJSON<Point>();
 

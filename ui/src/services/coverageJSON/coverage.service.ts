@@ -20,7 +20,7 @@ export class CoverageService {
     return length;
   }
 
-  getValues(coverage: CoverageJSON, options?: TCoverageOptions): TValues {
+  getRange(coverage: CoverageJSON, options?: TCoverageOptions): TValues {
     const filteredRanges = Object.entries(coverage.ranges).filter(([parameterId]) => {
       if (options?.chosenParameter) {
         const parameterEntry = coverage.parameters[parameterId];
@@ -77,7 +77,7 @@ export class CoverageService {
     return coverage.domain.domainType ?? coverage?.domainType ?? '';
   }
 
-  getCurrentValuesConstructor(count: number, values: TValues, xCount: number, yCount: number) {
+  getCurrentRangeValueConstructor(count: number, values: TValues, xCount: number, yCount: number) {
     const keys = Object.keys(values);
 
     return (i: number, j: number): TValues => {
