@@ -11,6 +11,8 @@ import Checkbox from '@/components/Checkbox';
 import IconButton from '@/components/IconButton';
 import Popover from '@/components/Popover';
 import { Variant } from '@/components/types';
+import { useMap } from '@/contexts/MapContexts';
+import { MAP_ID } from '@/features/Map/config';
 import { Confirm } from '@/features/Tools/SpatialSelection/Confirm';
 import styles from '@/features/Tools/Tools.module.css';
 import { useConfirmableAction } from '@/hooks/useConfirmableAction';
@@ -34,11 +36,14 @@ const SpatialSelection: React.FC = () => {
   const setSpatialSelectionPredefinedBoundary = useMainStore(
     (state) => state.setSpatialSelectionPredefinedBoundary
   );
+  const setDrawnShapes = useMainStore((state) => state.setDrawnShapes);
   const setSpatialSelectionStrict = useMainStore((state) => state.setSpatialSelectionStrict);
 
   const confirmAction = useConfirmableAction(hasLayers);
 
   const { isLoadingGeography } = useLoading();
+
+  const { draw } = useMap(MAP_ID);
 
   const [show, setShow] = useState(false);
 
@@ -95,12 +100,25 @@ const SpatialSelection: React.FC = () => {
     }
   };
 
+  const handleConfirm = (drawnShapesAreInvalid: boolean) => {
+    if (drawnShapesAreInvalid) {
+      // Clear shapes
+      setDrawnShapes([]);
+
+      if (draw) {
+        draw.trash();
+        draw.deleteAll();
+      }
+    }
+    confirmAction.confirm();
+  };
+
   return (
     <>
       <Confirm
         opened={confirmAction.opened}
         onClose={confirmAction.close}
-        onConfirm={confirmAction.confirm}
+        onConfirm={handleConfirm}
       />
       <Popover
         offset={16}

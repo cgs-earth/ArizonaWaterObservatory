@@ -39,6 +39,7 @@ export const ARIZONA_ID_NUMERIC = Number(ARIZONA_ID);
 export const useSpatialSelection = (map: Map | null, geocoder: MapboxGeocoder | null) => {
   const spatialSelection = useMainStore((state) => state.spatialSelection);
   const layerCount = useMainStore((state) => state.layers.length);
+  const drawnShapes = useMainStore((state) => state.drawnShapes);
 
   const fetchLowerColoradoBasin = (signal: AbortSignal) => {
     return geoconnexService.getItem<Feature<Polygon | MultiPolygon>>('hu02', LOWER_COLORADO_ID, {
@@ -208,7 +209,7 @@ export const useSpatialSelection = (map: Map | null, geocoder: MapboxGeocoder | 
 
       // Reapply spatial filters for all layers to include new bounds
       mainManager
-        .applySpatialFilter([], { rethrow: true, signal: controller.signal })
+        .applySpatialFilter(drawnShapes, { signal: controller.signal })
         .catch((error) => {
           if ((error as Error)?.message) {
             const _error = error as Error;

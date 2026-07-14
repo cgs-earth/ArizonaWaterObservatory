@@ -24,8 +24,6 @@ import {
   validColorBrewerIndex,
 } from '@/utils/colors/types';
 
-// C:\Users\jsalman\source\ArizonaWaterObservatory\ui\src\features\Panel\Layers\Layer\Color\Popover.tsx
-
 type Props = {
   paletteDefinition: Layer['paletteDefinition'];
   onChange: (paletteDefinition: Layer['paletteDefinition']) => void;
