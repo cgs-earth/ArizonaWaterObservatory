@@ -56,7 +56,7 @@ export const glossaryEntries: Array<{ id: string; label: ReactNode; descriptions
     id: 'api',
     label: (
       <Anchor href="https://asu-awo-pygeoapi-864861257574.us-south1.run.app/" target="_blank">
-        API
+        <b>API</b>
       </Anchor>
     ),
     descriptions: [
@@ -98,7 +98,8 @@ type QA = {
 export const questions: QA[] = [
   {
     id: 'restrictions',
-    question: 'Why do some datasets require me to select a small date range or draw smaller shape?',
+    question:
+      'Why do some datasets require me to select a small date range or draw a smaller shape?',
     answer:
       'Many of our datasets contain temporal data (forecasts, historical records, real-time monitoring). Some datasets are very data rich and require stricter date ranges with smaller target areas to ensure optimal performance in the browser. Selecting a specific time range and appropriate spatial extent helps reduce the amount of data being fetched and improves loading performance while giving you the exact information you need.',
   },
@@ -111,8 +112,7 @@ export const questions: QA[] = [
   {
     id: 'save',
     question: 'Can I save my map configurations and symbolization?',
-    answer:
-      'Yes, you can save all map configurations and symbolization. Use the share feature to save all layer configurations as well as your current basemap, zoom, center, pitch and bearing.',
+    answer: `Yes, you can save all map configurations and symbolization. Use the share feature to save all layer configurations as well as your current basemap, zoom, center, pitch and bearing.`,
   },
   {
     id: 'no-data',
