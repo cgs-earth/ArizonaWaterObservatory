@@ -61,7 +61,7 @@ export const Header: React.FC<Props> = (props) => {
   }, [dataset, isFetchingCollections]);
 
   return (
-    <Stack justify="center" gap={1}>
+    <Stack justify="center" gap="calc(var(--default-spacing) / 4)">
       {dataset && (
         <Text component="h3" size="md" lineClamp={1} title={dataset.title}>
           <strong>{provider}</strong> {dataset.title}
