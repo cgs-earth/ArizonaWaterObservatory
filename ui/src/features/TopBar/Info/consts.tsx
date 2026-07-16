@@ -5,6 +5,7 @@
 
 import { ReactNode } from 'react';
 import { Anchor, Text } from '@mantine/core';
+import CGSLogo from '@/assets/logos/CGSLogo';
 import CHILogo from '@/assets/logos/CHILogo';
 import GitHub from '@/assets/logos/Github';
 
@@ -225,8 +226,8 @@ export const contacts: Contact[] = [
   },
   {
     id: 'Center For Geospatial Solutions',
-    image: <GitHub />,
-    body: 'Access the repository containing the source code for the AWO. Contribute new features, report issues, and learn more about how this application was built.',
+    image: <CGSLogo />,
+    body: 'The Arizona Water Observatory was built in collaboration with the Center for Geospatial Solutions, a non-profit enabling data-driven decisions for the greater good of land, water, and people.',
     link: 'https://cgsearth.org/',
   },
 ];
