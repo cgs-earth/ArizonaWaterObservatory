@@ -8,9 +8,9 @@ const CHILogo: React.FC = () => {
     <img
       src="https://chi.asu.edu/wp-content/uploads/sites/13/2023/04/ASU-CHI-Horiz-RGB-White-600ppi.png"
       alt="Center for Hydrologic Innovations logo"
-      height="85"
+      height="inherit"
       width="100%"
-      style={{ backgroundColor: 'black', objectFit: 'scale-down' }}
+      style={{ backgroundColor: 'black', objectFit: 'scale-down', borderRadius: '12px' }}
     />
   );
 };
