@@ -30,10 +30,12 @@ export class SpatialService {
     this.store = store;
   }
 
-  private checkCollectionBBoxRestrictions(collectionId: ICollection['id'], area: number) {
+  private checkCollectionBBoxRestrictions(collectionId: ICollection['id'], bbox: BBox) {
     const restrictions = CollectionRestrictions[collectionId];
 
     if (restrictions && restrictions.length > 0) {
+      const area = turf.area(turf.bboxPolygon(bbox));
+
       const sizeRestriction = restrictions.find(
         (restriction) => restriction.type === RestrictionType.Size
       );
@@ -48,30 +50,47 @@ export class SpatialService {
     }
   }
 
-  private validateBBox(bbox: BBox, collectionId: ICollection['id']) {
-    const userBBox = turf.bboxPolygon(bbox);
-    const AZBBox = turf.bboxPolygon(DEFAULT_BBOX);
+  public validateBBox(userBBox: BBox, boundaryBBox: BBox) {
+    const userBBoxPolygon = turf.bboxPolygon(userBBox);
+    const boundaryBBoxPolygon = turf.bboxPolygon(boundaryBBox);
 
-    const userBBoxArea = turf.area(userBBox);
-    const AZBBoxArea = turf.area(AZBBox);
+    const userBBoxArea = turf.area(userBBoxPolygon);
+    const boundaryBBoxArea = turf.area(boundaryBBoxPolygon);
+
+    const intersectsBoundary = turf.booleanIntersects(userBBoxPolygon, boundaryBBoxPolygon);
+    const containsBoundary = turf.booleanContains(userBBoxPolygon, boundaryBBoxPolygon);
+    const smaller = userBBoxArea <= boundaryBBoxArea;
+
+    return {
+      intersectsBoundary,
+      containsBoundary,
+      smaller,
+    };
+  }
+
+  private validateDataBoundary(bbox: BBox, collectionId: ICollection['id']) {
+    const spatialSelection = this.store.getState().spatialSelection;
+
+    const boundaryBBox =
+      spatialSelection && isSpatialSelectionPredefined(spatialSelection)
+        ? getBBox(spatialSelection.boundary)
+        : DEFAULT_BBOX;
+
+    const { intersectsBoundary, containsBoundary, smaller } = this.validateBBox(bbox, boundaryBBox);
 
     // Valid bbox should touch the AZ bbox, not contain it fully, and be smaller than the size limit
     // Certain collections have additional size restrictions due to large datasets
     // Throw errors to stop process and provide feedback to user
-    this.checkCollectionBBoxRestrictions(collectionId, userBBoxArea);
+    this.checkCollectionBBoxRestrictions(collectionId, bbox);
 
-    const intersectsAZ = turf.booleanIntersects(userBBox, AZBBox);
-    const containsAZ = turf.booleanContains(userBBox, AZBBox);
-    const smaller = userBBoxArea <= AZBBoxArea;
-
-    if (!intersectsAZ) {
-      throw new Error('Target area not connected to Arizona.');
+    if (!intersectsBoundary) {
+      throw new Error('Target area not connected to Data Boundary.');
     }
-    if (containsAZ) {
-      throw new Error('Target area can not contain Arizona.');
+    if (containsBoundary) {
+      throw new Error('Target area can not contain Data Boundary.');
     }
     if (!smaller) {
-      throw new Error('Target area must be smaller than Arizona.');
+      throw new Error('Target area must be smaller than Data Boundary.');
     }
   }
 
@@ -81,11 +100,9 @@ export class SpatialService {
 
     if (drawnShapes.length === 0) {
       if (canThrowErrors) {
-        this.checkCollectionBBoxRestrictions(
-          collectionId,
-          turf.area(turf.bboxPolygon(DEFAULT_BBOX))
-        );
+        this.checkCollectionBBoxRestrictions(collectionId, DEFAULT_BBOX);
       }
+
       const spatialSelection = this.store.getState().spatialSelection;
       if (spatialSelection && isSpatialSelectionPredefined(spatialSelection)) {
         return getBBox(spatialSelection.boundary);
@@ -99,7 +116,7 @@ export class SpatialService {
     const userBBox = turf.bbox(featureCollection);
 
     if (canThrowErrors) {
-      this.validateBBox(userBBox, collectionId);
+      this.validateDataBoundary(userBBox, collectionId);
     }
 
     return userBBox;
