@@ -143,7 +143,6 @@ export const Screenshot: React.FC = () => {
     }
 
     if (show) {
-      console.log('refresh');
       void handleScreenshot(map, cloneMap.current, container.current, width, height);
     }
 
