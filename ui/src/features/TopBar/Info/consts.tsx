@@ -57,7 +57,7 @@ export const glossaryEntries: Array<{ id: string; label: ReactNode; descriptions
     id: 'api',
     label: (
       <Anchor href="https://asu-awo-pygeoapi-864861257574.us-south1.run.app/" target="_blank">
-        <b>API</b>
+        <strong>API</strong>
       </Anchor>
     ),
     descriptions: [

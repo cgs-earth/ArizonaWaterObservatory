@@ -11,13 +11,13 @@ import IconButton from '@/components/IconButton';
 import Modal from '@/components/Modal';
 import { Variant } from '@/components/types';
 import { About } from '@/features/TopBar/Info/About';
+import { Contact } from '@/features/TopBar/Info/Contact';
 import { FAQ } from '@/features/TopBar/Info/FAQ';
 import { Glossary } from '@/features/TopBar/Info/Glossary';
 import { UserGuide } from '@/features/TopBar/Info/UserGuide';
 import styles from '@/features/TopBar/TopBar.module.css';
 import useSessionStore from '@/stores/session';
 import { HelpTab, Overlay } from '@/stores/session/types';
-import { Contact } from './Contact';
 
 export const INFO_LOCAL_KEY = 'awo-show-info';
 
