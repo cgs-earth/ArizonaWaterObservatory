@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Box, Grid, Group, Paper, Text } from '@mantine/core';
+import { Box, Grid, Group, Paper, Stack, Text } from '@mantine/core';
 import { contacts } from '@/features/TopBar/Info/consts';
 import styles from '@/features/TopBar/TopBar.module.css';
 
@@ -21,7 +21,7 @@ export const Contact: React.FC = () => {
             bdrs={0}
             p="calc(var(--default-spacing) / 2)"
           >
-            <Box className={styles.contact}>
+            <Stack className={styles.contact} justify="space-between">
               <Group gap="var(--default-spacing)" align="flex-start" grow>
                 <Box className={styles.contactImage}>{contact.image}</Box>
                 <Text size="sm" className={styles.contactBody}>
@@ -38,7 +38,7 @@ export const Contact: React.FC = () => {
               >
                 {contact.link}
               </Text>
-            </Box>
+            </Stack>
           </Paper>
         </Grid.Col>
       ))}
