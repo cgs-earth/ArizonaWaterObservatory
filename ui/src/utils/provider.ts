@@ -7,6 +7,21 @@ import { Provider, ProviderDatasources } from '@/consts/collections';
 import { ICollection } from '@/services/edr.service';
 
 export const getProvider = (collectionId: ICollection['id']): string => {
+  if (ProviderDatasources[Provider.ADWR].includes(collectionId)) {
+    return Provider.ADWR.toUpperCase();
+  }
+  if (ProviderDatasources[Provider.ASU].includes(collectionId)) {
+    return Provider.ASU.toUpperCase();
+  }
+  if (ProviderDatasources[Provider.NASA].includes(collectionId)) {
+    return Provider.NASA.toUpperCase();
+  }
+  if (ProviderDatasources[Provider.CAP].includes(collectionId)) {
+    return Provider.CAP.toUpperCase();
+  }
+  if (ProviderDatasources[Provider.NOAA].includes(collectionId)) {
+    return Provider.NOAA.toUpperCase();
+  }
   if (ProviderDatasources[Provider.USBR].includes(collectionId)) {
     return Provider.USBR.toUpperCase();
   }

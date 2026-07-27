@@ -2,7 +2,7 @@
   "name": "awo-ui",
   "private": true,
   "type": "module",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
