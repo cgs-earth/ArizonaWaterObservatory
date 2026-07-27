@@ -142,8 +142,12 @@
   position: absolute;
   right: var(--default-spacing);
   top: var(--default-spacing);
-  width: 84px;
   display: none;
+}
+
+.mobileToolWrapper {
+  width: fit-content;
+  margin-left: auto;
 }
 
 .row {
@@ -159,10 +163,6 @@
 @media screen and (max-width: 899px) {
   .mobileWrapper {
     display: block;
-  }
-
-  .geocoderWrapper {
-    min-width: calc(100vw - (var(--default-spacing) * 2));
   }
 
   .dateSelectorButton {

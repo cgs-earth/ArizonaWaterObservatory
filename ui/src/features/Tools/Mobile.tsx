@@ -21,7 +21,7 @@ export const Mobile: React.FC = () => {
 
   return (
     <Box className={styles.mobileWrapper}>
-      <Group gap="calc(var(--default-spacing) * 2)">
+      <Group gap="calc(var(--default-spacing) * 2)" className={styles.mobileToolWrapper}>
         <Info />
         <IconButton variant={opened ? Variant.Selected : Variant.Secondary} onClick={toggle}>
           <Tools />
