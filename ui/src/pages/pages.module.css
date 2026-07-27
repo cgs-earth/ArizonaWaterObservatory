@@ -3,11 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.root {
-  height: 100vh;
-  max-width: 100vw;
-  max-height: 100vh;
-  overflow: hidden;
+.cgsLogo {
+  position: absolute;
+  bottom: calc(var(--default-spacing) / 4);
+  left: 104px;
+}
+
+.fullHeight {
+  height: 100%;
+}
+
+.mapWrapper {
+  position: relative;
+  width: auto;
+  height: 100%;
 }
 
 .right {
@@ -16,12 +25,9 @@
   height: 100%;
 }
 
-.fullHeight {
-  height: 100%;
-}
-
-.cgsLogo {
-  position: absolute;
-  bottom: var(--default-spacing);
-  left: 104px;
+.root {
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  overflow: hidden;
 }
