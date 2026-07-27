@@ -33,7 +33,6 @@ export enum CollectionId {
   PRISM = 'usgs-prism',
   NationalMapElevation = 'usgs-national-map_elevation',
   NationalMapLandCover = 'usgs-national-map_land-cover',
-  Streamgages = 'usgs-sta',
   Aquifers = 'Aquifers_USGS_West',
 
   CentralArizonaProjectCanal = 'CentralArizonaProjectCanal',
@@ -64,7 +63,6 @@ export const ProviderDatasources: Record<Provider, string[]> = {
     CollectionId.PRISM,
     CollectionId.NationalMapElevation,
     CollectionId.NationalMapLandCover,
-    CollectionId.Streamgages,
     CollectionId.Aquifers,
   ],
   [Provider.USACE]: [CollectionId.USACEEdr],
@@ -97,7 +95,6 @@ export const StringIdentifierCollections: string[] = [
   CollectionId.AWDB,
   CollectionId.ArizonaWaterWells,
   CollectionId.NWMLakeOutput,
-  CollectionId.Streamgages,
   CollectionId.SNOTELEdr,
   CollectionId.NOAARFC,
 ];
