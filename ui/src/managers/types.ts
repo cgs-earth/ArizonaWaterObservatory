@@ -72,5 +72,5 @@ export type ExtendedFeatureCollection<
 };
 
 export type ApplySpatialFilterOptions = {
-  rethrow: boolean;
+  signal?: AbortSignal;
 };

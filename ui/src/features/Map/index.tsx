@@ -9,11 +9,17 @@ import { useMediaQuery } from '@mantine/hooks';
 import Map from '@/components/Map';
 import { basemaps } from '@/components/Map/consts';
 import { LayerType } from '@/components/Map/types';
+import { getBBox } from '@/consts/bbox';
 import { useMap } from '@/contexts/MapContexts';
 import { layerDefinitions, MAP_ID } from '@/features/Map/config';
-import { DEFAULT_BBOX, drawLayers, INITIAL_CENTER, INITIAL_ZOOM } from '@/features/Map/consts';
+import { drawLayers, INITIAL_CENTER, INITIAL_ZOOM } from '@/features/Map/consts';
 import { sourceConfigs, SourceId } from '@/features/Map/sources';
-import { drawnFeatureContainsExtent, getSelectedColor, getSortKey } from '@/features/Map/utils';
+import {
+  drawnFeatureContainsExtent,
+  getGeocoderFilterFunction,
+  getSelectedColor,
+  getSortKey,
+} from '@/features/Map/utils';
 import { showGraphPopup } from '@/features/Popup/utils';
 import { useSpatialSelection } from '@/hooks/useSpatialSelection';
 import notificationManager from '@/managers/Notification.init';
@@ -26,7 +32,7 @@ import {
   popupService,
 } from '@/services/init';
 import useMainStore from '@/stores/main';
-import { Location } from '@/stores/main/types';
+import { Location, PredefinedBoundary } from '@/stores/main/types';
 import useSessionStore from '@/stores/session';
 import { groupLocationIdsByLayer } from '@/utils/groupLocationsByCollection';
 import { isTopLayer } from '@/utils/isTopLayer';
@@ -68,7 +74,7 @@ const MainMap: React.FC<Props> = (props) => {
 
   const mobile = useMediaQuery('(max-width: 899px)');
 
-  useSpatialSelection(map);
+  useSpatialSelection(map, geocoder);
 
   useEffect(() => {
     return () => {
@@ -183,10 +189,14 @@ const MainMap: React.FC<Props> = (props) => {
           // Check if the edges of the drawn feature are visible
           const drawnFeature = drawnFeatures[0];
 
-          const includeDrawLayers =
+          const isWithinExtent =
             drawnFeatures.length > 0 && !drawnFeatureContainsExtent(drawnFeature, draw, map);
 
-          if (!isTopLayer(layer.id, layer.datasourceId, map, e.point, includeDrawLayers)) {
+          if (isWithinExtent) {
+            return;
+          }
+
+          if (!isTopLayer(layer.id, layer.datasourceId, map, e.point)) {
             return;
           }
 
@@ -438,14 +448,12 @@ const MainMap: React.FC<Props> = (props) => {
         }}
         draw={{ clickBuffer: 5, touchEnabled: true, displayControlsDefault: false }}
         geocoder={{
-          bbox: DEFAULT_BBOX, // limit to Arizona
+          bbox: getBBox(PredefinedBoundary.Arizona), // limit to Arizona
           countries: 'us', // exclude non-US cities in bbox
           placeholder: 'Search for a location',
           flyTo: false,
           trackProximity: false,
-          filter: (item) => {
-            return item.place_name.toLowerCase().includes('arizona');
-          },
+          filter: getGeocoderFilterFunction(PredefinedBoundary.Arizona, true),
         }}
         eventHandlers={{
           doubleClickZoom: false,

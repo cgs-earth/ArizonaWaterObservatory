@@ -164,11 +164,20 @@
   border: 1px solid var(--border);
   margin: calc(var(--default-spacing) / 2);
   padding: calc(var(--default-spacing) / 2);
+  min-height: 9rem;
 }
 
 .contactImage {
   padding: calc(var(--default-spacing) * 0.75);
   max-width: 25%;
+  max-height: 4.375rem;
+  height: 4.375rem;
+  width: 25%;
+}
+
+.contactImage > img {
+  height: inherit;
+  width: 100%;
 }
 
 .contactBody {

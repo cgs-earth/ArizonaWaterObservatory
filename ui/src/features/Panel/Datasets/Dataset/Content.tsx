@@ -9,7 +9,8 @@ import Select from '@/components/Select';
 import styles from '@/features/Panel/Panel.module.css';
 import { useLoading } from '@/hooks/useLoading';
 import { ICollection } from '@/services/edr.service';
-import { Layer } from '@/stores/main/types';
+import useMainStore from '@/stores/main';
+import { Category, Layer } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { getParameterUnit } from '@/utils/parameters';
 
@@ -30,17 +31,21 @@ export const Content: React.FC<Props> = (props) => {
     isParameterSelectionOverLimit,
   } = props;
 
+  const category = useMainStore((state) => state.category);
+  const parameterGroupMembers = useMainStore((state) => state.parameterGroupMembers);
+
   const [data, setData] = useState<ComboboxData>();
 
   const [datasetLink, setDatasetLink] = useState('');
   const [sourceLink, setSourceLink] = useState('');
   const [documentationLink, setDocumentationLink] = useState('');
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
+  const [categoryFilterExcludesCollection, setCategoryFilterExcludesCollection] = useState(false);
 
   const { isFetchingCollections } = useLoading();
 
   useEffect(() => {
-    if (isFetchingCollections || data) {
+    if (isFetchingCollections) {
       return;
     }
 
@@ -60,7 +65,17 @@ export const Content: React.FC<Props> = (props) => {
 
     const paramObjects = Object.values(dataset?.parameter_names ?? {});
 
+    let categoryFilter: string[] = [];
+    if (category) {
+      const validGroups = parameterGroupMembers?.[category.label];
+
+      categoryFilter = validGroups?.[dataset.id] ?? [];
+    }
+
+    setCategoryFilterExcludesCollection(categoryFilter.length === 0);
+
     const newData = paramObjects
+      .filter((object) => categoryFilter.length === 0 || categoryFilter.includes(object.id))
       .map((object) => {
         const unit = getParameterUnit(object);
 
@@ -71,7 +86,17 @@ export const Content: React.FC<Props> = (props) => {
       })
       .sort((a, b) => a.label.localeCompare(b.label));
     setData(newData);
-  }, [isFetchingCollections, dataset]);
+  }, [category, isFetchingCollections, dataset]);
+
+  const getCategoryNote = (
+    categoryFilterExcludesCollection: boolean,
+    category: Category | null
+  ) => {
+    if (categoryFilterExcludesCollection) {
+      return 'Selected category does not apply to this dataset. Showing all parameters.';
+    }
+    return category ? `Showing parameters within selected category: ${category.label}` : null;
+  };
 
   const getParameterError = () => {
     if (parameterLimit && isParameterSelectionOverLimit) {
@@ -114,6 +139,11 @@ export const Content: React.FC<Props> = (props) => {
             Parameters can be further customized for each layer instance within that layer's
             controls.
           </Text>
+          {category && (
+            <Text c="dimmed" size="sm">
+              {getCategoryNote(categoryFilterExcludesCollection, category)}
+            </Text>
+          )}
         </>
       )}
 

@@ -344,7 +344,7 @@ class MainManager {
 
   public async applySpatialFilter(
     drawnShapes: Feature<Polygon | MultiPolygon>[],
-    _options?: ApplySpatialFilterOptions
+    options?: ApplySpatialFilterOptions
   ): Promise<void> {
     const layers = this.store.getState().layers;
 
@@ -361,6 +361,7 @@ class MainManager {
           // addData should return the layerId
           return this.deps.dataService.addData(collectionId, layer, {
             filterFeatures: drawnShapes,
+            signal: options?.signal,
           });
         })
       );
@@ -388,12 +389,15 @@ class MainManager {
 
       for (const result of settled) {
         if (result.status === 'rejected') {
-          this.deps.notificationManager.show(
-            'An error occurred while applying a spatial filter, check the console for more details.',
-            NotificationVariant.Error,
-            10000
-          );
-          console.error('applySpatialFilter: addData failed:', result.reason);
+          if (typeof result.reason === 'string') {
+            this.deps.notificationManager.show(result.reason, NotificationVariant.Error, 10000);
+          } else if ('message' in result.reason && typeof result.reason.message === 'string') {
+            this.deps.notificationManager.show(
+              result.reason.message,
+              NotificationVariant.Error,
+              10000
+            );
+          }
         }
       }
     }
@@ -402,7 +406,7 @@ class MainManager {
   private createParameterGroupMembers(parameterGroups: ParameterGroup[]): void {
     const parameterGroupMembers: ParameterGroupMembers = {};
     parameterGroups.forEach((parameterGroup) => {
-      parameterGroupMembers[parameterGroup.label] = Object.keys(parameterGroup.members);
+      parameterGroupMembers[parameterGroup.label] = parameterGroup.members;
     });
 
     this.store.getState().setParameterGroupMembers(parameterGroupMembers);
@@ -516,6 +520,7 @@ class MainManager {
     let _color = color;
     if (parametersChanged || temporalRangeChanged || paletteChanged) {
       const drawnShapes = this.store.getState().drawnShapes;
+
       await this.deps.dataService.addData(layer.datasourceId, layer, {
         parameterNames: parameters,
         filterFeatures: drawnShapes,

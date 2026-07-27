@@ -4,7 +4,7 @@
  */
 
 import { EChartsSeries } from '@/components/Charts/types';
-import notificationManager from '@/managers/Notification.init';
+import NotificationManager from '@/managers/Notification.manager';
 import { CoverageService } from '@/services/coverageJSON/coverage.service';
 import {
   TChartData,
@@ -19,7 +19,18 @@ import { NotificationVariant } from '@/stores/session/types';
 import { isAxesValues, isCoverageCollection } from '@/utils/isTypeObject';
 import { getParameterUnit } from '@/utils/parameters';
 
+type CoverageChartServiceDependencies = {
+  notificationManager: NotificationManager;
+};
+
 export class CoverageChartService extends CoverageService {
+  private deps: CoverageChartServiceDependencies;
+
+  constructor(deps: CoverageChartServiceDependencies) {
+    super();
+    this.deps = deps;
+  }
+
   private associateDataWithTime(
     values: (string | number | null)[],
     times: (string | number)[]
@@ -41,7 +52,7 @@ export class CoverageChartService extends CoverageService {
     const xLength = xValues.length;
     const yLength = yValues.length;
 
-    const getCurrentValues = this.getCurrentValuesConstructor(count, values, xLength, yLength);
+    const getCurrentValues = this.getCurrentRangeValueConstructor(count, values, xLength, yLength);
     let id = 1;
 
     return (x: number, y: number) => {
@@ -82,7 +93,7 @@ export class CoverageChartService extends CoverageService {
     coverage: CoverageJSON,
     options?: TCoverageOptions
   ): EChartsSeries[] {
-    let values: TValues | null = this.getValues(coverage, options);
+    let values: TValues | null = this.getRange(coverage, options);
 
     const series: EChartsSeries[] = [];
 
@@ -112,11 +123,13 @@ export class CoverageChartService extends CoverageService {
     const { t, x: xObj, y: yObj } = this.getAxes(coverage);
 
     if (this.isSegments(xObj) && this.isSegments(yObj)) {
-      notificationManager.show(
-        `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
-        NotificationVariant.Error,
-        10000
-      );
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
+          NotificationVariant.Error,
+          10000
+        );
+      }
       return [];
     }
 
@@ -131,7 +144,13 @@ export class CoverageChartService extends CoverageService {
     const coverageParameters = coverage.parameters ?? options?.parameters;
 
     if (!coverage.ranges) {
-      notificationManager.show('Missing ranges in coverage data', NotificationVariant.Error, 10000);
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          'Missing ranges in coverage data',
+          NotificationVariant.Error,
+          10000
+        );
+      }
       return [];
     }
 
@@ -188,19 +207,21 @@ export class CoverageChartService extends CoverageService {
     return series;
   }
 
-  private processPointSeries(
+  private processSeries(
     coverage: CoverageJSON,
     options: TCoverageOptions = { axisStyle: 'values' }
   ) {
     const dates = (coverage.domain.axes.t as { values: string[] }).values;
     const coverageParameters = coverage.parameters ?? options?.parameters;
 
-    if (!coverage.ranges || !dates) {
-      notificationManager.show(
-        'Missing ranges or date axis in coverage data',
-        NotificationVariant.Error,
-        10000
-      );
+    if (!coverage.ranges || Object.keys(coverage.ranges).length === 0 || !dates) {
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          'Missing ranges or date axis in coverage data. There may be no data for this date range.',
+          NotificationVariant.Error,
+          10000
+        );
+      }
       return [];
     }
 
@@ -252,7 +273,7 @@ export class CoverageChartService extends CoverageService {
 
     return series;
   }
-  private addPointValuesConstructor(
+  private addSingletonValuesConstructor(
     xValues: number[],
     yValues: number[],
     series: EChartsSeries[],
@@ -266,7 +287,7 @@ export class CoverageChartService extends CoverageService {
     const xLength = xValues.length;
     const yLength = yValues.length;
 
-    const getCurrentValues = this.getCurrentValuesConstructor(count, values, xLength, yLength);
+    const getCurrentValues = this.getCurrentRangeValueConstructor(count, values, xLength, yLength);
     let id = 1;
 
     return (x: number, y: number) => {
@@ -300,20 +321,20 @@ export class CoverageChartService extends CoverageService {
     };
   }
 
-  private processPointValues(
+  private processSingletonValues(
     timesObj: CoverageAxesValues,
     xObj: CoverageAxesValues,
     yObj: CoverageAxesValues,
     coverage: CoverageJSON,
     options?: TCoverageOptions
   ): EChartsSeries[] {
-    let values: TValues | null = this.getValues(coverage, options);
+    let values: TValues | null = this.getRange(coverage, options);
 
     const series: EChartsSeries[] = [];
 
     const coverageParameters = coverage.parameters;
 
-    const addPoint = this.addPointValuesConstructor(
+    const addPoint = this.addSingletonValuesConstructor(
       xObj.values as number[],
       yObj.values as number[],
       series,
@@ -331,20 +352,33 @@ export class CoverageChartService extends CoverageService {
 
     return series;
   }
-  private processPoint(coverage: CoverageJSON, options?: TCoverageOptions) {
+  private processSingleton(coverage: CoverageJSON, options?: TCoverageOptions) {
     const { t, x: xObj, y: yObj } = this.getAxes(coverage);
 
+    if (!coverage.ranges || Object.keys(coverage.ranges).length === 0) {
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          'Missing ranges in coverage data. There may be no data for this date range.',
+          NotificationVariant.Error,
+          10000
+        );
+      }
+      return [];
+    }
+
     if (this.isSegments(xObj) && this.isSegments(yObj)) {
-      notificationManager.show(
-        `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
-        NotificationVariant.Error,
-        10000
-      );
+      if (this.deps.notificationManager) {
+        this.deps.notificationManager.show(
+          `Domain type ${coverage.domain.domainType}, sub-type segments is not currently supported.`,
+          NotificationVariant.Error,
+          10000
+        );
+      }
       return [];
     }
 
     if (this.isValues(xObj) && this.isValues(yObj)) {
-      return this.processPointValues(t, xObj, yObj, coverage, options);
+      return this.processSingletonValues(t, xObj, yObj, coverage, options);
     }
 
     return [];
@@ -366,8 +400,8 @@ export class CoverageChartService extends CoverageService {
   private coverageToSeries(coverage: CoverageJSON, options?: TCoverageOptions) {
     const domainType = this.getDomainType(coverage);
 
-    if (domainType === 'PointSeries') {
-      return this.processPointSeries(coverage, options);
+    if (['PolygonSeries', 'PointSeries'].includes(domainType)) {
+      return this.processSeries(coverage, options);
     }
 
     if (domainType === 'VerticalProfile') {
@@ -378,14 +412,16 @@ export class CoverageChartService extends CoverageService {
       return this.processGrid(coverage, options);
     }
 
-    if (domainType === 'Point') {
-      return this.processPoint(coverage, options);
+    if (['Polygon', 'Point'].includes(domainType)) {
+      return this.processSingleton(coverage, options);
     }
-    notificationManager.show(
-      `Domain type ${domainType} is not currently supported.`,
-      NotificationVariant.Error,
-      10000
-    );
+    if (this.deps.notificationManager) {
+      this.deps.notificationManager.show(
+        `Domain type ${domainType} is not currently supported.`,
+        NotificationVariant.Error,
+        10000
+      );
+    }
     return [];
   }
 
@@ -466,7 +502,7 @@ export class CoverageChartService extends CoverageService {
       };
     }
 
-    if (['PointSeries', 'Grid'].includes(domainType)) {
+    if (['PolygonSeries', 'PointSeries', 'Polygon', 'Point', 'Grid'].includes(domainType)) {
       const dates = this.extractDates(coverage);
 
       if (axisStyle === 'time') {

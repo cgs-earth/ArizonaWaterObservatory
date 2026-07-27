@@ -15,15 +15,17 @@ import {
   Source,
 } from 'mapbox-gl';
 import { StoreApi, UseBoundStore } from 'zustand';
+import { getBBox } from '@/consts/bbox';
 import { getDefaultGeoJSON } from '@/consts/geojson';
-import { DEFAULT_BBOX, drawLayers } from '@/features/Map/consts';
+import { drawLayers } from '@/features/Map/consts';
 import { drawnFeatureContainsExtent } from '@/features/Map/utils';
 import { CollectionService } from '@/services/collection.service';
 import { ICollection } from '@/services/edr.service';
 import { FactoryService } from '@/services/factory.service';
 import { LocationService } from '@/services/location.service';
 import { PopupService } from '@/services/popup.service';
-import { Layer, MainState } from '@/stores/main/types';
+import { isSpatialSelectionPredefined } from '@/stores/main/slices/spatialSelection';
+import { Layer, MainState, PredefinedBoundary } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
 import { isTopLayer } from '@/utils/isTopLayer';
 import {
@@ -99,6 +101,15 @@ export class MapService {
     return sourceId;
   }
 
+  private useCurrentBBox() {
+    const spatialSelection = this.store.getState().spatialSelection;
+    if (spatialSelection && isSpatialSelectionPredefined(spatialSelection)) {
+      return getBBox(spatialSelection.boundary);
+    }
+
+    return getBBox(PredefinedBoundary.Arizona);
+  }
+
   private addRasterSource(collection: ICollection, layerId: Layer['id']) {
     const link = collection.links.find(
       (link) => link.rel.includes('map') && link.type === 'image/png'
@@ -110,7 +121,7 @@ export class MapService {
       if (!source) {
         this.map.addSource(sourceId, {
           type: 'raster',
-          bounds: DEFAULT_BBOX,
+          bounds: this.useCurrentBBox(),
           tiles: [
             `${link.href}&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/3857&bbox={bbox-epsg-3857}`,
           ],
@@ -218,13 +229,18 @@ export class MapService {
       // Check if the edges of the drawn feature are visible
       const drawnFeature = drawnFeatures[0];
 
-      const includeDrawLayers =
+      const isWithinExtent =
         drawnFeatures.length > 0 &&
         !drawnFeatureContainsExtent(drawnFeature, this.draw!, this.map!);
 
+      // This feature is inside of drawn feature and the drawn feature is fully within the map extent
+      if (isWithinExtent) {
+        return;
+      }
+
       // As layers can be added in any order, and reordered, perform manual check to ensure popup shows
       // for top layer in visual order
-      if (!isTopLayer(layerId, collectionId, this.map!, e.point, includeDrawLayers)) {
+      if (!isTopLayer(layerId, collectionId, this.map!, e.point)) {
         return;
       }
 
@@ -442,14 +458,15 @@ export class MapService {
     V extends GeoJsonProperties = GeoJsonProperties,
   >(sourceId: string): FeatureCollection<T, V> | undefined {
     const source = this.map?.getSource(sourceId) as GeoJSONSource;
+    if (source) {
+      const data = source._data;
+      if (typeof data !== 'string') {
+        const featureCollection = turf.featureCollection<T, V>(
+          (data as FeatureCollection<T, V>).features as Feature<T, V>[]
+        );
 
-    const data = source._data;
-    if (typeof data !== 'string') {
-      const featureCollection = turf.featureCollection<T, V>(
-        (data as FeatureCollection<T, V>).features as Feature<T, V>[]
-      );
-
-      return featureCollection;
+        return featureCollection;
+      }
     }
   }
 }

@@ -5,6 +5,8 @@
 
 import { ReactNode } from 'react';
 import { Anchor, Text } from '@mantine/core';
+import CGSLogo from '@/assets/logos/CGSLogo';
+import CHILogo from '@/assets/logos/CHILogo';
 import GitHub from '@/assets/logos/Github';
 
 const description = {
@@ -55,7 +57,7 @@ export const glossaryEntries: Array<{ id: string; label: ReactNode; descriptions
     id: 'api',
     label: (
       <Anchor href="https://asu-awo-pygeoapi-864861257574.us-south1.run.app/" target="_blank">
-        API
+        <strong>API</strong>
       </Anchor>
     ),
     descriptions: [
@@ -97,7 +99,8 @@ type QA = {
 export const questions: QA[] = [
   {
     id: 'restrictions',
-    question: 'Why do some datasets require me to select a small date range or draw smaller shape?',
+    question:
+      'Why do some datasets require me to select a small date range or draw a smaller shape?',
     answer:
       'Many of our datasets contain temporal data (forecasts, historical records, real-time monitoring). Some datasets are very data rich and require stricter date ranges with smaller target areas to ensure optimal performance in the browser. Selecting a specific time range and appropriate spatial extent helps reduce the amount of data being fetched and improves loading performance while giving you the exact information you need.',
   },
@@ -110,8 +113,7 @@ export const questions: QA[] = [
   {
     id: 'save',
     question: 'Can I save my map configurations and symbolization?',
-    answer:
-      'Yes, you can save all map configurations and symbolization. Use the share feature to save all layer configurations as well as your current basemap, zoom, center, pitch and bearing.',
+    answer: `Yes, you can save all map configurations and symbolization. Use the share feature to save all layer configurations as well as your current basemap, zoom, center, pitch and bearing.`,
   },
   {
     id: 'no-data',
@@ -217,15 +219,15 @@ export const contacts: Contact[] = [
     link: 'https://github.com/cgs-earth/ArizonaWaterObservatory',
   },
   {
-    id: 'github',
-    image: <GitHub />,
-    body: 'Access the repository containing the source code for the AWO. Contribute new features, report issues, and learn more about how this application was built.',
-    link: 'https://github.com/cgs-earth/ArizonaWaterObservatory',
+    id: 'Center For Hydrologic Innovations',
+    image: <CHILogo />,
+    body: 'Contact the Center For Hydrologic Innovations with any questions about the Arizona Water Observatory.',
+    link: 'mailto:chi-center@asu.edu',
   },
   {
-    id: 'github',
-    image: <GitHub />,
-    body: 'Access the repository containing the source code for the AWO. Contribute new features, report issues, and learn more about how this application was built.',
-    link: 'https://github.com/cgs-earth/ArizonaWaterObservatory',
+    id: 'Center For Geospatial Solutions',
+    image: <CGSLogo />,
+    body: 'The Arizona Water Observatory was built in collaboration with the Center for Geospatial Solutions, a non-profit enabling data-driven decisions for the greater good of land, water, and people.',
+    link: 'https://cgsearth.org/',
   },
 ];

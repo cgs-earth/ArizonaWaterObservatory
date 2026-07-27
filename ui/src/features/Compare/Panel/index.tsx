@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useMemo } from 'react';
 import { Box } from '@mantine/core';
 import Accordion from '@/components/Accordion';
 import Collapsible from '@/components/Collapsible';
@@ -52,6 +53,19 @@ const Panel: React.FC<Props> = (props) => {
     onOpen();
   };
 
+  const locationsByLayer = useMemo(() => {
+    const map = new Map<string, Location[]>();
+
+    for (const loc of locations) {
+      if (!map.has(loc.layerId)) {
+        map.set(loc.layerId, []);
+      }
+      map.get(loc.layerId)!.push(loc);
+    }
+
+    return map;
+  }, [locations]);
+
   return (
     <Collapsible
       width="25rem"
@@ -76,7 +90,7 @@ const Panel: React.FC<Props> = (props) => {
                       content: (
                         <Layer
                           layer={layer}
-                          locations={locations}
+                          locations={locationsByLayer.get(layer.id) ?? []}
                           onLocationAdd={onLocationAdd}
                           onLocationRemove={onLocationRemove}
                         />

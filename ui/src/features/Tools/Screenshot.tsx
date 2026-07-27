@@ -48,6 +48,7 @@ export const Screenshot: React.FC = () => {
 
   const isMovingRef = useRef(false);
   const isMounted = useRef(true);
+
   const updateSource = (src: string) => {
     if (isMounted.current) {
       setSrc(src);
@@ -72,12 +73,14 @@ export const Screenshot: React.FC = () => {
 
     cloneMap.resize();
     cloneMap.setStyle(originalMap.getStyle());
-    cloneMap.setCenter(originalMap.getCenter());
-    cloneMap.setZoom(originalMap.getZoom());
-    cloneMap.setBearing(originalMap.getBearing());
-    cloneMap.setPitch(originalMap.getPitch());
+    cloneMap.setCenter(originalMap.getCenter(), { animate: false });
+    cloneMap.setZoom(originalMap.getZoom(), { animate: false });
+    cloneMap.setBearing(originalMap.getBearing(), { animate: false });
+    cloneMap.setPitch(originalMap.getPitch(), { animate: false });
 
-    handleCreateMapImage(cloneMap, width, height, false, updateSource, updateLoading);
+    cloneMap.once('idle', () => {
+      handleCreateMapImage(cloneMap, width, height, false, updateSource, updateLoading);
+    });
   };
 
   useEffect(() => {

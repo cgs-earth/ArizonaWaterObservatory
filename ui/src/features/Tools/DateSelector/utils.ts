@@ -30,22 +30,24 @@ export const getDates = async (map: Map, layer: Layer): Promise<string[]> => {
     layer.id
   );
 
-  // For speed of access, check map first
-  const features = map.queryRenderedFeatures({
-    layers: [pointLayerId, lineLayerId, fillLayerId],
-  });
+  if (map.getLayer(pointLayerId) && map.getLayer(lineLayerId) && map.getLayer(fillLayerId)) {
+    // For speed of access, check map first
+    const features = map.queryRenderedFeatures({
+      layers: [pointLayerId, lineLayerId, fillLayerId],
+    });
 
-  if (features.length > 0) {
-    const feature = features[0];
-    return getDatesFromProperties(feature);
-  }
+    if (features.length > 0) {
+      const feature = features[0];
+      return getDatesFromProperties(feature);
+    }
 
-  // Fallback to more costly potential fetch
-  const featureCollection = await mainManager.getFeatures(layer);
-  if (featureCollection.features.length > 0) {
-    const feature = featureCollection.features[0];
+    // Fallback to more costly potential fetch
+    const featureCollection = await mainManager.getFeatures(layer);
+    if (featureCollection.features.length > 0) {
+      const feature = featureCollection.features[0];
 
-    return getDatesFromProperties(feature);
+      return getDatesFromProperties(feature);
+    }
   }
 
   throw new Error('No features found.');

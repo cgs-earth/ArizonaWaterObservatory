@@ -61,6 +61,10 @@
   width: 200rem;
 }
 
+.datasetsParameterList {
+  max-width: 17.1875rem;
+}
+
 .entry {
   width: 100%;
   max-width: 100%;
