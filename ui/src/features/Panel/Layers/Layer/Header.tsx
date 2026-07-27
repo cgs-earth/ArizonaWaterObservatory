@@ -11,7 +11,6 @@ import { ICollection } from '@/services/edr.service';
 import { collectionService } from '@/services/init';
 import { Layer } from '@/stores/main/types';
 import { CollectionType, getCollectionType } from '@/utils/collection';
-import { getProvider } from '@/utils/provider';
 
 type Props = {
   layer: Layer;
@@ -24,7 +23,7 @@ export const Header: React.FC<Props> = (props) => {
 
   const [dataset, setDataset] = useState<ICollection>();
   const [parameters, setParameters] = useState<string[]>([]);
-  const [provider, setProvider] = useState<string>('');
+  // const [provider, setProvider] = useState<string>('');
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
   const { isFetchingCollections } = useLoading();
@@ -51,20 +50,11 @@ export const Header: React.FC<Props> = (props) => {
     }
   }, [layer, isFetchingCollections]);
 
-  useEffect(() => {
-    if (!dataset || provider.length > 0) {
-      return;
-    }
-
-    const newProvider = getProvider(dataset.id);
-    setProvider(newProvider);
-  }, [dataset, isFetchingCollections]);
-
   return (
     <Stack justify="center" gap="calc(var(--default-spacing) / 4)">
       {dataset && (
         <Text component="h3" size="md" lineClamp={1} title={dataset.title}>
-          <strong>{provider}</strong> {dataset.title}
+          {dataset.title}
         </Text>
       )}
 

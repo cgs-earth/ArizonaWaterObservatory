@@ -45,7 +45,7 @@ export const Provider: React.FC<Props> = (props) => {
           </>
         }
         placeholder="Select..."
-        data={['USACE', 'USDA', 'NOAA', 'USBR', 'USGS']}
+        data={['ASU', 'ADWR', 'CAP', 'NASA', 'NOAA', 'USACE', 'USBR', 'USDA', 'USGS']}
         value={provider}
         onChange={onChange}
         searchable

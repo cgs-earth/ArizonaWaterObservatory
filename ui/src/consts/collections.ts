@@ -7,9 +7,11 @@ import { CollectionType } from '@/utils/collection';
 
 export enum CollectionId {
   RISEEdr = 'rise-edr',
+
   SNOTELEdr = 'snotel-edr',
+  AWDB = 'awdb-forecasts-edr',
+
   USACEEdr = 'usace-edr',
-  Streamgages = 'usgs-sta',
 
   NWMChannelRouting = 'National_Water_Model_Channel_Routing_Output',
   NWMAssimilationSystem = 'National_Water_Model_Land_Data_Assimilation_System_Output',
@@ -18,29 +20,74 @@ export enum CollectionId {
   NWMGroundwaterOutput = 'National_Water_Model_Groundwater_Output',
 
   ArizonaWaterWells = 'ArizonaWaterWells',
-  AWDB = 'awdb-forecasts-edr',
+  ActiveManagementAreas = 'Active_Management_Areas_2025',
+  GroundwaterBasins = 'Arizona_Groundwater_Basins',
+  IrrigationDistricts = 'ArizonaIrrigationDistricts',
 
   NOAARFC = 'noaa-rfc',
+  NOAARiverStageForecastDay1 = 'noaa-river-stage-forecast-day-1',
+  NOAARiverStageForecastDay2 = 'noaa-river-stage-forecast-day-2',
+  NOAARiverStageForecastDay3 = 'noaa-river-stage-forecast-day-3',
+  NOAARiverStageForecastDay10 = 'noaa-river-stage-forecast-day-10',
+
   PRISM = 'usgs-prism',
+  NationalMapElevation = 'usgs-national-map_elevation',
+  NationalMapLandCover = 'usgs-national-map_land-cover',
+  Streamgages = 'usgs-sta',
+  Aquifers = 'Aquifers_USGS_West',
+
+  CentralArizonaProjectCanal = 'CentralArizonaProjectCanal',
+
+  GRACEGroundwaterStorage = 'ASU_LCRB_GRACE',
+  GRACEGroundwaterBasins = 'ASU_Groundwater_Basins_Aggregated_Grace',
   GRACE = 'GRACE',
+  SMAP = 'SMAP_SPL4SMGP',
 }
 
 export enum Provider {
+  ADWR = 'adwr',
+  ASU = 'asu',
+  CAP = 'cap',
+  NASA = 'nasa',
+  NOAA = 'noaa',
+  USACE = 'usace',
   USBR = 'usbr',
   USDA = 'usda',
   USGS = 'usgs',
-  USACE = 'usace',
-  NOAA = 'noaa',
-  NASA = 'nasa',
 }
 
 export const ProviderDatasources: Record<Provider, string[]> = {
-  [Provider.USBR]: [],
-  [Provider.USDA]: [],
-  [Provider.USGS]: [],
-  [Provider.USACE]: [],
-  [Provider.NOAA]: [],
-  [Provider.NASA]: [],
+  [Provider.ASU]: [CollectionId.GRACEGroundwaterBasins, CollectionId.GRACEGroundwaterStorage],
+  [Provider.USBR]: [CollectionId.RISEEdr],
+  [Provider.USDA]: [CollectionId.SNOTELEdr, CollectionId.AWDB],
+  [Provider.USGS]: [
+    CollectionId.PRISM,
+    CollectionId.NationalMapElevation,
+    CollectionId.NationalMapLandCover,
+    CollectionId.Streamgages,
+    CollectionId.Aquifers,
+  ],
+  [Provider.USACE]: [CollectionId.USACEEdr],
+  [Provider.NOAA]: [
+    CollectionId.NWMChannelRouting,
+    CollectionId.NWMAssimilationSystem,
+    CollectionId.NWMReachToReach,
+    CollectionId.NWMLakeOutput,
+    CollectionId.NWMGroundwaterOutput,
+    CollectionId.NOAARFC,
+    CollectionId.NOAARiverStageForecastDay1,
+    CollectionId.NOAARiverStageForecastDay2,
+    CollectionId.NOAARiverStageForecastDay3,
+    CollectionId.NOAARiverStageForecastDay10,
+  ],
+  [Provider.NASA]: [CollectionId.SMAP],
+  [Provider.ADWR]: [
+    CollectionId.ArizonaWaterWells,
+    CollectionId.ActiveManagementAreas,
+    CollectionId.GroundwaterBasins,
+    CollectionId.IrrigationDistricts,
+  ],
+  [Provider.CAP]: [CollectionId.CentralArizonaProjectCanal],
 };
 
 export const idStoreProperty = 'id_store';
