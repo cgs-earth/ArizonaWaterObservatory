@@ -14,7 +14,6 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import styles from '@/features/Loading/Loading.module.css';
 
 type Props = {
   loadingTexts: string[];
@@ -26,9 +25,7 @@ export const Info: React.FC<PropsWithChildren<Props>> = (props) => {
   return (
     <HoverCard width={300} shadow="md" position="top" withArrow>
       <HoverCardTarget>
-        <Box w="100%" className={styles.loadingBar}>
-          {children}
-        </Box>
+        <Box w="100%">{children}</Box>
       </HoverCardTarget>
       <HoverCardDropdown>
         <Title order={4}>Loading:</Title>

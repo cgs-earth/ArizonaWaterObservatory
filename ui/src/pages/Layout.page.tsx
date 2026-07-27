@@ -103,11 +103,11 @@ export const LayoutPage: React.FC = () => {
 
   return (
     <Box className={styles.root}>
-      <Stack gap={0} className={styles.fullHeight}>
-        <Group gap={0} align="flex-start" className={styles.fullHeight}>
-          <Panel />
-          <Stack gap={0} className={styles.right}>
-            <TopBar />
+      <Group gap={0} align="flex-start" className={styles.fullHeight}>
+        <Panel />
+        <Stack gap={0} className={styles.right}>
+          <TopBar />
+          <Box className={styles.mapWrapper}>
             <Outlet />
             <Box className={styles.cgsLogo}>
               <Anchor target="_blank" href="https://cgsearth.org/">
@@ -122,10 +122,10 @@ export const LayoutPage: React.FC = () => {
                 />
               </Anchor>
             </Box>
-            <Loading />
-          </Stack>
-        </Group>
-      </Stack>
+          </Box>
+          <Loading />
+        </Stack>
+      </Group>
       <Notifications />
       {mobile && <MobileTools />}
     </Box>
