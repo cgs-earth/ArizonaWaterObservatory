@@ -23,7 +23,6 @@ export const Header: React.FC<Props> = (props) => {
 
   const [dataset, setDataset] = useState<ICollection>();
   const [parameters, setParameters] = useState<string[]>([]);
-  // const [provider, setProvider] = useState<string>('');
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.Unknown);
 
   const { isFetchingCollections } = useLoading();
