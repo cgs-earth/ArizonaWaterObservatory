@@ -36,7 +36,6 @@ import { CollectionType, getCollectionType, isEdrGrid } from '@/utils/collection
 import { createDynamicStepExpression, isSamePalette } from '@/utils/colors';
 import { ColorBrewerIndex, isValidColorBrewerIndex } from '@/utils/colors/types';
 import { isSameArray } from '@/utils/compareArrays';
-import { getProvider } from '@/utils/provider';
 
 type MainManagerDependencies = {
   collectionService: CollectionService;
@@ -100,15 +99,13 @@ class MainManager {
       throw new Error('Layer limit reached.');
     }
 
-    const provider = getProvider(datasource.id);
-
     const collectionType = getCollectionType(datasource);
     const title = datasource.title ?? datasource.id;
 
     let next = 1;
-    let name = `${provider} ${title} ${currentDatasourceCount + next++}`;
+    let name = `${title} ${currentDatasourceCount + next++}`;
     while (layers.some((layer) => layer.name === name)) {
-      name = `${provider} ${title} ${currentDatasourceCount + next++}`;
+      name = `${title} ${currentDatasourceCount + next++}`;
     }
 
     const to = this.deps.factoryService.getTo(datasource);
