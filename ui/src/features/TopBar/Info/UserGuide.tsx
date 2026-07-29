@@ -36,7 +36,7 @@ export const UserGuide: React.FC = () => {
           title="AWO User Guide"
           loading="lazy"
           className={styles.userGuide}
-          src="https://www.canva.com/design/DAHBDTBmL2Y/N5pajJxWWsiBAK1Cid1Qng/view?embed"
+          src="https://www.canva.com/design/DAHO0P7csTA/VyiYxXDd4QT0P7KTAiNtJQ/view?embed"
           allowFullScreen
           allow="fullscreen"
         />
