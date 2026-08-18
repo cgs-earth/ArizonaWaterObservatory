@@ -1,0 +1,16 @@
+---
+title: "Arizona Water Observatory Tutorials"
+listing:
+  contents: posts
+  type: default
+  sort: "date desc"
+  fields: [date, title, author, description]
+  categories: false
+  feed: false
+page-layout: full
+toc: false
+---
+
+Step-by-step tutorials showing how to retrieve and analyze Arizona water data
+through the [Arizona Water Observatory](https://arizonawaterobservatory.asu.edu/)
+OGC API - EDR service.

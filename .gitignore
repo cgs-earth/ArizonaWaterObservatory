@@ -34,3 +34,11 @@ zarr.json
 
 **/ASU_GRACE/*
 !ASU_GRACE/*.sh
+
+# Quarto build output for blogs/
+blogs/_site/
+blogs/.quarto/
+.quarto/
+
+# local clone of the upstream blog source repo (savicario/AWO_blogs)
+AWO_blogs/
