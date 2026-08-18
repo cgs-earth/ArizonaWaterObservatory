@@ -1,0 +1,27 @@
+# Copyright 2026 Lincoln Institute of Land Policy
+# SPDX-License-Identifier: Apache-2.0
+
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Arizona Water Observatory"
+  description: "Tutorials for working with Arizona water data through the AWO OGC API - EDR service."
+  site-url: https://cgs-earth.github.io/ArizonaWaterObservatory/
+  navbar:
+    left:
+      - text: "Tutorials"
+        href: index.qmd
+      - text: "Arizona Water Observatory"
+        href: https://arizonawaterobservatory.asu.edu/
+  page-footer:
+    center: "Built by the [Center for Geospatial Solutions](https://cgsearth.org/) and [Arizona State University's Arizona Water Innovation Initiative](https://azwaterinnovation.asu.edu/)."
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-tools: true
