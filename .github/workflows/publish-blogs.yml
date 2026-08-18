@@ -3,7 +3,7 @@ name: Publish blogs to GitHub Pages
 on:
   push:
     branches:
-      - blog-publication
+      - main
     paths:
       - "blogs/**"
       - ".github/workflows/publish-blogs.yml"
