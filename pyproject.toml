@@ -32,7 +32,7 @@ dependencies = [
     "rioxarray>=0.19.0",
     "geopandas>=1.1.1",
     "pgedr==0.2.0",
-    "pygeoapi-plugins",
+    "pygeoapi-plugins==0.6.0",
     # pins to the same gcfs version that is compatible to the zarr version used in wwdh
     # mainly just for compatibility; could be bumped in the future
     "gcsfs>=2023.6.0",
@@ -67,10 +67,9 @@ members = [
 ]
 
 [tool.uv.sources]
-# use dev branch which shares the same features across usbr and asu to keep consistency
-# this is rebased to be at least 0.23.0 for pygeoapi
-pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="dev"}
-pygeoapi-plugins = { url = "https://github.com/cgs-earth/pygeoapi-plugins/archive/refs/heads/master.zip" }
+# use hash which pins the same features for asu
+# this is rebased to be at least 0.24.0 for pygeoapi
+pygeoapi = { git = "https://github.com/internetofwater/pygeoapi.git", rev="045e5dc9aaad9f5e604606587f5a9bc2028b551a"}
 # it appears that to get the latest code you need to specify the HEAD branch of each package
 usace = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/usace", branch="main" }
 com = { git = "https://github.com/internetofwater/Western-Water-Datahub.git", subdirectory = "packages/com", branch="main" }
